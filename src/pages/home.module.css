@@ -1,0 +1,159 @@
+main{
+    display: flex;
+    place-content: center;
+    margin-bottom: 100px;
+}
+.intro h2{
+    color: rgb(36, 123, 181);
+    font-size: 25px;
+}
+.intro h3{
+    color: #fff;
+    font-size: 22px;
+}
+main button{
+    background-color:  #0e2d43d4;
+    color: #fff;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 20px;
+    transition: 0.4s ease-in-out;
+}
+main button:hover{
+    background-color: #11365042;
+}
+.content{
+    margin-top: 30px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+.stepsIntro{
+    margin-top: 80px;
+}
+.steps{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    
+}
+.stepsContainer{
+    margin: 10px 10px; 
+    display: flex;
+    align-items: center;
+    place-content: center;
+    background-color: #11365079;
+    border: 1px solid #0000003e;
+    border-radius: 20px;
+    font-size: 15px;
+
+    height: 250px;
+    padding: 10px;
+}
+.stepsContainer img{
+    width: 100px;
+    height: 100px;
+    padding-left: 15px;
+}
+.whatsapp{
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+.flex{
+    display: flex;
+    place-content: center;
+    margin-top: 40px;
+}
+.flex img{
+    width: 500px;
+    display: none;
+}
+@media (max-width: 600px) {
+    .flex img{
+        display: block;
+        width: 100%;
+    }
+    .stepsContainer{
+        width: 100%;
+        height: auto;
+    }
+    .steps{
+        width: 100%;
+        
+        align-items: center;
+    }
+    .stepsContainer img{
+        width: 80px;
+        height: 80px;
+    }
+    .stepsContainer h3{
+        font-size: 20px;
+    }
+    .stepsContainer p{
+        font-size: 15px;
+    }
+    .stepsContainer{
+        margin: 10px 0;
+    }
+    .content{
+        margin-top: 20px;
+    }
+    .intro h2{
+        font-size: 20px;
+    }
+    .intro h3{
+        font-size: 18px;
+    }
+    main{
+        flex-direction: column;
+        align-items: center;
+    }
+    main button{
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+    }
+    .main{
+        width: 100%;
+        padding: 0 20px;
+    }
+    .stepsContainer{
+        width: 100%;
+        padding: 20px;
+    }
+    .stepsContainer h3{
+        font-size: 18px;
+    }
+    .stepsContainer p{
+        font-size: 14px;
+    }
+    .stepsContainer img{
+        width: 60px;
+        height: 60px;
+    }
+    .whatsapp{
+        width: 40px;
+        height: 40px;
+    }
+    .stepsContainer{
+        padding: 15px;
+    }
+    .stepsContainer h3{
+        font-size: 16px;
+    }
+    .stepsContainer p{
+        font-size: 12px;
+    }
+    .stepsContainer img{
+        width: 50px;
+        height: 50px;
+    }
+    .stepsContainer{
+        width: 100%;
+        height: auto;
+        margin: 10px 0;
+    }
+}

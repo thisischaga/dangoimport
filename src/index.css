@@ -1,0 +1,14 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Lato','sans-serif';
+  font-family: 'Poppins','sans-serif', 'Roboto';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  background: linear-gradient(180deg, #081b29, #000);
+  color: #fff;
+}
+.hidden {
+  display: none;
+}
+

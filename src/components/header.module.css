@@ -1,0 +1,121 @@
+.container{
+    /*background-image: url('../images/serviceimport.png');*/    
+    background-size: cover;
+    height: 580px;
+    width: 100%;
+    padding-top: 10px;
+}
+.content{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+.content img{
+    width: 500px;
+    padding-top: 100px;
+}
+.headerNav{
+    display: flex;
+    justify-content: space-between;
+    background-color: rgb(92, 90, 90);
+    background-color: #11365079;
+    border-radius: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.container .logo{
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+.container .logo img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.container .logo h3{
+    margin-left: 10px;
+    color: #fff;
+    border-bottom: 1px solid #ffdc2b;
+}
+
+.container ul{
+    display: flex;
+    padding-right: 10px;
+}
+.container nav ul li{
+    list-style: none;
+    color: #fff;
+    font-size: 13px;
+    padding: 0 5px;
+    cursor: pointer;
+}
+.container nav ul button{
+    background-color: #ffdc2b;
+    border: none;
+    border-radius: 20px;
+    color: #0e2d43ee;
+}
+.headerIntro{
+    margin-top: 120px;
+    margin-left: 10px;
+}
+.headerIntro h2{
+    color: #ffdc2b;
+    font-size: 30px;
+    animation: fadeInMove 1.7s ease-in-out forwards;
+    opacity: 0;
+    transform: translateX(100px);
+}
+@keyframes fadeInMove{
+    to{
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.headerIntro h3{
+    color: #fff;
+    font-size: 25px;
+    animation: fadeInMove-two 1.7s ease-in-out forwards;
+    opacity: 0;
+    transform: translateY(50px);
+}
+@keyframes fadeInMove-two{
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.active {
+  color: #004cff;
+  font-weight: bold;
+  border-bottom: 2px solid #ffdc2b;
+}
+
+@media (max-width: 600px) {
+    .container{
+        height: 100%;
+        padding-top: 20px;
+    }
+    .content{
+        flex-direction: column;
+        align-items: center;
+    }
+    .content img{
+        width: 300px;
+        padding-top: 0;
+    }
+    .headerNav{
+        flex-direction: column;
+        align-items: center;
+    }
+    .headerIntro h2, .headerIntro h3{
+        text-align: center;
+    }
+    .headerIntro h2{
+        font-size: 25px;
+    }
+
+}

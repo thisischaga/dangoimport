@@ -1,0 +1,221 @@
+.container{
+    background-color: #0e2d4387;
+    border-radius: 10px;
+    display: flex;
+    place-content: center;
+    margin-top: 20px;
+    padding: 10px 30px;
+    padding-bottom: 60px;
+}
+form input, textarea{
+    background-color: #fff;
+    color: #0e2d43;
+    border: none;
+    outline: none;
+    width: 720px;
+    height: 30px;
+    padding: 7px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 17px;
+}
+.intro{
+    padding-top: 40px;
+    display: flex;
+    place-content: center;
+}
+.formGroup{
+    display: flex;
+    place-content: center;
+    gap: 10px;
+    width: 700px;
+    padding-top: 20px;
+}
+form span{
+    color: red;
+}
+textarea{
+    height: 60px;
+}
+form .btnSubmit, .finalStep .btnSubmit{
+    width: 100%;
+    height: 45px;
+    margin-top: 10px;
+    padding: 7px;
+    border-radius: 5px;
+    cursor: pointer;
+    
+}
+.container p, label{
+    font-size: 14px;
+    line-height: 20px;
+    color: #ffffff87;
+}
+.container label{
+    font-weight: bold;
+}
+.container .intro h3{
+    color: rgb(36, 123, 181);
+}
+.hiddenBtn{
+    background-color: transparent;
+    position: absolute;
+    right: 15%;
+    cursor: pointer;
+    color: #ffffffc1;
+}
+.hiddenBtn:hover{
+    background-color: transparent;
+    color: #ffffff7b;
+}
+.backBtn{
+    position: absolute;
+    top: 840px;
+    left: 17%;
+    color: #ffffffc1;
+    cursor: pointer;
+}
+.imageInput{
+    display: none;
+}
+.imgBtn{
+    padding: 15px;
+    margin-top: 10px;
+    width: 700px;
+    text-align: center;
+    background-color: #fff;
+    color: #0e2d43a4;
+}
+.flex{
+    display: flex;
+    place-content: center;
+}
+.profilePicture{
+  display: flex;
+  place-content: center;
+  margin-top: 40px;
+}
+.pictureManager{
+  margin-bottom: 20px;
+}
+.pictureManager img{
+  border: 2px solid #0e2d43a4;
+  width: 250px;
+  height: 250px;
+}
+.pictureManager input{
+  display: none;
+}
+.pictureManager label{
+  background-color: rgba(0, 102, 255, 0.589);
+  cursor: pointer;
+  margin: 10px;
+  padding: 18px;
+
+  color: #fff;
+  border-radius: 5px;
+}
+.finalStep h3{
+    text-align: center;
+}
+.messageBox p{
+    text-align: center;
+}
+.radios{
+    display: flex;
+    place-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.radioInput{
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background-color: transparent;
+}
+.radiosContainer{
+    display: flex;
+    place-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 0 20px;
+}
+@media (max-width: 600px) {
+    .container{
+        width: 100%;
+        padding: 10px;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 20px;
+
+    }
+    form input, textarea{
+        width: 100%;
+    }
+    .formGroup{
+        flex-direction: column;
+        width: 100%;
+    }
+    .radiosContainer{
+        margin: 0;
+    }
+    .pictureManager img{
+        width: 200px;
+        height: 200px;
+    }
+    .pictureManager label{
+        width: 100%;
+        text-align: center;
+    }
+    .hiddenBtn, .backBtn{
+        position: static;
+        margin-top: 20px;
+  }
+    .hiddenBtn{
+        width: 100%;
+        text-align: center;
+    }
+    .backBtn{
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .container p, label{
+        font-size: 12px;
+    }
+    .container .intro h3{
+        font-size: 16px;
+    }
+    form .btnSubmit, .finalStep .btnSubmit{
+        width: 100%;
+    }
+    .profilePicture{
+        flex-direction: column;
+        align-items: center;
+    }
+    .profilePicture img{
+        width: 200px;
+        height: 200px;
+    }
+    .profilePicture .pictureManager{
+        margin-bottom: 20px;
+    }
+    .profilePicture .pictureManager img{
+        width: 150px;
+        height: 150px;
+    }
+    .profilePicture .pictureManager label{
+        width: 100%;
+        text-align: center;
+    }
+
+    .messageBox p{
+        font-size: 14px;
+    }
+
+    .messageBox{
+        width: 100%;
+        padding: 10px;
+        background-color: #0e2d4387;
+        border-radius: 10px;
+    }
+}

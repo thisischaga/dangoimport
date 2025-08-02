@@ -1,0 +1,141 @@
+main{
+    padding: 30px;
+}   
+.container{
+    display: flex;
+    place-content: center;
+    margin-top: 10px;
+}
+.container h3{
+    color: #fff;
+    font-size: 25px;
+}
+.container h2{
+    color: rgb(0, 76, 255);
+}
+.functions{
+    border-radius: 20px;
+    background-color: #11365079;
+    border: 1px solid #0000003e;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.functions h3{
+    color: rgb(36, 123, 181);
+}
+.flex{
+    display: flex;
+    place-content: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+.flex img{
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+}
+p, li, strong{
+    line-height: 30px;
+}
+@media (max-width: 600px) {
+    .container{
+        align-items: center;
+    }
+    .flex img{
+        width: 150px;
+        height: 150px;
+    }
+    .container h2{
+        font-size: 20px;
+    }
+    .container h3{
+        font-size: 18px;
+    }
+    .functions h3{
+        font-size: 18px;
+    }
+    p, li, strong{
+        line-height: 25px;
+    }
+    .container ul{
+        padding-right: 0;
+    }
+    .container nav ul li{
+        font-size: 12px;
+    }
+    .container nav ul button{
+        font-size: 12px;
+        padding: 10px;
+    }
+    .headerIntro h2{
+        font-size: 24px;
+    }
+    .headerIntro h3{
+        font-size: 20px;
+    }
+    .headerIntro{
+        margin-top: 80px;
+    }
+    .flex{
+        align-items: center;
+    }
+    .flex img{
+        width: 100%;
+    }
+    .functions{
+        padding: 10px;
+        width: 95%;
+    }
+    .functions h3{
+        font-size: 16px;
+    }
+    .functions p{
+        font-size: 14px;
+        
+    }
+    .functions ul{
+        padding: 0;
+    }
+    .functions ul li{
+        font-size: 14px;
+    }
+    .functions ul li strong{
+        font-size: 14px;
+    }
+    .functions ul li p{
+        font-size: 12px;
+    }
+    .functions ul li img{
+        width: 100%;
+        height: auto;
+    }
+    .functions ul li img{
+        width: 80px;
+        height: 80px;
+    }
+    .functions ul li p{
+        font-size: 12px;
+    }
+    .functions ul li strong{
+        font-size: 12px;
+    }
+    .functions ul li{
+        font-size: 12px;
+    }
+    .functions ul{
+        padding-right: 0;
+    }
+    .functions ul li{
+        list-style: none;
+        color: #fff;
+        font-size: 13px;
+        padding: 0 5px;
+        cursor: pointer;
+    }
+    .functions ul li img{
+        width: 60px;
+        height: 60px;
+    }
+}
