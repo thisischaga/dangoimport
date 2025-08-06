@@ -13,9 +13,9 @@ main{
     font-size: 22px;
 }
 main button{
-    background-color:  rgb(36, 123, 181);
+    background-color:  #ffdc2b;
     color: #fff;
-    padding: 10px 30px;
+    padding: 20px 30px;
     border: none;
     border-radius: 20px;
     transition: 0.4s ease-in-out;
