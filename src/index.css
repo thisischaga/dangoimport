@@ -7,8 +7,13 @@ body {
   padding: 0;
   background: linear-gradient(180deg, #081b29, #000);
   color: #fff;
+  background-size: cover;
+  height: 100%;
+  overflow-x: hidden;
 }
 .hidden {
   display: none;
 }
-
+.backendMessage{
+  text-align: center;
+}

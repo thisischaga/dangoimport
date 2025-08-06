@@ -2,7 +2,6 @@ main{
     display: flex;
     place-content: center;
     margin-bottom: 100px;
-    padding: 0 10px;
     margin: 20px;
 }
 .intro h3{
@@ -48,6 +47,15 @@ main button:hover{
 .services h4 span{
     font-size: 25px;
 }
+.services.hidden{
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.5s ease;
+}
+.services.show{
+    opacity: 1;
+    transform: translateY(0);
+}
 .servicesContainer{
     margin: 10px;
     display: flex;
@@ -61,15 +69,7 @@ main button:hover{
     width: 400px;
     height: 250px;
     padding: 10px;
-    animation: zoom 2s ease-in-out forwards;
-    opacity: 0;
-    transform: rotate(5deg);
-}
-@keyframes zoom{
-    to{
-        transform: rotate(0deg); 
-        opacity: 1;
-    }
+    /*animation: zoom 2s ease-in-out forwards;*/
 }
 .servicesContainer img{
     width: 100px;
@@ -182,7 +182,7 @@ p, li{
     }
     .blog img{
         width: 100%;
-        height: auto;
+        height: 250px;
     }
     .blog p{
         font-size: 14px;

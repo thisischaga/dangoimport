@@ -19,12 +19,14 @@ const DevisForm = ({showForm}) =>{
     const [productDescription, setProductDescription] = useState('');
     const [productQuantity, setProductQuantity] = useState('');
     const [picture, setPicture] = useState(null);
+    let status = 'En attente';
 
    
     
     const [backendMessage, setBackendMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(null);
     const [isError, setIsError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false)
 
     const [selectedCountry, setSelectedCountry] = useState('');
     const benin = 'Bénin';
@@ -33,7 +35,6 @@ const DevisForm = ({showForm}) =>{
 
     const handleCountryChange = (e) => {
         setSelectedCountry(e.target.value);
-        alert(`Vous avez sélectionné ${e.target.value}`);
     };
     const hiddeForm = ()=>{
         showForm(false);
@@ -52,10 +53,14 @@ const DevisForm = ({showForm}) =>{
         setProductQuantity(e.target.value);
     }
     const showStepTwo = (e)=>{
+        const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
         e.preventDefault();
         if (userName === '' || userEmail === '') {
             alert('Veillez remplir tous les champs !')
-        } else {
+        }else if (!emailValidate.test(userEmail)) {
+            alert('Entrez un email valide');
+        }else{
             setStepOne(false);
             setStepTwo(true);
             setStepThree(false);
@@ -92,12 +97,14 @@ const DevisForm = ({showForm}) =>{
     }
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        
         if (productDescription === '' || productQuantity === '') {
             alert('Veillez remplir tous les champs !')
         } else {
             try {
+                setIsLoading(true);
                 const response = await axios.post('http://localhost:8000/commander', {
-                    userName, userEmail, productDescription, productQuantity, picture, selectedCountry
+                    userName, userEmail, productDescription, productQuantity, picture, selectedCountry, status
                 });
                 setBackendMessage(response.data.message);
                 setIsSuccess(true);
@@ -109,7 +116,7 @@ const DevisForm = ({showForm}) =>{
                 console.log('Erreur', error);
             } finally {
                 setMessageBoxIs(true);
-
+                setIsLoading(false);
             } 
         }
         
@@ -139,7 +146,7 @@ const DevisForm = ({showForm}) =>{
         <div className={styles.container}>
             
             <div>
-                <button className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</button>
+                <h5 className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</h5>
                 <div  className={!finalStep || backendMessage? styles.intro: 'hidden'}>
                     <div >
                         <h3 className={backendMessage? 'hidden': ''}>Vous souhaitez commander un article depuis la Chine?</h3>
@@ -153,7 +160,7 @@ const DevisForm = ({showForm}) =>{
                         <label>Nom <span>*</span></label><br/>
                         <input type='text' name='user_name' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} required/><br/>
                         <label>Addresse E-mail <span>*</span></label><br/>
-                        <input type='mail' name='Email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} required/><br/>
+                        <input type='email' name='Email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} required/><br/>
                         <div >
                             <div className={styles.radios}> 
                                 <div className={styles.radiosContainer}>
@@ -173,11 +180,11 @@ const DevisForm = ({showForm}) =>{
                         <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 00 00 00 00
+                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50
                         </p>
                     </form>
                     <form className={setpTwo?'': 'hidden'}>
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepOne}>Back</button>
+                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepOne}>Précédent</button>
                         <label>Description du produit (ajoutez le lien vers le produit si possible) <span>*</span></label><br/>
                         <textarea  name='product_description' placeholder='Décrivez votre...' onChange={handlePdChange} value={productDescription} /><br/>
                         <label>Quantité du produit <span>*</span></label><br/>
@@ -186,11 +193,11 @@ const DevisForm = ({showForm}) =>{
                         <button className={styles.btnSubmit} onClick={showStepThree}>SUIVANT</button>
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 00 00 00 00
+                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50
                         </p>
                     </form>
                     <form className={setpThree?'': 'hidden'}> 
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepTwo}>Back</button>
+                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepTwo}>Précédent</button>
                         <div className={styles.pictureManager}>
                             <div className={styles.flex}>
                                 {!picture && <div>
@@ -205,11 +212,11 @@ const DevisForm = ({showForm}) =>{
                         <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 00 00 00 00
+                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50
                         </p>
                     </form>
                     <div className={finalStep?styles.finalStep: 'hidden'}>
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Back</button>
+                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
                         <h3>Confirmer la commande </h3>
                         <p>Nom : {userName} </p>
                         <p>Addresse E-mail : {userEmail} </p>
@@ -217,11 +224,11 @@ const DevisForm = ({showForm}) =>{
                         <p>Quantité du produit désiré : {productQuantity} </p>
                         <p>Pays de livraison : {selectedCountry} </p>
                         <p>Photo du produit : </p>
-                        <img src={picture} alt='product-picture'/>
-                        <button className={styles.btnSubmit} onClick={handleSubmit}>CONFIRMER</button>
+                        <img src={picture} alt='product-picture' width={200} height={220} />
+                        <button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Envoie de la commande...': 'CONFIRMER'} </button>
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 00 00 00 00
+                            Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50
                         </p>
                     </div>
                     <div className={messageBoxIs?styles.messageBox: 'hidden'}>

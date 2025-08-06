@@ -24,6 +24,12 @@ form input, textarea{
     display: flex;
     place-content: center;
 }
+.intro h3{
+    font-size: 25px;
+}
+.intro p{
+    text-align: center;
+}
 .formGroup{
     display: flex;
     place-content: center;
@@ -59,9 +65,12 @@ form .btnSubmit, .finalStep .btnSubmit{
 }
 .hiddenBtn{
     background-color: transparent;
-    position: absolute;
-    right: 15%;
+    position: static;
+    text-align: right;
+    margin: 0;
+    margin-top: 20px;
     cursor: pointer;
+    font-size: 16px;
     color: #ffffffc1;
 }
 .hiddenBtn:hover{
@@ -70,7 +79,7 @@ form .btnSubmit, .finalStep .btnSubmit{
 }
 .backBtn{
     position: absolute;
-    top: 840px;
+    top: 870px;
     left: 17%;
     color: #ffffffc1;
     cursor: pointer;
@@ -111,7 +120,6 @@ form .btnSubmit, .finalStep .btnSubmit{
   cursor: pointer;
   margin: 10px;
   padding: 18px;
-
   color: #fff;
   border-radius: 5px;
 }
@@ -140,21 +148,64 @@ form .btnSubmit, .finalStep .btnSubmit{
     gap: 10px;
     margin: 0 20px;
 }
-@media (max-width: 600px) {
+@media (max-width: 830px) {
     .container{
-        width: 100%;
-        padding: 10px;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 20px;
-
+        background-color: #0e2d4387;
+        border-radius: 10px;
+        display: flex;
+        place-content: center;
+        margin-top: 20px;
+        padding: 10px 30px;
+        padding-bottom: 60px;
+    }
+    .intro h3{
+        font-size: 7px;
+        color: red;
+        text-align: center;
     }
     form input, textarea{
-        width: 100%;
+        background-color: #fff;
+        color: #0e2d43;
+        border: none;
+        outline: none;
+        width: 95.5%;
+        height: 30px;
+        padding: 7px;
+        border-radius: 5px;
+        margin-top: 10px;
+        margin-bottom: 17px;
+    }
+    form .btnSubmit, .finalStep .btnSubmit{
+        padding: 7px;
+        height: 45px;
+        margin-top: 10px;
+        border-radius: 5px;
+        
     }
     .formGroup{
         flex-direction: column;
+        width: 320px;
         width: 100%;
+        place-content: center;
+        align-items: center;
+    }
+    .hiddenBtn{
+        background-color: transparent;
+        position: static;
+        cursor: pointer;
+        color: #ffffffc1;
+        text-align: right;
+    }
+    .backBtn{
+        position: static;
+        text-align: center;
+        color: #000;
+        background-color: #fff;
+        border-radius: 5px;
+        border-bottom: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+        margin-top: 20px;
     }
     .radiosContainer{
         margin: 0;
@@ -162,22 +213,6 @@ form .btnSubmit, .finalStep .btnSubmit{
     .pictureManager img{
         width: 200px;
         height: 200px;
-    }
-    .pictureManager label{
-        width: 100%;
-        text-align: center;
-    }
-    .hiddenBtn, .backBtn{
-        position: static;
-        margin-top: 20px;
-  }
-    .hiddenBtn{
-        width: 100%;
-        text-align: center;
-    }
-    .backBtn{
-        text-align: center;
-        margin-bottom: 20px;
     }
     .container p, label{
         font-size: 12px;
@@ -187,6 +222,7 @@ form .btnSubmit, .finalStep .btnSubmit{
     }
     form .btnSubmit, .finalStep .btnSubmit{
         width: 100%;
+        margin-top: 20px;
     }
     .profilePicture{
         flex-direction: column;
@@ -203,9 +239,14 @@ form .btnSubmit, .finalStep .btnSubmit{
         width: 150px;
         height: 150px;
     }
-    .profilePicture .pictureManager label{
+    .pictureManager label{
+        background-color: rgba(0, 102, 255, 0.589);
         width: 100%;
-        text-align: center;
+        position: relative;
+        top: 20px;
+        bottom: 20px;
+        color: #fff;
+        border-radius: 5px;
     }
 
     .messageBox p{
@@ -217,5 +258,26 @@ form .btnSubmit, .finalStep .btnSubmit{
         padding: 10px;
         background-color: #0e2d4387;
         border-radius: 10px;
+    }
+    textarea{
+        height: 50px;
+    }
+}
+@media (width: 820px) {
+    .hiddenBtn{
+        background-color: transparent;
+        position: static;
+        margin-left: 90%;
+        cursor: pointer;
+        color: #ffffffc1;
+    }
+}
+@media (width: 1024px) {
+    .hiddenBtn{
+        background-color: transparent;
+        position: static;
+        margin-left: 100%;
+        cursor: pointer;
+        color: #ffffffc1;
     }
 }

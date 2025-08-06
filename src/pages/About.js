@@ -1,10 +1,13 @@
 import Header from "../components/Header";
 import styles from './about.module.css';
-import logo from '../images/logo.jpeg'
+import logo from '../images/logo.jpeg';
 import Footer from "../components/Footer";
+//import useInView from "../components/UseInView";
 
 
 const About = () => {
+
+  //const [ref, inView] = useInView();
     return(
       <div>
         <Header/>
@@ -45,16 +48,15 @@ const About = () => {
               </div>
               <div  className={styles.functions}>
                 <h3>Ce que nous faisons</h3>
-                <p>
-                  Nous vous accompagnons dans toutes les étapes: 
-                  <ul>
-                    <li>Recherche des founisseurs fiables en Chine</li>
-                    <li>Devis clairs et rapides</li>
-                    <li>Achat en votre nom</li>
-                    <li>Transport, dedouanement et livraison</li>
-                    <li>Suivi personnalisé et communication transparente</li>
-                  </ul>
-                </p>
+                
+                Nous vous accompagnons dans toutes les étapes: 
+                <ul>
+                  <li>Recherche des founisseurs fiables en Chine</li>
+                  <li>Devis clairs et rapides</li>
+                  <li>Achat en votre nom</li>
+                  <li>Transport, dedouanement et livraison</li>
+                  <li>Suivi personnalisé et communication transparente</li>
+                </ul>            
               </div>
               <div  className={styles.functions}>
                 <h3>Nos engagements</h3>

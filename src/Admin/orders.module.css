@@ -1,0 +1,183 @@
+main{
+    height: 100%;
+}
+.header{
+    display: flex;
+    justify-content: space-between;
+    background-color: #11365079;
+    width: 100%;
+    border-radius: 50px;
+    padding-right: 10px;
+}
+.logo{
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+.logo img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.logo h3{
+    margin-left: 10px;
+    color: #fff;
+    border-bottom: 1px solid #ffdc2b;
+    cursor: pointer;
+}
+nav{
+    display: flex;
+}
+nav h4{
+    padding: 5px 10px;
+}
+nav h4 span{
+    color: #ffdc2b;
+}
+.dashboard{
+    background-color: #11365079;
+    width: 900px;
+    height: auto;
+    margin-top: 50px;
+    border-radius: 50px;
+    padding: 10px 0;
+    padding-bottom: 20px;
+    margin-top: 20px;
+}
+.dashboard h1, .commande h1{
+    margin-left: 30px;
+}
+.dashboard .items, .commande .items{
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+    line-height: 25px;
+}
+.dashboard h4{
+    text-align: center;
+}
+.flex{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right:30px;
+}
+.commande p{
+    margin: 0 ;
+}
+.commande span{
+    color: #ffdc2b;
+    font-weight: bold;
+}
+.ordersMain{
+    display: flex;
+    place-content: center;
+    flex-direction: column;
+}
+.commande{
+    background-color: #11365079;
+    width: 900px;
+    height: auto;
+    margin-top: 50px;
+    border-radius: 50px;
+    padding: 10px 0;
+    padding-bottom: 20px;
+    margin-top: 20px;
+}
+.ordersCount{
+    margin: 0;
+}
+.ordersCount span{
+    color: #ffdc2b;
+}
+.orange{
+    color: orange;
+    font-size: 30px;
+}
+.red{
+    color: rgb(241, 63, 63);
+    font-size: 30px;
+}
+.green{
+    color: rgb(27, 207, 27);
+    font-size: 30px;
+}
+.neutre{
+    color: #8fa0acc9;
+    font-size: 30px;
+}
+.addAdmin{
+    padding: 8px;
+    background-color: rgba(0, 102, 255, 0.589);
+    text-align: center;
+    border-radius: 20px;
+    cursor: pointer;
+}
+.imgCmd{
+    display: flex;
+    place-content: center;
+}
+.imgCmd p{
+    background-color: #114f7bd4;
+    text-align: center;
+    margin-right: 10px;
+    width: 200px;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.6s ease-in-out;
+}
+.imgCmd p:hover{
+    opacity: 0.8;
+}
+.commande img{
+    width: 200px;
+    height: 200px;
+    padding: 10px;
+    transition: 0.6s ease-in-out;
+}
+.statusWaiting{
+    cursor: pointer;
+    background-color: orange;
+    padding: 5px;
+    border-radius: 5px;
+    color: #ffffffb0;
+    margin: 5px;
+}
+.statusSucess{
+    cursor: pointer;
+    background-color: rgb(7, 159, 7);
+    padding: 5px;
+    border-radius: 5px;
+    color: #ffffffb0;
+    margin: 5px;
+}
+.statusNeutre {
+    cursor: pointer;
+    background-color:#8fa0acc9;
+    padding: 5px;
+    border-radius: 5px;
+    color: #ffffffb0;
+    margin: 5px;
+}
+.countryLength{
+    font-size: 30px;
+}
+.adminAddForm{
+    display: flex;
+    place-content: center;
+    margin-top: 20px;
+}
+.adminAddForm form{
+    background-color: #11365079;
+    border-radius: 10px;
+    width: 900px;
+    padding: 10px;
+    display: flex;
+
+}
+.adminAddForm form input{
+    width: 100%;
+    margin: 10px;
+}

@@ -2,6 +2,7 @@ main{
     display: flex;
     place-content: center;
     margin-bottom: 100px;
+    margin: 20px;
 }
 .intro h2{
     color: rgb(36, 123, 181);
@@ -25,9 +26,6 @@ main button:hover{
 .content{
     margin-top: 30px;
     padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 
 }
 .stepsIntro{
@@ -37,7 +35,7 @@ main button:hover{
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    
+    place-content: center;
 }
 .stepsContainer{
     margin: 10px 10px; 
@@ -48,7 +46,7 @@ main button:hover{
     border: 1px solid #0000003e;
     border-radius: 20px;
     font-size: 15px;
-
+    width: 400px;
     height: 250px;
     padding: 10px;
 }
@@ -72,31 +70,33 @@ main button:hover{
     display: none;
 }
 @media (max-width: 600px) {
-    .flex img{
-        display: block;
-        width: 100%;
-    }
-    .stepsContainer{
-        width: 100%;
-        height: auto;
-    }
     .steps{
-        width: 100%;
-        
+        display: flex;
+        flex-direction: column;
         align-items: center;
     }
-    .stepsContainer img{
-        width: 80px;
-        height: 80px;
+    .stepsContainer{
+        
     }
-    .stepsContainer h3{
+    .stepsContainer img{
+        width: 150px;
+        height: 150px;
+    }
+    main h2{
         font-size: 20px;
     }
-    .stepsContainer p{
-        font-size: 15px;
+    main h3{
+        font-size: 18px;
     }
-    .stepsContainer{
-        margin: 10px 0;
+    .stepsContainerh4{
+        font-size: 18px;
+    }
+    .stepsContainerh4 span{
+        font-size: 20px;
+    }
+    .servicesContainer{
+        width: 100%;
+        height: auto;
     }
     .content{
         margin-top: 20px;
@@ -107,14 +107,30 @@ main button:hover{
     .intro h3{
         font-size: 18px;
     }
-    main{
+    .flex{
         flex-direction: column;
         align-items: center;
     }
-    main button{
+    .flex img{
         width: 100%;
-        padding: 15px;
+    }
+    .whatsapp{
+        width: 40px;
+        height: 40px;
+    }
+    .stepsContainer{
+        padding: 20px;
+        margin: 10px;
+    }
+    .stepsContainer h4{
+        font-size: 16px;
+    }
+    .stepsContainer h4 span{
         font-size: 18px;
+    }
+    .stepsContainer img{
+        width: 80px;
+        height: 80px;
     }
     .main{
         width: 100%;
@@ -123,37 +139,6 @@ main button:hover{
     .stepsContainer{
         width: 100%;
         padding: 20px;
-    }
-    .stepsContainer h3{
-        font-size: 18px;
-    }
-    .stepsContainer p{
-        font-size: 14px;
-    }
-    .stepsContainer img{
-        width: 60px;
-        height: 60px;
-    }
-    .whatsapp{
-        width: 40px;
-        height: 40px;
-    }
-    .stepsContainer{
-        padding: 15px;
-    }
-    .stepsContainer h3{
-        font-size: 16px;
-    }
-    .stepsContainer p{
-        font-size: 12px;
-    }
-    .stepsContainer img{
-        width: 50px;
-        height: 50px;
-    }
-    .stepsContainer{
-        width: 100%;
-        height: auto;
-        margin: 10px 0;
+        margin: 20px;
     }
 }

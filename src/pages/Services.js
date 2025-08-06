@@ -4,8 +4,13 @@ import styles from './services.module.css';
 import business from '../images/business.jpg';
 import batimat from '../images/batimat.png';
 import une_personne from '../images/une-personne.png';
+//import useInView from '../components/UseInView';
 const Service = () => {
+
+//const [ref, isVisible] = useInView();
+
   return(
+
     <div className={styles.servicesPage} >
         <Header/>
         <main>
