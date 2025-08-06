@@ -19,7 +19,7 @@ const Header = ()=>{
         navigate('/services')
     }
     const toAdminLogin = ()=>{
-        window.open('http://localhost:3000/admin', '_blank')
+        window.open('dango-import.vercel.app/admin', '_blank')
     }
     return(
         <header>
