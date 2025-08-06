@@ -47,10 +47,10 @@ const Orders = () => {
             const response = await axios.post('http://localhost:8000/add_admin', {
                 adminFirstname, adminSurname, adminName, adminPassword, role
             })
-            //alert(response.data.message);
+            alert(response.data.message);
             window.location.reload();
             } catch (error) {
-                //alert(error.response.data.message)
+                alert(error.response.data.message)
                 console.log('Erreur', error);
             };
     }
@@ -95,7 +95,7 @@ const Orders = () => {
         await axios.put('http://localhost:8000/status', {
         orderId, status,
         })
-        [location.pathname]
+        window.location.reload();
     };
     const enAttente = orders.filter(o => o.status === 'En attente');
     const validated = orders.filter(o => o.status === 'Validée');
