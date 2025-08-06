@@ -36,9 +36,14 @@ const Header = ()=>{
                             <li className={isActive("/") ? styles.active : ""} onClick={toHome}>Acceuil</li>
                             <li className={isActive("/services") ? styles.active : ""} onClick={toServices}>Service</li>
                             <li className={isActive("/about") ? styles.active : ""} onClick={toAbout}>A propos</li>
-                            <button onClick={()=>alert("Ce service n'est pas encore disponible !")}>Acheter nos produits</button>
+                            <button className={styles.pc} onClick={()=>alert("Ce service n'est pas encore disponible !")}>Acheter nos produits</button>
                         </ul>
+                        
                     </nav>
+                    
+                </div>
+                <div className={styles.mobile}>
+                    <button onClick={()=>alert("Ce service n'est pas encore disponible !")}>Acheter nos produits</button>
                 </div>
                 <div className={styles.content}>
                     <div className={styles.headerIntro}>
