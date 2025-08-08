@@ -44,7 +44,7 @@ const Orders = () => {
     const add_admin = async(e)=>{
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/add_admin', {
+            const response = await axios.post('https://dangoimport-server.onrender.com/add_admin', {
                 adminFirstname, adminSurname, adminName, adminPassword, role
             })
             alert(response.data.message);
@@ -61,7 +61,7 @@ const Orders = () => {
             if (token) {
                 setTokenIs(true)
                 try {
-                    await axios.get('http://localhost:8000/admin_data', {
+                    await axios.get('https://dangoimport-server.onrender.com/admin_data', {
                         headers: {Authorization: `Bearer${token}`}
                     })
                     .then(response => 
@@ -73,7 +73,7 @@ const Orders = () => {
                     console.log('Erreur', error);
                 };
                 try {
-                    await axios.get('http://localhost:8000/commandes', {
+                    await axios.get('https://dangoimport-server.onrender.com/commandes', {
                         headers: {Authorization: `Bearer${token}`}
                     })
                     .then(response => 
@@ -92,7 +92,7 @@ const Orders = () => {
       
     }, [location.pathname]);
     const updateStatus = async(orderId, status)=>{
-        await axios.put('http://localhost:8000/status', {
+        await axios.put('https://dangoimport-server.onrender.com/status', {
         orderId, status,
         })
         window.location.reload();

@@ -110,7 +110,7 @@ const DevisForm = ({showForm}) =>{
         } else {
             try {
                 setIsLoading(true);
-                const response = await axios.post('http://localhost:8000/commander', {
+                const response = await axios.post('https://dangoimport-server.onrender.com/commander', {
                     userName, userEmail, productDescription, productQuantity, picture, selectedCountry, status
                 });
                 setBackendMessage(response.data.message);
