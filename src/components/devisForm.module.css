@@ -50,7 +50,7 @@ form .btnSubmit, .finalStep .btnSubmit{
     padding: 7px;
     border-radius: 5px;
     cursor: pointer;
-    
+    transition: 0.4s ease-in-out;
 }
 .container p, label{
     font-size: 14px;
@@ -147,6 +147,9 @@ form .btnSubmit, .finalStep .btnSubmit{
     align-items: center;
     gap: 10px;
     margin: 0 20px;
+}
+p{
+    align-items: center;
 }
 @media (max-width: 830px) {
     .container{

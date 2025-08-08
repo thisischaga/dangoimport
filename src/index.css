@@ -17,3 +17,8 @@ body {
 .backendMessage{
   text-align: center;
 }
+a{
+  color: rgb(36, 123, 181);
+  text-decoration: none;
+  font-weight: bold;
+}

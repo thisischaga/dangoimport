@@ -19,7 +19,7 @@ const AdminLogin = () => {
     const hanndleSubmit = async(e)=>{
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/login', {
+            const response = await axios.post('https://dangoimport-server.onrender.com/login', {
                 adminName, adminPassword
             });
             alert(response.data.message);

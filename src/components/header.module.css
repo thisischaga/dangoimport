@@ -1,7 +1,7 @@
 .container{
     /*background-image: url('../images/serviceimport.png');*/    
     background-size: cover;
-    height: 580px;
+    height: 650px;
     width: 100%;
     padding-top: 10px;
 }
@@ -63,7 +63,7 @@
 }
 .headerIntro{
     margin-top: 120px;
-    margin-left: 10px;
+    margin-left: 40px;
 }
 .headerIntro h2{
     color: #ffdc2b;
@@ -114,11 +114,20 @@
         flex-direction: column;
         align-items: center;
     }
+    .headerIntro{
+        margin: 0;
+        padding: 0;
+    }
     .headerIntro h2, .headerIntro h3{
         text-align: center;
     }
     .headerIntro h2{
         font-size: 25px;
+    }
+    .container nav ul{
+        margin: 0;
+        padding: 0;
+        padding-bottom: 10px;
     }
     .container nav ul li{
         list-style: none;

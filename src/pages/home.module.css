@@ -12,16 +12,17 @@ main{
     color: #fff;
     font-size: 22px;
 }
-main button{
-    background-color:  #ffdc2b;
-    color: #fff;
-    padding: 20px 30px;
+.devisBtn{
+    background: #fff;
+    color: #000;
+    padding: 15px 30px;
     border: none;
-    border-radius: 20px;
+    border-radius: 30px;
     transition: 0.4s ease-in-out;
+    cursor: pointer;
 }
-main button:hover{
-    background-color: #11365042;
+.devisBtn:hover{
+    background: #ffffffb7;
 }
 .content{
     margin-top: 30px;
@@ -29,7 +30,10 @@ main button:hover{
 
 }
 .stepsIntro{
-    margin-top: 80px;
+    margin-top: 20px;
+}
+.stepsIntro p{
+    color: #fff;
 }
 .steps{
     display: flex;

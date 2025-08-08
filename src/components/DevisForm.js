@@ -33,6 +33,13 @@ const DevisForm = ({showForm}) =>{
     const ghana = 'Ghana';  
     const togo = 'Togo';
 
+    const [checked, setChecked] = useState(true);
+
+    const toggleCheck = ()=>{
+        setChecked(!checked);
+        
+    };
+    console.log(checked);
     const handleCountryChange = (e) => {
         setSelectedCountry(e.target.value);
     };
@@ -225,7 +232,8 @@ const DevisForm = ({showForm}) =>{
                         <p>Pays de livraison : {selectedCountry} </p>
                         <p>Photo du produit : </p>
                         <img src={picture} alt='product-picture' width={200} height={220} />
-                        <button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Envoie de la commande...': 'CONFIRMER'} </button>
+                        <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
+                        {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Envoie de la commande...': 'CONFIRMER'} </button>}
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
                             Livraison possible au Bénin, au Togo et au Ghana. Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50

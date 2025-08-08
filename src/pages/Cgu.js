@@ -13,7 +13,7 @@ const Cgu = () => {
                 <div>
                     <div className={styles.header}>
                         <h1>Conditions Générales d'Utilisation (CGU) - Dango Import</h1>
-                        <p>Dernière mis à jour : 7 juin 2025</p>
+                        <p>Dernière mis à jour : 10 août 2025</p>
                     </div>
                     <div className={styles.content}>
                         <p>
@@ -22,7 +22,8 @@ const Cgu = () => {
                             Ces conditions définissent les règles juridiques encadrant l'utilisation de notre plateforme. 
                         </p>
                         <p>
-                            <strong>1. Informations légales</strong>
+                            <strong>1. Informations légales</strong><br/>
+                            Le site permet aux utilisateurs de :
                             <li>Nom du site : Dango Import </li> 
                             <li>Responsable: Ayatoulaye DANGO NADEY </li> 
                             <li>Adresse E-mail : dangoimport02@gmail.com</li> 
@@ -31,10 +32,10 @@ const Cgu = () => {
                         </p>
                         <p>
                             <strong>2. Objet du site</strong><br/>
-                            Le site <strong>Dango import</strong> a pour objectif : 
-                            <li> De présenter les services de facilitation d'importation depuis la Chine</li>
-                            <li>De permettre aux visiteurs de soumettre des demandes de devis</li>
-                            <li>De fournir des informations pratiques sur les procédure d'inmportation</li>
+                            Le site permet aux utilisateurs de :
+                            <li> Demander un devis personnalisé pour l’importation de produits depuis la Chine</li>
+                            <li>Commander des produits directement disponibles en stock</li>
+                            <li>S’informer via nos contenus éducatifs (articles, conseils, etc.)</li>
                         </p>
                         <p>
                             <strong>3. Conditions d'accès</strong><br/>
@@ -80,7 +81,7 @@ const Cgu = () => {
                             Aucune commande n'est engagée sans validation et paiement anticipé
                         </p>
                         <p>
-                            <strong>8. Donn"es personnelles</strong><br/>
+                            <strong>8. Données personnelles</strong><br/>
                             Vos données sont collectées pour la gestion de vos demandes et l'amélioration de nos services.<br/>
                             La collecte et le traitement sont régis par notre Politique de confidentialité.
                         </p>
@@ -108,7 +109,8 @@ const Cgu = () => {
                             <strong>13. Contact</strong><br/>
                             Pour toute question ou remarque : 
                             <li>dangoimport02@gmail.com</li>
-                            <li>WhatsApp : +229 01 59 38 71 80 / 01 41 52 98 50</li>
+                            <li>WhatsApp : +229 01 59 38 71 80 / +228 99 17 38 54</li>
+                            <li>Site : <a href='dango-import.vercel.app'>dango-import.vercel.app</a></li>
                         </p>
                     </div>
                 </div>

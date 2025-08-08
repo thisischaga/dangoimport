@@ -6,7 +6,8 @@ const Footer = () =>{
             <p>
                 Copyright 2025 Dango Import - Service d'importation de produits
                 depuis la Chine vers l'Afrique de l'Ouest<br/>
-                Tous droits réservés - créer par Chaga. <a href='/cgu'>conditions générales d'utilisation</a>
+                Tous droits réservés - créer par Chaga. Lire les <a href='/cgu'>conditions générales d'utilisation</a> et la
+                <a href='/politique-de-confidentialité'> Politique de confidentialité</a>
             </p>
         </footer>
     )

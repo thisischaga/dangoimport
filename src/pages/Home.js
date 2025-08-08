@@ -31,7 +31,7 @@ const Home = ()=>{
                             Nous nous occupons de la recherche, du devis, de la commande
                             et de la livraison.<br/> Rapide - Sécurisé - Transparant.
                         </h3>
-                        <button className={isVisible? 'hidden':''} onClick={showForm}>Demande de devis</button>
+                        <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
                         <div className={!isVisible? 'hidden': ''}>
                             <DevisForm showForm={setIsvisible} />
                         </div>
@@ -66,7 +66,7 @@ const Home = ()=>{
                                 <div>
                                     <h4>2- On vous envoie un devis clair</h4>
                                     <p>
-                                        Nous analysons votre demande <br/>et vous envoyons
+                                        Nous analysons votre demande et nous vous envoyons
                                         un devis personnalisé avec:<br/>
                                         <li>le coût du produit</li>
                                         <li>les frais de livraison</li>
