@@ -51,8 +51,8 @@ figure{
     100%{transform: translateX(-100px);}
 }
 .content img{
-    width: 400px;
-    height: 400px;
+    width: 0;
+    height: 0;
 }
 .headerNav{
     display: flex;
