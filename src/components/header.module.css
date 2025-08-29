@@ -50,7 +50,7 @@ figure{
     50%{transform: translateX(-50px);}
     100%{transform: translateX(-100px);}
 }
-.acceuil img{
+.content img{
     width: 400px;
     height: 400px;
 }
