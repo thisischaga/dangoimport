@@ -1,0 +1,125 @@
+main{
+    margin-bottom: 100px;
+    margin: 20px;
+    display: flex;
+    place-content: center;
+}
+header{
+    background: linear-gradient(to bottom, #081b29, #000);
+    height: 600px;
+    width: 100%;
+    padding-top: 10px;
+    border-bottom-left-radius: 100% 80px;
+}
+.headerNav{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #11365079;
+    border-radius: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    padding-right: 10px;
+}
+.logo{
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+.logo img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.logo h3{
+    margin-left: 10px;
+    color: #fff;
+    border-bottom: 1px solid #ffdc2b;
+    cursor: pointer;
+}
+.searchInput{
+    padding: 10px;
+    width: 200px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    border: 1px solid rgba(0, 102, 255, 0.589);
+    color: #fff;
+    border-radius: 20px 0 0 20px;
+}
+::placeholder{
+    color: #fff;
+    font-size: 12px;
+}
+.searchBtn{
+    padding: 10px;
+    background-color: rgba(0, 102, 255, 0.589);
+    border: 1px solid rgba(0, 102, 255, 0.589);
+    color: #fff;
+    border-radius: 0 20px 20px 0;
+}
+.acceuil{
+    display: flex;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+    align-items: center;
+    margin-top: 50px;
+}
+.acceuil img{
+    width: 450px;
+}
+.acceuil .texts{
+    width: 40%;
+}
+.acceuil h1{
+    color: #ffdc2b;
+}
+h1 span{
+    color: #ffdc2b;
+}
+.productContainer{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.items{
+    display: grid;
+}
+.item {
+    margin: 10px;
+    background-color: #11365079;
+    border-radius: 20px;
+    padding: 10px;
+    transition: 0.6s ease-in-out;
+}
+.item:hover{
+    transform: scale(0.8);
+    margin-top: 20px;
+}
+.item img{
+    width: 220px;
+    height: 220px;
+    border-radius: 20px;
+}
+.item button{
+    background-color: rgba(0, 102, 255, 0.589);
+    padding: 15px 40px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.item button:hover{
+    background-color: rgba(0, 102, 255, 0.589);
+    opacity: 0.8;
+}
+.item p{
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+.item p span{
+    color: #ffdc2b;
+    font-weight: bold;
+}

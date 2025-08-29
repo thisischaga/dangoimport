@@ -6,8 +6,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   padding: 0;
   background: linear-gradient(180deg, #081b29, #000);
-  color: #fff;
   background-size: cover;
+  color: #fff;
   height: 100%;
   overflow-x: hidden;
 }

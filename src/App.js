@@ -7,6 +7,7 @@ import Orders from './Admin/Orders';
 import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
+import Ecom from './components/Ecom';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/commandes' element={<Orders/>}/>
         <Route path='/cgu' element={<Cgu/>}/>
         <Route path='/politique-de-confidentialité' element={<Politique/>}/>
+        <Route path='/shopping' element={<Ecom/>}/>
       </Routes>
     </Router>
   );

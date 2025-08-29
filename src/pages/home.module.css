@@ -12,6 +12,7 @@ main{
     color: #fff;
     font-size: 22px;
 }
+
 .devisBtn{
     background: #fff;
     color: #000;
@@ -22,7 +23,7 @@ main{
     cursor: pointer;
 }
 .devisBtn:hover{
-    background: #ffffffb7;
+    background: #fbfbfb7d;
 }
 .content{
     margin-top: 30px;
@@ -58,6 +59,9 @@ main{
     width: 100px;
     height: 100px;
     padding-left: 15px;
+}
+.stepsContainer h4{
+    color: #fff;
 }
 .whatsapp{
     border-radius: 50%;

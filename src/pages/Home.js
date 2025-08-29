@@ -10,13 +10,12 @@ import Footer from "../components/Footer";
 import DevisForm from "../components/DevisForm";
 
 const Home = ()=>{
-    
     const [isVisible, setIsvisible] = useState(false);
-
-
+        
     const showForm = () => {
         setIsvisible(true);
     }
+    
     return(
         <div>
             <Header/>
@@ -32,6 +31,7 @@ const Home = ()=>{
                             et de la livraison.<br/> Rapide - Sécurisé - Transparant.
                         </h3>
                         <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
+                        
                         <div className={!isVisible? 'hidden': ''}>
                             <DevisForm showForm={setIsvisible} />
                         </div>
