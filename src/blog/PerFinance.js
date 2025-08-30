@@ -8,9 +8,9 @@ const PerFinance = () => {
     return (
         <div className={styles.articlePage}>
             <div className={styles.articleContainer}>
-                <header>
+                <div className={styles.articleHeader}>
                     <h1>Finance personnelle : Comment mieux gérer son argent et préparer l’avenir</h1>
-                </header>
+                </div>
                 <main>
                     <div className={styles.articleContent}>
                         <p>
@@ -19,7 +19,7 @@ const PerFinance = () => {
                             ses revenus et <br/>ses dépenses est une compétence essentielle pour atteindre la stabilité financière, réaliser ses projets et vivre 
                             sereinement.<br/> Pourtant, beaucoup de personnes rencontrent des difficultés à épargner, à investir ou à sortir de l’endettement. 
                             Dans cet article, <br/>nous allons explorer les bases de la finance personnelle, 
-                            ses piliers, ainsi que des conseils pratiques pour améliorer la gestion de son argent.
+                            ses piliers, ainsi que des conseils pratiques pour améliorer la gestion <br/>de son argent.
                         </p>
                         <h2>1. Qu’est-ce que la finance personnelle ?</h2>
                         <p>

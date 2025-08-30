@@ -1,9 +1,9 @@
-header {
+.articleHeader {
     background-image: url('../images/financePerso.jpg');
     border-radius: 0;
     height: 350px;
 }
-header h1 {
+.articleHeader h1 {
     color: white;
     text-align: center;
     padding-top: 120px;
