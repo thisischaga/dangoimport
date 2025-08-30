@@ -2,6 +2,10 @@
     background-image: url('../images/financePerso.jpg');
     border-radius: 0;
     height: 350px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    margin-top: 0;
 }
 .articleHeader h1 {
     color: white;
