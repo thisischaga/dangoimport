@@ -1,0 +1,12 @@
+header {
+    background-image: url('../images/financePerso.jpg');
+    border-radius: 0;
+    height: 350px;
+}
+header h1 {
+    color: white;
+    text-align: center;
+    padding-top: 120px;
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}

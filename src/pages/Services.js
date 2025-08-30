@@ -2,7 +2,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import styles from './services.module.css';
 import business from '../images/business.jpg';
-import batimat from '../images/batimat.png';
+import financePerso from '../images/financePerso.jpg';
 import une_personne from '../images/une-personne.png';
 //import useInView from '../components/UseInView';
 const Service = () => {
@@ -116,9 +116,11 @@ const Service = () => {
                             <div className={styles.blog}>
                                 
                                 <div>
-                                    <img src={batimat} alt="batimat"/>
+                                    <img src={financePerso} alt="financePerso"/>
                                     <p>
-                                        Les 5 erreurs à éviter absolument quand on importe depuis la Chine
+                                        <a href="/blog/finance personnelle">
+                                            Les principes fondamentaux de la finance personnelle : Gérer son argent au quotidien
+                                        </a>
                                     </p>
                                 </div>
                             </div>

@@ -8,6 +8,7 @@ import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
 import Ecom from './components/Ecom';
+import PerFinance from './blog/PerFinance';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path='/cgu' element={<Cgu/>}/>
         <Route path='/politique-de-confidentialité' element={<Politique/>}/>
         <Route path='/shopping' element={<Ecom/>}/>
+        <Route path='/blog/finance personnelle' element={<PerFinance/>}/>
       </Routes>
     </Router>
   );
