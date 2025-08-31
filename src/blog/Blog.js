@@ -15,19 +15,18 @@ const Blog = () => {
     e.preventDefault();
     setRedirectUrl(url);
     setShowAd(true);
-    setCountdown(5);
+    setCountdown(20);
   };
 
-  // Gestion du countdown et redirection
-  useEffect(() => {
+    // Gestion du countdown
+    useEffect(() => {
     let timer;
     if (showAd && countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (showAd && countdown === 0 && redirectUrl) {
-      window.location.href = redirectUrl;
+        timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     }
     return () => clearTimeout(timer);
-  }, [showAd, countdown, redirectUrl]);
+    }, [showAd, countdown]);
+
 
   // Charger dynamiquement le script Adsterra pour la bannière 728x90
   useEffect(() => {
@@ -116,11 +115,25 @@ const Blog = () => {
 
       {showAd && (
         <div className={styles.adOverlay}>
-          <p>La pub se ferme dans {countdown} secondes...</p>
-          {countdown === 0 && <button className={styles.skipButton} onAbort={() => setShowAd(false)}>Fermer</button>}
-          <div id="ad-container" className={styles.adFullScreen}></div>
+            <p>La pub se ferme dans {countdown} secondes...</p>
+            
+            {/* Bouton visible quand le timer est fini */}
+            {countdown === 0 && (
+            <button
+                className={styles.skipButton}
+                onClick={() => {
+                setShowAd(false); // ferme la pub
+                if (redirectUrl) window.location.href = redirectUrl; // puis redirige
+                }}
+            >
+                Fermer et continuer
+            </button>
+            )}
+            
+            <div id="ad-container" className={styles.adFullScreen}></div>
         </div>
-      )}
+        )}
+
     </div>
   );
 };
