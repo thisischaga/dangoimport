@@ -51,7 +51,7 @@ const Blog = () => {
                   <a
                     href="/blog/finance-personnelle"
                     onClick={(e) =>
-                      handleClick(e, "/blog/finance-personnelle")
+                      handleClick(e, "/blog/finance personnelle")
                     }
                   >
                     Les principes fondamentaux de la finance personnelle : Gérer
