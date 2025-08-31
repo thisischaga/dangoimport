@@ -32,54 +32,59 @@ const Blog = () => {
 
   return (
     <div className={styles.blogPage}>
-      <Header />
-      {!showAd && <main>
-        <div className={styles.mainContainer}>
-          <section className={styles.blogs}>
-            <div className={styles.blog}>
-              <div className={styles.item}>
-                <img src={financePerso} alt="financePerso" />
-                <p>
-                  <a
-                    href="/blog/finance-personnelle"
-                    onClick={(e) =>
-                      handleClick(e, "/blog/finance-personnelle")
-                    }
-                  >
-                    Les principes fondamentaux de la finance personnelle : Gérer
-                    son argent au quotidien
-                  </a>
-                </p>
-              </div>
+      
+      {!showAd && 
+        <div>
+            <Header />
+            <main>
+                <div className={styles.mainContainer}>
+                <section className={styles.blogs}>
+                    <div className={styles.blog}>
+                    <div className={styles.item}>
+                        <img src={financePerso} alt="financePerso" />
+                        <p>
+                        <a
+                            href="/blog/finance-personnelle"
+                            onClick={(e) =>
+                            handleClick(e, "/blog/finance-personnelle")
+                            }
+                        >
+                            Les principes fondamentaux de la finance personnelle : Gérer
+                            son argent au quotidien
+                        </a>
+                        </p>
+                    </div>
 
-              <div className={styles.item}>
-                <img src={epargne} alt="image_epargne" />
-                <p>
-                  <a
-                    href="/blog/epargne"
-                    onClick={(e) => handleClick(e, "/blog/epargne")}
-                  >
-                    L’Épargne : Comment Protéger et Faire Croître Votre Argent
-                  </a>
-                </p>
-              </div>
+                    <div className={styles.item}>
+                        <img src={epargne} alt="image_epargne" />
+                        <p>
+                        <a
+                            href="/blog/epargne"
+                            onClick={(e) => handleClick(e, "/blog/epargne")}
+                        >
+                            L’Épargne : Comment Protéger et Faire Croître Votre Argent
+                        </a>
+                        </p>
+                    </div>
 
-              <div className={styles.item}>
-                <img src={une_personne} alt="une personne" />
-                <p>
-                  <a
-                    href="/blog/dango"
-                    onClick={(e) => handleClick(e, "/blog/dango")}
-                  >
-                    Pourquoi choisir Dango Import pour vos achats depuis la
-                    Chine?
-                  </a>
-                </p>
-              </div>
-            </div>
-          </section>
+                    <div className={styles.item}>
+                        <img src={une_personne} alt="une personne" />
+                        <p>
+                        <a
+                            href="/blog/dango"
+                            onClick={(e) => handleClick(e, "/blog/dango")}
+                        >
+                            Pourquoi choisir Dango Import pour vos achats depuis la
+                            Chine?
+                        </a>
+                        </p>
+                    </div>
+                    </div>
+                </section>
+                </div>
+            </main>
         </div>
-      </main>}
+      }
       
 
       {/* Vidéo en plein écran */}
