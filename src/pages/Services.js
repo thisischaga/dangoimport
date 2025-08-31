@@ -1,9 +1,6 @@
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import styles from './services.module.css';
-import financePerso from '../images/financePerso.jpg';
-import une_personne from '../images/une-personne.png';
-import epargne from '../images/epargne.jpg';
 //import useInView from '../components/UseInView';
 const Service = () => {
 
@@ -108,39 +105,6 @@ const Service = () => {
                         </div>
                     </div>
                     <div>
-                        <div className={styles.section_blog_title}>
-                            <h3>Importations Chine Afrique (Blog)</h3>
-                            <p><a href='/blog/articles'>Voir tout...</a></p>
-                        </div>
-                        <section className={styles.blogs}>
-                            <div className={styles.blog}>
-                                
-                                <div>
-                                    <img src={financePerso} alt="financePerso"/>
-                                    <p>
-                                        <a href="/blog/finance personnelle">
-                                            Les principes fondamentaux de la finance personnelle : Gérer son argent au quotidien
-                                        </a>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className={styles.blog}>
-                                <img src={epargne} alt="image_epargne"/>
-                                <p>
-                                    <a href="/blog/epargne">
-                                        L’Épargne : Comment Protéger et Faire Croître Votre Argent
-                                    </a>
-                                </p>
-                            </div>
-                            <div className={styles.blog}>
-                                <img src={une_personne} alt="une personne"/>
-                                <p>
-                                    <a href="/#">
-                                        Pourquoi choisir Dango Import pour vos achats depuis la Chine?  
-                                    </a>
-                                </p>
-                            </div>
-                        </section>
                         <button>S'abonner à la newsletter</button>
                     </div>
                 </div>
