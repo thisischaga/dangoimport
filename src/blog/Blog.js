@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import styles from "./blog.module.css";
@@ -9,26 +9,25 @@ import epargne from "../images/epargne.jpg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
-  const [canSkip, setCanSkip] = useState(false);
+  const [countdown, setCountdown] = useState(5); // ⏳ 5 secondes
 
-  // Quand l’utilisateur clique sur un article
   const handleClick = (e, url) => {
     e.preventDefault();
     setRedirectUrl(url);
     setShowAd(true);
-    setCanSkip(false);
-
-    // Autoriser le skip après 5 secondes
-    setTimeout(() => setCanSkip(true), 5000);
+    setCountdown(5); 
   };
 
-  // Quand la vidéo est terminée
-  const handleAdFinished = () => {
-    setShowAd(false);
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
+  useEffect(() => {
+    let timer;
+    if (showAd && countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (showAd && countdown === 0 && redirectUrl) {
+      window.location.href = redirectUrl; 
     }
-  };
+    return () => clearTimeout(timer);
+  }, [showAd, countdown, redirectUrl]);
+
 
   return (
     <div className={styles.blogPage}>
@@ -88,30 +87,22 @@ const Blog = () => {
       }
       
 
-      {/* Vidéo en plein écran */}
       {showAd && (
-        <div className={styles.videoOverlay}>
-            {canSkip && (
-                <button className={styles.skipButton} onClick={handleAdFinished}>
-                Passer la pub
-                </button>
-            )}
-            <video
-                width="100%"
-                height="100%"
-                autoPlay
-                controls={false}
-                onEnded={handleAdFinished}
-            >
-                <source
-                src="https://www.w3schools.com/html/mov_bbb.mp4"
-                type="video/mp4"
-                />
-                Votre navigateur ne supporte pas la vidéo.
-            </video>
-
+        <div className={styles.adOverlay}>
+            <p>La pub se ferme dans quelques secondes...</p>
+            <div id="ad-container" className={styles.adFullScreen}>
+            <script
+                async
+                data-cfasync="false"
+                src="//pl27547310.revenuecpmgate.com/3b589e0bbebc733766018894abb29077/invoke.js"
+            ></script>
+            <div id="container-3b589e0bbebc733766018894abb29077"></div>
+            </div>
+            
         </div>
-      )}
+        )}
+
+
       
     </div>
   );
