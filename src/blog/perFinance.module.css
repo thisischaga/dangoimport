@@ -5,7 +5,7 @@
     margin: 0;
 }
 .articleHeader {
-    background-image: url('../images/epargne.jpg');
+    background-image: url('../images/financePerso.jpg');
     border-radius: 0;
     height: 350px;
     background-size: cover;
@@ -43,6 +43,14 @@ main {
     .articleHeader h1 {
         font-size: 1.5em;
         padding-top: 70px;
+    }
+    .intro{
+        display: flex;
+        place-content: center;
+        padding: 0 10px;
+    }
+    .articleContent {
+        padding: 0 10px;
     }
     
 }
