@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import styles from "./blog.module.css";
@@ -9,34 +9,26 @@ import epargne from "../images/epargne.jpg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
+  const [canSkip, setCanSkip] = useState(false);
 
   // Quand l’utilisateur clique sur un article
   const handleClick = (e, url) => {
-    e.preventDefault(); // empêcher redirection directe
+    e.preventDefault();
     setRedirectUrl(url);
-    setShowAd(true); // afficher la pub
+    setShowAd(true);
+    setCanSkip(false);
+
+    // Autoriser le skip après 5 secondes
+    setTimeout(() => setCanSkip(true), 5000);
   };
 
-  // Injection dynamique du script Adsterra
-  useEffect(() => {
-    if (showAd) {
-      const script = document.createElement("script");
-      script.src =
-        "//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js";
-      script.async = true;
-      document.getElementById("ad-container")?.appendChild(script);
-
-      // Simuler fin de la pub (10 secondes)
-      const timer = setTimeout(() => {
-        setShowAd(false);
-        if (redirectUrl) {
-          window.location.href = redirectUrl;
-        }
-      }, 10000);
-
-      return () => clearTimeout(timer);
+  // Quand la vidéo est terminée
+  const handleAdFinished = () => {
+    setShowAd(false);
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
     }
-  }, [showAd, redirectUrl]);
+  };
 
   return (
     <div className={styles.blogPage}>
@@ -51,7 +43,7 @@ const Blog = () => {
                   <a
                     href="/blog/finance-personnelle"
                     onClick={(e) =>
-                      handleClick(e, "/blog/finance personnelle")
+                      handleClick(e, "/blog/finance-personnelle")
                     }
                   >
                     Les principes fondamentaux de la finance personnelle : Gérer
@@ -90,12 +82,29 @@ const Blog = () => {
       </main>
       <Footer />
 
-      {/* Overlay Pub */}
+      {/* Vidéo en plein écran */}
       {showAd && (
-        <div className={styles.adOverlay}>
-          <div className={styles.adContainer} id="ad-container">
-            <p>Votre article s’ouvrira après la publicité (10s)...</p>
-          </div>
+        <div className={styles.videoOverlay}>
+          <video
+            width="100%"
+            height="100%"
+            autoPlay
+            controls={false}
+            onEnded={handleAdFinished}
+          >
+            <source
+              src="https://www.w3schools.com/html/mov_bbb.mp4"
+              type="video/mp4"
+            />
+            Votre navigateur ne supporte pas la vidéo.
+          </video>
+
+          {/* Bouton Skip (désactivé avant 5s) */}
+          {canSkip && (
+            <button className={styles.skipButton} onClick={handleAdFinished}>
+              Passer la pub
+            </button>
+          )}
         </div>
       )}
     </div>
