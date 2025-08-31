@@ -26,6 +26,9 @@ const Header = ()=>{
     const toServices = ()=>{
         navigate('/services')
     }
+    const toBlog = ()=>{
+        navigate('/blog/articles')
+    }
     /*const toEcom = ()=>{
         navigate('/shopping')
     }*/
@@ -82,6 +85,7 @@ const Header = ()=>{
                         <ul>                    
                             <li className={isActive("/") ? styles.active : ""} onClick={toHome}>Acceuil</li>
                             <li className={isActive("/services") ? styles.active : ""} onClick={toServices}>Service</li>
+                            <li className={isActive("/blog/articles") ? styles.active : ""} onClick={toBlog}>Articles</li>
                             <li className={isActive("/about") ? styles.active : ""} onClick={toAbout}>A propos</li>
                             <button className={styles.pc}>Acheter nos produits</button>
                         </ul>
@@ -97,9 +101,8 @@ const Header = ()=>{
                         <h2>Vos achats en chine, <br/>livrés en Afrique de l'Ouest</h2>
                         <h3>Importer depuis la Chine, <br/>on s'occupe du reste !</h3>
                     </div>
-                    <div>
-                        <img  src={expressing} alt="expressing"/>
-                    </div>
+                    <img  src={expressing} alt="expressing"/>
+
                 </div>
             </div>
         </header>

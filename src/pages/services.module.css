@@ -100,6 +100,9 @@ main button:hover{
     color: #909090d8;
     cursor: pointer;
 }
+.section_blog_title a{
+    color: #fff;
+}
 .blogs{
     display: flex;
     justify-content: space-between;

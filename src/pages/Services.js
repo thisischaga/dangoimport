@@ -110,7 +110,7 @@ const Service = () => {
                     <div>
                         <div className={styles.section_blog_title}>
                             <h3>Importations Chine Afrique (Blog)</h3>
-                            <p>Voir tout...</p>
+                            <p><a href='/blog/articles'>Voir tout...</a></p>
                         </div>
                         <section className={styles.blogs}>
                             <div className={styles.blog}>
@@ -135,7 +135,9 @@ const Service = () => {
                             <div className={styles.blog}>
                                 <img src={une_personne} alt="une personne"/>
                                 <p>
-                                    Pourquoi choisir Dango Import pour vos achats depuis la Chine?
+                                    <a href="/#">
+                                        Pourquoi choisir Dango Import pour vos achats depuis la Chine?  
+                                    </a>
                                 </p>
                             </div>
                         </section>
