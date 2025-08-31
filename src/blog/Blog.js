@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import styles from "./blog.module.css";
@@ -12,18 +12,31 @@ const Blog = () => {
 
   // Quand l’utilisateur clique sur un article
   const handleClick = (e, url) => {
-    e.preventDefault(); // on empêche la redirection directe
+    e.preventDefault(); // empêcher redirection directe
     setRedirectUrl(url);
-    setShowAd(true); // on affiche la pub
+    setShowAd(true); // afficher la pub
   };
 
-  // Quand la pub est terminée
-  const handleAdFinished = () => {
-    setShowAd(false);
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
+  // Injection dynamique du script Adsterra
+  useEffect(() => {
+    if (showAd) {
+      const script = document.createElement("script");
+      script.src =
+        "//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js";
+      script.async = true;
+      document.getElementById("ad-container")?.appendChild(script);
+
+      // Simuler fin de la pub (10 secondes)
+      const timer = setTimeout(() => {
+        setShowAd(false);
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        }
+      }, 10000);
+
+      return () => clearTimeout(timer);
     }
-  };
+  }, [showAd, redirectUrl]);
 
   return (
     <div className={styles.blogPage}>
@@ -50,7 +63,10 @@ const Blog = () => {
               <div className={styles.item}>
                 <img src={epargne} alt="image_epargne" />
                 <p>
-                  <a href="/blog/epargne" onClick={(e) => handleClick(e, "/blog/epargne")}>
+                  <a
+                    href="/blog/epargne"
+                    onClick={(e) => handleClick(e, "/blog/epargne")}
+                  >
                     L’Épargne : Comment Protéger et Faire Croître Votre Argent
                   </a>
                 </p>
@@ -59,8 +75,12 @@ const Blog = () => {
               <div className={styles.item}>
                 <img src={une_personne} alt="une personne" />
                 <p>
-                  <a href="/blog/dango" onClick={(e) => handleClick(e, "/blog/dango")}>
-                    Pourquoi choisir Dango Import pour vos achats depuis la Chine?
+                  <a
+                    href="/blog/dango"
+                    onClick={(e) => handleClick(e, "/blog/dango")}
+                  >
+                    Pourquoi choisir Dango Import pour vos achats depuis la
+                    Chine?
                   </a>
                 </p>
               </div>
@@ -70,23 +90,11 @@ const Blog = () => {
       </main>
       <Footer />
 
-      {/* Modal de pub 
-        <video
-              width="100%"
-              controls
-              autoPlay
-              onEnded={handleAdFinished}
-            >
-              <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-              Votre navigateur ne supporte pas la vidéo.
-            </video>
-        */}
+      {/* Overlay Pub */}
       {showAd && (
         <div className={styles.adOverlay}>
-          <div className={styles.adContainer}>
-            <script type='text/javascript' src='//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js'></script>
-            
-            <p>La vidéo se terminera avant l’ouverture de l’article...</p>
+          <div className={styles.adContainer} id="ad-container">
+            <p>Votre article s’ouvrira après la publicité (10s)...</p>
           </div>
         </div>
       )}
