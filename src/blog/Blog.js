@@ -70,12 +70,8 @@ const Blog = () => {
       </main>
       <Footer />
 
-      {/* Modal de pub */}
-      {showAd && (
-        <div className={styles.adOverlay}>
-          <div className={styles.adContainer}>
-            <script type='text/javascript' src='//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js'></script>
-            <video
+      {/* Modal de pub 
+        <video
               width="100%"
               controls
               autoPlay
@@ -84,6 +80,12 @@ const Blog = () => {
               <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
               Votre navigateur ne supporte pas la vidéo.
             </video>
+        */}
+      {showAd && (
+        <div className={styles.adOverlay}>
+          <div className={styles.adContainer}>
+            <script type='text/javascript' src='//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js'></script>
+            
             <p>La vidéo se terminera avant l’ouverture de l’article...</p>
           </div>
         </div>
