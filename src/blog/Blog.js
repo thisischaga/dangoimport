@@ -91,26 +91,25 @@ const Blog = () => {
       {/* Vidéo en plein écran */}
       {showAd && (
         <div className={styles.videoOverlay}>
-          <video
-            width="100%"
-            height="100%"
-            autoPlay
-            controls={false}
-            onEnded={handleAdFinished}
-          >
-            <source
-              src="https://www.w3schools.com/html/mov_bbb.mp4"
-              type="video/mp4"
-            />
-            Votre navigateur ne supporte pas la vidéo.
-          </video>
+            {canSkip && (
+                <button className={styles.skipButton} onClick={handleAdFinished}>
+                Passer la pub
+                </button>
+            )}
+            <video
+                width="100%"
+                height="100%"
+                autoPlay
+                controls={false}
+                onEnded={handleAdFinished}
+            >
+                <source
+                src="https://www.w3schools.com/html/mov_bbb.mp4"
+                type="video/mp4"
+                />
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
 
-          {/* Bouton Skip (désactivé avant 5s) */}
-          {canSkip && (
-            <button className={styles.skipButton} onClick={handleAdFinished}>
-              Passer la pub
-            </button>
-          )}
         </div>
       )}
       
