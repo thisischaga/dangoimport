@@ -26,7 +26,7 @@ function App() {
         <Route path='/politique-de-confidentialité' element={<Politique/>}/>
         <Route path='/shopping' element={<Ecom/>}/>
         <Route path='/blog/articles' element={<Blog/>}/>
-        <Route path='/blog/finance personnelle' element={<PerFinance/>}/>
+        <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
         <Route path='/blog/epargne' element={<Epargne/>}/>
       </Routes>
     </Router>
