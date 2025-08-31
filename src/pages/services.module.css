@@ -76,6 +76,10 @@ main button:hover{
     height: 100px;
     padding-left: 15px;
 }
+.servicesContainer p{
+    text-align: justify;
+    padding: 10px;
+}
 .whatsapp{
     border-radius: 50%;
     width: 50px;
