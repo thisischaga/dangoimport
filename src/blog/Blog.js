@@ -9,7 +9,7 @@ import epargne from "../images/epargne.jpg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
-  const [countdown, setCountdown] = useState(5); // ⏳ 5 secondes
+  const [countdown, setCountdown] = useState(20); // ⏳ 5 secondes
 
   const handleClick = (e, url) => {
     e.preventDefault();
@@ -117,6 +117,7 @@ const Blog = () => {
       {showAd && (
         <div className={styles.adOverlay}>
           <p>La pub se ferme dans {countdown} secondes...</p>
+          {countdown === 0 && <button onAbort={() => setShowAd(false)}>Fermer</button>}
           <div id="ad-container" className={styles.adFullScreen}></div>
         </div>
       )}
