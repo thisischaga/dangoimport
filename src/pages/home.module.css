@@ -1,16 +1,22 @@
 main{
     display: flex;
     place-content: center;
-    margin-bottom: 100px;
-    margin: 20px;
+    margin: 20px ;
+}
+.intro, .stepsIntro{
+    display: flex;
+    place-content: center;
+    padding: 0 190px;   
 }
 .intro h2{
     color: rgb(36, 123, 181);
     font-size: 25px;
+    text-align: justify;
 }
 .intro h3{
     color: #fff;
     font-size: 22px;
+    text-align: justify;
 }
 
 .devisBtn{
@@ -35,6 +41,7 @@ main{
 }
 .stepsIntro p{
     color: #fff;
+    text-align: justify;
 }
 .steps{
     display: flex;
@@ -62,6 +69,7 @@ main{
 }
 .stepsContainer h4{
     color: #fff;
+    text-align: justify;
 }
 .whatsapp{
     border-radius: 50%;
@@ -76,6 +84,11 @@ main{
 .flex img{
     width: 500px;
     display: none;
+}
+.centeredText{
+    display: flex;
+    place-content: center;
+    padding: 0 150px;
 }
 @media (max-width: 600px) {
     .steps{
@@ -145,6 +158,11 @@ main{
         width: 100%;
         padding: 20px;
         margin: 20px;
+    }
+    .intro, .stepsIntro{
+        display: flex;
+        place-content: center;
+        padding: 0;   
     }
     
 }

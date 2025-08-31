@@ -22,30 +22,34 @@ const Home = ()=>{
             <main>
                 <div>
                     <div className={styles.intro}>
-                        <h2>
-                            Nous sommes une agence spécialisée dans l'import de tous<br/>
-                            types de produits depuis la Chine.
-                        </h2>
-                        <h3>
-                            Nous nous occupons de la recherche, du devis, de la commande
-                            et de la livraison.<br/> Rapide - Sécurisé - Transparant.
-                        </h3>
-                        <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
-                        
-                        <div className={!isVisible? 'hidden': ''}>
-                            <DevisForm showForm={setIsvisible} />
+                        <div>
+                            <h2>
+                                Nous sommes une agence spécialisée dans l'import de tous
+                                types de produits depuis la Chine.
+                            </h2>
+                            <h3>
+                                Nous nous occupons de la recherche, du devis, de la commande
+                                et de la livraison. Rapide - Sécurisé - Transparant.
+                            </h3>
+                            <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
+                            
+                            <div className={!isVisible? 'hidden': ''}>
+                                <DevisForm showForm={setIsvisible} />
+                            </div>
                         </div>
                     </div>
                     <div className={styles.flex}>
                         <img src={home_img} alt="colis"/>
                     </div>
                     <div className={styles.stepsIntro}>
-                        <h3>Comment ça marche?</h3>
-                        <p>
-                            Chez Dango Import, nous avons simplifié l'importation depuis
-                            la Chine en 4 étapes claires. Vous nous dites ce que <br/>vous chercher,
-                            et nous nous occupons du reste.
-                        </p>
+                        <div>
+                            <h3>Comment ça marche?</h3>
+                            <p>
+                                Chez Dango Import, nous avons simplifié l'importation depuis
+                                la Chine en 4 étapes claires. Vous nous dites ce que vous chercher,
+                                et nous nous occupons du reste.
+                            </p>
+                        </div>
                     </div>
                     <div className={styles.content}>
                         
@@ -54,9 +58,9 @@ const Home = ()=>{
                                 <div>
                                     <h4>1- Vous nous contactez</h4>
                                     <p>
-                                        Vous remplissez notre formulaire de devis <br/>
-                                        ou nous écrivez sur WhatsApp et nous <br/>indiquez
-                                        les produits que vous souhaitez <br/>commander 
+                                        Vous remplissez notre formulaire de devis 
+                                        ou nous écrivez sur WhatsApp et nous indiquez
+                                        les produits que vous souhaitez commander 
                                         (quantité, type, lien si possible).
                                     </p>
                                 </div>
@@ -67,7 +71,7 @@ const Home = ()=>{
                                     <h4>2- On vous envoie un devis clair</h4>
                                     <p>
                                         Nous analysons votre demande et nous vous envoyons
-                                        un devis personnalisé avec:<br/>
+                                        un devis personnalisé avec:
                                         <li>le coût du produit</li>
                                         <li>les frais de livraison</li>
                                         <li>les delais </li>
@@ -82,9 +86,9 @@ const Home = ()=>{
                                 <div>
                                     <h4>3- Validation & commande</h4>
                                     <p>
-                                        Si le devis vous convient, vous confirmer<br/>
+                                        Si le devis vous convient, vous confirmer
                                         la commande. <br/>
-                                        Nous effectuons l'achat pour vous, en lien <br/>direct
+                                        Nous effectuons l'achat pour vous, en lien direct
                                         avec le founisseur.
                                     </p>
                                 </div>
@@ -94,9 +98,9 @@ const Home = ()=>{
                                 <div>
                                     <h4>4- Livraison chez vous</h4>
                                     <p>
-                                        Nous suivons l'envoi jusqu'à la livraison<br/> au Bénin
+                                        Nous suivons l'envoi jusqu'à la livraison au Bénin
                                         Togo ou Ghana. <br/>
-                                        Vous êtes informés à chaque étape par e-mail<br/>
+                                        Vous êtes informés à chaque étape par e-mail
                                         ou WhatsApp
                                     </p>
                                 </div>
