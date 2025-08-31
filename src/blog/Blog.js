@@ -15,95 +15,111 @@ const Blog = () => {
     e.preventDefault();
     setRedirectUrl(url);
     setShowAd(true);
-    setCountdown(5); 
+    setCountdown(5);
   };
 
+  // Gestion du countdown et redirection
   useEffect(() => {
     let timer;
     if (showAd && countdown > 0) {
       timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     } else if (showAd && countdown === 0 && redirectUrl) {
-      window.location.href = redirectUrl; 
+      window.location.href = redirectUrl;
     }
     return () => clearTimeout(timer);
   }, [showAd, countdown, redirectUrl]);
 
+  // Charger dynamiquement le script Adsterra pour la bannière 728x90
+  useEffect(() => {
+    if (showAd) {
+      // Définir atOptions
+      window.atOptions = {
+        key: "3aaeaf494b1a9119d81d64c1f8fcd306",
+        format: "iframe",
+        height: 90,
+        width: 728,
+        params: {},
+      };
+
+      // Créer et ajouter le script
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = "//www.highperformanceformat.com/3aaeaf494b1a9119d81d64c1f8fcd306/invoke.js";
+      script.async = true;
+
+      const adContainer = document.getElementById("ad-container");
+      if (adContainer) {
+        adContainer.appendChild(script);
+      }
+
+      return () => {
+        if (adContainer) adContainer.innerHTML = ""; // Nettoyer à la fermeture
+      };
+    }
+  }, [showAd]);
 
   return (
     <div className={styles.blogPage}>
-      
-      {!showAd && 
+      {!showAd && (
         <div>
-            <Header />
-            <main>
-                <div className={styles.mainContainer}>
-                <section className={styles.blogs}>
-                    <div className={styles.blog}>
-                    <div className={styles.item}>
-                        <img src={financePerso} alt="financePerso" />
-                        <p>
-                        <a
-                            href="/blog/finance-personnelle"
-                            onClick={(e) =>
-                            handleClick(e, "/blog/finance-personnelle")
-                            }
-                        >
-                            Les principes fondamentaux de la finance personnelle : Gérer
-                            son argent au quotidien
-                        </a>
-                        </p>
-                    </div>
+          <Header />
+          <main>
+            <div className={styles.mainContainer}>
+              <section className={styles.blogs}>
+                <div className={styles.blog}>
+                  <div className={styles.item}>
+                    <img src={financePerso} alt="financePerso" />
+                    <p>
+                      <a
+                        href="/blog/finance-personnelle"
+                        onClick={(e) =>
+                          handleClick(e, "/blog/finance-personnelle")
+                        }
+                      >
+                        Les principes fondamentaux de la finance personnelle : Gérer
+                        son argent au quotidien
+                      </a>
+                    </p>
+                  </div>
 
-                    <div className={styles.item}>
-                        <img src={epargne} alt="image_epargne" />
-                        <p>
-                        <a
-                            href="/blog/epargne"
-                            onClick={(e) => handleClick(e, "/blog/epargne")}
-                        >
-                            L’Épargne : Comment Protéger et Faire Croître Votre Argent
-                        </a>
-                        </p>
-                    </div>
+                  <div className={styles.item}>
+                    <img src={epargne} alt="image_epargne" />
+                    <p>
+                      <a
+                        href="/blog/epargne"
+                        onClick={(e) => handleClick(e, "/blog/epargne")}
+                      >
+                        L’Épargne : Comment Protéger et Faire Croître Votre Argent
+                      </a>
+                    </p>
+                  </div>
 
-                    <div className={styles.item}>
-                        <img src={une_personne} alt="une personne" />
-                        <p>
-                        <a
-                            href="/blog/dango"
-                            onClick={(e) => handleClick(e, "/blog/dango")}
-                        >
-                            Pourquoi choisir Dango Import pour vos achats depuis la
-                            Chine?
-                        </a>
-                        </p>
-                    </div>
-                    </div>
-                </section>
+                  <div className={styles.item}>
+                    <img src={une_personne} alt="une personne" />
+                    <p>
+                      <a
+                        href="/blog/dango"
+                        onClick={(e) => handleClick(e, "/blog/dango")}
+                      >
+                        Pourquoi choisir Dango Import pour vos achats depuis la
+                        Chine?
+                      </a>
+                    </p>
+                  </div>
                 </div>
-            </main>
-            <Footer />
+              </section>
+            </div>
+          </main>
+          <Footer />
         </div>
-      }
-      
+      )}
 
       {showAd && (
         <div className={styles.adOverlay}>
-            <p>La pub se ferme dans quelques secondes...</p>
-            <div id="ad-container" className={styles.adFullScreen}>
-            <script
-                async
-                data-cfasync="false"
-                src="//pl27547310.revenuecpmgate.com/3b589e0bbebc733766018894abb29077/invoke.js"
-            ></script>
-            <div id="container-3b589e0bbebc733766018894abb29077"></div>
-            </div>
-            
+          <p>La pub se ferme dans {countdown} secondes...</p>
+          <div id="ad-container" className={styles.adFullScreen}></div>
         </div>
-        )}
-
-
-      
+      )}
     </div>
   );
 };
