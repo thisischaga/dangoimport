@@ -9,13 +9,13 @@ import epargne from "../images/epargne.jpg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
-  const [countdown, setCountdown] = useState(20); // ⏳ 5 secondes
+  const [countdown, setCountdown] = useState(5); // ⏳ 5 secondes
 
   const handleClick = (e, url) => {
     e.preventDefault();
     setRedirectUrl(url);
     setShowAd(true);
-    setCountdown(20);
+    setCountdown(5);
   };
 
     // Gestion du countdown
