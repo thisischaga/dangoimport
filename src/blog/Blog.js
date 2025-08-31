@@ -117,7 +117,7 @@ const Blog = () => {
       {showAd && (
         <div className={styles.adOverlay}>
           <p>La pub se ferme dans {countdown} secondes...</p>
-          {countdown === 0 && <button onAbort={() => setShowAd(false)}>Fermer</button>}
+          {countdown === 0 && <button className={styles.skipButton} onAbort={() => setShowAd(false)}>Fermer</button>}
           <div id="ad-container" className={styles.adFullScreen}></div>
         </div>
       )}
