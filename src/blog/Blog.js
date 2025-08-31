@@ -33,7 +33,7 @@ const Blog = () => {
   return (
     <div className={styles.blogPage}>
       <Header />
-      <main>
+      {!showAd && <main>
         <div className={styles.mainContainer}>
           <section className={styles.blogs}>
             <div className={styles.blog}>
@@ -79,8 +79,8 @@ const Blog = () => {
             </div>
           </section>
         </div>
-      </main>
-      <Footer />
+      </main>}
+      
 
       {/* Vidéo en plein écran */}
       {showAd && (
@@ -107,6 +107,7 @@ const Blog = () => {
           )}
         </div>
       )}
+      <Footer />
     </div>
   );
 };
