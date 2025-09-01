@@ -82,13 +82,14 @@
 }
 .sliderContainer {
   flex: 0.6;
-  min-width: 300px;
+  overflow: hidden;
+  margin-right: 45px;
 }
 
 .slideImage {
   width: 250px;
   height: 250px;
-  /*object-fit: cover;*/
+  object-fit: cover;
   border-radius: 20px;
 }
 
