@@ -45,6 +45,10 @@ p, li, strong{
     padding: 0 190px;   
 }
 @media (max-width: 600px) {
+    main {
+        margin: 10px;
+        padding: 10px;
+    }   
     .container{
         align-items: center;
     }
