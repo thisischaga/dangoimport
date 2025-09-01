@@ -110,7 +110,7 @@ const Cgu = () => {
                             Pour toute question ou remarque : 
                             <li>dangoimport02@gmail.com</li>
                             <li>WhatsApp : +229 01 59 38 71 80 / +228 99 17 38 54</li>
-                            <li>Site : <a href='dango-import.vercel.app'>dango-import.vercel.app</a></li>
+                            <li>Site : <a href='www.dangoimport.com'>www.dangoimport.com</a></li>
                         </p>
                     </div>
                 </div>

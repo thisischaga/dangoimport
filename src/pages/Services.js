@@ -104,9 +104,6 @@ const Service = () => {
                             </ul>
                         </div>
                     </div>
-                    <div>
-                        <button>S'abonner à la newsletter</button>
-                    </div>
                 </div>
             </div>
         </main>

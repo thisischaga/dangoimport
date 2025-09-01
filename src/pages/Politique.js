@@ -71,7 +71,7 @@ const Politique = () => {
                             <li>Les modifier ou corriger</li>
                             <li>En demander la suppression</li>
                             <li>Retirer votre consentement</li>
-                            📧 Pour exercer vos droits : dangoimport02@gmail.com
+                            📧 Pour exercer vos droits : contact@dangoimport.com
                         </p>
                         <p>
                             <strong>7. Sécurité</strong><br/>
