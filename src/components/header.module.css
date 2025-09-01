@@ -80,14 +80,9 @@
     opacity: 0;
     transform: translateX(100px);
 }
-.sliderContainer {
-  min-width: 300px;
-}
-
 .slideImage {
   width: 250px;
   height: 250px;
-  object-fit: cover;
   border-radius: 20px;
 }
 
