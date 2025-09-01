@@ -1,4 +1,4 @@
-.container{ 
+/*.container{ 
     background: linear-gradient(to bottom, #081b29, #000);
     height: 600px;
     width: 100%;
@@ -199,7 +199,7 @@
         padding: 10px 20px;
     }
 
-}
+}/*
 .container {
   background: linear-gradient(to bottom, #081b29, #000);
   height: 600px;
