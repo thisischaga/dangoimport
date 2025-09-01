@@ -1,10 +1,10 @@
 .container{ 
     background: linear-gradient(to bottom, #081b29, #000);
-    height: auto;
+    height: 600px;
     padding-bottom: 60px;
     width: 100%;
     padding-top: 10px;
-    border-bottom-left-radius: 100% 50px;
+    border-bottom-left-radius: 100% 0;
 }
 .content{
     display: flex;
@@ -72,7 +72,7 @@
     border: 2px solid #fff;
 }
 .headerIntro{
-    margin-top: 120px;
+    margin-top: 160px;
     margin-left: 40px;
 }
 .headerIntro h2{
@@ -114,7 +114,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 160px;
   margin-right: 45px;
 }
 
@@ -198,7 +198,7 @@
         color: #0e2d43ee;
         padding: 10px 20px;
     }
-    .sliderContainer { max-width: 300px; margin-right: 0; }
+    .sliderContainer { max-width: 300px; margin-right: 0; margin-top: 0;}
     .sliderContainer img,
     .slideImage {
         display: block !important;
