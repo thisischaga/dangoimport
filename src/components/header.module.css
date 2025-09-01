@@ -81,11 +81,10 @@
     transform: translateX(100px);
 }
 .sliderContainer {
-  flex: 0.6;
+  flex: 0.4;
   overflow: hidden;
   margin-right: 45px;
-  width: 400px;
-  margin-top: 40px;
+  margin-top: 70px;
 }
 
 .slideImage {
@@ -130,64 +129,35 @@
   border-bottom: 2px solid #ffdc2b;
 }
 
-@media (max-width: 830px) {
-    .container{
-        height: 100%;
-        padding-top: 20px;
-    }
-    .content{
-        flex-direction: column;
-        align-items: center;
-    }
-    .content img{
-        width: 300px;
-        padding-top: 0;
-    }
+@media (max-width: 600px){
     .headerNav{
         flex-direction: column;
         align-items: center;
     }
-    .headerIntro{
-        margin: 0;
-        padding: 0;
-    }
-    .headerIntro h2, .headerIntro h3{
-        text-align: center;
-    }
-    .headerIntro h2{
-        font-size: 25px;
-    }
     .container nav ul{
-        margin: 0;
-        padding: 0;
+        
+        gap: 10px;
         padding-bottom: 10px;
     }
     .container nav ul li{
-        list-style: none;
-        color: #fff;
-        font-size: 10px;
-        padding: 0 5px;
-        cursor: pointer;
+        font-size: 12px;
     }
-    .container nav ul button{
-        background-color: #ffdc2b;
-        border: none;
-        border-radius: 20px;
-        color: #0e2d43ee;
+    .content{
+        display: block;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 0 10px;
+        margin-right: 10px;
+        margin-left: 10px;
     }
-    .container nav ul .pc button{
-        background-color: #ffdc2b;
-        border: none;
-        border-radius: 20px;
-        color: #0e2d43ee;
-    }
-    .pc {
+    .pc{
         display: none;
     }
     .mobile{
         display: flex;
         justify-content: center;
-        margin-top: 20px;
+        margin-top: 10px;
     }
     .mobile button{
         background-color: #ffdc2b;
@@ -196,20 +166,29 @@
         color: #0e2d43ee;
         padding: 10px 20px;
     }
-    .content {
-        flex-direction: column;
-        align-items: center;
+    .sliderContainer {
+        margin-right: 40px;
+        width: 300px;
+        justify-content: center;
+        margin-top: 20px;
+        overflow: visible;
+        flex: 0;
+        margin-left: 55px;
+        flex: 0.4;
+        padding: 0;
     }
-    .headerIntro {
-        margin: 0 0 20px 0;
+    .slideImage{
+        height: 200px;
+    }
+    .headerIntro{
+        margin-top: 40px;
+        margin-left: 0px;
         text-align: center;
     }
-    .headerIntro h2 {
-        font-size: 25px;
+    .headerIntro h2{
+        font-size: 22px;
     }
-    .headerIntro h3 {
-        font-size: 20px;
+    .headerIntro h3{
+        font-size: 18px;
     }
-
 }
-
