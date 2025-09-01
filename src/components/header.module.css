@@ -169,18 +169,19 @@
     .sliderContainer {
         justify-content: center;
         margin-top: 20px;
-        overflow: hidden;
         margin-left: 55px;
         margin-right: 55px;
         flex: 0.1;
+        overflow: hidden;
     }
     .slideImage{
         height: 200px;
         width: 190px;
+        margin: 10px;
     }
     .headerIntro{
-        margin-top: 40px;
-        margin-left: 0px;
+        margin-top: 20px;
+        margin-left: 20px;
         text-align: center;
     }
     .headerIntro h2{
