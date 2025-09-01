@@ -18,41 +18,38 @@ const Blog = () => {
     setCountdown(5);
   };
 
-    // Gestion du countdown
-    useEffect(() => {
+  // Gestion du countdown
+  useEffect(() => {
     let timer;
     if (showAd && countdown > 0) {
-        timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     }
     return () => clearTimeout(timer);
-    }, [showAd, countdown]);
+  }, [showAd, countdown]);
 
-
-  // Charger dynamiquement le script Adsterra pour la bannière 728x90
+  // Afficher le bloc AdSense dans le container
   useEffect(() => {
     if (showAd) {
-      // Définir atOptions
-      window.atOptions = {
-        key: "3aaeaf494b1a9119d81d64c1f8fcd306",
-        format: "iframe",
-        height: 90,
-        width: 728,
-        params: {},
-      };
-
-      // Créer et ajouter le script
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = "//www.highperformanceformat.com/3aaeaf494b1a9119d81d64c1f8fcd306/invoke.js";
-      script.async = true;
-
       const adContainer = document.getElementById("ad-container");
       if (adContainer) {
-        adContainer.appendChild(script);
+        adContainer.innerHTML = `
+          <!-- annonce1 -->
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-2759671915983740"
+               data-ad-slot="9954163361"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        `;
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+          console.error("AdSense error:", e);
+        }
       }
 
       return () => {
-        if (adContainer) adContainer.innerHTML = ""; // Nettoyer à la fermeture
+        if (adContainer) adContainer.innerHTML = ""; // Nettoyer quand on ferme
       };
     }
   }, [showAd]);
@@ -75,8 +72,8 @@ const Blog = () => {
                           handleClick(e, "/blog/finance-personnelle")
                         }
                       >
-                        Les principes fondamentaux de la finance personnelle : Gérer
-                        son argent au quotidien
+                        Les principes fondamentaux de la finance personnelle :
+                        Gérer son argent au quotidien
                       </a>
                     </p>
                   </div>
@@ -88,7 +85,8 @@ const Blog = () => {
                         href="/blog/epargne"
                         onClick={(e) => handleClick(e, "/blog/epargne")}
                       >
-                        L’Épargne : Comment Protéger et Faire Croître Votre Argent
+                        L’Épargne : Comment Protéger et Faire Croître Votre
+                        Argent
                       </a>
                     </p>
                   </div>
@@ -115,25 +113,24 @@ const Blog = () => {
 
       {showAd && (
         <div className={styles.adOverlay}>
-            <p>La pub se ferme dans {countdown} secondes...</p>
-            
-            {/* Bouton visible quand le timer est fini */}
-            {countdown === 0 && (
+          <p>La pub se ferme dans {countdown} secondes...</p>
+
+          {/* Bouton visible quand le timer est fini */}
+          {countdown === 0 && (
             <button
-                className={styles.skipButton}
-                onClick={() => {
+              className={styles.skipButton}
+              onClick={() => {
                 setShowAd(false); // ferme la pub
                 if (redirectUrl) window.location.href = redirectUrl; // puis redirige
-                }}
+              }}
             >
-                Fermer et continuer
+              Fermer et continuer
             </button>
-            )}
-            
-            <div id="ad-container" className={styles.adFullScreen}></div>
-        </div>
-        )}
+          )}
 
+          <div id="ad-container" className={styles.adFullScreen}></div>
+        </div>
+      )}
     </div>
   );
 };
