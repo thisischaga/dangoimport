@@ -166,7 +166,6 @@
     .container nav ul{
         display: flex;
         place-content: center;
-        padding-right: 40px;
         gap: 5px;
         padding-bottom: 10px;
     }
