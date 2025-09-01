@@ -136,7 +136,7 @@
     }
     .container nav ul{
         
-        gap: 10px;
+        gap: 5px;
         padding-bottom: 10px;
     }
     .container nav ul li{
@@ -169,8 +169,8 @@
     .sliderContainer {
         justify-content: center;
         margin-top: 20px;
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: 75px;
+        margin-right: 25px;
         width: 100%;
     }
     .slideImage{
