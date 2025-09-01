@@ -52,22 +52,21 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Contenu avec display flex */}
       <div className={styles.content}>
         <div className={styles.headerIntro}>
           <h2>Vos achats en Chine,<br />livrés en Afrique de l'Ouest</h2>
           <h3>Importer depuis la Chine,<br />on s'occupe du reste !</h3>
         </div>
-
-        {/* Slider à côté */}
         <div className={styles.sliderContainer}>
-          <Slider {...settings}>
-            {slides.map((slide, index) => (
-              <div key={index}>
-                <img src={slide} alt={`slide${index + 1}`} className={styles.slideImage} />
-              </div>
-            ))}
-          </Slider>
+          <div>
+            <Slider {...settings}>
+                {slides.map((slide, index) => (
+                <div key={index}>
+                    <img src={slide} alt={`slide${index + 1}`} className={styles.slideImage} />
+                </div>
+                ))}
+            </Slider>
+          </div>
         </div>
       </div>
     </header>
