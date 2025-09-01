@@ -167,18 +167,16 @@
         padding: 10px 20px;
     }
     .sliderContainer {
-        margin-right: 40px;
-        width: 300px;
         justify-content: center;
         margin-top: 20px;
-        overflow: visible;
-        flex: 0;
+        overflow: hidden;
         margin-left: 55px;
-        flex: 0.4;
-        padding: 0;
+        margin-right: 55px;
+        flex: 0.1;
     }
     .slideImage{
         height: 200px;
+        width: 190px;
     }
     .headerIntro{
         margin-top: 40px;

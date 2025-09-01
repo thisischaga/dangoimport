@@ -4,8 +4,8 @@ import styles from './home.module.css'
 import home_img from '../images/home-img.jpg';
 import whatsapp from '../images/whatsapp.jpg';
 import devis from '../images/devis.jpg';
-import validate from '../images/validate.jpg';
-import livraison from '../images/livraison.jpg';
+import validation from '../images/validation.png';
+import livraisons from '../images/livraisons.png';
 import Footer from "../components/Footer";
 import DevisForm from "../components/DevisForm";
 
@@ -92,7 +92,7 @@ const Home = ()=>{
                                         avec le founisseur.
                                     </p>
                                 </div>
-                                <img src={validate} alt="icone-validation-form"/>
+                                <img src={validation} alt="icone-validation-form"/>
                             </div>
                             <div className={styles.stepsContainer}>
                                 <div>
@@ -104,7 +104,7 @@ const Home = ()=>{
                                         ou WhatsApp
                                     </p>
                                 </div>
-                                <img src={livraison} alt="icone-livraison-express"/>
+                                <img src={livraisons} alt="icone-livraison-express"/>
                             </div>
                         </div>
                     </div>
