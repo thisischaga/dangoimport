@@ -157,6 +157,7 @@
     .container{
         height: auto;
         padding-bottom: 40px;
+        border-bottom-left-radius: 100% 100px;
     }
     .headerNav{
         flex-direction: column;
