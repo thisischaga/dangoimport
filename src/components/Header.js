@@ -32,7 +32,6 @@ const Header = () => {
     autoplay: true,
     autoplaySpeed: 4000,
     arrows: true,
-    fade: true, // transition en fondu
   };
 
   return (
@@ -53,18 +52,19 @@ const Header = () => {
         </nav>
       </div>
 
+      {/* Contenu avec display flex */}
       <div className={styles.content}>
         <div className={styles.headerIntro}>
-          <h2>Vos achats en Chine, <br />livrés en Afrique de l'Ouest</h2>
-          <h3>Importer depuis la Chine, <br />on s'occupe du reste !</h3>
+          <h2>Vos achats en Chine,<br />livrés en Afrique de l'Ouest</h2>
+          <h3>Importer depuis la Chine,<br />on s'occupe du reste !</h3>
         </div>
 
-        {/* Slider */}
-        <div className={styles.slider}>
+        {/* Slider à côté */}
+        <div className={styles.sliderContainer}>
           <Slider {...settings}>
             {slides.map((slide, index) => (
               <div key={index}>
-                <img src={slide} alt={`slide${index+1}`} className={styles.slideImage}/>
+                <img src={slide} alt={`slide${index + 1}`} className={styles.slideImage} />
               </div>
             ))}
           </Slider>
