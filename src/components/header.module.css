@@ -1,227 +1,127 @@
-.container{ 
-    background: linear-gradient(to bottom, #081b29, #000);
-    height: 600px;
-    width: 100%;
-    padding-top: 10px;
-    border-bottom-left-radius: 100% 80px;
-}
-.content{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 0 10px;
-    margin-right: 10px;
-    margin-left: 10px;
-}
-.sliderContainer {
+.container {
+  background: linear-gradient(to bottom, #081b29, #000);
+  height: 600px;
   width: 100%;
-  height: 400px; /* Ajuste selon ton design */
-  margin-top: 20px;
+  padding-top: 10px;
+  border-bottom-left-radius: 100% 80px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.headerNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(17, 54, 80, 0.5);
+  border-radius: 50px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.logo h3 {
+  margin-left: 10px;
+  color: #fff;
+  border-bottom: 1px solid #ffdc2b;
+  cursor: pointer;
+}
+
+.headerNav ul {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerNav ul li {
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pc {
+  background-color: #ffdc2b;
+  border: none;
+  border-radius: 20px;
+  color: #0e2d43ee;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.pc:hover {
+  border: 2px solid #fff;
+}
+
+/* Contenu en flex */
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.headerIntro {
+  flex: 1;
+  color: #fff;
+  margin-right: 20px;
+}
+
+.headerIntro h2 {
+  color: #ffdc2b;
+  font-size: 30px;
+}
+
+.headerIntro h3 {
+  font-size: 25px;
+}
+
+/* Slider à côté */
+.sliderContainer {
+  flex: 1;
+  min-width: 300px;
 }
 
 .slideImage {
   width: 100%;
-  height: 400px; /* Même hauteur que container */
+  height: 350px;
   object-fit: cover;
+  border-radius: 20px;
 }
 
-.slider{
-    width: 100%;
-    overflow: hidden;
-    padding-right: 20px;
-    padding-left: 20px;
-    position: absolute;
-    top: 200px;
-    right: 30px;
-}
-figure{
-    width: 400%;
-    position: relative;
-    right: 0;
-}
-.slide{
-    float: right;
-    overflow: hidden;
-    display: flex;
-    animation: 10s forSlide infinite;
-    transform: translateX(80px);
-    opacity: 1;
-}
-.slide img{
-    width: 250px;
-    height: 250px;
-    border-radius: 40px;
-    margin-left: 45px;
-}
-@keyframes forSlide{
-    /*to{
-        opacity: 0;    
-    }*/
-    0%{transform: translateX(0);}
-    50%{transform: translateX(-50px);}
-    100%{transform: translateX(-100px);}
-}
-.content img{
-    width: 0;
-    height: 0;
-}
-.headerNav{
-    display: flex;
-    justify-content: space-between;
-    background-color: #11365079;
-    border-radius: 50px;
-    margin-left: 10px;
-    margin-right: 10px;
-}
-.container .logo{
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-}
-.container .logo img{
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-.container .logo h3{
-    margin-left: 10px;
-    color: #fff;
-    border-bottom: 1px solid #ffdc2b;
-    cursor: pointer;
+/* Slick dots */
+.slick-dots li button:before {
+  color: #ffdc2b;
 }
 
-.container ul{
-    display: flex;
-    align-items: center;
-    padding-right: 10px;
-}
-.container nav ul li{
-    list-style: none;
-    color: #fff;
-    font-size: 13px;
-    padding: 0 5px;
-    transition: 0.6s ease-in-out;
-    cursor: pointer;
-}
-.mobile{
-    display: none;
-    cursor: pointer;
-}
-.pc {
-    background-color: #ffdc2b;
-    border: none;
-    border-radius: 20px;
-    color: #0e2d43ee;
-    padding: 10px 20px;
-    border: 2px solid #ffdc2b;
-    cursor: pointer;
-    transition: 0.6s ease-in-out;
-}
-.pc:hover{
-    border: 2px solid #fff;
-}
-.headerIntro{
-    margin-top: 120px;
-    margin-left: 40px;
-}
-.headerIntro h2{
-    color: #ffdc2b;
-    font-size: 30px;
-    animation: fadeInMove 1.7s ease-in-out forwards;
-    opacity: 0;
-    transform: translateX(100px);
-}
-@keyframes fadeInMove{
-    to{
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-.headerIntro h3{
-    color: #fff;
-    font-size: 25px;
-    animation: fadeInMove-two 1.7s ease-in-out forwards;
-    opacity: 0;
-    transform: translateY(50px);
-}
-@keyframes fadeInMove-two{
-    to{
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-.active {
-  color: #004cff;
-  font-weight: bold;
-  border-bottom: 2px solid #ffdc2b;
+/* Arrows */
+.slick-prev:before,
+.slick-next:before {
+  color: #fff;
 }
 
+/* Responsive */
 @media (max-width: 830px) {
-    .container{
-        height: 100%;
-        padding-top: 20px;
-    }
-    .content{
-        flex-direction: column;
-        align-items: center;
-    }
-    .content img{
-        width: 300px;
-        padding-top: 0;
-    }
-    .headerNav{
-        flex-direction: column;
-        align-items: center;
-    }
-    .headerIntro{
-        margin: 0;
-        padding: 0;
-    }
-    .headerIntro h2, .headerIntro h3{
-        text-align: center;
-    }
-    .headerIntro h2{
-        font-size: 25px;
-    }
-    .container nav ul{
-        margin: 0;
-        padding: 0;
-        padding-bottom: 10px;
-    }
-    .container nav ul li{
-        list-style: none;
-        color: #fff;
-        font-size: 10px;
-        padding: 0 5px;
-        cursor: pointer;
-    }
-    .container nav ul button{
-        background-color: #ffdc2b;
-        border: none;
-        border-radius: 20px;
-        color: #0e2d43ee;
-    }
-    .container nav ul .pc button{
-        background-color: #ffdc2b;
-        border: none;
-        border-radius: 20px;
-        color: #0e2d43ee;
-    }
-    .pc {
-        display: none;
-    }
-    .mobile{
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    .mobile button{
-        background-color: #ffdc2b;
-        border: none;
-        border-radius: 20px;
-        color: #0e2d43ee;
-        padding: 10px 20px;
-    }
-
+  .content {
+    flex-direction: column;
+    align-items: center;
+  }
+  .headerIntro {
+    margin: 0 0 20px 0;
+    text-align: center;
+  }
+  .headerIntro h2 {
+    font-size: 25px;
+  }
+  .headerIntro h3 {
+    font-size: 20px;
+  }
 }
