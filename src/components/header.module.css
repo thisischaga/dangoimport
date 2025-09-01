@@ -17,6 +17,7 @@
 .headerNav{
     display: flex;
     justify-content: space-between;
+    align-items: center;
     background-color: #11365079;
     border-radius: 50px;
     margin-left: 10px;
@@ -135,21 +136,25 @@
         align-items: center;
     }
     .container nav ul{
-        
+        display: flex;
+        place-content: center;
+        padding-right: 40px;
         gap: 5px;
         padding-bottom: 10px;
     }
     .container nav ul li{
         font-size: 12px;
     }
+    .container .logo{
+        display: flex;
+        align-items: center;
+        padding-left: 0;
+    }
     .content{
-        display: block;
-        justify-content: space-between;
+        display: flex;
         align-items: center;
         flex-wrap: wrap;
         padding: 0 10px;
-        margin-right: 10px;
-        margin-left: 10px;
     }
     .pc{
         display: none;
@@ -168,20 +173,26 @@
     }
     .sliderContainer {
         justify-content: center;
+        align-items: center;
+        margin: 0 auto;  
         margin-top: 20px;
-        margin-left: 75px;
-        margin-right: 25px;
+        width: 100%; 
+    }
+
+    .slider {
+        flex-wrap: wrap;
+        justify-content: center;
         width: 100%;
     }
-    .slideImage{
+
+    .slideImage {
         height: 200px;
         width: 190px;
-        margin: 10px;
+        margin: auto 10px;
     }
     .headerIntro{
-        margin-top: 20px;
-        margin-left: 40px;
-        text-align: center;
+        margin-top: 5px;
+        margin-bottom: 0;
     }
     .headerIntro h2{
         font-size: 22px;

@@ -58,7 +58,7 @@ const Header = () => {
           <h3>Importer depuis la Chine,<br />on s'occupe du reste !</h3>
         </div>
         <div className={styles.sliderContainer}>
-          <div>
+          <div className={styles.slider}>
             <Slider {...settings}>
                 {slides.map((slide, index) => (
                 <div key={index}>
