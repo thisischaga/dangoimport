@@ -81,7 +81,6 @@
     transform: translateX(100px);
 }
 .sliderContainer {
-  flex: 1;
   min-width: 300px;
 }
 
