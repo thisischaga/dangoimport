@@ -26,7 +26,7 @@ const Cgu = () => {
                             Le site permet aux utilisateurs de :
                             <li>Nom du site : Dango Import </li> 
                             <li>Responsable: Ayatoulaye DANGO NADEY </li> 
-                            <li>Adresse E-mail : dangoimport02@gmail.com</li> 
+                            <li>Adresse E-mail : contact@dangoimport.com</li> 
                             <li>Hébergeur : </li> Hostinger <br/>
                             <li>Pays d'activité : Bénin - Togo - Ghana </li> 
                         </p>
@@ -108,7 +108,7 @@ const Cgu = () => {
                         <p>
                             <strong>13. Contact</strong><br/>
                             Pour toute question ou remarque : 
-                            <li>dangoimport02@gmail.com</li>
+                            <li>contact@dangoimport.com</li>
                             <li>WhatsApp : +229 01 59 38 71 80 / +228 99 17 38 54</li>
                             <li>Site : <a href='www.dangoimport.com'>www.dangoimport.com</a></li>
                         </p>
