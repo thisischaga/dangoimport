@@ -14,7 +14,7 @@
     margin-right: 10px;
     margin-left: 10px;
 }
-/* Slider à côté */
+
 .sliderContainer {
   flex: 1;
   min-width: 300px;
@@ -27,12 +27,12 @@
   border-radius: 20px;
 }
 
-/* Slick dots */
+
 .slick-dots li button:before {
   color: #ffdc2b;
 }
 
-/* Arrows */
+
 .slick-prev:before,
 .slick-next:before {
   color: #fff;
