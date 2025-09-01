@@ -157,8 +157,7 @@
     border: none;
     border-radius: 30px;
     color: #0e2d43ee;
-    padding: 15px 20px;
-    margin-top: 20px;
+    padding: 15px 50px;
     border: 2px solid #ffdc2b;
     cursor: pointer;
     transition: 0.6s ease-in-out;
@@ -166,34 +165,7 @@
 .newsletter:hover{
     border: 2px solid #fff;
 }
-.form input{
-    padding: 15px 10px;
-    border-radius: 30px;
-    border: none;
-    width: 230px;
-    outline: none;
-    margin-top: 10px;
-}
-.form button{
-    background-color: #ffdc2b;
-    width: 250px;
-    padding: 15px 10px;
-    border: none;
-    border-radius: 30px;
-    color: #0e2d43ee;
-    padding: 10px 20px;
-    margin-top: 10px;
-    border: 2px solid #ffdc2b;
-    cursor: pointer;
-    transition: 0.6s ease-in-out;
-}
-.form button:hover{
-    border: 2px solid #fff;
-}
-::placeholder {
-    color: #000 !important;
-    opacity: 1 !important;
-}
+
 @media (max-width: 600px){
     .container{
         height: auto;

@@ -12,7 +12,6 @@ import "slick-carousel/slick/slick-theme.css";
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [formVisible, setFormVisible] = useState(false);
   const isActive = (path) => location.pathname === path;
   const toHome = () => navigate('/');
   const toAbout = () => navigate('/about');
@@ -22,8 +21,8 @@ const Header = () => {
 
   const slides = [slide1, slide2, slide3];
   
-  const tooglleForm = () => {
-    setFormVisible(!formVisible);
+  const tooglleNewsletter = () => {
+    navigate('https://preview.mailerlite.io/preview/1579555/sites/156648060934423805/g4bOpM?fresh=1');
   }
 
   const settings = {
@@ -67,13 +66,8 @@ const Header = () => {
           <h2>Vos achats en Chine,<br />livrés en Afrique de l'Ouest</h2>
           <h3>Importer depuis la Chine,<br />on s'occupe du reste !</h3>
           <div>
-            {!formVisible ? (
-              <button className={styles.devisBtn} onClick={tooglleForm}>Demande de devis</button>) : 
-              (<div className={styles.form}>
-                <input type="email" placeholder="Votre adresse email" /><br />
-                <button>ENVOYER</button>
-              </div>)
-            }
+            <p>Abonnez-vous à la newsletter</p>
+            <button className={styles.newsletter} onClick={tooglleNewsletter}>Newsletter</button>
           </div>
             
         </div>
