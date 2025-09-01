@@ -80,18 +80,24 @@
     opacity: 0;
     transform: translateX(100px);
 }
+.sliderContainer {
+  flex: 1;
+  min-width: 300px;
+}
+
 .slideImage {
-  width: 250px;
-  height: 250px;
+  width: 30%;
+  height: 350px;
+  object-fit: cover;
   border-radius: 20px;
 }
 
-
+/* Slick dots */
 .slick-dots li button:before {
   color: #ffdc2b;
 }
 
-
+/* Arrows */
 .slick-prev:before,
 .slick-next:before {
   color: #fff;
