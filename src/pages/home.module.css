@@ -24,12 +24,14 @@ main{
     color: #000;
     padding: 15px 30px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     transition: 0.4s ease-in-out;
     cursor: pointer;
+    border: 2px solid #fff;
 }
 .devisBtn:hover{
-    background: #fbfbfb7d;
+    border-radius: 30px;
+    background-color: #fff;
 }
 .content{
     margin-top: 30px;
@@ -90,6 +92,14 @@ main{
     place-content: center;
     padding: 0 150px;
 }
+.btns{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+.forMobile{
+    display: none;
+}
 @media (max-width: 600px) {
     main {
         margin: 10px;
@@ -99,6 +109,21 @@ main{
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+    .forMobile{
+        background: #000;
+        color: #fff;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 10px;
+        transition: 0.4s ease-in-out;
+        border: 2px solid #fff;
+        cursor: pointer;
+        display: block;
+        margin-left: 10px;
+    }
+    .forMobile:hover{
+        border: 2px solid #fff;
     }
     .stepsContainer img{
         width: 150px;
@@ -140,10 +165,6 @@ main{
         width: 40px;
         height: 40px;
     }
-    .stepsContainer{
-        padding: 20px;
-        margin: 10px;
-    }
     .stepsContainer h4{
         font-size: 16px;
     }
@@ -162,6 +183,7 @@ main{
         width: 100%;
         padding: 20px;
         margin: 20px;
+        margin-top: 0;
     }
     .intro, .stepsIntro{
         display: flex;

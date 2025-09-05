@@ -31,7 +31,10 @@ const Home = ()=>{
                                 Nous nous occupons de la recherche, du devis, de la commande
                                 et de la livraison. Rapide - Sécurisé - Transparant.
                             </h3>
-                            <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
+                            <div className={styles.btns}>
+                                <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
+                                <button className={isVisible? 'hidden': styles.forMobile}>Acheter nos produits</button>
+                            </div>
                             
                             <div className={!isVisible? 'hidden': ''}>
                                 <DevisForm showForm={setIsvisible} />

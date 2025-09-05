@@ -1,28 +1,34 @@
 .container{
     background-color: #0e2d4387;
     border-radius: 10px;
-    display: flex;
-    place-content: center;
     margin-top: 20px;
     padding: 10px 30px;
     padding-bottom: 60px;
+    width: 100%;
 }
-form input, textarea{
+form input, textarea, select{
     background-color: #fff;
     color: #0e2d43;
     border: none;
     outline: none;
-    width: 720px;
+    width: 98%;
     height: 30px;
     padding: 7px;
     border-radius: 5px;
     margin-top: 10px;
     margin-bottom: 17px;
 }
+select{
+    height: 45px;
+    width: 100%;
+}
 .intro{
     padding-top: 40px;
     display: flex;
     place-content: center;
+}
+::placeholder{
+    color: #000000ae !important;
 }
 .intro h3{
     font-size: 25px;
@@ -47,7 +53,7 @@ form .btnSubmit, .finalStep .btnSubmit{
     width: 100%;
     height: 45px;
     margin-top: 10px;
-    padding: 7px;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
     transition: 0.4s ease-in-out;
@@ -79,8 +85,10 @@ form .btnSubmit, .finalStep .btnSubmit{
 }
 .backBtn{
     position: absolute;
-    top: 870px;
-    left: 17%;
+    top: 1000px;
+    margin-top: 20px;
+    text-align: center;
+    left: 23%;
     color: #ffffffc1;
     cursor: pointer;
 }
@@ -151,15 +159,14 @@ form .btnSubmit, .finalStep .btnSubmit{
 p{
     align-items: center;
 }
-@media (max-width: 830px) {
+@media (max-width: 600px) {
     .container{
         background-color: #0e2d4387;
         border-radius: 10px;
-        display: flex;
-        place-content: center;
         margin-top: 20px;
         padding: 10px 30px;
         padding-bottom: 60px;
+        width: 210px;
     }
     .intro h3{
         font-size: 7px;
@@ -171,19 +178,20 @@ p{
         color: #0e2d43;
         border: none;
         outline: none;
-        width: 95.5%;
+        width: 280px;
         height: 30px;
         padding: 7px;
         border-radius: 5px;
         margin-top: 10px;
         margin-bottom: 17px;
+        width: 210px;
     }
     form .btnSubmit, .finalStep .btnSubmit{
         padding: 7px;
         height: 45px;
         margin-top: 10px;
         border-radius: 5px;
-        
+        width: 100%;
     }
     .formGroup{
         flex-direction: column;
@@ -266,6 +274,7 @@ p{
         height: 50px;
     }
 }
+
 @media (width: 820px) {
     .hiddenBtn{
         background-color: transparent;
@@ -274,12 +283,41 @@ p{
         cursor: pointer;
         color: #ffffffc1;
     }
+    .container{
+        background-color: #0e2d4387;
+        border-radius: 10px;
+        margin-top: 20px;
+        padding: 10px 50px;
+        padding-bottom: 60px;
+        width: 600px;
+    }
+    form input, textarea{
+        background-color: #fff;
+        color: #0e2d43;
+        border: none;
+        outline: none;
+        height: 30px;
+        padding: 7px;
+        border-radius: 5px;
+        margin-top: 10px;
+        margin-bottom: 17px;
+        width: 600px;
+    }
+    form .btnSubmit, .finalStep .btnSubmit{
+        width: 610px;
+        height: 45px;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.4s ease-in-out;
+    }
 }
 @media (width: 1024px) {
     .hiddenBtn{
         background-color: transparent;
         position: static;
-        margin-left: 100%;
+        margin-left: 90%;
         cursor: pointer;
         color: #ffffffc1;
     }

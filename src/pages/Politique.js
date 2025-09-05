@@ -1,5 +1,4 @@
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import styles from './cgu.module.css';
 
 const Politique = () => {
@@ -7,7 +6,6 @@ const Politique = () => {
   return(
 
     <div className={styles.servicesPage} >
-        <Header/>
         <main>
             <div className={styles.cgu}>
                 <div>
