@@ -85,11 +85,15 @@ const DevisForm = ({showForm}) =>{
     };
     const showStepThree = (e)=>{
         e.preventDefault();
-        setStepOne(false);
-        setStepTwo(false);
-        setStepThree(true);
-        setFianalStep(false);
-        setOtpSystem(false);
+        if (categorie === '' || productQuantity === '') {
+            alert('Veillez remplir tous les champs !')
+        }else {
+            setStepOne(false);
+            setStepTwo(false);
+            setStepThree(true);
+            setFianalStep(false);
+            setOtpSystem(false);
+        }
     };
     const showFinalStep = (e)=>{
         e.preventDefault();
@@ -171,15 +175,7 @@ const DevisForm = ({showForm}) =>{
         
         
     }
-    if (categorie === '' || productQuantity === '') {
-            alert('Veillez remplir tous les champs !')
-    } else {
-            setStepOne(false);
-            setStepTwo(false);
-            setStepThree(true);
-            setFianalStep(false);
-            setOtpSystem(false);
-    }
+    
     const goBackStepOne = (e)=>{
         e.preventDefault();
         setStepOne(true);
