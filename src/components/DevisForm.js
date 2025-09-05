@@ -177,7 +177,9 @@ const DevisForm = ({showForm}) =>{
             setOtpSystem(false);
         } catch (error) {
             console.error('Erreur', error);
-            setIsError(true);
+            setTimeout(() => {
+                setIsError(true);
+            }, 3000);
 
             const message =
             error.response?.data?.message || 'Une erreur s’est produite. Veuillez réessayer.';
