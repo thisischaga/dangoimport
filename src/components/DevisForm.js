@@ -144,6 +144,13 @@ const DevisForm = ({showForm}) =>{
         try {
             const res = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', { userEmail, otp });
             setBackendMessage(res.data.message);
+            if (backendMessage) {
+                setStepOne(false);
+                setStepTwo(false);
+                setStepThree(false);
+                setFianalStep(false);
+                setOtpSystem(false);
+            }
         } catch (err) {
             setBackendMessage('OTP invalide ou expiré.');
         }
@@ -297,7 +304,7 @@ const DevisForm = ({showForm}) =>{
                         <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
                         <p style={{textAlign: 'center'}}>Un code a été envoyé à {userEmail}</p>
                         <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' style={{padding: '10px', width: '110px', 
-                            backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', color:'#fff'}} value={otp} onChange={handleOtpChange} required/></p>
+                            backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
                         <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
                         {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
                         <p>

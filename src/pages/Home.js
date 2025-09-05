@@ -62,8 +62,8 @@ const Home = ()=>{
                                     <h4>1- Vous nous contactez</h4>
                                     <p>
                                         Vous remplissez notre formulaire de devis 
-                                        ou nous écrivez sur WhatsApp et nous indiquez
-                                        les produits que vous souhaitez commander 
+                                        ou nous écrivez sur  <br/>WhatsApp et nous indiquez
+                                        les produits que vous souhaitez <br/>commander 
                                         (quantité, type, lien si possible).
                                     </p>
                                 </div>
@@ -74,7 +74,7 @@ const Home = ()=>{
                                     <h4>2- On vous envoie un devis clair</h4>
                                     <p>
                                         Nous analysons votre demande et nous vous envoyons
-                                        un devis personnalisé avec:
+                                        un devis <br/>personnalisé avec:
                                         <li>le coût du produit</li>
                                         <li>les frais de livraison</li>
                                         <li>les delais </li>

@@ -172,7 +172,7 @@
     border-radius: 30px;
 }
 
-@media (max-width: 600px){
+@media (max-width: 820px){
     .container{
         height: auto;
         padding-bottom: 40px;
@@ -270,7 +270,7 @@
         width: 100%;
     }
 }
-@media (width: 820px) {
+/*@media (width: 820px) {
   .headerIntro h2 { font-size: 28px; }
   .slideImage { height: 280px; width: 10px;}
   .sliderContainer { max-width: 20px; margin-top: 0; margin-right: 0px;}
@@ -286,4 +286,4 @@
         margin-left: 10px;
         width: 100%;
     }
-}
+}*/
