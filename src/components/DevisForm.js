@@ -103,7 +103,7 @@ const DevisForm = ({showForm}) =>{
         e.preventDefault();
         
         try {
-            const res = await axios.post('https://dangoimport-server.onrender.com//api/send-otp', { userEmail });
+            const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
             setIsLoading(true)
             if (res.data.message === 'otp envoyé') {
                 setStepOne(false);
@@ -142,7 +142,7 @@ const DevisForm = ({showForm}) =>{
     const handleSubmit = async (e)=>{
         e.preventDefault();
         try {
-            const res = await axios.post('https://dangoimport-server.onrender.com//api/verify-otp', { userEmail, otp });
+            const res = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', { userEmail, otp });
             setBackendMessage(res.data.message);
         } catch (err) {
             setBackendMessage('OTP invalide ou expiré.');
@@ -287,7 +287,7 @@ const DevisForm = ({showForm}) =>{
                         <p>Pays de livraison : {selectedCountry} </p>
                         <p>Photo du produit : </p>
                         <img src={picture} alt='product-picture' width={200} height={220} />
-                        {checked &&<button className={styles.btnSubmit} onClick={toOtpSystem}>{!isLoading?'ENVOYER': 'Envoi...'} </button>}
+                        {checked &&<button className={styles.btnSubmit} onClick={toOtpSystem}>{isLoading? 'Patientez...': 'ENVOYER'} </button>}
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
                             Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
