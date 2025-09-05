@@ -143,37 +143,49 @@ const DevisForm = ({showForm}) =>{
             console.log('Erreur', error)
         }
     }
-    const handleSubmit = async (e)=>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setIsLoading(true);
-            const res = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', { userEmail, otp });
-            setBackendMessage(res.data.message);
-            const response = await axios.post('https://dangoimport-server.onrender.com/commander', {
-                userName, userEmail, categorie, productQuantity, picture, selectedCountry, status
+
+            const otpResponse = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', {
+            userEmail,
+            otp,
             });
-            setBackendMessage(response.data.message);
-            if (backendMessage) {
-                setStepOne(false);
-                setStepTwo(false);
-                setStepThree(false);
-                setFianalStep(false);
-                setOtpSystem(false);
-            }
-            setIsSuccess(true);
-            setFianalStep(false);
-        } catch (error) {
+
+            if (otpResponse.data.message !== 'otp vérifié') {
             setBackendMessage('OTP invalide ou expiré.');
             setIsError(true);
-            setBackendMessage(error.response.data.message);
+            return; 
+            }
+
+            const commandeResponse = await axios.post('https://dangoimport-server.onrender.com/commander', {
+            userName,
+            userEmail,
+            categorie,
+            productQuantity,
+            picture,
+            selectedCountry,
+            status,
+            });
+
+            setBackendMessage(commandeResponse.data.message);
+            setIsSuccess(true);
+            setStepOne(false);
+            setStepTwo(false);
+            setStepThree(false);
             setFianalStep(false);
-            console.log('Erreur', error);
-        }finally {
-            setMessageBoxIs(true);
+            setOtpSystem(false);
+        } catch (error) {
+            console.error('Erreur', error);
+            setIsError(true);
+
+            const message =
+            error.response?.data?.message || 'Une erreur s’est produite. Veuillez réessayer.';
+            setBackendMessage(message);
+        } finally {
             setIsLoading(false);
-        } 
-        
-        
+            setMessageBoxIs(true);
+        }
     }
     
     const goBackStepOne = (e)=>{
