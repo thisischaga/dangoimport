@@ -142,8 +142,13 @@ const DevisForm = ({showForm}) =>{
     const handleSubmit = async (e)=>{
         e.preventDefault();
         try {
+            setIsLoading(true);
             const res = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', { userEmail, otp });
             setBackendMessage(res.data.message);
+            const response = await axios.post('https://dangoimport-server.onrender.com/commander', {
+                userName, userEmail, categorie, productQuantity, picture, selectedCountry, status
+            });
+            setBackendMessage(response.data.message);
             if (backendMessage) {
                 setStepOne(false);
                 setStepTwo(false);
@@ -151,31 +156,29 @@ const DevisForm = ({showForm}) =>{
                 setFianalStep(false);
                 setOtpSystem(false);
             }
-        } catch (err) {
+            setIsSuccess(true);
+            setFianalStep(false);
+        } catch (error) {
             setBackendMessage('OTP invalide ou expiré.');
-        }
-        if (categorie === '' || productQuantity === '') {
-            alert('Veillez remplir tous les champs !')
-        } else {
-            try {
-                setIsLoading(true);
-                const response = await axios.post('https://dangoimport-server.onrender.com/commander', {
-                    userName, userEmail, categorie, productQuantity, picture, selectedCountry, status
-                });
-                setBackendMessage(response.data.message);
-                setIsSuccess(true);
-                setFianalStep(false);
-            } catch (error) {
-                setIsError(true);
-                setBackendMessage(error.response.data.message);
-                setFianalStep(false);
-                console.log('Erreur', error);
-            } finally {
-                setMessageBoxIs(true);
-                setIsLoading(false);
-            } 
-        }
+            setIsError(true);
+            setBackendMessage(error.response.data.message);
+            setFianalStep(false);
+            console.log('Erreur', error);
+        }finally {
+            setMessageBoxIs(true);
+            setIsLoading(false);
+        } 
         
+        
+    }
+    if (categorie === '' || productQuantity === '') {
+            alert('Veillez remplir tous les champs !')
+    } else {
+            setStepOne(false);
+            setStepTwo(false);
+            setStepThree(true);
+            setFianalStep(false);
+            setOtpSystem(false);
     }
     const goBackStepOne = (e)=>{
         e.preventDefault();
@@ -303,8 +306,11 @@ const DevisForm = ({showForm}) =>{
                     <div className={otpSystem?styles.finalStep: 'hidden'}>
                         <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
                         <p style={{textAlign: 'center'}}>Un code a été envoyé à {userEmail}</p>
-                        <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' style={{padding: '10px', width: '110px', 
-                            backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
+                        <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' 
+                            style={{padding: '10px', width: '110px', 
+                            backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
+                            color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} 
+                            value={otp} onChange={handleOtpChange} required/></p>
                         <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
                         {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
                         <p>
