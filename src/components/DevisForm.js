@@ -16,6 +16,7 @@ const DevisForm = ({ showForm }) => {
   const [categorie, setCategorie] = useState('');
   const [productQuantity, setProductQuantity] = useState('');
   const [picture, setPicture] = useState(null);
+  const [productDescription, setProductDescription] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [otp, setOtp] = useState('');
   const [checked, setChecked] = useState(true);
@@ -33,6 +34,7 @@ const DevisForm = ({ showForm }) => {
   const handleUserNameChange = (e) => setUserName(e.target.value);
   const handleUserEmailChange = (e) => setUserEmail(e.target.value);
   const handleCatChange = (e) => setCategorie(e.target.value);
+  const handleDescptChange= (e) => setProductDescription(e.target.value);
   const handlePqChange = (e) => setProductQuantity(e.target.value);
   const handleCountryChange = (e) => setSelectedCountry(e.target.value);
   const handleOtpChange = (e) => setOtp(e.target.value);
@@ -122,6 +124,7 @@ const DevisForm = ({ showForm }) => {
         categorie,
         productQuantity,
         picture,
+        productDescription,
         selectedCountry,
         status,
       });
@@ -149,7 +152,7 @@ const DevisForm = ({ showForm }) => {
     step();
   };
 
-  const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport'];
+  const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Beauté', 'Autres(présisez le dans la description)'];
 
   return (
     <main>
@@ -211,10 +214,11 @@ const DevisForm = ({ showForm }) => {
           {stepThree && (
             <form>
               <button className={styles.backBtn} onClick={goBackStep(() => setStepTwo(true))}>Précédent</button>
-              <label>Ajouter une image :</label>
+              <label>Ajouter une image <span>*</span>:</label>
               <input type='file' accept='image/*' onChange={handlePictureChange} />
               {picture && <img src={picture} alt="Produit" width={200} height={220}/>}
-
+               <label>Description du produit<span>*</span> :</label>
+                <textArea placeholder='Décrivez votre produit...' style={{height:'80px'}} onChange={handleDescptChange} value={productDescription} />
               <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
             </form>
           )}
@@ -240,7 +244,7 @@ const DevisForm = ({ showForm }) => {
           {otpSystem && (
             <div className={styles.finalStep}>
               <p>Un code a été envoyé à {userEmail}</p>
-              <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' style={{padding: '10px', width: '160px', 
+              <p style={{textAlign: 'center'}}><input type='number' maxLength={6} placeholder='* * * * * *' style={{padding: '10px', width: '160px', 
                 backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
                 color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
               <p>
