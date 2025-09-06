@@ -124,11 +124,15 @@ form .btnSubmit, .finalStep .btnSubmit{
 .pictureManager input{
   display: none;
 }
-.pictureManager label{
-  background-color: rgba(0, 102, 255, 0.589);
+.pictureBox{
+    margin: 80px;
+}
+.pictureManager .pictureBox label{
+  /*background-color: rgba(0, 102, 255, 0.589);*/
   cursor: pointer;
   margin: 10px;
-  padding: 18px;
+  padding: 80px;
+  border: 2px dashed rgba(0, 102, 255, 0.589);
   color: #fff;
   border-radius: 5px;
 }

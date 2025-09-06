@@ -28,6 +28,7 @@ const DevisForm = ({showForm}) =>{
     const [isSuccess, setIsSuccess] = useState(null);
     const [isError, setIsError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [hideBtn, setHideBtn] = useState(false);
 
     const [selectedCountry, setSelectedCountry] = useState('');
     const benin = 'Bénin'; 
@@ -105,10 +106,11 @@ const DevisForm = ({showForm}) =>{
     }
     const toOtpSystem = async(e)=>{
         e.preventDefault();
-        
+        //setIsLoading(true);
+        setHideBtn(true);
         try {
+            
             const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
-            setIsLoading(true)
             if (res.data.message === 'otp envoyé') {
                 setStepOne(false);
                 setStepTwo(false);
@@ -148,24 +150,24 @@ const DevisForm = ({showForm}) =>{
         try {
 
             const otpResponse = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', {
-            userEmail,
-            otp,
+                userEmail,
+                otp,
             });
 
             if (otpResponse.data.message !== 'otp vérifié') {
-            setBackendMessage('OTP invalide ou expiré.');
-            setIsError(true);
+                setBackendMessage('OTP invalide ou expiré.');
+                setIsError(true);
             return; 
             }
 
             const commandeResponse = await axios.post('https://dangoimport-server.onrender.com/commander', {
-            userName,
-            userEmail,
-            categorie,
-            productQuantity,
-            picture,
-            selectedCountry,
-            status,
+                userName,
+                userEmail,
+                categorie,
+                productQuantity,
+                picture,
+                selectedCountry,
+                status,
             });
 
             setBackendMessage(commandeResponse.data.message);
@@ -284,7 +286,9 @@ const DevisForm = ({showForm}) =>{
                             <div className={styles.flex}>
                                 {!picture && <div>
                                     <input type='file' accept='image/*' id='file' onChange={handlePictureChange} required/>
-                                    <label htmlFor='file'>{picture? 'Changer la photo':'Ajouter une photo'}</label>
+                                    <div  className={styles.pictureBox}>
+                                        <label htmlFor='file'>{picture? 'Changer la photo':'Ajouter une photo'}</label>
+                                    </div>
                                 </div>}
                                 {picture && <div>
                                     <img src={picture} alt='product-picture'/>
@@ -317,12 +321,12 @@ const DevisForm = ({showForm}) =>{
                         <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
                         <p style={{textAlign: 'center'}}>Un code a été envoyé à {userEmail}</p>
                         <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' 
-                            style={{padding: '10px', width: '110px', 
+                            style={{padding: '10px', width: '160px', 
                             backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
                             color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} 
                             value={otp} onChange={handleOtpChange} required/></p>
                         <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
-                        {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
+                        {hideBtn === false &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
                             Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
