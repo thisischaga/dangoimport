@@ -87,7 +87,7 @@ const DevisForm = ({ showForm }) => {
     setHideBtn(true);
     try {
       const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
-      if (res.data.message === 'otp envoyé') {
+      if (res.data.message === 'OTP envoyé avec succès') {
         setFinalStep(false);
         setOtpSystem(true);
       }
