@@ -109,7 +109,7 @@ const DevisForm = ({ showForm }) => {
         otp,
       });
 
-      if (otpResponse.data.message !== 'otp vérifié') {
+      if (otpResponse.data.message !== 'OTP vérifié avec succès !') {
         setBackendMessage('OTP invalide ou expiré.');
         setIsError(true);
         setMessageBoxIs(true);
@@ -240,14 +240,9 @@ const DevisForm = ({ showForm }) => {
           {otpSystem && (
             <div className={styles.finalStep}>
               <p>Un code a été envoyé à {userEmail}</p>
-              <input
-                type='text'
-                maxLength={6}
-                placeholder='Code à 6 chiffres'
-                value={otp}
-                onChange={handleOtpChange}
-                className={styles.otpInput}
-              />
+              <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' style={{padding: '10px', width: '160px', 
+                backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
+                color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
               <p>
                 <input type='checkbox' checked={checked} onChange={toggleCheck} />
                 J'ai lu et j’accepte les <a href='/cgu'>conditions générales d'utilisation</a>
