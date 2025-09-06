@@ -183,16 +183,6 @@ const DevisForm = ({ showForm }) => {
                     </div> 
                 </div> 
               </div>
-              <div className={styles.radios}>
-                <label>
-                  <input type='radio' value={benin} checked={selectedCountry === benin} onChange={handleCountryChange} />
-                  Bénin
-                </label>
-                <label>
-                  <input type='radio' value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} />
-                  Togo
-                </label>
-              </div>
 
               <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
             </form>
