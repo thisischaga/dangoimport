@@ -311,7 +311,7 @@ const DevisForm = ({showForm}) =>{
                         <p>Pays de livraison : {selectedCountry} </p>
                         <p>Photo du produit : </p>
                         <img src={picture} alt='product-picture' width={200} height={220} />
-                        {checked &&<button className={styles.btnSubmit} onClick={toOtpSystem}>{isLoading? 'Patientez...': 'ENVOYER'} </button>}
+                        {hideBtn === false  &&<button className={styles.btnSubmit} onClick={toOtpSystem}>{isLoading? 'Patientez...': 'ENVOYER'} </button>}
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
                             Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
@@ -326,7 +326,7 @@ const DevisForm = ({showForm}) =>{
                             color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} 
                             value={otp} onChange={handleOtpChange} required/></p>
                         <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
-                        {hideBtn === false &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
+                        {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
                         <p>
                             Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
                             Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
