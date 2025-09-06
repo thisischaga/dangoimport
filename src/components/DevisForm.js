@@ -172,7 +172,17 @@ const DevisForm = ({ showForm }) => {
               <input type='text' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} />
               <label>Email <span>*</span></label>
               <input type='email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} />
-
+              <div > 
+                <div className={styles.radios}> 
+                    <div className={styles.radiosContainer}> 
+                        <input type='radio' className={styles.radioInput} value={benin} checked={selectedCountry === benin} onChange={handleCountryChange}/> 
+                        <label>Bénin </label><br/> 
+                    </div> <div className={styles.radiosContainer}> 
+                        <input type='radio' className={styles.radioInput} value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} /> 
+                        <label>Togo</label><br/> 
+                    </div> 
+                </div> 
+              </div>
               <div className={styles.radios}>
                 <label>
                   <input type='radio' value={benin} checked={selectedCountry === benin} onChange={handleCountryChange} />
