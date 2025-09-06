@@ -256,7 +256,7 @@ p{
         height: 150px;
     }
     .pictureManager label{
-        width: 100%;
+        padding: 20px 0;
         position: relative;
         top: 20px;
         bottom: 20px;
