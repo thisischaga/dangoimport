@@ -213,7 +213,7 @@ const DevisForm = ({ showForm }) => {
               <button className={styles.backBtn} onClick={goBackStep(() => setStepTwo(true))}>Précédent</button>
               <label>Ajouter une image :</label>
               <input type='file' accept='image/*' onChange={handlePictureChange} />
-              {picture && <img src={picture} alt="Produit" width={200} />}
+              {picture && <img src={picture} alt="Produit" width={200} height={300}/>}
 
               <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
             </form>
@@ -229,7 +229,7 @@ const DevisForm = ({ showForm }) => {
               <p><strong>Catégorie :</strong> {categorie}</p>
               <p><strong>Quantité :</strong> {productQuantity}</p>
               <p><strong>Pays :</strong> {selectedCountry}</p>
-              {picture && <img src={picture} alt="Produit" width={200} />}
+              {picture && <img src={picture} alt="Produit" width={200} height={300}/>}
               <button disabled={hideBtn} className={styles.btnSubmit} onClick={toOtpSystem}>
                 {isLoading ? 'Patientez...' : 'ENVOYER'}
               </button>
