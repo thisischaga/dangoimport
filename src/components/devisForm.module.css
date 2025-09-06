@@ -255,6 +255,9 @@ p{
         width: 150px;
         height: 150px;
     }
+    .pictureBox{
+        margin: 40px 0;
+    }
     .pictureManager label{
         padding: 20px 0;
         position: relative;
