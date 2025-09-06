@@ -125,7 +125,7 @@ form .btnSubmit, .finalStep .btnSubmit{
   display: none;
 }
 .pictureBox{
-    margin: 80px;
+    margin: 80px 0;
 }
 .pictureManager .pictureBox label{
   /*background-color: rgba(0, 102, 255, 0.589);*/
@@ -133,7 +133,7 @@ form .btnSubmit, .finalStep .btnSubmit{
   margin: 10px;
   padding: 80px;
   border: 2px dashed rgba(0, 102, 255, 0.589);
-  color: #fff;
+  color: #ffffff61;
   border-radius: 5px;
 }
 .finalStep h3{
@@ -256,12 +256,10 @@ p{
         height: 150px;
     }
     .pictureManager label{
-        background-color: rgba(0, 102, 255, 0.589);
         width: 100%;
         position: relative;
         top: 20px;
         bottom: 20px;
-        color: #fff;
         border-radius: 5px;
     }
 
