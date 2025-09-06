@@ -109,7 +109,7 @@ const DevisForm = ({ showForm }) => {
         otp,
       });
 
-      if (otpResponse.data.message !== 'OTP vérifié avec succès !') {
+      if (otpResponse.data.message !== 'OTP vérifié avec succès') {
         setBackendMessage('OTP invalide ou expiré.');
         setIsError(true);
         setMessageBoxIs(true);
