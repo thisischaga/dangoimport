@@ -10,6 +10,8 @@ const AdminLogin = () => {
     const [adminName, setAdminName] = useState('');
     const [adminPassword, setAdminPassword] = useState('');
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleAdminNameChange = (e)=>{
         setAdminName(e.target.value);
     };
@@ -18,6 +20,7 @@ const AdminLogin = () => {
     }
     const hanndleSubmit = async(e)=>{
         e.preventDefault();
+        setIsLoading(true);
         try {
             const response = await axios.post('https://dangoimport-server.onrender.com/login', {
                 adminName, adminPassword
@@ -46,7 +49,7 @@ const AdminLogin = () => {
                         <form>
                             <p><input type='text' name='adminName' placeholder='Admin name' onChange={handleAdminNameChange} value={adminName}/></p>
                             <p><input type='password' name='password' placeholder='Mot de passe' onChange={handleUserPasswordChange} value={adminPassword}/></p>
-                            <p><button className={styles.btnSubmit} onClick={hanndleSubmit}>SE CONNECTER</button></p>
+                            <p><button className={styles.btnSubmit} onClick={hanndleSubmit}>{isLoading? 'CONNEXION...': 'SE CONNECTER'}</button></p>
                         </form>
                     </div>
                 </div>
