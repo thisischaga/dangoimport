@@ -1,134 +1,186 @@
-.container{
-    background-color: #0e2d4387;
-    border-radius: 10px;
-    margin-top: 20px;
-    padding: 10px 30px;
-    padding-bottom: 60px;
-    width: 100%;
+/* === Container général === */
+.container {
+  background-color: #0e2d4387;
+  border-radius: 10px;
+  margin-top: 20px;
+  padding: 10px 30px 60px;
+  width: 100%;
 }
-form input, textarea, select{
-    background-color: #fff;
-    color: #0e2d43;
-    border: none;
-    outline: none;
-    box-sizing: border-box;
-    width: 100%;
-    height: 50px;
-    padding: 7px;
-    border-radius: 5px;
-    margin-top: 10px;
-    margin-bottom: 17px;
+
+/* === Formulaires === */
+form input,
+textarea,
+select {
+  background-color: #fff;
+  color: #0e2d43;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  padding: 7px;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 17px;
 }
-select{
-    height: 45px;
-    width: 100%;
+
+select {
+  height: 45px;
 }
-.intro{
-    padding-top: 40px;
-    display: flex;
-    place-content: center;
+
+textarea {
+  height: 60px;
 }
-::placeholder{
-    color: #000000ae !important;
+
+::placeholder {
+  color: #000000ae !important;
 }
-.intro h3{
-    font-size: 25px;
+
+form span {
+  color: red;
 }
-.intro p{
-    text-align: center;
+
+/* === Boutons === */
+.btnSubmit,
+.finalStep .btnSubmit {
+  width: 100%;
+  height: 45px;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.4s ease-in-out;
 }
-.formGroup{
-    display: flex;
-    place-content: center;
-    gap: 10px;
-    width: 700px;
-    padding-top: 20px;
+
+.backBtn {
+  background-color: #fff;
+  color: #000;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
 }
-form span{
-    color: red;
-}
-textarea{
-    height: 60px;
-}
-form .btnSubmit, .finalStep .btnSubmit{
-    width: 100%;
-    height: 45px;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.4s ease-in-out;
-}
-.container p, label{
-    font-size: 14px;
-    line-height: 20px;
-    color: #ffffff87;
-}
-.container label{
-    font-weight: bold;
-}
-.container .intro h3{
-    color: rgb(36, 123, 181);
-}
-.hiddenBtn{
-    background-color: transparent;
-    position: static;
-    text-align: right;
-    margin: 0;
-    margin-top: 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #ffffffc1;
-}
-.hiddenBtn:hover{
-    background-color: transparent;
-    color: #ffffff7b;
-}
-.backBtn{
-    position: absolute;
-    top: 1000px;
-    margin-top: 20px;
-    text-align: center;
-    left: 23%;
-    color: #ffffffc1;
-    cursor: pointer;
-}
-.imageInput{
-    display: none;
-}
-.imgBtn{
-    padding: 15px;
-    margin-top: 10px;
-    width: 700px;
-    text-align: center;
-    background-color: #fff;
-    color: #0e2d43a4;
-}
-.flex{
-    display: flex;
-    place-content: center;
-}
-.profilePicture{
+
+/* === Intro === */
+.intro {
+  padding-top: 40px;
   display: flex;
-  place-content: center;
-  margin-top: 40px;
+  flex-direction: column;
+  align-items: center;
 }
-.pictureManager{
+
+.intro h3 {
+  font-size: 25px;
+  color: rgb(36, 123, 181);
+  text-align: center;
+}
+
+.intro p {
+  text-align: center;
+}
+
+/* === Form Group === */
+.formGroup {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 700px;
+  padding-top: 20px;
+}
+
+/* === Messages, textes, labels === */
+.container p,
+.container label {
+  font-size: 14px;
+  line-height: 20px;
+  color: #ffffff87;
+}
+
+.container label {
+  font-weight: bold;
+}
+
+/* === Bouton fermer === */
+.hiddenBtn {
+  background-color: transparent;
+  text-align: right;
+  margin-top: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #ffffffc1;
+}
+
+.hiddenBtn:hover {
+  color: #ffffff7b;
+}
+
+/* === Radio Buttons === */
+.radios {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.radioInput {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.radiosContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 0 20px;
+}
+
+/* === Images / Upload === */
+.imageInput {
+  display: none;
+}
+
+.imgBtn {
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+  background-color: #fff;
+  color: #0e2d43a4;
+}
+
+.profilePicture {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pictureManager {
   margin-bottom: 20px;
 }
-.pictureManager img{
+
+.pictureManager img {
   border: 2px solid #0e2d43a4;
   width: 250px;
   height: 250px;
+  object-fit: cover;
 }
-.pictureManager input{
+
+.pictureManager input {
   display: none;
 }
-.pictureBox{
-    margin: 80px 0;
+
+.pictureBox {
+  margin: 40px 0;
 }
-.pictureManager .pictureBox label{
-  /*background-color: rgba(0, 102, 255, 0.589);*/
+
+.pictureManager .pictureBox label {
   cursor: pointer;
   margin: 10px;
   padding: 80px;
@@ -136,195 +188,88 @@ form .btnSubmit, .finalStep .btnSubmit{
   color: #ffffff61;
   border-radius: 5px;
 }
-.finalStep h3{
-    text-align: center;
+
+/* === Étape finale / Message === */
+.finalStep h3 {
+  text-align: center;
 }
-.messageBox p{
-    text-align: center;
+
+.messageBox {
+  background-color: #0e2d4387;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 20px;
 }
-.radios{
-    display: flex;
-    place-content: center;
-    align-items: center;
-    gap: 10px;
+
+.messageBox h3 {
+  color: #fff;
+  font-size: 18px;
 }
-.radioInput{
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    background-color: transparent;
+
+.messageBox p {
+  font-size: 14px;
 }
-.radiosContainer{
-    display: flex;
-    place-content: center;
-    align-items: center;
-    gap: 10px;
-    margin: 0 20px;
-}
-p{
-    align-items: center;
-}
+
+/* === Responsive === */
 @media (max-width: 820px) {
-    .container{
-        background-color: #0e2d4387;
-        border-radius: 10px;
-        margin-top: 20px;
-        padding: 10px 10px;
-        padding-bottom: 60px;
-        width: 100%;
-    }
-    .intro h3{
-        font-size: 7px;
-        color: red;
-        text-align: center;
-    }
-    form input, textarea{
-        background-color: #fff;
-        color: #0e2d43;
-        border: none;
-        outline: none;
-        height: 50px;
-        padding: 7px;
-        border-radius: 5px;
-        margin-top: 10px;
-        margin-bottom: 17px;
-        width: 210px;
-        width: 100%;
-    }
-    form .btnSubmit, .finalStep .btnSubmit{
-        padding: 7px;
-        height: 45px;
-        margin-top: 10px;
-        border-radius: 5px;
-        width: 100%;
-    }
-    .formGroup{
-        flex-direction: column;
-        width: 320px;
-        width: 100%;
-        place-content: center;
-        align-items: center;
-    }
-    .hiddenBtn{
-        background-color: transparent;
-        position: static;
-        cursor: pointer;
-        color: #ffffffc1;
-        text-align: right;
-    }
-    .backBtn{
-        position: static;
-        text-align: center;
-        color: #000;
-        background-color: #fff;
-        border-radius: 5px;
-        border-bottom: 10px;
-        width: 100%;
-        margin-bottom: 10px;
-        margin-top: 20px;
-    }
-    .radiosContainer{
-        margin: 0;
-    }
-    .pictureManager img{
-        width: 200px;
-        height: 200px;
-    }
-    .container p, label{
-        font-size: 12px;
-    }
-    .container .intro h3{
-        font-size: 16px;
-    }
-    form .btnSubmit, .finalStep .btnSubmit{
-        width: 100%;
-        margin-top: 20px;
-    }
-    .profilePicture{
-        flex-direction: column;
-        align-items: center;
-    }
-    .profilePicture img{
-        width: 200px;
-        height: 200px;
-    }
-    .profilePicture .pictureManager{
-        margin-bottom: 20px;
-    }
-    .profilePicture .pictureManager img{
-        width: 150px;
-        height: 150px;
-    }
-    .pictureBox{
-        margin: 40px 0;
-    }
-    .pictureManager label{
-        padding: 20px 0;
-        position: relative;
-        top: 20px;
-        bottom: 20px;
-        border-radius: 5px;
-    }
+  .container {
+    padding: 10px;
+  }
 
-    .messageBox p{
-        font-size: 14px;
-    }
+  .intro h3 {
+    font-size: 16px;
+  }
 
-    .messageBox{
-        width: 100%;
-        padding: 10px;
-        background-color: #0e2d4387;
-        border-radius: 10px;
-    }
-    textarea{
-        height: 50px;
-    }
+  .formGroup {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
+
+  .backBtn {
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  form input,
+  textarea,
+  select {
+    width: 100%;
+    height: 45px;
+  }
+
+  .btnSubmit,
+  .finalStep .btnSubmit {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .pictureManager img {
+    width: 200px;
+    height: 200px;
+  }
+
+  .profilePicture img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .pictureManager .pictureBox label {
+    padding: 40px;
+  }
+
+  .messageBox {
+    padding: 10px;
+  }
+
+  .messageBox p {
+    font-size: 13px;
+  }
 }
 
-/*@media (width: 820px) {
-    .hiddenBtn{
-        background-color: transparent;
-        position: static;
-        margin-left: 90%;
-        cursor: pointer;
-        color: #ffffffc1;
-    }
-    .container{
-        background-color: #0e2d4387;
-        border-radius: 10px;
-        margin-top: 20px;
-        padding: 10px 50px;
-        padding-bottom: 60px;
-        width: 600px;
-    }
-    form input, textarea{
-        background-color: #fff;
-        color: #0e2d43;
-        border: none;
-        outline: none;
-        height: 30px;
-        padding: 7px;
-        border-radius: 5px;
-        margin-top: 10px;
-        margin-bottom: 17px;
-        width: 600px;
-    }
-    form .btnSubmit, .finalStep .btnSubmit{
-        width: 610px;
-        height: 45px;
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: 0.4s ease-in-out;
-    }
-}*/
-@media (width: 1024px) {
-    .hiddenBtn{
-        background-color: transparent;
-        position: static;
-        margin-left: 90%;
-        cursor: pointer;
-        color: #ffffffc1;
-    }
+@media (min-width: 1024px) {
+  .hiddenBtn {
+    margin-left: 90%;
+  }
 }

@@ -1,347 +1,277 @@
 import { useState } from 'react';
-import styles from './devisForm.module.css'
-//import { useNavigate } from 'react-router-dom';
+import styles from './devisForm.module.css';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import axios from 'axios';
 
-const DevisForm = ({showForm}) =>{
+const DevisForm = ({ showForm }) => {
+  const [stepOne, setStepOne] = useState(true);
+  const [stepTwo, setStepTwo] = useState(false);
+  const [stepThree, setStepThree] = useState(false);
+  const [finalStep, setFinalStep] = useState(false);
+  const [otpSystem, setOtpSystem] = useState(false);
+  const [messageBoxIs, setMessageBoxIs] = useState(false);
 
-    //const navigate = useNavigate()
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [categorie, setCategorie] = useState('');
+  const [productQuantity, setProductQuantity] = useState('');
+  const [picture, setPicture] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [otp, setOtp] = useState('');
+  const [checked, setChecked] = useState(true);
 
-    const [setpOne, setStepOne] = useState(true);
-    const [setpTwo, setStepTwo] = useState(false);
-    const [setpThree, setStepThree] = useState(false);
-    const [finalStep, setFianalStep] = useState(false);
-    const [otpSystem, setOtpSystem] = useState(false);
-    const [messageBoxIs, setMessageBoxIs] = useState(false);
+  const [backendMessage, setBackendMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(null);
+  const [isError, setIsError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hideBtn, setHideBtn] = useState(false);
 
-    const [userName, setUserName] = useState('');
-    const [userEmail, setUserEmail] = useState('');
-    const [categorie, setCategorie] = useState('');
-    const [productQuantity, setProductQuantity] = useState('');
-    const [picture, setPicture] = useState(null);
-    let status = 'En attente';
+  const status = 'En attente';
+  const benin = 'Bénin';
+  const togo = 'Togo';
 
-   
-    
-    const [backendMessage, setBackendMessage] = useState('');
-    const [isSuccess, setIsSuccess] = useState(null);
-    const [isError, setIsError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [hideBtn, setHideBtn] = useState(false);
+  const handleUserNameChange = (e) => setUserName(e.target.value);
+  const handleUserEmailChange = (e) => setUserEmail(e.target.value);
+  const handleCatChange = (e) => setCategorie(e.target.value);
+  const handlePqChange = (e) => setProductQuantity(e.target.value);
+  const handleCountryChange = (e) => setSelectedCountry(e.target.value);
+  const handleOtpChange = (e) => setOtp(e.target.value);
+  const toggleCheck = () => setChecked(!checked);
 
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const benin = 'Bénin'; 
-    const togo = 'Togo';
-
-    const [checked, setChecked] = useState(true);
-
-    const toggleCheck = ()=>{
-        setChecked(!checked);
-        
-    };
-    const handleCountryChange = (e) => {
-        setSelectedCountry(e.target.value);
-    };
-    const hiddeForm = ()=>{
-        showForm(false);
-        window.location.reload();
+  const handlePictureChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setPicture(reader.result);
+      reader.readAsDataURL(file);
     }
-    const handleUserNameChange = (e)=>{
-        setUserName(e.target.value);
-    };
-    const handleUserEmailChange = (e)=>{
-        setUserEmail(e.target.value);
-    }
-    const categories = [
-        'Électronique',
-        'Vêtements',
-        'Alimentation',
-        'Maison',
-        'Sport',
-    ];
+  };
 
-    const handleCatChange = (e) => {
-        setCategorie(e.target.value);
-        console.log(categorie);
-    };
-    const handlePqChange = (e)=>{
-        setProductQuantity(e.target.value);
-    }
-    const showStepTwo = (e)=>{
-        const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        e.preventDefault();
-        if (userName === '' || userEmail === '') {
-            alert('Veillez remplir tous les champs !')
-        }else if (!emailValidate.test(userEmail)) {
-            alert('Entrez un email valide');
-        }else{
-            setStepOne(false);
-            setStepTwo(true);
-            setStepThree(false);
-            setFianalStep(false);
-            setOtpSystem(false);
-        }
-    };
-    const showStepThree = (e)=>{
-        e.preventDefault();
-        if (categorie === '' || productQuantity === '') {
-            alert('Veillez remplir tous les champs !')
-        }else {
-            setStepOne(false);
-            setStepTwo(false);
-            setStepThree(true);
-            setFianalStep(false);
-            setOtpSystem(false);
-        }
-    };
-    const showFinalStep = (e)=>{
-        e.preventDefault();
-        setStepOne(false);
-        setStepTwo(false);
-        setStepThree(false);
-        setFianalStep(true);
-        setOtpSystem(false);
-    }
-    const toOtpSystem = async(e)=>{
-        e.preventDefault();
-        //setIsLoading(true);
-        setHideBtn(true);
-        try {
-            
-            const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
-            if (res.data.message === 'otp envoyé') {
-                setStepOne(false);
-                setStepTwo(false);
-                setStepThree(false);
-                setFianalStep(false);
-                setOtpSystem(true);
-            }
-            
-            setBackendMessage(res.data.message);
-        } catch (err) {
-            setBackendMessage('Erreur lors de l’envoi de l’OTP');
-        } finally{
-            setIsLoading(false)
-        }
-    }
-    const [otp, setOtp] = useState('');
-    const handleOtpChange = (e)=>{
-        setOtp(e.target.value);
-    }
+  const hiddeForm = () => {
+    showForm(false);
+    window.location.reload();
+  };
 
-    const handlePictureChange = (e)=>{
-        try{ 
-        const file = e.target.files?.[0];
-        if(file){
-            const reader = new FileReader();
-            reader.onload = ()=>{
-            setPicture(reader.result);
-            }
-            reader.readAsDataURL(file);
-        }
-        }catch(error){
-            console.log('Erreur', error)
-        }
+  const showStepTwo = (e) => {
+    e.preventDefault();
+    const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!userName || !userEmail) {
+      alert('Veuillez remplir tous les champs !');
+    } else if (!emailValidate.test(userEmail)) {
+      alert('Entrez un email valide');
+    } else {
+      setStepOne(false);
+      setStepTwo(true);
     }
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
+  };
 
-            const otpResponse = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', {
-                userEmail,
-                otp,
-            });
-
-            if (otpResponse.data.message !== 'otp vérifié') {
-                setBackendMessage('OTP invalide ou expiré.');
-                setIsError(true);
-            return; 
-            }
-
-            const commandeResponse = await axios.post('https://dangoimport-server.onrender.com/commander', {
-                userName,
-                userEmail,
-                categorie,
-                productQuantity,
-                picture,
-                selectedCountry,
-                status,
-            });
-
-            setBackendMessage(commandeResponse.data.message);
-            setIsSuccess(true);
-            setStepOne(false);
-            setStepTwo(false);
-            setStepThree(false);
-            setFianalStep(false);
-            setOtpSystem(false);
-        } catch (error) {
-            console.error('Erreur', error);
-            setTimeout(() => {
-                setIsError(true);
-            }, 3000);
-
-            const message =
-            error.response?.data?.message || 'Une erreur s’est produite. Veuillez réessayer.';
-            setBackendMessage(message);
-        } finally {
-            setIsLoading(false);
-            setMessageBoxIs(true);
-        }
+  const showStepThree = (e) => {
+    e.preventDefault();
+    if (!categorie || !productQuantity) {
+      alert('Veuillez remplir tous les champs !');
+    } else {
+      setStepTwo(false);
+      setStepThree(true);
     }
-    
-    const goBackStepOne = (e)=>{
-        e.preventDefault();
-        setStepOne(true);
-        setStepTwo(false);
-        setStepThree(false);
-        setFianalStep(false);
-    };
-    const goBackStepTwo = (e)=>{
-        e.preventDefault();
-        setStepOne(false);
-        setStepTwo(true);
-        setStepThree(false);
-        setFianalStep(false)
+  };
+
+  const showFinalStep = (e) => {
+    e.preventDefault();
+    setStepThree(false);
+    setFinalStep(true);
+  };
+
+  const toOtpSystem = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setHideBtn(true);
+    try {
+      const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
+      if (res.data.message === 'otp envoyé') {
+        setFinalStep(false);
+        setOtpSystem(true);
+      }
+      setBackendMessage(res.data.message);
+    } catch (err) {
+      setBackendMessage('Erreur lors de l’envoi de l’OTP');
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
     }
-    const goBackStepThree = (e)=>{
-        e.preventDefault();
-        setStepOne(false);
-        setStepTwo(false);
-        setStepThree(true);
-        setFianalStep(false)
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const otpResponse = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', {
+        userEmail,
+        otp,
+      });
+
+      if (otpResponse.data.message !== 'otp vérifié') {
+        setBackendMessage('OTP invalide ou expiré.');
+        setIsError(true);
+        setMessageBoxIs(true);
+        return;
+      }
+
+      const commandeResponse = await axios.post('https://dangoimport-server.onrender.com/commander', {
+        userName,
+        userEmail,
+        categorie,
+        productQuantity,
+        picture,
+        selectedCountry,
+        status,
+      });
+
+      setBackendMessage(commandeResponse.data.message);
+      setIsSuccess(true);
+      setOtpSystem(false);
+    } catch (error) {
+      const message = error.response?.data?.message || 'Une erreur s’est produite. Veuillez réessayer.';
+      setBackendMessage(message);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+      setMessageBoxIs(true);
     }
-    
-    return(
-        <main >
-            
-            <div className={styles.container}>
-                <h5 className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</h5>
-                <div  className={!finalStep || backendMessage? styles.intro: 'hidden'}>
-                    <div >
-                        <h3 className={backendMessage || otpSystem? 'hidden': ''}>Vous souhaitez commander un article depuis la Chine?</h3>
-                        <p className={backendMessage || otpSystem? 'hidden':''}>
-                            Remplissez le formulaire ci-dessous avec les détails de votre commande.
-                        </p>
-                    </div>
-                </div>
-                <div className={styles.formGroup}>
-                    <form className={setpOne?'': 'hidden'}> 
-                        <label>Nom <span>*</span></label><br/>
-                        <input type='text' name='user_name' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} required/><br/>
-                        <label>Addresse E-mail <span>*</span></label><br/>
-                        <input type='email' name='Email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} required/><br/>
-                        <div >
-                            <div className={styles.radios}> 
-                                <div className={styles.radiosContainer}>
-                                    <input type='radio'  className={styles.radioInput} value={benin} checked={selectedCountry === benin} onChange={handleCountryChange}/>
-                                    <label>Bénin </label><br/>
-                                </div>
-                                <div className={styles.radiosContainer}>                            
-                                    <input type='radio' className={styles.radioInput}  value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} />
-                                    <label>Togo</label><br/>
-                                </div>
-                            </div>
-                        </div>
-                        <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
-                        <p>
-                            Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
-                        </p>
-                    </form>
-                    <form className={setpTwo?'': 'hidden'}>
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepOne}>Précédent</button>
-                        <div>
-                            <label htmlFor="categorie" style={{ fontWeight: 'bold' }}>
-                                Choisissez une catégorie de produit :
-                            </label>
-                            <br />
-                            <select
-                                id="categorie"
-                                value={categorie}
-                                onChange={handleCatChange}
-                            >
-                                <option value="">Sélectionnez une catégorie</option>
-                                {categories.map((cat, index) => (
-                                <option key={index} value={cat}>
-                                    {cat}
-                                </option>
-                                ))}
-                            </select>
-                        </div>
-                        <label>Quantité du produit <span>*</span></label><br/>
-                        <input type='number'  name='product_quantity' placeholder='Le nombre de produit...' onChange={handlePqChange} value={productQuantity} /><br/>
-                        
-                        <button className={styles.btnSubmit} onClick={showStepThree}>SUIVANT</button>
-                        <p>
-                            Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
-                        </p>
-                    </form>
-                    <form className={setpThree?'': 'hidden'}> 
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepTwo}>Précédent</button>
-                        <div className={styles.pictureManager}>
-                            <div className={styles.flex}>
-                                {!picture && <div>
-                                    <input type='file' accept='image/*' id='file' onChange={handlePictureChange} required/>
-                                    <div  className={styles.pictureBox}>
-                                        <label htmlFor='file'>{picture? 'Changer la photo':'Ajouter une photo'}</label>
-                                    </div>
-                                </div>}
-                                {picture && <div>
-                                    <img src={picture} alt='product-picture'/>
-                                </div>}
-                            </div>   
-                        </div>
-                        <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
-                        <p>
-                            Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
-                        </p>
-                    </form>
-                    <div className={finalStep?styles.finalStep: 'hidden'}>
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
-                        <h3>Confirmer la commande </h3>
-                        <p>Nom : {userName} </p>
-                        <p>Addresse E-mail : {userEmail} </p>
-                        <p>Catégorie : {categorie} </p>
-                        <p>Quantité du produit désiré : {productQuantity} </p>
-                        <p>Pays de livraison : {selectedCountry} </p>
-                        <p>Photo du produit : </p>
-                        <img src={picture} alt='product-picture' width={200} height={220} />
-                        <button disabled={hideBtn===true? true : false} className={styles.btnSubmit} onClick={toOtpSystem}>{isLoading? 'Patientez...': 'ENVOYER'} </button>
-                        <p>
-                            Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
-                        </p>
-                    </div>
-                    <div className={otpSystem?styles.finalStep: 'hidden'}>
-                        <button className={setpOne?'hidden': styles.backBtn} onClick={goBackStepThree}>Précédent</button>
-                        <p style={{textAlign: 'center'}}>Un code a été envoyé à {userEmail}</p>
-                        <p style={{textAlign: 'center'}}><input type='text' maxLength={6} placeholder='code à 6 chiffres' 
-                            style={{padding: '10px', width: '160px', 
-                            backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
-                            color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} 
-                            value={otp} onChange={handleOtpChange} required/></p>
-                        <p><input type='checkbox' value={checked} onChange={toggleCheck} checked={checked}/> lu et approuvé les <a href='/cgu'>conditions générales d'utilisation</a></p>
-                        {checked &&<button className={styles.btnSubmit} onClick={handleSubmit}>{isLoading? 'Patientez...': 'CONFIRMER'} </button>}
-                        <p>
-                            Nous allons étudier votre dossier et vous enverrons un devis personnalisé dans les plus brefs delais.
-                            Livraison possible au Bénin et au Togo Contact direct possible aussi sur whatsApp sur le +229 01 59 38 71 80 / 01 41 52 98 50 contact@dangoimport.com
-                        </p>
-                    </div>
-                    <div className={messageBoxIs?styles.messageBox: 'hidden'}>
-                        
-                        {isSuccess && <p className={styles.success}><FaCheckCircle size={40} style={{ marginRight: 8 }} color='green' /></p>}
-                        {isError && <p className={styles.error}><FaTimesCircle size={40} style={{ marginRight: 8 }} color='red'/></p>}
-                        <h3>{backendMessage} </h3>
-                    </div>
-               </div>
+  };
+
+  const goBackStep = (step) => (e) => {
+    e.preventDefault();
+    setStepOne(false);
+    setStepTwo(false);
+    setStepThree(false);
+    setFinalStep(false);
+    setOtpSystem(false);
+    step();
+  };
+
+  const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport'];
+
+  return (
+    <main>
+      <div className={styles.container}>
+        <h5 className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</h5>
+
+        {/* Intro */}
+        {!finalStep && !backendMessage && !otpSystem && (
+          <div className={styles.intro}>
+            <h3>Vous souhaitez commander un article depuis la Chine ?</h3>
+            <p>Remplissez le formulaire ci-dessous avec les détails de votre commande.</p>
+          </div>
+        )}
+
+        <div className={styles.formGroup}>
+          {/* Étape 1 */}
+          {stepOne && (
+            <form>
+              <label>Nom <span>*</span></label>
+              <input type='text' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} />
+              <label>Email <span>*</span></label>
+              <input type='email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} />
+
+              <div className={styles.radios}>
+                <label>
+                  <input type='radio' value={benin} checked={selectedCountry === benin} onChange={handleCountryChange} />
+                  Bénin
+                </label>
+                <label>
+                  <input type='radio' value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} />
+                  Togo
+                </label>
+              </div>
+
+              <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
+            </form>
+          )}
+
+          {/* Étape 2 */}
+          {stepTwo && (
+            <form>
+              <button className={styles.backBtn} onClick={goBackStep(() => setStepOne(true))}>Précédent</button>
+              <label>Catégorie de produit :</label>
+              <select value={categorie} onChange={handleCatChange}>
+                <option value="">Sélectionnez une catégorie</option>
+                {categories.map((cat, idx) => (
+                  <option key={idx} value={cat}>{cat}</option>
+                ))}
+              </select>
+
+              <label>Quantité <span>*</span></label>
+              <input type='number' placeholder='Quantité' onChange={handlePqChange} value={productQuantity} />
+
+              <button className={styles.btnSubmit} onClick={showStepThree}>SUIVANT</button>
+            </form>
+          )}
+
+          {/* Étape 3 */}
+          {stepThree && (
+            <form>
+              <button className={styles.backBtn} onClick={goBackStep(() => setStepTwo(true))}>Précédent</button>
+              <label>Ajouter une image :</label>
+              <input type='file' accept='image/*' onChange={handlePictureChange} />
+              {picture && <img src={picture} alt="Produit" width={200} />}
+
+              <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
+            </form>
+          )}
+
+          {/* Étape 4 : Récap + bouton envoi */}
+          {finalStep && (
+            <div className={styles.finalStep}>
+              <button className={styles.backBtn} onClick={goBackStep(() => setStepThree(true))}>Précédent</button>
+              <h3>Confirmer la commande</h3>
+              <p><strong>Nom :</strong> {userName}</p>
+              <p><strong>Email :</strong> {userEmail}</p>
+              <p><strong>Catégorie :</strong> {categorie}</p>
+              <p><strong>Quantité :</strong> {productQuantity}</p>
+              <p><strong>Pays :</strong> {selectedCountry}</p>
+              {picture && <img src={picture} alt="Produit" width={200} />}
+              <button disabled={hideBtn} className={styles.btnSubmit} onClick={toOtpSystem}>
+                {isLoading ? 'Patientez...' : 'ENVOYER'}
+              </button>
             </div>
-            
-        </main>
-    )
-}
+          )}
+
+          {/* OTP */}
+          {otpSystem && (
+            <div className={styles.finalStep}>
+              <p>Un code a été envoyé à {userEmail}</p>
+              <input
+                type='text'
+                maxLength={6}
+                placeholder='Code à 6 chiffres'
+                value={otp}
+                onChange={handleOtpChange}
+                className={styles.otpInput}
+              />
+              <p>
+                <input type='checkbox' checked={checked} onChange={toggleCheck} />
+                J'ai lu et j’accepte les <a href='/cgu'>conditions générales d'utilisation</a>
+              </p>
+              {checked && (
+                <button className={styles.btnSubmit} onClick={handleSubmit}>
+                  {isLoading ? 'Patientez...' : 'CONFIRMER'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Message final */}
+          {messageBoxIs && (
+            <div className={styles.messageBox}>
+              {isSuccess && <FaCheckCircle size={40} color='green' />}
+              {isError && <FaTimesCircle size={40} color='red' />}
+              <h3>{backendMessage}</h3>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+};
+
 export default DevisForm;
