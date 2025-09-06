@@ -232,6 +232,7 @@ const DevisForm = ({ showForm }) => {
               <p><strong>Email :</strong> {userEmail}</p>
               <p><strong>Catégorie :</strong> {categorie}</p>
               <p><strong>Quantité :</strong> {productQuantity}</p>
+              <p><strong>Description du produit désiré :</strong> {productDescription}</p>
               <p><strong>Pays :</strong> {selectedCountry}</p>
               {picture && <img src={picture} alt="Produit" width={200} height={220}/>}
               <button disabled={hideBtn} className={styles.btnSubmit} onClick={toOtpSystem}>
