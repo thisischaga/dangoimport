@@ -5,9 +5,10 @@ main{
     place-content: center;
 }
 header{
-    background: linear-gradient(to bottom, #081b29, #000);
-    height: 600px;
+    /*background: linear-gradient(to bottom, #081b29, #000);*/
+    height: 400px;
     width: 100%;
+    margin-bottom: 100px;
     padding-top: 10px;
     border-bottom-left-radius: 100% 80px;
 }

@@ -1,21 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logo from '../images/logo.jpeg';
 import Slider from "react-slick";
 import styles from './Ecom.module.css';
 import Footer from "../components/Footer";
-import product1 from '../images/product1.jpg';
-import product2 from '../images/product2.jpg';
+import product1 from '../images/product1.png';
+import product2 from '../images/product2.png';
+import product3 from '../images/product3.png';
 import slide1 from '../images/product1.jpg';
 import slide2 from '../images/product2.jpg';
 import slide3 from '../images/slide3.jpg';
-import { useLocation, useNavigate } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import BuyProduct from "./BuyProduct";
 
 
 const Ecom = ()=>{
     const slides = [slide1, slide2, slide3];
-    
+    const [productDetailImg, setProductDetailImg] = useState('');
+    const [productDetailPrice, setProductDetailPrice] = useState('');
+    const [productDetailName, setProductDetailName] = useState('');
+    const [productDescription, setProductDescription] = useState('');
+
+    const [achat, setAchat] = useState(false);
+
+    const [products, setProducts] = useState([]);
+
     const settings = {
         dots: true,
         infinite: true,
@@ -27,6 +36,12 @@ const Ecom = ()=>{
         arrows: true,
         adaptiveHeight: true,
     };
+    useEffect(() => {
+    fetch('http://dangoimport-server.onrender.com/api/products')
+        .then(res => res.json())
+        .then(data => setProducts(data))
+        .catch(err => console.error(err));
+    }, []);
     
     useEffect(() => {
         const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
@@ -43,10 +58,12 @@ const Ecom = ()=>{
                             <h3 >Dango Import</h3>
                         </div>
                     </div>
+                    {/* 
                     <div className={styles.form}> 
                         <input className={styles.searchInput} name='searching' type='text' placeholder='Rechercher un produit...' />
                         <button className={styles.searchBtn}>Rechercher</button>          
                     </div>   
+                    */}
                               
                 </div>
                 <div className={styles.acceuil}>
@@ -72,33 +89,39 @@ const Ecom = ()=>{
                 </div>  
             </header>
             <main>
+                {!achat && 
                 <div className={styles.items}>
                     <div >
                         <div className={styles.productContainer}>
-                            <div className={styles.item}>
-                                <img src={product1} alt="product1"/>
-                                <div>
-                                    <p>Gaecrolft <span>12000 fcfa</span></p>
-                                    <p><button>Acheter</button></p>
-                                </div>
-                            </div>
-                            <div className={styles.item}>
-                                <img src={product2} alt="product2"/>
-                                <div>
-                                    <p>Gaecrolft <span>12000 fcfa</span></p>
-                                    <p><button>Acheter</button></p>
-                                </div>
-                            </div>
-                            <div className={styles.item}>
-                                <img src={slide3} alt="product3"/>
-                                <div>
-                                    <p>Gaecrolft <span>12000 fcfa</span></p>
-                                    <p><button>Acheter</button></p>
-                                </div>
-                            </div>
+                            {products.map(item=>
+                                (
+                                    <div className={styles.item} key={item.id}>
+                                        <img src={item.productImg} alt="productImg"/>
+                                        <div>
+                                            <p>{item.name} <span>{item.price} fcfa</span></p>
+                                            <p><button 
+                                                onClick={()=>{
+                                                    setAchat(true);
+                                                    setProductDetailImg(item.productImg);
+                                                    setProductDetailPrice(item.price);
+                                                    setProductDetailName(item.name);
+                                                    setProductDescription(item.description)
+                                                }
+                                                    
+                                            }>Acheter</button></p>
+                                        </div>
+                                    </div>
+                                )
+                            )}
+                            
                         </div>
                     </div>
                 </div>  
+                }
+                {achat && <BuyProduct image={productDetailImg} 
+                    name={productDetailName} price={productDetailPrice}
+                    description={productDescription}
+                />}
             </main>
             <Footer/>
         </div>

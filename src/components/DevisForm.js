@@ -14,7 +14,7 @@ const DevisForm = ({ showForm }) => {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [categorie, setCategorie] = useState('');
-  const [productQuantity, setProductQuantity] = useState('');
+  const [productQuantity, setProductQuantity] = useState(1);
   const [picture, setPicture] = useState(null);
   const [productDescription, setProductDescription] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -259,8 +259,6 @@ const DevisForm = ({ showForm }) => {
               )}
             </div>
           )}
-
-          {/* Message final */}
           {messageBoxIs && (
             <div className={styles.messageBox}>
               {isSuccess && <FaCheckCircle size={40} color='green' />}

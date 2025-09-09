@@ -11,6 +11,7 @@ import Ecom from './components/Ecom';
 import PerFinance from './blog/PerFinance';
 import Epargne from './blog/Epargne';
 import Blog from './blog/Blog';
+//import BuyProduct from './components/BuyProduct';
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
         <Route path='/blog/epargne' element={<Epargne/>}/>
       </Routes>
+
     </Router>
   );
 }
