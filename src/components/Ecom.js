@@ -37,7 +37,7 @@ const Ecom = ()=>{
         adaptiveHeight: true,
     };
     useEffect(() => {
-    fetch('http://dangoimport-server.onrender.com/api/products')
+    fetch('https://dangoimport-server.onrender.com/api/products')
         .then(res => res.json())
         .then(data => setProducts(data))
         .catch(err => console.error(err));
