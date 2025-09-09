@@ -54,6 +54,7 @@ const Ecom = ()=>{
         fetchData();
       
     }, []);
+    console.log(products);
     useEffect(() => {
         const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
         return () => clearTimeout(t);
