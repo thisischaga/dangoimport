@@ -8,14 +8,18 @@ import validation from '../images/validation.png';
 import livraisons from '../images/livraisons.png';
 import Footer from "../components/Footer";
 import DevisForm from "../components/DevisForm";
+import { useNavigate } from "react-router-dom";
 
 const Home = ()=>{
+    const navigate = useNavigate();
     const [isVisible, setIsvisible] = useState(false);
         
     const showForm = () => {
         setIsvisible(true);
     }
-    
+    const toEcom = ()=>{
+        navigate('/shopping');
+    }
     return(
         <div>
             <Header/>
@@ -33,7 +37,7 @@ const Home = ()=>{
                             </h3>
                             <div className={styles.btns}>
                                 <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
-                                <button className={isVisible? 'hidden': styles.forMobile}>Acheter nos produits</button>
+                                <button className={isVisible? 'hidden': styles.forMobile} onClick={toEcom}>Acheter nos produits</button>
                             </div>
                             
                             <div className={!isVisible? 'hidden': ''}>

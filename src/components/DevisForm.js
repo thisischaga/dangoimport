@@ -2,8 +2,12 @@ import { useState } from 'react';
 import styles from './devisForm.module.css';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const DevisForm = ({ showForm }) => {
+
+  const navigate = useNavigate();
+
   const [stepOne, setStepOne] = useState(true);
   const [stepTwo, setStepTwo] = useState(false);
   const [stepThree, setStepThree] = useState(false);
@@ -153,7 +157,9 @@ const DevisForm = ({ showForm }) => {
   };
 
   const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Beauté', 'Autres(présisez le dans la description)'];
-
+  const toEcom = ()=>{
+    navigate('/shopping');
+  }
   return (
     <main>
       <div className={styles.container}>
