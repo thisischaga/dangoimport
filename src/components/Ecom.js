@@ -12,6 +12,7 @@ import slide3 from '../images/slide3.jpg';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import BuyProduct from "./BuyProduct";
+import axios from "axios";
 
 
 const Ecom = ()=>{
@@ -36,13 +37,23 @@ const Ecom = ()=>{
         arrows: true,
         adaptiveHeight: true,
     };
-    useEffect(() => {
-    fetch('https://dangoimport-server.onrender.com/api/products')
-        .then(res => res.json())
-        .then(data => setProducts(data))
-        .catch(err => console.error(err));
+    useEffect(()=>{
+        
+        const fetchData = async ()=>{
+            try {
+                await axios.get('https://dangoimport-server.onrender.com/api/products')
+                .then(response => 
+                    setProducts(response.data)
+                )
+                .catch(error => console.error(error)
+                    )
+            } catch (error) {
+                console.log('Erreur', error);
+            };
+        }
+        fetchData();
+      
     }, []);
-    
     useEffect(() => {
         const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
         return () => clearTimeout(t);
