@@ -37,7 +37,7 @@ const Home = ()=>{
                             </h3>
                             <div className={styles.btns}>
                                 <button className={isVisible? 'hidden': styles.devisBtn} onClick={showForm}>Demande de devis</button>
-                                <button className={isVisible? 'hidden': styles.forMobile} onClick={toEcom}>Acheter nos produits</button>
+                                
                             </div>
                             
                             <div className={!isVisible? 'hidden': ''}>
