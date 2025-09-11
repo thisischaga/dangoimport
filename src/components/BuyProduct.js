@@ -44,7 +44,6 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
     };
     
     const toTheOtp = async ()=>{
-        alert('OTP pas encore prêt !')
         if (!userName || !userNumber || !productQuantity || !userPref || !selectedCountry) {
             alert('Veuillez remplir tous les champs !');
         } else if(productQuantity <1){
@@ -138,7 +137,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                                 <textArea type='text' placeholder='Ajouter des préférences pour ce produit...'  onChange={handlePrefChange} value={userPref}/><br/>
                                 
                                 <label>Téléphone <span>*</span></label><br/>
-                                <input type='number' placeholder='EX: +22899152036'  onChange={handleUserNumberChange} value={userNumber}/><br/>
+                                <input type='text' placeholder='EX: +22899152036'  onChange={handleUserNumberChange} value={userNumber}/><br/>
                                 <label>Quantité <span>*</span></label><br/>
                                 <input type='number' placeholder='Quantité...'  onChange={handlePqChange} value={productQuantity}/><br/>
                                 <div > 
