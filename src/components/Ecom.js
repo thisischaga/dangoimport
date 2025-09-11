@@ -92,7 +92,7 @@ const Ecom = () => {
       </header>
 
       <main>
-        {!showForm && (
+        {showForm === false && (
           <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
@@ -124,15 +124,13 @@ const Ecom = () => {
           </div>
         )}
 
-        {showForm && (
-          <BuyProduct
+        <BuyProduct
             image={productDetailImg}
             name={productDetailName}
             price={productDetailPrice}
             description={productDescription}
             isVisibled={showForm}
-          />
-        )}
+        />
       </main>
 
       <Footer />
