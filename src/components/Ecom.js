@@ -97,11 +97,12 @@ const Ecom = () => {
       </header>
 
       <main>
-        {!showForm && (
+        
         <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
-                {products ? products.map((item) => (
+                {loading && <p>Loading...</p>}
+                {products && products.map((item) => (
                   <div className={styles.item} key={item.id || item._id}>
                     <img src={item.productImg} alt="productImg" />
                     <div>
@@ -123,11 +124,10 @@ const Ecom = () => {
                       </p>
                     </div>
                   </div>
-                )) : <p>chargement...</p>}
+                ))}
               </div>
             </div>
           </div>
-        )}
 
         {
             showForm && ( 
