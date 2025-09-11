@@ -7,7 +7,7 @@ import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
     
 
-const BuyProduct = ({image, name, price, description})=>{
+const BuyProduct = ({image, name, price, description, isVisibled})=>{
 
     const [userName, setUserName] = useState('');
     const [userNumber, setUserNumber] = useState('');
@@ -38,7 +38,10 @@ const BuyProduct = ({image, name, price, description})=>{
     const handleOtpChange = (e) => setOtp(e.target.value);
     const toggleCheck = () => setChecked(!checked);
 
-
+    const hiddeForm = () => {
+        isVisibled(false);
+        window.location.reload();
+    };
     
     const toTheOtp = ()=>{
         alert('OTP pas encore prêt !')
@@ -96,6 +99,7 @@ const BuyProduct = ({image, name, price, description})=>{
             
             <main>
                 <div className={styles.buyingForm}>
+                    <button onClick={hiddeForm}>Retourner</button>
                     <div className={styles.title}>
                         <h1>Acheter</h1>
                     </div>

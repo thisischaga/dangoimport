@@ -18,7 +18,7 @@ const Ecom = () => {
   const [productDetailPrice, setProductDetailPrice] = useState('');
   const [productDetailName, setProductDetailName] = useState('');
   const [productDescription, setProductDescription] = useState('');
-  const [achat, setAchat] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [products, setProducts] = useState([]);
 
   const settings = {
@@ -33,7 +33,6 @@ const Ecom = () => {
     adaptiveHeight: true,
   };
 
-  // ✅ Appel API au montage uniquement
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,13 +48,12 @@ const Ecom = () => {
     fetchData();
   }, []);
 
-  // ✅ petit hack resize (comme tu avais déjà fait)
   useEffect(() => {
     const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
     return () => clearTimeout(t);
   }, []);
 
-  console.log(products); // Debug: voir si les produits arrivent bien
+  console.log(products); 
 
   return (
     <div>
@@ -94,7 +92,7 @@ const Ecom = () => {
       </header>
 
       <main>
-        {!achat && (
+        {!showForm && (
           <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
@@ -108,7 +106,7 @@ const Ecom = () => {
                       <p>
                         <button
                           onClick={() => {
-                            setAchat(true);
+                            setShowForm(true);
                             setProductDetailImg(item.productImg);
                             setProductDetailPrice(item.price);
                             setProductDetailName(item.name);
@@ -126,12 +124,13 @@ const Ecom = () => {
           </div>
         )}
 
-        {achat && (
+        {showForm && (
           <BuyProduct
             image={productDetailImg}
             name={productDetailName}
             price={productDetailPrice}
             description={productDescription}
+            isVisibled={showForm}
           />
         )}
       </main>
