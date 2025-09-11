@@ -204,7 +204,7 @@ h1 span{
 }
 
 /* ✅ Mobiles (≤ 768px) : 1 colonne */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .productContainer {
     grid-template-columns: 1fr;
   }
