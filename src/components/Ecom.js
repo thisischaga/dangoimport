@@ -98,7 +98,7 @@ const Ecom = () => {
 
       <main>
         
-        {!showForm && (
+        {showForm && (
             <div className={styles.items}>
                 <div>
                 <div className={styles.productContainer}>

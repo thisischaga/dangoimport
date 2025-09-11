@@ -99,7 +99,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
             
             <main>
                 <div className={styles.buyingForm}>
-                    <button onClick={hiddeForm}>Retourner</button>
+                    <button className={styles.hiddenBtn} onClick={hiddeForm}>Retourner</button>
                     <div className={styles.title}>
                         <h1>Acheter</h1>
                     </div>
