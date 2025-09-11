@@ -101,7 +101,7 @@ const Ecom = () => {
         <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
-                {loading && <p>Loading...</p>}
+                {loading && <p>Chargement...</p>}
                 {products && products.map((item) => (
                   <div className={styles.item} key={item.id || item._id}>
                     <img src={item.productImg} alt="productImg" />
