@@ -125,7 +125,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                     <div className={styles.title}>
                         <h1>Acheter</h1>
                     </div>
-                    <div className={otpSystem === true? 'hidden':''}>
+                    <div className={otpSystem === true || messageBoxIs? 'hidden':''}>
                         <div className={styles.metaData}>
                             <h2>{name} </h2>
                             <h2>Prix : <span>{price} fcfa</span></h2>
