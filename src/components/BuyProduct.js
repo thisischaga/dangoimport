@@ -53,6 +53,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
         }
         else{
             try {
+                setIsLoading(true)
                 const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userNumber });
                 if (res.data.message === 'OTP envoyé avec succès') {
                     setOtpSystem(true);
