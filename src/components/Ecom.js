@@ -18,8 +18,10 @@ const Ecom = () => {
   const [productDetailPrice, setProductDetailPrice] = useState('');
   const [productDetailName, setProductDetailName] = useState('');
   const [productDescription, setProductDescription] = useState('');
+
   const [showForm, setShowForm] = useState(false);
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const settings = {
     dots: true,
@@ -35,14 +37,17 @@ const Ecom = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          'https://dangoimport-server.onrender.com/api/products'
-        );
-        setProducts(response.data);
-      } catch (err) {
-        console.error('Erreur', err);
-      }
+        setLoading(true);
+        try {
+            const response = await axios.get(
+            'https://dangoimport-server.onrender.com/api/products'
+            );
+            setProducts(response.data);
+        } catch (err) {
+            console.error('Erreur', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     fetchData();
@@ -92,11 +97,11 @@ const Ecom = () => {
       </header>
 
       <main>
-        {showForm && (
-          <div className={styles.items}>
+        {!showForm && (
+        <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
-                {products.map((item) => (
+                {products ? products.map((item) => (
                   <div className={styles.item} key={item.id || item._id}>
                     <img src={item.productImg} alt="productImg" />
                     <div>
@@ -118,7 +123,7 @@ const Ecom = () => {
                       </p>
                     </div>
                   </div>
-                ))}
+                )) : <p>chargement...</p>}
               </div>
             </div>
           </div>
