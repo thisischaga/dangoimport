@@ -124,13 +124,17 @@ const Ecom = () => {
           </div>
         )}
 
-        <BuyProduct
-            image={productDetailImg}
-            name={productDetailName}
-            price={productDetailPrice}
-            description={productDescription}
-            isVisibled={showForm}
-        />
+        {
+            showForm && ( 
+                <BuyProduct
+                    image={productDetailImg}
+                    name={productDetailName}
+                    price={productDetailPrice}
+                    description={productDescription}
+                    isVisibled={setShowForm}
+                />
+            )
+        }
       </main>
 
       <Footer />
