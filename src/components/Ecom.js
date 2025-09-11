@@ -92,7 +92,7 @@ const Ecom = () => {
       </header>
 
       <main>
-        {showForm === false && (
+        {showForm && (
           <div className={styles.items}>
             <div>
               <div className={styles.productContainer}>
