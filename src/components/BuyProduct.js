@@ -151,11 +151,13 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                                             <input type='radio' className={styles.radioInput} value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} /> 
                                             <label>Togo</label><br/> 
                                         </div> 
-                                        <button className={styles.btnSubmit} onClick={toTheOtp}>
-                                            {isLoading ? 'Patientez...' : 'CONFIRMER'}
-                                        </button>
+                                        
                                     </div> 
+
                                 </div>
+                                <button className={styles.btnSubmit} onClick={toTheOtp}>
+                                    {isLoading ? 'Patientez...' : 'CONFIRMER'}
+                                </button>
                             </div>
                         </div>
                     </div>
