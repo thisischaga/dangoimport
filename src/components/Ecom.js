@@ -37,29 +37,23 @@ const Ecom = ()=>{
         arrows: true,
         adaptiveHeight: true,
     };
-    useEffect(()=>{
-        
-        const fetchData = async ()=>{
+    useEffect(() => {
+        const fetchData = async () => {
             try {
-                await axios.get('https://dangoimport-server.onrender.com/api/products')
-                .then(response => 
-                    setProducts(response.data)
-                )
-                .catch(error => console.error(error)
-                    )
-            } catch (error) {
-                console.log('Erreur', error);
-            };
-        }
+            const response = await axios.get('https://dangoimport-server.onrender.com/api/products');
+            setProducts(response.data);
+            } catch (err) {
+            console.error('Erreur', err);
+            }
+        };
+
         fetchData();
-      
     }, []);
-    console.log(products);
     useEffect(() => {
         const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
         return () => clearTimeout(t);
     }, []);
-    
+    console.log(products);
     return(
         <div>
             <header>
