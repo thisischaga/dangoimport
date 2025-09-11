@@ -55,7 +55,7 @@ const Header = () => {
             <li className={isActive("/services") ? styles.active : ""} onClick={toServices}>Service</li>
             <li className={isActive("/blog/articles") ? styles.active : ""} onClick={toBlog}>Blog</li>
             <li className={isActive("/about") ? styles.active : ""} onClick={toAbout}>A propos</li>
-            
+            <button className={styles.pc} onClick={toEcom}>Acheter nos produits</button>
           </ul>
         </nav>
       </div>
