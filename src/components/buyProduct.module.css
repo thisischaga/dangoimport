@@ -1,81 +1,109 @@
-.buyingForm{
-    width: 800px;
-    height: auto;
-    margin-bottom: 100px;
-    background-color: #0e2d4387;
-    border-radius: 20px;
-    padding: 40px;
-    padding-bottom: 10px;
+.buyingForm {
+  width: 800px;
+  height: auto;
+  margin-bottom: 100px;
+  background-color: #0e2d4387;
+  border-radius: 20px;
+  padding: 40px;
+  padding-bottom: 10px;
 }
-.title h1{
-    text-align: center;
+
+.title h1 {
+  text-align: center;
 }
-p{
-    color: #ffffff87;
+
+.buyingForm p {
+  color: #ffffff87;
 }
+
 .metaData {
-    color: #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.metaData{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+
+.metaData span {
+  color: #ffdc2b;
 }
-.metaData span{
-    color: #ffdc2b;
+
+.form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
-.form{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-    
+
+.productDes {
+  width: 350px;
+  overflow: hidden;
 }
-.productDes{
-    width: 350px;
-    overflow: hidden;
+
+.form img {
+  width: 350px;
+  height: 350px;
+  border-radius: 20px;
 }
-.form img{
-    width: 350px;
-    height: 350px;
-    border-radius: 20px;
+
+.form label {
+  font-size: 18px;
+  line-height: 20px;
+  color: #ffffff87;
+  font-weight: bold;
 }
-.form label{
-    font-size: 18px;
-    line-height: 20px;
-    color: #ffffff87;
-    font-weight: bold;
-}
+
 .form input,
 textarea,
 select {
-    background-color: #fff;
-    color: #0e2d43;
-    border: none;
-    outline: none;
-    box-sizing: border-box;
-    width: 100%;
-    height: 50px;
-    padding: 5px;
-    border-radius: 5px;
-    margin-top: 10px;
-    margin-bottom: 17px;
-    font-family: sans-serif;
-    font-size: 18px;
-    font-weight: bold;
+  background-color: #fff;
+  color: #0e2d43;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  padding: 5px;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 17px;
+  font-family: sans-serif;
+  font-size: 18px;
+  font-weight: bold;
 }
-textarea{
-    height: 70px;
+
+textarea {
+  height: 70px;
 }
-::placeholder{
-    font-family: sans-serif;
-    font-size: 18px;
-    font-weight: bold;
+
+::placeholder {
+  font-family: sans-serif;
+  font-size: 18px;
+  font-weight: bold;
 }
-.radios{ display: flex; place-content: center; align-items: center; } 
-.radioInput{ cursor: pointer; background-color: transparent; margin-top: 0;  transform: scale(2);} 
-.radiosContainer{ display: flex; place-content: center; align-items: center; gap: 15px; padding: 5px; margin: 0 5px; }
+
+.radios {
+  display: flex;
+  place-content: center;
+  align-items: center;
+}
+
+.radioInput {
+  cursor: pointer;
+  background-color: transparent;
+  margin-top: 0;
+  transform: scale(2);
+}
+
+.radiosContainer {
+  display: flex;
+  place-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 5px;
+  margin: 0 5px;
+}
+
 .messageBox {
   background-color: #0e2d4387;
   border-radius: 10px;
@@ -92,6 +120,7 @@ textarea{
 .messageBox p {
   font-size: 14px;
 }
+
 .btnSubmit,
 .finalStep .btnSubmit {
   width: 100%;
@@ -101,4 +130,96 @@ textarea{
   border-radius: 5px;
   cursor: pointer;
   transition: 0.4s ease-in-out;
+}
+
+/* 📱 Responsivité */
+@media (max-width: 1024px) {
+  .buyingForm {
+    width: 90%;
+    padding: 30px;
+  }
+
+  .form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .form img {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 20px;
+  }
+
+  .productDes {
+    width: 100%;
+  }
+}
+
+@media (max-width: 820px) {
+  .buyingForm {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .form img {
+    width: 250px;
+    height: 250px;
+  }
+
+  .form label {
+    font-size: 16px;
+  }
+
+  .form input,
+  textarea,
+  select {
+    font-size: 16px;
+    height: 45px;
+  }
+
+  textarea {
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .buyingForm {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+  }
+
+  .form img {
+    width: 200px;
+    height: 200px;
+  }
+
+  .form label {
+    font-size: 14px;
+  }
+
+  .form input,
+  textarea,
+  select {
+    font-size: 14px;
+    height: 40px;
+  }
+
+  textarea {
+    height: 50px;
+  }
+
+  .metaData {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .messageBox h3 {
+    font-size: 16px;
+  }
+
+  .messageBox p {
+    font-size: 12px;
+  }
 }
