@@ -98,36 +98,38 @@ const Ecom = () => {
 
       <main>
         
-        <div className={styles.items}>
-            <div>
-              <div className={styles.productContainer}>
-                {loading && <p>Chargement...</p>}
-                {products && products.map((item) => (
-                  <div className={styles.item} key={item.id || item._id}>
-                    <img src={item.productImg} alt="productImg" />
-                    <div>
-                      <p>
-                        {item.name} <span>{item.price} fcfa</span>
-                      </p>
-                      <p>
-                        <button
-                          onClick={() => {
-                            setShowForm(true);
-                            setProductDetailImg(item.productImg);
-                            setProductDetailPrice(item.price);
-                            setProductDetailName(item.name);
-                            setProductDescription(item.description);
-                          }}
-                        >
-                          Acheter
-                        </button>
-                      </p>
+        {!showForm && (
+            <div className={styles.items}>
+                <div>
+                <div className={styles.productContainer}>
+                    {loading && <p>Chargement...</p>}
+                    {products && products.map((item) => (
+                    <div className={styles.item} key={item.id || item._id}>
+                        <img src={item.productImg} alt="productImg" />
+                        <div>
+                        <p>
+                            {item.name} <span>{item.price} fcfa</span>
+                        </p>
+                        <p>
+                            <button
+                            onClick={() => {
+                                setShowForm(true);
+                                setProductDetailImg(item.productImg);
+                                setProductDetailPrice(item.price);
+                                setProductDetailName(item.name);
+                                setProductDescription(item.description);
+                            }}
+                            >
+                            Acheter
+                            </button>
+                        </p>
+                        </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                    ))}
+                </div>
             </div>
-          </div>
+        </div>
+        )}
 
         {
             showForm && ( 
