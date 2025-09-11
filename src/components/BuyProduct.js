@@ -149,17 +149,16 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                                 <input type='text' placeholder='EX: +22899152036'  onChange={handleUserNumberChange} value={userNumber} required/><br/>
                                 <label>Quantité <span>*</span></label><br/>
                                 <input type='number' placeholder='Quantité...'  onChange={handlePqChange} value={productQuantity} required/><br/>
-                                <input type='text' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} required/>
                                 <label>Email <span>*</span></label>
                                 <input type='email' placeholder='example@gmail.com' onChange={handleUserEmailChange} value={userEmail} required/>
                                 <div > 
                                     <div className={styles.radios}> 
                                         <div className={styles.radiosContainer}> 
-                                            <input type='radio' className={styles.radioInput} value={benin} checked={selectedCountry === benin} onChange={handleCountryChange}/> 
+                                            <input type='radio' className={styles.radioInput} value={benin} checked={selectedCountry === benin} required onChange={handleCountryChange}/> 
                                             <label>Bénin </label><br/> 
                                         </div> 
                                         <div className={styles.radiosContainer}> 
-                                            <input type='radio' className={styles.radioInput} value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} /> 
+                                            <input type='radio' className={styles.radioInput} value={togo} checked={selectedCountry === togo} required onChange={handleCountryChange} /> 
                                             <label>Togo</label><br/> 
                                         </div> 
                                         
@@ -175,7 +174,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                     <div>
                          {otpSystem && (
                             <div className={styles.finalStep}>
-                                <p>Un code a été envoyé à {userNumber}</p>
+                                <p>Un code a été envoyé à {userEmail}</p>
                                 <p style={{textAlign: 'center'}}><input type='number' maxLength={6} placeholder='* * * * * *' style={{padding: '10px', width: '160px', 
                                     backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
                                     color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
