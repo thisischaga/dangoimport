@@ -116,10 +116,15 @@ const Orders = () => {
       
     }, [location.pathname]);
     const updateStatus = async(orderId, status)=>{
-        await axios.put('https://dangoimport-server.onrender.com/status', {
+        const res = await axios.put('https://dangoimport-server.onrender.com/status', {
         orderId, status,
         })
-        window.location.reload();
+        const updatedOrder = res.data;
+        setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+        order._id === orderId ? { ...order, status: updatedOrder.status } : order
+      )
+    );
     };
     const enAttente = orders.filter(o => o.status === 'En attente');
     const validated = orders.filter(o => o.status === 'Validée');
