@@ -10,6 +10,7 @@ const Orders = () => {
 
     const [adminData, setAdminData] = useState(null);
     const [orders, setOrders] = useState([]);
+    const [achats, setAchats] = useState([]);
     const [showImag, setShowImg] = useState(false);
     const [tokenIs, setTokenIs] = useState(false);
     //const [backendMessage, setBackendMessage] = useState('');
@@ -78,6 +79,18 @@ const Orders = () => {
                     })
                     .then(response => 
                         setOrders(response.data)
+                    )
+                    .catch(error => console.error(error)
+                    )
+                } catch (error) {
+                    console.log('Erreur', error);
+                };
+                try {
+                    await axios.get('https://dangoimport-server.onrender.com/achats', {
+                        headers: {Authorization: `Bearer${token}`}
+                    })
+                    .then(response => 
+                        setAchats(response.data)
                     )
                     .catch(error => console.error(error)
                     )
@@ -192,6 +205,38 @@ const Orders = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                        
+                                    )): <h1>Aucune commande</h1>}
+                                    {achats.length !== 0 ?achats.map((item) => (
+                                        <div>
+                                            <div key={item._id} className={styles.commande}>
+                                                <div className={styles.flex}>
+                                                    <h1>Achat</h1>
+                                                    <p>{item.date}</p>
+                                                </div>
+                                                <div className={styles.items}>
+                                                    <p><span>Nom :</span> {item.userName} </p>
+                                                    <p><span>Email :</span> {item.userEmail}</p>
+                                                    <p><span>Téléphone :</span> {item.userNumber}</p>
+                                                </div>
+                                                <div className={styles.items}>
+                                                    <p><span>Préférences de l'utilisateur :</span> {item.userPref}</p>
+                                                </div>
+                                                <div className={styles.items}>
+                                                    <p><span>Quantité :</span> {item.productQuantity}</p>
+                                                    <img src={item.picture} alt='product_picture' className={!showImag?'hidden':''}/>
+                                                </div>
+                                                <div className={styles.items}>
+                                                    <p><span>Pays :</span> {item.selectedCountry}</p>
+                                                    <p>Statut : 
+                                                        {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                        {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                        {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                     )): <h1>Aucune commande</h1>}
                                 </div>
                                 
