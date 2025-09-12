@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import styles from "./Countdown.module.css"; 
 import logo from '../images/logo.jpeg';
+import styles from "./Countdown.module.css";
 
 const Countdown = ({ launchHour = 22 }) => {
-  const [timeLeft, setTimeLeft] = useState({});
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [showCountdown, setShowCountdown] = useState(true);
 
   const calculateTimeLeft = () => {
@@ -14,7 +14,6 @@ const Countdown = ({ launchHour = 22 }) => {
       now.getDate(),
       launchHour, 0, 0
     );
-
     const difference = launchDate - now;
 
     if (difference <= 0) {
@@ -31,7 +30,6 @@ const Countdown = ({ launchHour = 22 }) => {
 
   useEffect(() => {
     setTimeLeft(calculateTimeLeft());
-
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -42,20 +40,20 @@ const Countdown = ({ launchHour = 22 }) => {
   if (!showCountdown) return null;
 
   return (
-    <div className="countdown-overlay">
-      <div className="countdown-box">
+    <div className={styles.overlay}>
+      <div className={styles.countdownBox}>
         <h1>Notre site sera lancé bientôt !</h1>
-        <div className="timer">
-          <div className="time-section">
-            <span>{timeLeft.hours ?? 0}</span>
+        <div className={styles.timer}>
+          <div>
+            <span>{timeLeft.hours}</span>
             <p>Heures</p>
           </div>
-          <div className="time-section">
-            <span>{timeLeft.minutes ?? 0}</span>
+          <div>
+            <span>{timeLeft.minutes}</span>
             <p>Minutes</p>
           </div>
-          <div className="time-section">
-            <span>{timeLeft.seconds ?? 0}</span>
+          <div>
+            <span>{timeLeft.seconds}</span>
             <p>Secondes</p>
           </div>
           <div className={styles.logo}>
