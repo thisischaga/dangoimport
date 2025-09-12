@@ -157,15 +157,10 @@ const DevisForm = ({ showForm }) => {
   };
 
   const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Beauté', 'Autres(présisez le dans la description)'];
-  const toEcom = ()=>{
-    navigate('/shopping');
-  }
   return (
     <main>
       <div className={styles.container}>
         <h5 className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</h5>
-
-        {/* Intro */}
         {!finalStep && !backendMessage && !otpSystem && (
           <div className={styles.intro}>
             <h3>Vous souhaitez commander un article depuis la Chine ?</h3>

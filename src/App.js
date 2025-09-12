@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import About from "./pages/About";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
@@ -11,26 +11,32 @@ import Ecom from './components/Ecom';
 import PerFinance from './blog/PerFinance';
 import Epargne from './blog/Epargne';
 import Blog from './blog/Blog';
-//import BuyProduct from './components/BuyProduct';
-
+import Countdown from './components/Countdown'; // créer un composant Countdown
 
 function App() {
+  const launchDate = new Date("2025-10-01T00:00:00").getTime();
+  const now = new Date().getTime();
+  const isLaunched = now >= launchDate;
+
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path='/services' element={<Services/>}/>
-        <Route path='/admin' element={<AdminLogin/>}/>
-        <Route path='/commandes' element={<Orders/>}/>
-        <Route path='/cgu' element={<Cgu/>}/>
-        <Route path='/politique-de-confidentialité' element={<Politique/>}/>
-        <Route path='/shopping' element={<Ecom/>}/>
-        <Route path='/blog/articles' element={<Blog/>}/>
-        <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
-        <Route path='/blog/epargne' element={<Epargne/>}/>
-      </Routes>
-
+      {isLaunched ? (
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path='/services' element={<Services/>}/>
+          <Route path='/admin' element={<AdminLogin/>}/>
+          <Route path='/commandes' element={<Orders/>}/>
+          <Route path='/cgu' element={<Cgu/>}/>
+          <Route path='/politique-de-confidentialité' element={<Politique/>}/>
+          <Route path='/shopping' element={<Ecom/>}/>
+          <Route path='/blog/articles' element={<Blog/>}/>
+          <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
+          <Route path='/blog/epargne' element={<Epargne/>}/>
+        </Routes>
+      ) : (
+        <Countdown launchDate={launchDate} />
+      )}
     </Router>
   );
 }
