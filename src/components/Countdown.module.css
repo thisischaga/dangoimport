@@ -14,10 +14,25 @@
   padding: 10px;
   box-sizing: border-box;
 }
+.logo{
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+.logo img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.logo h3{
+    margin-left: 10px;
+    color: #fff;
+    border-bottom: 1px solid #ffdc2b;
+}
 
 .countdownBox {
   text-align: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: #ffdc2b;
   padding: 40px 20px;
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(0,0,0,0.3);

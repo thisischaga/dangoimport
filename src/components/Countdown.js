@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./Countdown.module.css";
+import logo from '../images/logo.jpeg';
 
 const Countdown = ({ launchHour = 22 }) => {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -55,7 +56,10 @@ const Countdown = ({ launchHour = 22 }) => {
                     <span>{timeLeft.seconds}</span>
                     <p>Secondes</p>
                 </div>
-                <h1>Dnago Import</h1>
+                <div className={styles.logo}>
+                    <img src={logo} alt="logo" />
+                    <h3>Dango Import</h3>
+                </div>
                 </div>
             </div>
         </div>
