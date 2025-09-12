@@ -35,7 +35,7 @@ const Countdown = ({ launchHour = 22 }) => {
     return () => clearInterval(timer);
   }, [launchHour]);
 
-  if (launched) return null; // Le site devient visible
+  if (launched) return null;
 
   return (
     <main>
@@ -55,6 +55,7 @@ const Countdown = ({ launchHour = 22 }) => {
                     <span>{timeLeft.seconds}</span>
                     <p>Secondes</p>
                 </div>
+                <h1>Dnago Import</h1>
                 </div>
             </div>
         </div>

@@ -4,39 +4,45 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(180deg, #081b29, #000);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
   color: #fff;
   font-family: 'Poppins', sans-serif;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .countdownBox {
   text-align: center;
   background: rgba(0, 0, 0, 0.5);
-  padding: 50px 30px;
+  padding: 40px 20px;
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 400px;
 }
 
 .countdownBox h1 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 30px;
 }
 
 .timer {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
+  flex-wrap: wrap; 
 }
 
 .timer div {
   background: rgba(255,255,255,0.1);
-  padding: 20px 15px;
+  padding: 15px 10px;
   border-radius: 15px;
-  min-width: 80px;
+  min-width: 70px;
+  flex: 1 1 80px;
 }
 
 .timer span {
@@ -47,4 +53,18 @@
 .timer p {
   margin: 5px 0 0;
   font-size: 0.9rem;
+}
+
+/* Mobile */
+@media (max-width: 680px) {
+  .countdownBox h1 {
+    font-size: 1.4rem;
+  }
+  .timer span {
+    font-size: 1.6rem;
+  }
+  .timer div {
+    min-width: 60px;
+    padding: 10px 5px;
+  }
 }
