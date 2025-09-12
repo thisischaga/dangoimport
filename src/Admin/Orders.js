@@ -115,28 +115,56 @@ const Orders = () => {
       fetchData();
       
     }, [location.pathname]);
-    const updateStatus = async(orderId, status)=>{
-        const res = await axios.put('https://dangoimport-server.onrender.com/devis/status', {
-        orderId, status,
-        })
-        const updatedOrder = res.data;
-        setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-        order._id === orderId ? { ...order, status: updatedOrder.status } : order
-        )
-        );
+    const updateStatus = async (orderId, currentStatus) => {
+        let nextStatus = currentStatus;
+
+        if (currentStatus === "En attente") nextStatus = "Validée";
+        else if (currentStatus === "Validée") nextStatus = "Achevée";
+        else if (currentStatus === "Achevée") nextStatus = "En attente"; 
+
+        try {
+            const res = await axios.put("https://dangoimport-server.onrender.com/devis/status", {
+            orderId,
+            status: nextStatus,
+            });
+
+            const updatedOrder = res.data;
+
+            setOrders((prevOrders) =>
+            prevOrders.map((order) =>
+                order._id === orderId ? { ...order, status: updatedOrder.status } : order
+            )
+            );
+        } catch (err) {
+            console.error("Erreur update commande:", err);
+        }
     };
-    const updateStatusA = async(orderId, status)=>{
-        const res = await axios.put('https://dangoimport-server.onrender.com/devis/status', {
-        orderId, status,
-        })
-        const updatedOrder = res.data;
-        setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-        order._id === orderId ? { ...order, status: updatedOrder.status } : order
-      )
-    );
-    }
+
+    const updateStatusA = async (achatId, currentStatus) => {
+        let nextStatus = currentStatus;
+
+        if (currentStatus === "En attente") nextStatus = "Validée";
+        else if (currentStatus === "Validée") nextStatus = "Achevée";
+        else if (currentStatus === "Achevée") nextStatus = "En attente";
+
+        try {
+            const res = await axios.put("https://dangoimport-server.onrender.com/achats/status", {
+            orderId: achatId,
+            status: nextStatus,
+            });
+
+            const updatedAchat = res.data;
+
+            setAchats((prevAchats) =>
+            prevAchats.map((achat) =>
+                achat._id === achatId ? { ...achat, status: updatedAchat.status } : achat
+            )
+            );
+        } catch (err) {
+            console.error("Erreur update achat:", err);
+        }
+    };
+
     
     const enAttente = orders.filter(o => o.status === 'En attente');
     const validated = orders.filter(o => o.status === 'Validée');
