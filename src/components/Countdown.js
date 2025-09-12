@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import styles from "./Countdown.module.css";
+import styles from "./Countdown.module.css"; 
+import logo from '../images/logo.jpeg';
 
 const Countdown = ({ launchHour = 22 }) => {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState({});
   const [showCountdown, setShowCountdown] = useState(true);
 
   const calculateTimeLeft = () => {
@@ -13,6 +14,7 @@ const Countdown = ({ launchHour = 22 }) => {
       now.getDate(),
       launchHour, 0, 0
     );
+
     const difference = launchDate - now;
 
     if (difference <= 0) {
@@ -40,21 +42,25 @@ const Countdown = ({ launchHour = 22 }) => {
   if (!showCountdown) return null;
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.countdownBox}>
+    <div className="countdown-overlay">
+      <div className="countdown-box">
         <h1>Notre site sera lancé bientôt !</h1>
-        <div className={styles.timer}>
-          <div>
-            <span>{timeLeft.hours}</span>
+        <div className="timer">
+          <div className="time-section">
+            <span>{timeLeft.hours ?? 0}</span>
             <p>Heures</p>
           </div>
-          <div>
-            <span>{timeLeft.minutes}</span>
+          <div className="time-section">
+            <span>{timeLeft.minutes ?? 0}</span>
             <p>Minutes</p>
           </div>
-          <div>
-            <span>{timeLeft.seconds}</span>
+          <div className="time-section">
+            <span>{timeLeft.seconds ?? 0}</span>
             <p>Secondes</p>
+          </div>
+          <div className={styles.logo}>
+            <img src={logo} alt="logo" />
+            <h3>Dango Import</h3>
           </div>
         </div>
       </div>
