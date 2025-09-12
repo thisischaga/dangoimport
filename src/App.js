@@ -20,7 +20,6 @@ function App() {
 
   return (
     <Router>
-      {isLaunched ? (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -34,9 +33,6 @@ function App() {
           <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
           <Route path='/blog/epargne' element={<Epargne/>}/>
         </Routes>
-      ) : (
-        <Countdown launchDate={launchDate} />
-      )}
     </Router>
   );
 }
