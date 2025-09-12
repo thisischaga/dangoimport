@@ -148,7 +148,7 @@ const Orders = () => {
         else if (currentStatus === "Achevée") nextStatus = "En attente";
 
         try {
-            const res = await axios.put("https://dangoimport-server.onrender.com/achats/status", {
+            const res = await axios.put("https://dangoimport-server.onrender.com/achat/status", {
             orderId: achatId,
             status: nextStatus,
             });
