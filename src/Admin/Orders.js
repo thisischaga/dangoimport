@@ -13,6 +13,7 @@ const Orders = () => {
     const [achats, setAchats] = useState([]);
     const [showImag, setShowImg] = useState(false);
     const [tokenIs, setTokenIs] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     //const [backendMessage, setBackendMessage] = useState('');
 
     const [adminFirstname, setAdminFirstname] = useState('');
@@ -45,6 +46,7 @@ const Orders = () => {
     const add_admin = async(e)=>{
         e.preventDefault();
         try {
+            setIsLoading(true);
             const response = await axios.post('https://dangoimport-server.onrender.com/add_admin', {
                 adminFirstname, adminSurname, adminName, adminPassword, role
             })
@@ -62,6 +64,7 @@ const Orders = () => {
             if (token) {
                 setTokenIs(true)
                 try {
+                    setIsLoading(true);
                     await axios.get('https://dangoimport-server.onrender.com/admin_data', {
                         headers: {Authorization: `Bearer${token}`}
                     })
@@ -74,6 +77,7 @@ const Orders = () => {
                     console.log('Erreur', error);
                 };
                 try {
+                    setIsLoading(true);
                     await axios.get('https://dangoimport-server.onrender.com/commandes', {
                         headers: {Authorization: `Bearer${token}`}
                     })
@@ -86,6 +90,7 @@ const Orders = () => {
                     console.log('Erreur', error);
                 };
                 try {
+                    setIsLoading(true);
                     await axios.get('https://dangoimport-server.onrender.com/achats', {
                         headers: {Authorization: `Bearer${token}`}
                     })
@@ -114,8 +119,13 @@ const Orders = () => {
     const validated = orders.filter(o => o.status === 'Validée');
     const acheved = orders.filter(o => o.status === 'Achevée');
     const benin = orders.filter(o => o.selectedCountry === 'Bénin');
-    const ghana = orders.filter(o => o.selectedCountry === 'Ghana');
     const togo = orders.filter(o => o.selectedCountry === 'Togo');
+
+    const enAttenteA = achats.filter(o => o.status === 'En attente');
+    const validateda = achats.filter(o => o.status === 'Validée');
+    const achevedA = achats.filter(o => o.status === 'Achevée');
+    const beninA = achats.filter(o => o.selectedCountry === 'Bénin');
+    const togoA = achats.filter(o => o.selectedCountry === 'Togo');
 
     return(
         <div className={styles.ordersPage} >
@@ -156,88 +166,93 @@ const Orders = () => {
                             
                             <div className={styles.container}>
                                 <div className={styles.dashboard}>
-                                    <div className={styles.flex}>
-                                        <h1>Dashboard</h1>
-                                        <h4 className={styles.ordersCount}>Vous avez reçu <span>{orders.length}</span> {orders.length<1? 'commande': 'commandes'}</h4>
-                                    </div>
-                                    
-                                    <div className={styles.items}>
-                                        <h4 >En attente : <br/> <span className={styles.orange}>{enAttente.length}</span></h4>
-                                        <h4 >Validé : <br/> <span className={styles.green}>{validated.length} </span></h4>
-                                        <h4 >Achevé : <br/> <span className={styles.neutre}>{acheved.length}</span></h4>
-                                    </div>
-                                    <div className={styles.items}>
-                                        <h4>Bénin : <br/><span className={styles.countryLength}>{benin.length}</span></h4>
-                                        <h4>Ghana : <br/><span className={styles.countryLength}>{ghana.length}</span></h4>
-                                        <h4>Togo : <br/><span className={styles.countryLength}>{togo.length}</span></h4>
-                                    </div>
+                                    {isLoading? <h1>Loading...</h1>:<div>
+                                        <div className={styles.flex}>
+                                            <h1>Dashboard</h1>
+                                            <h4 className={styles.ordersCount}>Vous avez reçu <span>{orders.length}</span> {orders.length<1? 'commande': 'commandes'}</h4>
+                                        </div>
+                                        
+                                        <div className={styles.items}>
+                                            <h4 >En attente : <br/> <span className={styles.orange}>{enAttente.length + enAttenteA.length}</span></h4>
+                                            <h4 >Validé : <br/> <span className={styles.green}>{validated.length + validateda.length} </span></h4>
+                                            <h4 >Achevé : <br/> <span className={styles.neutre}>{acheved.length + achevedA.length}</span></h4>
+                                        </div>
+                                        <div className={styles.items}>
+                                            <h4>Bénin : <br/><span className={styles.countryLength}>{benin.length + beninA.length}</span></h4>
+                                            <h4>Togo : <br/><span className={styles.countryLength}>{togo.length + togoA.length}</span></h4>
+                                        </div>
+                                    </div>}
                                 </div>
                                 <div className={styles.imgCmd}>
                                     <p onClick={handleImgIsshown} >{showImag? 'Masquer les images': 'Afficher les images des produits'}</p>
                                 </div>
                                 <div className={styles.ordersMain}>
-                                    {orders.length !== 0 ?orders.map((item) => (
-                                        <div>
-                                            <div key={item._id} className={styles.commande}>
-                                                <div className={styles.flex}>
-                                                    <h1>Commande</h1>
-                                                    <p>{item.date}</p>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Nom :</span> {item.userName} </p>
-                                                    <p><span>Email :</span> {item.userEmail}</p>
-                                                    
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Description du produit :</span> {item.productDescription}</p>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Quantité :</span> {item.productQuantity}</p>
-                                                    <img src={item.picture} alt='product_picture' className={!showImag?'hidden':''}/>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Pays :</span> {item.selectedCountry}</p>
-                                                    <p>Statut : 
-                                                        {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                        {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                        {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                    )): <h1>Aucune commande</h1>}
-                                    {achats.length !== 0 ?achats.map((item) => (
-                                        <div>
-                                            <div key={item._id} className={styles.commande}>
-                                                <div className={styles.flex}>
-                                                    <h1>Achat</h1>
-                                                    <p>{item.date}</p>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Nom :</span> {item.userName} </p>
-                                                    <p><span>Email :</span> {item.userEmail}</p>
-                                                    <p><span>Téléphone :</span> {item.userNumber}</p>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Préférences de l'utilisateur :</span> {item.userPref}</p>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Quantité :</span> {item.productQuantity}</p>
-                                                    <img src={item.picture} alt='product_picture' className={!showImag?'hidden':''}/>
-                                                </div>
-                                                <div className={styles.items}>
-                                                    <p><span>Pays :</span> {item.selectedCountry}</p>
-                                                    <p>Statut : 
-                                                        {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                        {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                        {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                    </p>
+                                    {isLoading === true ? <h1>Loading...</h1>:<div>
+                                        {orders.length !== 0 ?orders.map((item) => (
+                                            <div>
+                                                <div key={item._id} className={styles.commande}>
+                                                    <div className={styles.flex}>
+                                                        <h1>Commande</h1>
+                                                        <p>{item.date}</p>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Nom :</span> {item.userName} </p>
+                                                        <p><span>Email :</span> {item.userEmail}</p>
+                                                        
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Description du produit :</span> {item.productDescription}</p>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Quantité :</span> {item.productQuantity}</p>
+                                                        <img src={item.picture} alt='product_picture' className={!showImag?'hidden':''}/>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Pays :</span> {item.selectedCountry}</p>
+                                                        <p>Statut : 
+                                                            {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                    )): <h1>Aucune commande</h1>}
+                                            
+                                        )): <h1>Aucune demande de devis</h1>}
+                                    </div>}
+                                    {isLoading === true ? <h1>Loading...</h1>:<div>
+                                        {achats.length !== 0 ?achats.map((item) => (
+                                            <div>
+                                                <div key={item._id} className={styles.commande}>
+                                                    <div className={styles.flex}>
+                                                        <h1>Achat</h1>
+                                                        <p>{item.date}</p>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Nom :</span> {item.userName} </p>
+                                                        <p><span>Email :</span> {item.userEmail}</p>
+                                                        <p><span>Téléphone :</span> {item.userNumber}</p>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Préférences de l'utilisateur :</span> {item.userPref}</p>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Quantité :</span> {item.productQuantity}</p>
+                                                        <img src={item.picture} alt='product_picture' className={!showImag?'hidden':''}/>
+                                                    </div>
+                                                    <div className={styles.items}>
+                                                        <p><span>Pays :</span> {item.selectedCountry}</p>
+                                                        <p>Statut : 
+                                                            {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        )): <h1>Aucun achat</h1>}
+                                    </div>}
                                 </div>
                                 
                             </div>
