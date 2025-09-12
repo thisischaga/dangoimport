@@ -75,6 +75,8 @@ const Orders = () => {
                     )
                 } catch (error) {
                     console.log('Erreur', error);
+                }finally {
+                    setIsLoading(false);
                 };
                 try {
                     setIsLoading(true);
@@ -88,6 +90,8 @@ const Orders = () => {
                     )
                 } catch (error) {
                     console.log('Erreur', error);
+                }finally {
+                    setIsLoading(false);
                 };
                 try {
                     setIsLoading(true);
@@ -101,7 +105,9 @@ const Orders = () => {
                     )
                 } catch (error) {
                     console.log('Erreur', error);
-                };
+                }finally {
+                    setIsLoading(false);
+                }
             } else {
                 setTokenIs(false);
             }
