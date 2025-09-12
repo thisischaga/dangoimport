@@ -116,7 +116,18 @@ const Orders = () => {
       
     }, [location.pathname]);
     const updateStatus = async(orderId, status)=>{
-        const res = await axios.put('https://dangoimport-server.onrender.com/status', {
+        const res = await axios.put('https://dangoimport-server.onrender.com/devis/status', {
+        orderId, status,
+        })
+        const updatedOrder = res.data;
+        setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+        order._id === orderId ? { ...order, status: updatedOrder.status } : order
+        )
+        );
+    };
+    const updateStatusA = async(orderId, status)=>{
+        const res = await axios.put('https://dangoimport-server.onrender.com/devis/status', {
         orderId, status,
         })
         const updatedOrder = res.data;
@@ -125,7 +136,8 @@ const Orders = () => {
         order._id === orderId ? { ...order, status: updatedOrder.status } : order
       )
     );
-    };
+    }
+    
     const enAttente = orders.filter(o => o.status === 'En attente');
     const validated = orders.filter(o => o.status === 'Validée');
     const acheved = orders.filter(o => o.status === 'Achevée');
@@ -254,9 +266,9 @@ const Orders = () => {
                                                     <div className={styles.items}>
                                                         <p><span>Pays :</span> {item.selectedCountry}</p>
                                                         <p>Statut : 
-                                                            {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                            {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
-                                                            {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatus(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'En attente' && <strong className={styles.statusWaiting } onClick={()=>updateStatusA(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Validée' && <strong className={styles.statusSucess } onClick={()=>updateStatusA(item._id, item.status)}> {item.status}</strong>}
+                                                            {item.status === 'Achevée' && <strong className={styles.statusNeutre } onClick={()=>updateStatusA(item._id, item.status)}> {item.status}</strong>}
                                                         </p>
                                                     </div>
                                                 </div>
