@@ -9,7 +9,7 @@ import epargne from "../images/epargne.jpg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
-  const [countdown, setCountdown] = useState(5); // ⏳ 5 secondes
+  const [countdown, setCountdown] = useState(5); 
 
   const handleClick = (e, url) => {
     e.preventDefault();
@@ -18,7 +18,6 @@ const Blog = () => {
     setCountdown(5);
   };
 
-  // Gestion du countdown
   useEffect(() => {
     let timer;
     if (showAd && countdown > 0) {
@@ -27,7 +26,6 @@ const Blog = () => {
     return () => clearTimeout(timer);
   }, [showAd, countdown]);
 
-  // Afficher le bloc AdSense dans le container
   useEffect(() => {
     if (showAd) {
       const adContainer = document.getElementById("ad-container");
@@ -49,7 +47,7 @@ const Blog = () => {
       }
 
       return () => {
-        if (adContainer) adContainer.innerHTML = ""; // Nettoyer quand on ferme
+        if (adContainer) adContainer.innerHTML = ""; 
       };
     }
   }, [showAd]);
@@ -115,13 +113,12 @@ const Blog = () => {
         <div className={styles.adOverlay}>
           <p>La pub se ferme dans {countdown} secondes...</p>
 
-          {/* Bouton visible quand le timer est fini */}
           {countdown === 0 && (
             <button
               className={styles.skipButton}
               onClick={() => {
-                setShowAd(false); // ferme la pub
-                if (redirectUrl) window.location.href = redirectUrl; // puis redirige
+                setShowAd(false);
+                if (redirectUrl) window.location.href = redirectUrl; 
               }}
             >
               Fermer et continuer
