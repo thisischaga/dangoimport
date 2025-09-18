@@ -164,6 +164,7 @@ main {
   .stepsContainer {
     text-align: center;
     padding-top: 4rem;
+    width: 250px;
   }
   .stepsContainer img {
     position: static;
