@@ -58,8 +58,6 @@ const Ecom = () => {
     return () => clearTimeout(t);
   }, []);
 
-  console.log(products); 
-
   return (
     <div>
       <header>
