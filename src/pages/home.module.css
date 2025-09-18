@@ -1,172 +1,8 @@
-/*main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
-    margin: 40px auto;
-    max-width: 1200px;
-    padding: 0 20px;
-}.forMobile{
-    display: none;
-}
-.btns{
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-}
-.intro, .stepsIntro {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-.intro h2 {
-    color: #247bb5;
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-.intro h3 {
-    color: #fff;
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 1.6;
-}
-
-.devisBtn{
-    background: #fff;
-    color: #000;
-    padding: 10px 30px;
-    border: none;
-    border-radius: 10px;
-    transition: 0.4s ease-in-out;
-    cursor: pointer;
-    border: 2px solid #fff;
-}
-.devisBtn:hover{
-    border-radius: 30px;
-    background-color: #fff;
-}
-.stepsIntro p {
-    margin-top: 12px;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-.steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
-
-.stepsContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: rgba(17, 54, 80, 0.7);
-    border-radius: 20px;
-    padding: 30px 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.stepsContainer:hover {
-    transform: translateY(-8px);
-    box-shadow: 0px 10px 20px rgba(0,0,0,0.4);
-}
-
-.stepsContainer img {
-    width: 90px;
-    height: 90px;
-    margin-bottom: 15px;
-}
-.stepsContainer h4 {
-    color: #fff;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-.stepsContainer h4 span {
-    color: #ffdc2b;
-    font-weight: bold;
-}
-
-
-.flex {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    margin-top: 60px;
-    flex-wrap: wrap;
-}
-.flex img {
-    max-width: 500px;
-    width: 100%;
-    border-radius: 12px;
-}
-.centeredText {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto;
-    color: #fff;
-    font-size: 16px;
-    line-height: 1.6;
-}
-.whatsapp {
-    border-radius: 50%;
-    width: 55px;
-    height: 55px;
-}
-
-@media (max-width: 1024px) {
-    .intro h2 { font-size: 28px; }
-    .intro h3 { font-size: 20px; }
-    .stepsContainer img { width: 80px; height: 80px; }
-}
-
-@media (max-width: 820px) {
-    main { margin: 20px auto; padding: 0 15px; gap: 30px; }
-
-    .intro h2 { font-size: 24px; }
-    .intro h3 { font-size: 18px; }
-    .forMobile{
-        background: #000;
-        color: #fff;
-        padding: 10px 30px;
-        border: none;
-        border-radius: 10px;
-        transition: 0.4s ease-in-out;
-        border: 2px solid #fff;
-        cursor: pointer;
-        display: block;
-        margin-left: 10px;
-    }
-    .forMobile:hover{
-        border: 2px solid #fff;
-    }
-    .stepsContainer {
-        padding: 25px 15px;
-        width: 100%;
-    }
-    .stepsContainer h4 { font-size: 16px; }
-    .stepsContainer img { width: 70px; height: 70px; }
-
-    .flex { flex-direction: column; gap: 20px; }
-    .flex img { width: 100%; }
-}
-*/
-
 main {
-    font-family: "Poppins", sans-serif;
-    color: #ffffffbc;
-    line-height: 1.6;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
-    margin: 40px auto;
-    max-width: 1200px;
-    padding: 0 20px;
+    place-content: center;
 }
+
 .intro {
   display: flex;
   justify-content: center;
@@ -189,8 +25,6 @@ main {
   margin-bottom: 2rem;
   font-weight: 400;
 }
-
-/* 🔘 Boutons */
 .btns {
   display: flex;
   gap: 1rem;
@@ -253,7 +87,6 @@ main {
   color: #ffffffbc;
 }
 
-/* 🔢 Étapes principales */
 .content {
   padding: 3rem 2rem;
 }
@@ -297,8 +130,6 @@ main {
   list-style: disc;
   color: #ffffffbc;
 }
-
-/* Icônes */
 .stepsContainer img {
   width: 80px;
   height: 80px;
@@ -311,12 +142,15 @@ main {
 .whatsapp {
   width: 70px !important;
 }
-
-/* 📱 Responsive */
+.flex{
+    display: flex;
+    place-content: center;
+    justify-content: space-between;
+    margin-top: 40px;
+}
 @media (max-width: 768px) {
   main {
-      margin: 10px;
-      padding: 10px;;
+    margin: 0;
   }
   .intro h2 {
     font-size: 1.6rem;
@@ -336,4 +170,8 @@ main {
     margin: 0 auto 1rem;
     display: block;
   }
+  .flex{
+        flex-direction: column;
+        align-items: center;
+    }
 }
