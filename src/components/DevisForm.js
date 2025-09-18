@@ -169,7 +169,6 @@ const DevisForm = ({ showForm }) => {
         )}
 
         <div className={styles.formGroup}>
-          {/* Étape 1 */}
           {stepOne && (
             <form>
               <label>Nom <span>*</span></label>
@@ -191,8 +190,6 @@ const DevisForm = ({ showForm }) => {
               <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
             </form>
           )}
-
-          {/* Étape 2 */}
           {stepTwo && (
             <form>
               <button className={styles.backBtn} onClick={goBackStep(() => setStepOne(true))}>Précédent</button>

@@ -1,8 +1,8 @@
 import React, { useEffect, } from "react";
 import Slider from "react-slick";
 import logo from '../images/logo.jpeg';
-import slide1 from '../images/slide1.jpg';
-import slide2 from '../images/slide2.jpg';
+import slide1 from '../images/product1.png';
+import slide2 from '../images/avion.png';
 import slide3 from '../images/slide3.jpg';
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from './header.module.css';
@@ -48,20 +48,18 @@ const Header = () => {
           <img src={logo} alt="logo" />
           <h3>Dango Import</h3>
         </div>
-
         <nav>
           <ul>
             <li className={isActive("/") ? styles.active : ""} onClick={toHome}>Acceuil</li>
             <li className={isActive("/services") ? styles.active : ""} onClick={toServices}>Service</li>
             <li className={isActive("/blog/articles") ? styles.active : ""} onClick={toBlog}>Blog</li>
             <li className={isActive("/about") ? styles.active : ""} onClick={toAbout}>A propos</li>
-            <button className={styles.pc} onClick={toEcom}>Acheter nos produits</button>
           </ul>
         </nav>
       </div>
-
       <div >
         <div className={styles.content}>
+          
           <div className={styles.headerIntro}>
             <div className={styles.headerTexts}>
               <h2>Vos achats en Chine, livrés en Afrique de l'Ouest</h2>
@@ -90,6 +88,7 @@ const Header = () => {
           </div>
         </div>
       </div>
+      
     </header>
   );
 };

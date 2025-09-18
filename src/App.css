@@ -1,4 +1,5 @@
 html, body, #root {
     overflow-x: hidden;
     font-family: 'Poppins', sans-serif;
+    color: #fff;
 }

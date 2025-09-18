@@ -1,4 +1,4 @@
-main {
+/*main {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,7 +47,6 @@ main {
     background-color: #fff;
 }
 .stepsIntro p {
-    color: #ddd;
     margin-top: 12px;
     font-size: 16px;
     line-height: 1.5;
@@ -153,4 +152,177 @@ main {
 
     .flex { flex-direction: column; gap: 20px; }
     .flex img { width: 100%; }
+}
+*/
+
+main {
+  font-family: "Poppins", sans-serif;
+  color: #ffffffbc;
+  line-height: 1.6;
+}
+.intro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url("../images/home-img.jpg") center/cover no-repeat;
+  color: #fff;
+  text-align: center;
+}
+
+.intro h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.intro h3 {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+/* 🔘 Boutons */
+.btns {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.devisBtn,
+.forMobile {
+  background: #e63946;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.devisBtn:hover,
+.forMobile:hover {
+  background: #d62828;
+}
+
+.forMobile {
+  background: #457b9d;
+}
+
+.forMobile:hover {
+  background: #1d3557;
+}
+.flex {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.flex img {
+  max-width: 600px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.stepsIntro {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.stepsIntro h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #1d3557;
+}
+
+.stepsIntro p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #ffffffbc;
+}
+
+/* 🔢 Étapes principales */
+.content {
+  padding: 3rem 2rem;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+  gap: 2rem;
+}
+
+.stepsContainer {
+  flex: 1 1 400px;
+  background: rgba(17, 54, 80, 0.6); 
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: left;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.stepsContainer:hover {
+  transform: translateY(-5px);
+}
+
+.stepsContainer h4 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+  color: #ffdc2b; 
+}
+
+.stepsContainer p {
+  margin-bottom: 1rem;
+  color: #ffffffbc;
+}
+
+.stepsContainer li {
+  margin-left: 1.5rem;
+  list-style: disc;
+  color: #ffffffbc;
+}
+
+/* Icônes */
+.stepsContainer img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.whatsapp {
+  width: 70px !important;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .intro h2 {
+    font-size: 1.6rem;
+  }
+  .intro h3 {
+    font-size: 1rem;
+  }
+  .btns {
+    flex-direction: column;
+  }
+  .stepsContainer {
+    text-align: center;
+    padding-top: 4rem;
+  }
+  .stepsContainer img {
+    position: static;
+    margin: 0 auto 1rem;
+    display: block;
+  }
 }

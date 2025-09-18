@@ -45,9 +45,6 @@ const Home = ()=>{
                             </div>
                         </div>
                     </div>
-                    <div className={styles.flex}>
-                        <img src={home_img} alt="colis"/>
-                    </div>
                     <div className={styles.stepsIntro}>
                         <div>
                             <h3>Comment ça marche?</h3>
@@ -114,6 +111,35 @@ const Home = ()=>{
                                 <img src={livraisons} alt="icone-livraison-express"/>
                             </div>
                         </div>
+                        <div>
+                        <h3>Pourquoi choisir Dango Import ?</h3>
+                        <p>Votre partenaire fiable pour vos achats en Chine, livrés en Afrique de l'Ouest.</p>
+                    </div>
+                    <div className={styles.flex}>
+                
+                        <div>
+                            <h3>Etudes Newsletter</h3>
+                            <ul>
+                                <li>Accès prioritaire aux offres spéciales</li>
+                                <li>Conseils d'experts sur l'achat en Chine</li>
+                                <li>Communication claire et accompagnement personnalisé</li>
+                                <li>Tendancs du marché asiatique</li>
+                                <li>Suivi des delais & processus d'importation</li>
+                                <li>Histoires de clients & témoignages inspirants</li>
+                                <li>Guides pratiques & tutoriels</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Ce qui nous distingue</h3>
+                            <ul>
+                                <li>Livraison directe et sécurisée</li>
+                                <li>Sourcing fiable de founisseurs</li>
+                                <li>Communication claire et accompagnement <br/>personnalisé</li>
+                                <li>Gains de temps et économies</li>
+                                <li>Satisfaction garantie</li>
+                            </ul>
+                        </div>
+                    </div>
                     </div>
                 </div>
             </main>
