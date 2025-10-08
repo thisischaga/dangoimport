@@ -12,6 +12,9 @@ import PerFinance from './blog/PerFinance';
 import Epargne from './blog/Epargne';
 import Blog from './blog/Blog';
 import Countdown from './components/Countdown'; // créer un composant Countdown
+import ArticleThree from './blog/ArticleThree';
+import ArticleFour from './blog/ArticleFour';
+import ArticleFive from './blog/ArticleFive';
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -32,6 +35,9 @@ function App() {
           <Route path='/blog/articles' element={<Blog/>}/>
           <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
           <Route path='/blog/epargne' element={<Epargne/>}/>
+          <Route path='/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie' element={<ArticleThree/>}/>
+          <Route path='/blog/Lhistoire-de-Mamadou-apprendre-par-lechec' element={<ArticleFour/>}/>
+          <Route path='/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur' element={<ArticleFive/>}/>
         </Routes>
     </Router>
   );

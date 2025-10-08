@@ -96,8 +96,8 @@ const Blog = () => {
                     <img src={articleThree} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lentrepreneuriat-rêve-de-liberté-ou-véritable-école-de-survie"
-                        onClick={(e) => handleClick(e, "/blog/Lentrepreneuriat-rêve-de-liberté-ou-véritable-école-de-survie")}
+                        href="/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie"
+                        onClick={(e) => handleClick(e, "/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie")}
                       >
                         L’entrepreneuriat : rêve de liberté ou véritable école de survie ?
                       </a>
@@ -107,8 +107,8 @@ const Blog = () => {
                     <img src={articleFour} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lhistoire-de-Mamadou-apprendre-par-l’échec"
-                        onClick={(e) => handleClick(e, "/blog/Lhistoire-de-Mamadou-apprendre-par-l’échec")}
+                        href="/blog/Lhistoire-de-Mamadou-apprendre-par-lechec"
+                        onClick={(e) => handleClick(e, "/blog/Lhistoire-de-Mamadou-apprendre-par-lechec")}
                       >
                         L’histoire de Mamadou : apprendre par l’échec
                       </a>
@@ -118,8 +118,8 @@ const Blog = () => {
                     <img src={articleFive} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lintelligence-financière-indispensable-même-si-vous-nêtes-pas-entrepreneur"
-                        onClick={(e) => handleClick(e, "/blog/Lintelligence-financière-indispensable-même-si-vous-nêtes-pas-entrepreneur")}
+                        href="/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur"
+                        onClick={(e) => handleClick(e, "/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur")}
                       >
                         L’intelligence financière : indispensable même si vous n’êtes pas entrepreneur
                       </a>
