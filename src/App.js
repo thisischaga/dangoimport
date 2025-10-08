@@ -36,8 +36,8 @@ function App() {
           <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
           <Route path='/blog/epargne' element={<Epargne/>}/>
           <Route path='/blog/entreprendre' element={<ArticleThree/>}/>
-          <Route path='/blog/hustoire-de-mamadou' element={<ArticleFour/>}/>
-          <Route path='/blog/intéligence-financière' element={<ArticleFive/>}/>
+          <Route path='/blog/histoire-de-mamadou' element={<ArticleFour/>}/>
+          <Route path='/blog/intelligence-financière' element={<ArticleFive/>}/>
         </Routes>
     </Router>
   );
