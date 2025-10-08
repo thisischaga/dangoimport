@@ -35,9 +35,9 @@ function App() {
           <Route path='/blog/articles' element={<Blog/>}/>
           <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
           <Route path='/blog/epargne' element={<Epargne/>}/>
-          <Route path='/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie' element={<ArticleThree/>}/>
-          <Route path='/blog/Lhistoire-de-Mamadou-apprendre-par-lechec' element={<ArticleFour/>}/>
-          <Route path='/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur' element={<ArticleFive/>}/>
+          <Route path='/blog/entreprendre' element={<ArticleThree/>}/>
+          <Route path='/blog/hustoire-de-mamadou' element={<ArticleFour/>}/>
+          <Route path='/blog/intéligence-financière' element={<ArticleFive/>}/>
         </Routes>
     </Router>
   );

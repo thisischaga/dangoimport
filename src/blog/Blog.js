@@ -96,8 +96,8 @@ const Blog = () => {
                     <img src={articleThree} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie"
-                        onClick={(e) => handleClick(e, "/blog/Lentrepreneuriat-reve-de-liberté-ou-veritable-ecole-de-survie")}
+                        href="/blog/entreprendre"
+                        onClick={(e) => handleClick(e, "/blog/entreprendre")}
                       >
                         L’entrepreneuriat : rêve de liberté ou véritable école de survie ?
                       </a>
@@ -107,8 +107,8 @@ const Blog = () => {
                     <img src={articleFour} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lhistoire-de-Mamadou-apprendre-par-lechec"
-                        onClick={(e) => handleClick(e, "/blog/Lhistoire-de-Mamadou-apprendre-par-lechec")}
+                        href="/blog/hustoire-de-mamadou"
+                        onClick={(e) => handleClick(e, "/blog/hustoire-de-mamadou")}
                       >
                         L’histoire de Mamadou : apprendre par l’échec
                       </a>
@@ -118,8 +118,8 @@ const Blog = () => {
                     <img src={articleFive} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur"
-                        onClick={(e) => handleClick(e, "/blog/Lintelligence-financiere-indispensable-meme-si-vous-netes-pas-entrepreneur")}
+                        href="/blog/intéligence-financière"
+                        onClick={(e) => handleClick(e, "/blog/intéligence-financière")}
                       >
                         L’intelligence financière : indispensable même si vous n’êtes pas entrepreneur
                       </a>
