@@ -3,7 +3,6 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import styles from "./blog.module.css";
 import financePerso from "../images/financePerso.jpg";
-import une_personne from "../images/une-personne.png";
 import epargne from "../images/epargne.jpg";
 import articleThree from "../images/article3.jpeg";
 import articleFour from "../images/article4.jpeg";
@@ -12,7 +11,7 @@ import articleFive from "../images/article5.jpeg";
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState(null);
-  const [countdown, setCountdown] = useState(5); 
+  const [countdown, setCountdown] = useState(5);
 
   const handleClick = (e, url) => {
     e.preventDefault();
@@ -21,38 +20,51 @@ const Blog = () => {
     setCountdown(5);
   };
 
+  // Compte à rebours
   useEffect(() => {
-    let timer;
-    if (showAd && countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    }
+    if (!showAd) return;
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [showAd, countdown]);
 
+  // Chargement du script de publicité
   useEffect(() => {
-    if (showAd) {
-      const adContainer = document.getElementById("ad-container");
-      if (adContainer) {
-        adContainer.innerHTML = `
-          <!-- annonce1 -->
-          <ins class="adsbygoogle"
-               style="display:block"
-               data-ad-client="ca-pub-2759671915983740"
-               data-ad-slot="9954163361"
-               data-ad-format="auto"
-               data-full-width-responsive="true"></ins>
-        `;
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-          console.error("AdSense error:", e);
-        }
-      }
+    if (!showAd) return;
 
-      return () => {
-        if (adContainer) adContainer.innerHTML = ""; 
-      };
+    const adContainer = document.getElementById("ad-container");
+    if (adContainer) {
+      // Nettoyage avant ajout
+      adContainer.innerHTML = "";
+
+      // Script de configuration
+      const configScript = document.createElement("script");
+      configScript.type = "text/javascript";
+      configScript.innerHTML = `
+        atOptions = {
+          'key': 'a75182f28931d1c30b3fb4990a516b63',
+          'format': 'iframe',
+          'height': 250,
+          'width': 300,
+          'params': {}
+        };
+      `;
+
+      // Script d’appel de la pub
+      const invokeScript = document.createElement("script");
+      invokeScript.type = "text/javascript";
+      invokeScript.src =
+        "//www.highperformanceformat.com/a75182f28931d1c30b3fb4990a516b63/invoke.js";
+
+      // Ajout au DOM
+      adContainer.appendChild(configScript);
+      adContainer.appendChild(invokeScript);
     }
+
+    // Nettoyage quand la pub disparaît
+    return () => {
+      if (adContainer) adContainer.innerHTML = "";
+    };
   }, [showAd]);
 
   return (
@@ -99,29 +111,37 @@ const Blog = () => {
                         href="/blog/entreprendre"
                         onClick={(e) => handleClick(e, "/blog/entreprendre")}
                       >
-                        L’entrepreneuriat : rêve de liberté ou véritable école de survie ?
+                        L’entrepreneuriat : rêve de liberté ou véritable école
+                        de survie ?
                       </a>
                     </p>
                   </div>
+
                   <div className={styles.item}>
                     <img src={articleFour} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/hustoire-de-mamadou"
-                        onClick={(e) => handleClick(e, "/blog/hustoire-de-mamadou")}
+                        href="/blog/histoire-de-mamadou"
+                        onClick={(e) =>
+                          handleClick(e, "/blog/histoire-de-mamadou")
+                        }
                       >
                         L’histoire de Mamadou : apprendre par l’échec
                       </a>
                     </p>
                   </div>
+
                   <div className={styles.item}>
                     <img src={articleFive} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/intéligence-financière"
-                        onClick={(e) => handleClick(e, "/blog/intéligence-financière")}
+                        href="/blog/intelligence-financière"
+                        onClick={(e) =>
+                          handleClick(e, "/blog/intelligence-financière")
+                        }
                       >
-                        L’intelligence financière : indispensable même si vous n’êtes pas entrepreneur
+                        L’intelligence financière : indispensable même si vous
+                        n’êtes pas entrepreneur
                       </a>
                     </p>
                   </div>
@@ -135,21 +155,22 @@ const Blog = () => {
 
       {showAd && (
         <div className={styles.adOverlay}>
-          <p>La pub se ferme dans {countdown} secondes...</p>
-
-          {countdown === 0 && (
-            <button
-              className={styles.skipButton}
-              onClick={() => {
-                setShowAd(false);
-                if (redirectUrl) window.location.href = redirectUrl; 
-              }}
-            >
-              Fermer et continuer
-            </button>
-          )}
-
-          <div id="ad-container" className={styles.adFullScreen}></div>
+          <div className={styles.adContent}>
+            <h3>Annonce</h3>
+            <div id="ad-container" className={styles.adBox}></div>
+            <p>La pub se ferme dans {countdown} secondes...</p>
+            {countdown === 0 && (
+              <button
+                className={styles.skipButton}
+                onClick={() => {
+                  setShowAd(false);
+                  if (redirectUrl) window.location.href = redirectUrl;
+                }}
+              >
+                Fermer et continuer
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
