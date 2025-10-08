@@ -138,26 +138,7 @@ const Blog = () => {
         </>
       )}
 
-      {showAd && (
-        <div className={styles.adOverlay}>
-          <div className={styles.adContent}>
-            <h3>Annonce sponsorisée</h3>
-            <div id="ad-container" className={styles.adBox}></div>
-            <p>La pub se ferme dans {countdown} secondes...</p>
-            {countdown === 0 && (
-              <button
-                className={styles.skipButton}
-                onClick={() => {
-                  setShowAd(false);
-                  if (redirectUrl) window.location.href = redirectUrl;
-                }}
-              >
-                Fermer et continuer
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
