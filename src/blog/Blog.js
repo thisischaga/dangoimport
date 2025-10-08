@@ -28,7 +28,7 @@ const Blog = () => {
     return () => clearTimeout(timer);
   }, [showAd, countdown]);
 
-  // Injection du script de pub
+  // Injection du script de pub RevenueCPM
   useEffect(() => {
     if (!showAd) return;
 
@@ -36,28 +36,13 @@ const Blog = () => {
     if (adContainer) {
       adContainer.innerHTML = "";
 
-      // Script de configuration
-      const configScript = document.createElement("script");
-      configScript.type = "text/javascript";
-      configScript.innerHTML = `
-        atOptions = {
-          'key' : 'a75182f28931d1c30b3fb4990a516b63',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      `;
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src =
+        "//pl27546767.revenuecpmgate.com/32/6e/6c/326e6c39bd5847b383f209f01c2a3d69.js";
+      script.async = true;
 
-      // Script d'appel du fournisseur
-      const invokeScript = document.createElement("script");
-      invokeScript.type = "text/javascript";
-      invokeScript.src =
-        "//www.highperformanceformat.com/a75182f28931d1c30b3fb4990a516b63/invoke.js";
-
-      // Injection dans le conteneur
-      adContainer.appendChild(configScript);
-      adContainer.appendChild(invokeScript);
+      adContainer.appendChild(script);
     }
 
     return () => {
@@ -156,7 +141,7 @@ const Blog = () => {
       {showAd && (
         <div className={styles.adOverlay}>
           <div className={styles.adContent}>
-            <h3>Annonce</h3>
+            <h3>Annonce sponsorisée</h3>
             <div id="ad-container" className={styles.adBox}></div>
             <p>La pub se ferme dans {countdown} secondes...</p>
             {countdown === 0 && (
