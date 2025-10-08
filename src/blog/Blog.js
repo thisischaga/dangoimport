@@ -28,13 +28,12 @@ const Blog = () => {
     return () => clearTimeout(timer);
   }, [showAd, countdown]);
 
-  // Chargement du script de publicité
+  // Injection du script de pub
   useEffect(() => {
     if (!showAd) return;
 
     const adContainer = document.getElementById("ad-container");
     if (adContainer) {
-      // Nettoyage avant ajout
       adContainer.innerHTML = "";
 
       // Script de configuration
@@ -42,35 +41,36 @@ const Blog = () => {
       configScript.type = "text/javascript";
       configScript.innerHTML = `
         atOptions = {
-          'key': 'a75182f28931d1c30b3fb4990a516b63',
-          'format': 'iframe',
-          'height': 250,
-          'width': 300,
-          'params': {}
+          'key' : 'a75182f28931d1c30b3fb4990a516b63',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
         };
       `;
 
-      // Script d’appel de la pub
+      // Script d'appel du fournisseur
       const invokeScript = document.createElement("script");
       invokeScript.type = "text/javascript";
       invokeScript.src =
         "//www.highperformanceformat.com/a75182f28931d1c30b3fb4990a516b63/invoke.js";
 
-      // Ajout au DOM
+      // Injection dans le conteneur
       adContainer.appendChild(configScript);
       adContainer.appendChild(invokeScript);
     }
 
-    // Nettoyage quand la pub disparaît
     return () => {
-      if (adContainer) adContainer.innerHTML = "";
+      if (document.getElementById("ad-container")) {
+        document.getElementById("ad-container").innerHTML = "";
+      }
     };
   }, [showAd]);
 
   return (
     <div className={styles.blogPage}>
       {!showAd && (
-        <div>
+        <>
           <Header />
           <main>
             <div className={styles.mainContainer}>
@@ -150,7 +150,7 @@ const Blog = () => {
             </div>
           </main>
           <Footer />
-        </div>
+        </>
       )}
 
       {showAd && (
