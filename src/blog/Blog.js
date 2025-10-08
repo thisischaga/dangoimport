@@ -5,6 +5,9 @@ import styles from "./blog.module.css";
 import financePerso from "../images/financePerso.jpg";
 import une_personne from "../images/une-personne.png";
 import epargne from "../images/epargne.jpg";
+import articleThree from "../images/article3.jpeg";
+import articleFour from "../images/article4.jpeg";
+import articleFive from "../images/article5.jpeg";
 
 const Blog = () => {
   const [showAd, setShowAd] = useState(false);
@@ -90,14 +93,35 @@ const Blog = () => {
                   </div>
 
                   <div className={styles.item}>
-                    <img src={une_personne} alt="une personne" />
+                    <img src={articleThree} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/dango"
-                        onClick={(e) => handleClick(e, "/blog/dango")}
+                        href="/blog/Lentrepreneuriat-rêve-de-liberté-ou-véritable-école-de-survie"
+                        onClick={(e) => handleClick(e, "/blog/Lentrepreneuriat-rêve-de-liberté-ou-véritable-école-de-survie")}
                       >
-                        Pourquoi choisir Dango Import pour vos achats depuis la
-                        Chine?
+                        L’entrepreneuriat : rêve de liberté ou véritable école de survie ?
+                      </a>
+                    </p>
+                  </div>
+                  <div className={styles.item}>
+                    <img src={articleFour} alt="une personne" />
+                    <p>
+                      <a
+                        href="/blog/Lhistoire-de-Mamadou-apprendre-par-l’échec"
+                        onClick={(e) => handleClick(e, "/blog/Lhistoire-de-Mamadou-apprendre-par-l’échec")}
+                      >
+                        L’histoire de Mamadou : apprendre par l’échec
+                      </a>
+                    </p>
+                  </div>
+                  <div className={styles.item}>
+                    <img src={articleFive} alt="une personne" />
+                    <p>
+                      <a
+                        href="/blog/Lintelligence-financière-indispensable-même-si-vous-nêtes-pas-entrepreneur"
+                        onClick={(e) => handleClick(e, "/blog/Lintelligence-financière-indispensable-même-si-vous-nêtes-pas-entrepreneur")}
+                      >
+                        L’intelligence financière : indispensable même si vous n’êtes pas entrepreneur
                       </a>
                     </p>
                   </div>
