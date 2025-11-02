@@ -37,7 +37,7 @@ function App() {
           <Route path='/blog/epargne' element={<Epargne/>}/>
           <Route path='/blog/entreprendre' element={<ArticleThree/>}/>
           {/*<Route path='/blog/histoire-de-mamadou' element={<ArticleFour/>}/>*/}
-          <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFive/>}/>
+          <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFour/>}/>
         </Routes>
     </Router>
   );
