@@ -101,7 +101,8 @@ main {
 
 .stepsContainer {
   flex: 1 1 400px;
-  background: rgba(17, 54, 80, 0.6); 
+  /*background: rgba(17, 54, 80, 0.6); */
+  border: 1px solid rgba(17, 54, 80, 0.6);
   border-radius: 12px;
   padding: 2rem;
   text-align: left;

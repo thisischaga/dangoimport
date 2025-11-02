@@ -9,8 +9,9 @@ const ArticleThree = () => {
         <div className={styles.articlePage}>
             <div className={styles.articleContainer}>
                 <div className={styles.articleHeader}>
-                    <h1>L’entrepreneuriat : rêve de liberté ou véritable école de survie ?</h1>
+                    
                 </div>
+                    <h1>L’entrepreneuriat : rêve de liberté ou véritable école de survie ?</h1>
                 <main>
                     <div >
                         <div className={styles.intro}>
@@ -78,6 +79,47 @@ const ArticleThree = () => {
                             <p>
                                 👉 Ces chiffres doivent alerter mais pas décourager. La leçon, c’est qu’entreprendre sans 
                                 préparation revient à s’exposer inutilement
+                            </p>
+                            <h2>L’histoire de Mamadou : apprendre par l’échec</h2>
+                            <p>
+                                Pour illustrer, prenons l’exemple de Mamadou (histoire inspirée 
+                                de situations réelles dans l’import-export).<br/>
+
+                                
+                            </p>
+                            <p> 
+                               Mamadou, passionné de commerce, décide d’importer des ustensiles de cuisine depuis la Chine. Sa première commande : 500 pièces financées à crédit. Mais à l’arrivée, 20 % sont défectueuses, 
+                                les frais de douane explosent et sa marge s’effondre.<br/> 
+
+                                Échec cuisant ? Oui. Mais Mamadou ne baisse pas les bras. Il apprend à demander des échantillons, à négocier les MOQ, à contrôler la qualité avant expédition, et à tester la demande par de petites préventes. Deux ans plus tard, il relance avec un lot réduit dans une niche précise. Résultat : 
+                                une activité viable et en croissance.<br/>
+
+                                <strong>Moralité :</strong> ce qui tue une entreprise n’est pas l’échec en soi, 
+                                mais l’incapacité à apprendre de ses erreurs.<br/>
+                            </p>
+
+                            <h2>L’intelligence financière : indispensable même si vous n’êtes pas entrepreneur</h2>
+                            <p>
+                                La vérité est simple : même si vous ne créez jamais d’entreprise, vous avez besoin de l’intelligence financière pour survivre et avancer.
+                            </p>
+
+                            <p>
+                
+                                <li>
+                                    ✅ Savoir gérer son argent (budget, épargne, investissements).
+                                </li>
+                                <li>
+                                    ✅ Développer un revenu parallèle (freelance, e-commerce, consulting).
+                                </li>
+                                <li>
+                                    ✅ Comprendre les règles du business et du digital.
+                                </li>
+                                
+                                
+                            </p>
+                            
+                            <p>
+                                💡 Dans une économie mondialisée, la sécurité n’est plus garantie par un diplôme ou un emploi fixe. Ce monde appartient à ceux qui apprennent et s’adaptent.
                             </p>
                         </div>
                     </div>
