@@ -63,19 +63,18 @@ const Blog = () => {
                         L’histoire de Mamadou : apprendre par l’échec
                       </a>
                     </p>
-                  </div>
+                  </div>*/}
 
                   <div className={styles.item}>
                     <img src={articleFive} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/intelligence-financière"
+                        href="/blog/La prise de risque en entreprenneuriat"
                       >
-                        L’intelligence financière : indispensable même si vous
-                        n’êtes pas entrepreneur
+                        La prise de risque en entreprenneuriat: art de miser sans se perdre
                       </a>
                     </p>
-                  </div>*/}
+                  </div>
                 </div>
               </section>
             </div>
