@@ -59,9 +59,10 @@ main button:hover{
     display: flex;
     place-content: center;
     align-items: center;
-    background-color: #11365079;
+    /*background-color: #11365079;*/
     color: #fff;
-    border: 1px solid #0000003e;
+    /*border: 1px solid #0000003e;*/
+    border: 1px solid rgba(17, 54, 80, 0.6);
     border-radius: 20px;
     font-size: 15px;
     width: 400px;
