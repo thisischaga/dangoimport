@@ -69,7 +69,7 @@ const Blog = () => {
                     <img src={articleFive} alt="une personne" />
                     <p>
                       <a
-                        href="/blog/La prise de risque en entreprenneuriat"
+                        href="/blog/la prise de risque en entreprenneuriat"
                       >
                         La prise de risque en entreprenneuriat: art de miser sans se perdre
                       </a>
