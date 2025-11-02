@@ -54,7 +54,7 @@ const Blog = () => {
                     </p>
                   </div>
 
-                  <div className={styles.item}>
+                  {/*<div className={styles.item}>
                     <img src={articleFour} alt="une personne" />
                     <p>
                       <a
@@ -75,7 +75,7 @@ const Blog = () => {
                         n’êtes pas entrepreneur
                       </a>
                     </p>
-                  </div>
+                  </div>*/}
                 </div>
               </section>
             </div>

@@ -9,9 +9,9 @@ const ArticleThree = () => {
         <div className={styles.articlePage}>
             <div className={styles.articleContainer}>
                 <div className={styles.articleHeader}>
-                    
-                </div>
                     <h1>L’entrepreneuriat : rêve de liberté ou véritable école de survie ?</h1>
+                </div>
+                    
                 <main>
                     <div >
                         <div className={styles.intro}>
