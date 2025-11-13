@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './articleFour.module.css';
 import Footer from '../components/Footer';
+import AdSlot from '../components/AdSlot';
 
 
 const ArticleFour = () => {
@@ -26,6 +27,7 @@ const ArticleFour = () => {
                             </p>
                                 
                         </div>
+                        <AdSlot/>
                         <div className={styles.articleContent}>
                             <h2>2. Le risque n'est pas synonyme d'imprudence </h2>
                             

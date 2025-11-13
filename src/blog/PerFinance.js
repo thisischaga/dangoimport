@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './perFinance.module.css';
 import Footer from '../components/Footer';
+import AdSlot from '../components/AdSlot';
 
 
 const PerFinance = () => {
@@ -23,6 +24,7 @@ const PerFinance = () => {
                                 ses piliers, ainsi que des conseils pratiques pour améliorer la gestion de son argent.
                             </p>
                         </div>
+                        <AdSlot/>
                         <div className={styles.articleContent}>
                             <h2>1. Qu’est-ce que la finance personnelle ?</h2>
                             <p>
