@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './epargne.module.css';
 import Footer from '../components/Footer';
+import AdSlot from '../components/AdSlot';
 
 
 const Epargne = () => {
@@ -24,6 +25,7 @@ const Epargne = () => {
                                 les différentes méthodes, et des conseils pratiques pour mieux gérer votre argent.
                             </p>
                         </div>
+                        <AdSlot/>
                         <div className={styles.articleContent}>
                             <h2>Qu’est-ce que l’épargne ?</h2>
                             <p>

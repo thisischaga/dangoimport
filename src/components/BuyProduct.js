@@ -146,7 +146,7 @@ const BuyProduct = ({image, name, price, description, isVisibled})=>{
                                 <textArea type='text' placeholder='Ajouter des préférences pour ce produit...'  onChange={handlePrefChange} requiredvalue={userPref}/><br/>
                                 
                                 <label>Téléphone <span>*</span></label><br/>
-                                <input type='text' placeholder='EX: +22899152036'  onChange={handleUserNumberChange} value={userNumber} required/><br/>
+                                <input type='text' placeholder='+22899152036'  onChange={handleUserNumberChange} value={userNumber} required/><br/>
                                 <label>Quantité <span>*</span></label><br/>
                                 <input type='number' placeholder='Quantité...'  onChange={handlePqChange} value={productQuantity} required/><br/>
                                 <label>Email <span>*</span></label>

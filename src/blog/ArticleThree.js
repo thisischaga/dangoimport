@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './articleThree.module.css';
 import Footer from '../components/Footer';
+import AdSlot from '../components/AdSlot';
 
 
 const ArticleThree = () => {
@@ -21,6 +22,7 @@ const ArticleThree = () => {
                                 l’entrepreneuriat est une opportunité immense… mais aussi un terrain hostile.
                             </p>
                         </div>
+                        <AdSlot/>
                         <div className={styles.articleContent}>
                             <h2>La face cachée de l’entrepreneuriat</h2>
                             

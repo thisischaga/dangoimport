@@ -24,6 +24,7 @@ main {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   font-weight: 400;
+  color: #fff;
 }
 .btns {
   display: flex;
@@ -100,8 +101,10 @@ main {
 }
 
 .stepsContainer {
-  flex: 1 1 400px;
+  
+  display: flex;
   /*background: rgba(17, 54, 80, 0.6); */
+  flex-direction: column;
   border: 1px solid rgba(17, 54, 80, 0.6);
   border-radius: 12px;
   padding: 2rem;

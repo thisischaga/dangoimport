@@ -9,6 +9,11 @@ import slide3 from '../images/slide3.jpg';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import BuyProduct from "./BuyProduct";
+import product1 from '../images/product1.png';
+import product2 from '../images/product2.png';
+import product3 from '../images/product3.png';
+import product4 from '../images/montre1.png';
+import product5 from '../images/montre2.png';
 import axios from "axios";
 
 const Ecom = () => {
@@ -20,7 +25,7 @@ const Ecom = () => {
   const [productDescription, setProductDescription] = useState('');
 
   const [showForm, setShowForm] = useState(false);
-  const [products, setProducts] = useState([]);
+  //const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const settings = {
@@ -35,23 +40,49 @@ const Ecom = () => {
     adaptiveHeight: true,
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-            'https://dangoimport-server.onrender.com/api/products'
-            );
-            setProducts(response.data);
-        } catch (err) {
-            console.error('Erreur', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const productOne = {
+    id: 1,
+    productImg: product4,
+    price: '13 000',
+    name: 'G-Shock',
+    description: "Les montres G-Shock sont des montres robustes et stylées, conçues pour résister aux chocs, à l’eau et aux conditions extrêmes tout en offrant un design moderne et sportif. Elles sont disponibles en toutes couleurs et aux prix forfaitaires de 13000f"
+  };
+  const productTwo = {
+      id: 2,
+      productImg: product1,
+      price: '12 000',
+      name: 'Gaecrolft',
+      description: 'GAEGRLOF – Design Urbain & Confort Moderne. Affirme ton style avec ces sneakers GAEGRLOF au look audacieux ! Dotées d’une semelle épaisse et ergonomique, elles assurent un confort optimal tout au long de la journée. Leur design bicolore noir et blanc apporte une touche tendance et urbaine, parfaite pour les tenues streetwear. Le laçage épais et la finition soignée en font une paire à la fois stylée et résistante, idéale pour affronter la ville avec assurance.'
+  };
+  const productThree = {
+    id: 3,
+    productImg: product5,
+    price: '17 000',
+    name: 'Poedagar',
+    description: "La montre Poedagar est un accessoire élégant et robuste conçu pour ceux qui recherchent un style luxueux à prix abordable. Avec son boîtier en acier inoxydable et son verre minéral résistant aux rayures, elle s’adapte aussi bien aux environnements professionnels qu’aux sorties décontractées. Son mouvement à quartz (ou automatique selon le modèle) assure une précision fiable au quotidien. Dotée d’un bracelet en cuir ou en métal, elle offre un confort optimal et un look soigné. Son affichage analogique, parfois accompagné d’un indicateur de date ou de jour, la rend pratique et esthétique. Enfin, grâce à son étanchéité 3ATM, elle résiste aux éclaboussures, mais il est préférable d’éviter l’immersion."
+  };
+  /*const productFour = {
+      id: 4,
+      productImg: 'https://dangoimport-server.onrender.com/images/sac1.png',
+      price: '3 000',
+      name: 'Sac à nattes',
+      description: "Sac pour toute genre d'usage durable, pratique, jolie, tout pour votre confort . Vous permet d'être élégant lors de vos petites sorties ou lors d'un voyage. Vous disposez d'un large choix de couleurs et de motifs en plus des différents formats petit sac pour transporter vos affaires : 500f 700f 1000f 2000f sac en valise 3000f 5000f sac en forme de panier parfait pour ranger votre linge, vos affaires 3000f 4000f 5000f. N'hésitez pas à préciser vos préferences dans la description du formulaire d'achat"
+  };
+  const productFive = {
+    id: 5,
+    productImg: 'https://dangoimport-server.onrender.com/images/blueberry.png',
+    price: "1-20 : 500 fcfa l'unité,  20- 50 : 300 fcfa l'unité, 50- 100 : 200 fcfa l'unité",
+    name: 'PUQUIANNA',
+      description: "Masque de visage Naturel hydratant, rend la peau douce, élimine les acnés, les imperfections, les peau mortes, antirides etc... disponible"
+  };*/
+  const products = [
+    productOne,
+    productTwo,
+    productThree,
+    //productFour,
+    //productFive
+  ]
 
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
@@ -100,7 +131,7 @@ const Ecom = () => {
             <div className={styles.items}>
                 <div>
                 <div className={styles.productContainer}>
-                    {loading && <p>Chargement...</p>}
+                    {/*loading && <p>Chargement...</p>*/}
                     {products && products.map((item) => (
                     <div className={styles.item} key={item.id || item._id}>
                         <img src={item.productImg} alt="productImg" />
