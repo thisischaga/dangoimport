@@ -80,7 +80,7 @@ const Ecom = () => {
   };
   const productSix = {
     id: 5,
-    productImg: pince,
+    productImg: levre,
     price: "1 500",
     name: 'Sérum de lèvres',
     description: "Sérum de lèvres hydratante bien les lèvres bon éclat, ultra brillant"
