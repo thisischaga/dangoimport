@@ -1,267 +1,449 @@
 import { useState } from 'react';
-import styles from './devisForm.module.css';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import styles from './devisForm.module.css';
 
 const DevisForm = ({ showForm }) => {
-
-  const navigate = useNavigate();
-
-  const [stepOne, setStepOne] = useState(true);
-  const [stepTwo, setStepTwo] = useState(false);
-  const [stepThree, setStepThree] = useState(false);
-  const [finalStep, setFinalStep] = useState(false);
-  const [otpSystem, setOtpSystem] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [otpStep, setOtpStep] = useState(false);
   const [messageBoxIs, setMessageBoxIs] = useState(false);
 
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [categorie, setCategorie] = useState('');
-  const [productQuantity, setProductQuantity] = useState(1);
-  const [picture, setPicture] = useState(null);
-  const [productDescription, setProductDescription] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [otp, setOtp] = useState('');
-  const [checked, setChecked] = useState(true);
+  const [formData, setFormData] = useState({
+    userName: '',
+    userEmail: '',
+    categorie: '',
+    productQuantity: 1,
+    picture: null,
+    productDescription: '',
+    selectedCountry: '',
+    otp: '',
+    checked: true,
+  });
 
-  const [backendMessage, setBackendMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(null);
-  const [isError, setIsError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hideBtn, setHideBtn] = useState(false);
+  const [state, setState] = useState({
+    backendMessage: '',
+    isSuccess: null,
+    isError: null,
+    isLoading: false,
+    hideBtn: false,
+  });
 
-  const status = 'En attente';
-  const benin = 'Bénin';
-  const togo = 'Togo';
+  const categories = [
+    'Électronique',
+    'Vêtements',
+    'Alimentation',
+    'Maison',
+    'Sport',
+    'Beauté',
+    'Autres (précisez dans la description)',
+  ];
 
-  const handleUserNameChange = (e) => setUserName(e.target.value);
-  const handleUserEmailChange = (e) => setUserEmail(e.target.value);
-  const handleCatChange = (e) => setCategorie(e.target.value);
-  const handleDescptChange= (e) => setProductDescription(e.target.value);
-  const handlePqChange = (e) => setProductQuantity(e.target.value);
-  const handleCountryChange = (e) => setSelectedCountry(e.target.value);
-  const handleOtpChange = (e) => setOtp(e.target.value);
-  const toggleCheck = () => setChecked(!checked);
+  const handleInputChange = (field) => (e) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
 
   const handlePictureChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => setPicture(reader.result);
+      reader.onload = () => setFormData({ ...formData, picture: reader.result });
       reader.readAsDataURL(file);
     }
   };
 
-  const hiddeForm = () => {
+  const hideForm = () => {
     showForm(false);
     window.location.reload();
   };
 
-  const showStepTwo = (e) => {
-    e.preventDefault();
-    const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!userName || !userEmail) {
-      alert('Veuillez remplir tous les champs !');
-    } else if (!emailValidate.test(userEmail)) {
-      alert('Entrez un email valide');
-    } else {
-      setStepOne(false);
-      setStepTwo(true);
+  const validateStep = (step) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    switch (step) {
+      case 1:
+        if (!formData.userName || !formData.userEmail || !formData.selectedCountry) {
+          alert('Veuillez remplir tous les champs obligatoires !');
+          return false;
+        }
+        if (!emailRegex.test(formData.userEmail)) {
+          alert('Veuillez entrer un email valide');
+          return false;
+        }
+        return true;
+      case 2:
+        if (!formData.categorie || !formData.productQuantity) {
+          alert('Veuillez remplir tous les champs obligatoires !');
+          return false;
+        }
+        return true;
+      case 3:
+        if (!formData.productDescription) {
+          alert('Veuillez ajouter une description du produit !');
+          return false;
+        }
+        return true;
+      default:
+        return true;
     }
   };
 
-  const showStepThree = (e) => {
+  const nextStep = (e) => {
     e.preventDefault();
-    if (!categorie || !productQuantity) {
-      alert('Veuillez remplir tous les champs !');
-    } else {
-      setStepTwo(false);
-      setStepThree(true);
+    if (validateStep(currentStep)) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
-  const showFinalStep = (e) => {
+  const prevStep = (e) => {
     e.preventDefault();
-    setStepThree(false);
-    setFinalStep(true);
+    setCurrentStep(currentStep - 1);
   };
 
-  const toOtpSystem = async (e) => {
+  const sendOtp = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setHideBtn(true);
+    setState({ ...state, isLoading: true, hideBtn: true });
+    
     try {
-      const res = await axios.post('https://dangoimport-server.onrender.com/api/send-otp', { userEmail });
+      const res = await axios.post(
+        'https://dangoimport-server.onrender.com/api/send-otp',
+        { userEmail: formData.userEmail }
+      );
+      
       if (res.data.message === 'OTP envoyé avec succès') {
-        setFinalStep(false);
-        setOtpSystem(true);
+        setOtpStep(true);
+        setCurrentStep(0);
       }
-      setBackendMessage(res.data.message);
+      setState({ ...state, backendMessage: res.data.message, isLoading: false });
     } catch (err) {
-      setBackendMessage('Erreur lors de l’envoi de l’OTP');
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
+      setState({
+        ...state,
+        backendMessage: 'Erreur lors de l\'envoi de l\'OTP',
+        isError: true,
+        isLoading: false,
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setState({ ...state, isLoading: true });
+
     try {
-      const otpResponse = await axios.post('https://dangoimport-server.onrender.com/api/verify-otp', {
-        userEmail,
-        otp,
-      });
+      const otpResponse = await axios.post(
+        'https://dangoimport-server.onrender.com/api/verify-otp',
+        { userEmail: formData.userEmail, otp: formData.otp }
+      );
 
       if (otpResponse.data.message !== 'OTP vérifié avec succès') {
-        setBackendMessage('OTP invalide ou expiré.');
-        setIsError(true);
+        setState({
+          ...state,
+          backendMessage: 'OTP invalide ou expiré.',
+          isError: true,
+          isLoading: false,
+        });
         setMessageBoxIs(true);
         return;
       }
 
-      const commandeResponse = await axios.post('https://dangoimport-server.onrender.com/commander', {
-        userName,
-        userEmail,
-        categorie,
-        productQuantity,
-        picture,
-        productDescription,
-        selectedCountry,
-        status,
-      });
+      const commandeResponse = await axios.post(
+        'https://dangoimport-server.onrender.com/commander',
+        {
+          ...formData,
+          status: 'En attente',
+        }
+      );
 
-      setBackendMessage(commandeResponse.data.message);
-      setIsSuccess(true);
-      setOtpSystem(false);
+      setState({
+        ...state,
+        backendMessage: commandeResponse.data.message,
+        isSuccess: true,
+        isLoading: false,
+      });
+      setOtpStep(false);
+      setMessageBoxIs(true);
     } catch (error) {
-      const message = error.response?.data?.message || 'Une erreur s’est produite. Veuillez réessayer.';
-      setBackendMessage(message);
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
+      const message = error.response?.data?.message || 'Une erreur s\'est produite.';
+      setState({
+        ...state,
+        backendMessage: message,
+        isError: true,
+        isLoading: false,
+      });
       setMessageBoxIs(true);
     }
   };
 
-  const goBackStep = (step) => (e) => {
-    e.preventDefault();
-    setStepOne(false);
-    setStepTwo(false);
-    setStepThree(false);
-    setFinalStep(false);
-    setOtpSystem(false);
-    step();
-  };
+  const renderProgressBar = () => (
+    <div className={styles.progressBar}>
+      {[1, 2, 3, 4].map((step) => (
+        <div
+          key={step}
+          className={`${styles.progressStep} ${
+            currentStep >= step ? styles.progressStepActive : ''
+          }`}
+        >
+          <div className={styles.progressCircle}>{step}</div>
+          {step < 4 && <div className={styles.progressLine} />}
+        </div>
+      ))}
+    </div>
+  );
 
-  const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Beauté', 'Autres(présisez le dans la description)'];
   return (
-    <main>
+    <main className={styles.main}>
+      <div className={styles.overlay} onClick={hideForm} />
       <div className={styles.container}>
-        <h5 className={styles.hiddenBtn} onClick={hiddeForm}>Fermer</h5>
-        {!finalStep && !backendMessage && !otpSystem && (
-          <div className={styles.intro}>
-            <h3>Vous souhaitez commander un article depuis la Chine ?</h3>
-            <p>Remplissez le formulaire ci-dessous avec les détails de votre commande.</p>
-          </div>
+        <button className={styles.closeBtn} onClick={hideForm}>
+          <FaTimes size={24} />
+        </button>
+
+        {!otpStep && !messageBoxIs && (
+          <>
+            <div className={styles.header}>
+              <h2>Demande de devis</h2>
+              <p>Commandez vos produits depuis la Chine en toute simplicité</p>
+            </div>
+
+            {renderProgressBar()}
+          </>
         )}
 
-        <div className={styles.formGroup}>
-          {stepOne && (
-            <form>
-              <label>Nom <span>*</span></label>
-              <input type='text' placeholder='Entrez votre nom...' onChange={handleUserNameChange} value={userName} />
-              <label>Email <span>*</span></label>
-              <input type='email' placeholder='Email' onChange={handleUserEmailChange} value={userEmail} />
-              <div > 
-                <div className={styles.radios}> 
-                    <div className={styles.radiosContainer}> 
-                        <input type='radio' className={styles.radioInput} value={benin} checked={selectedCountry === benin} onChange={handleCountryChange}/> 
-                        <label>Bénin </label><br/> 
-                    </div> <div className={styles.radiosContainer}> 
-                        <input type='radio' className={styles.radioInput} value={togo} checked={selectedCountry === togo} onChange={handleCountryChange} /> 
-                        <label>Togo</label><br/> 
-                    </div> 
-                </div> 
+        <div className={styles.formContent}>
+          {currentStep === 1 && (
+            <form className={styles.form}>
+              <h3 className={styles.stepTitle}>Informations personnelles</h3>
+              
+              <div className={styles.inputGroup}>
+                <label>Nom complet <span>*</span></label>
+                <input
+                  type="text"
+                  placeholder="Entrez votre nom..."
+                  onChange={handleInputChange('userName')}
+                  value={formData.userName}
+                />
               </div>
 
-              <button className={styles.btnSubmit} onClick={showStepTwo}>SUIVANT</button>
+              <div className={styles.inputGroup}>
+                <label>Email <span>*</span></label>
+                <input
+                  type="email"
+                  placeholder="exemple@email.com"
+                  onChange={handleInputChange('userEmail')}
+                  value={formData.userEmail}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Pays de livraison <span>*</span></label>
+                <div className={styles.radioGroup}>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      value="Bénin"
+                      checked={formData.selectedCountry === 'Bénin'}
+                      onChange={handleInputChange('selectedCountry')}
+                    />
+                    <span>🇧🇯 Bénin</span>
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      value="Togo"
+                      checked={formData.selectedCountry === 'Togo'}
+                      onChange={handleInputChange('selectedCountry')}
+                    />
+                    <span>🇹🇬 Togo</span>
+                  </label>
+                </div>
+              </div>
+
+              <button className={styles.btnNext} onClick={nextStep}>
+                Suivant
+              </button>
             </form>
           )}
-          {stepTwo && (
-            <form>
-              <button className={styles.backBtn} onClick={goBackStep(() => setStepOne(true))}>Précédent</button>
-              <label>Catégorie de produit :</label>
-              <select value={categorie} onChange={handleCatChange}>
-                <option value="">Sélectionnez une catégorie</option>
-                {categories.map((cat, idx) => (
-                  <option key={idx} value={cat}>{cat}</option>
-                ))}
-              </select>
 
-              <label>Quantité <span>*</span></label>
-              <input type='number' placeholder='Quantité' onChange={handlePqChange} value={productQuantity} />
+          {currentStep === 2 && (
+            <form className={styles.form}>
+              <button className={styles.btnBack} onClick={prevStep}>
+                <FaArrowLeft /> Précédent
+              </button>
 
-              <button className={styles.btnSubmit} onClick={showStepThree}>SUIVANT</button>
+              <h3 className={styles.stepTitle}>Détails du produit</h3>
+
+              <div className={styles.inputGroup}>
+                <label>Catégorie <span>*</span></label>
+                <select
+                  value={formData.categorie}
+                  onChange={handleInputChange('categorie')}
+                >
+                  <option value="">Sélectionnez une catégorie</option>
+                  {categories.map((cat, idx) => (
+                    <option key={idx} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Quantité <span>*</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Quantité"
+                  onChange={handleInputChange('productQuantity')}
+                  value={formData.productQuantity}
+                />
+              </div>
+
+              <button className={styles.btnNext} onClick={nextStep}>
+                Suivant
+              </button>
             </form>
           )}
 
-          {/* Étape 3 */}
-          {stepThree && (
-            <form>
-              <button className={styles.backBtn} onClick={goBackStep(() => setStepTwo(true))}>Précédent</button>
-              <label>Ajouter une image <span>*</span>:</label>
-              <input type='file' accept='image/*' onChange={handlePictureChange} />
-              {picture && <img src={picture} alt="Produit" width={200} height={220}/>}
-               <label>Description du produit<span>*</span> :</label>
-                <textArea placeholder='Décrivez votre produit...' style={{height:'80px'}} onChange={handleDescptChange} value={productDescription} />
-              <button className={styles.btnSubmit} onClick={showFinalStep}>SUIVANT</button>
+          {currentStep === 3 && (
+            <form className={styles.form}>
+              <button className={styles.btnBack} onClick={prevStep}>
+                <FaArrowLeft /> Précédent
+              </button>
+
+              <h3 className={styles.stepTitle}>Description & Image</h3>
+
+              <div className={styles.inputGroup}>
+                <label>Image du produit</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePictureChange}
+                  className={styles.fileInput}
+                />
+                {formData.picture && (
+                  <div className={styles.imagePreview}>
+                    <img src={formData.picture} alt="Produit" />
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Description du produit <span>*</span></label>
+                <textarea
+                  placeholder="Décrivez votre produit en détail..."
+                  onChange={handleInputChange('productDescription')}
+                  value={formData.productDescription}
+                  rows={5}
+                />
+              </div>
+
+              <button className={styles.btnNext} onClick={nextStep}>
+                Suivant
+              </button>
             </form>
           )}
 
-          {/* Étape 4 : Récap + bouton envoi */}
-          {finalStep && (
-            <div className={styles.finalStep}>
-              <button className={styles.backBtn} onClick={goBackStep(() => setStepThree(true))}>Précédent</button>
-              <h3>Confirmer la commande</h3>
-              <p><strong>Nom :</strong> {userName}</p>
-              <p><strong>Email :</strong> {userEmail}</p>
-              <p><strong>Catégorie :</strong> {categorie}</p>
-              <p><strong>Quantité :</strong> {productQuantity}</p>
-              <p><strong>Description du produit désiré :</strong> {productDescription}</p>
-              <p><strong>Pays :</strong> {selectedCountry}</p>
-              {picture && <img src={picture} alt="Produit" width={200} height={220}/>}
-              <button disabled={hideBtn} className={styles.btnSubmit} onClick={toOtpSystem}>
-                {isLoading ? 'Patientez...' : 'ENVOYER'}
+          {currentStep === 4 && (
+            <div className={styles.summary}>
+              <button className={styles.btnBack} onClick={prevStep}>
+                <FaArrowLeft /> Précédent
+              </button>
+
+              <h3 className={styles.stepTitle}>Récapitulatif</h3>
+
+              <div className={styles.summaryCard}>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Nom :</span>
+                  <span className={styles.summaryValue}>{formData.userName}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Email :</span>
+                  <span className={styles.summaryValue}>{formData.userEmail}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Pays :</span>
+                  <span className={styles.summaryValue}>{formData.selectedCountry}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Catégorie :</span>
+                  <span className={styles.summaryValue}>{formData.categorie}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Quantité :</span>
+                  <span className={styles.summaryValue}>{formData.productQuantity}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Description :</span>
+                  <span className={styles.summaryValue}>{formData.productDescription}</span>
+                </div>
+                {formData.picture && (
+                  <div className={styles.imagePreview}>
+                    <img src={formData.picture} alt="Produit" />
+                  </div>
+                )}
+              </div>
+
+              <button
+                disabled={state.hideBtn}
+                className={styles.btnSubmit}
+                onClick={sendOtp}
+              >
+                {state.isLoading ? 'Envoi en cours...' : 'Envoyer la demande'}
               </button>
             </div>
           )}
 
-          {/* OTP */}
-          {otpSystem && (
-            <div className={styles.finalStep}>
-              <p>Un code a été envoyé à {userEmail}</p>
-              <p style={{textAlign: 'center'}}><input type='number' maxLength={6} placeholder='* * * * * *' style={{padding: '10px', width: '160px', 
-                backgroundColor: 'transparent', outline:'none', border: 'none', borderBottom: '3px solid rgb(36, 123, 181)', 
-                color: 'white', fontWeight:'bold', letterSpacing: '10px', fontSize: '20px', textAlign: 'center'}} value={otp} onChange={handleOtpChange} required/></p>
-              <p>
-                <input type='checkbox' checked={checked} onChange={toggleCheck} />
-                J'ai lu et j’accepte les <a href='/cgu'>conditions générales d'utilisation</a>
+          {otpStep && (
+            <div className={styles.otpStep}>
+              <h3 className={styles.stepTitle}>Vérification</h3>
+              <p className={styles.otpText}>
+                Un code a été envoyé à <strong>{formData.userEmail}</strong>
               </p>
-              {checked && (
+
+              <div className={styles.inputGroup}>
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="• • • • • •"
+                  className={styles.otpInput}
+                  value={formData.otp}
+                  onChange={handleInputChange('otp')}
+                />
+              </div>
+
+              <div className={styles.checkboxGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={formData.checked}
+                    onChange={(e) =>
+                      setFormData({ ...formData, checked: e.target.checked })
+                    }
+                  />
+                  <span>
+                    J'accepte les{' '}
+                    <a href="/cgu" target="_blank">
+                      conditions générales d'utilisation
+                    </a>
+                  </span>
+                </label>
+              </div>
+
+              {formData.checked && (
                 <button className={styles.btnSubmit} onClick={handleSubmit}>
-                  {isLoading ? 'Patientez...' : 'CONFIRMER'}
+                  {state.isLoading ? 'Vérification...' : 'Confirmer'}
                 </button>
               )}
             </div>
           )}
+
           {messageBoxIs && (
             <div className={styles.messageBox}>
-              {isSuccess && <FaCheckCircle size={40} color='green' />}
-              {isError && <FaTimesCircle size={40} color='red' />}
-              <h3>{backendMessage}</h3>
+              {state.isSuccess && <FaCheckCircle size={50} color="#10b981" />}
+              {state.isError && <FaTimesCircle size={50} color="#ef4444" />}
+              <h3>{state.backendMessage}</h3>
+              <button className={styles.btnClose} onClick={hideForm}>
+                Fermer
+              </button>
             </div>
           )}
         </div>

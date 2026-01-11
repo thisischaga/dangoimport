@@ -1,279 +1,492 @@
-/* === Container général === */
+.main {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
 .container {
-  background-color: #0e2d4387;
+  position: relative;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  border-radius: 24px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  padding: 40px;
+}
+
+.container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: #1e293b;
   border-radius: 10px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #cbd5e1;
+}
+
+.closeBtn:hover {
+  background-color: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+.progressBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.progressStep {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.progressCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #64748b;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.progressStepActive .progressCircle {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.progressLine {
+  flex: 1;
+  height: 2px;
+  background-color: #334155;
+  margin-left: 8px;
+  transition: all 0.3s ease;
+}
+
+.progressStepActive .progressLine {
+  background: linear-gradient(90deg, #3b82f6 0%, #334155 100%);
+}
+
+.formContent {
   margin-top: 20px;
-  padding: 10px 30px 60px;
-  width: 100%;
 }
 
-/* === Formulaires === */
-form input,
-textarea,
-select {
-    background-color: #fff;
-    color: #0e2d43;
-    border: none;
-    outline: none;
-    box-sizing: border-box;
-    width: 100%;
-    height: 50px;
-    padding: 7px;
-    border-radius: 5px;
-    margin-top: 10px;
-    margin-bottom: 17px;
-    font-family: sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-select {
-  height: 45px;
-}
-
-textarea {
-  height: 60px;
-}
-
-::placeholder {
-    color: #000000ae !important;
-    font-family: sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-form span {
-  color: red;
-}
-
-.btnSubmit,
-.finalStep .btnSubmit {
-  width: 100%;
-  height: 45px;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.4s ease-in-out;
-}
-
-.backBtn {
-  background-color: #fff;
-  color: #000;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  width: 100%;
-}
-
-.intro {
-  padding-top: 40px;
+.form {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 24px;
 }
 
-.intro h3 {
-  font-size: 25px;
-  color: rgb(36, 123, 181);
-  text-align: center;
+.stepTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 8px;
 }
 
-.intro p {
-  text-align: center;
-}
-
-.formGroup {
+.inputGroup {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-
-  padding-top: 20px;
-}
-.container p,
-.container label {
-    font-size: 18px;
-    line-height: 20px;
-    color: #ffffff87;
-    font-weight: bold;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.container label {
-  font-weight: bold;
+.inputGroup label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
-/* === Bouton fermer === */
-.hiddenBtn {
-  background-color: transparent;
-  text-align: right;
-  margin-top: 20px;
+.inputGroup label span {
+  color: #ef4444;
+}
+
+.inputGroup input,
+.inputGroup select,
+.inputGroup textarea {
+  background-color: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus,
+.inputGroup textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputGroup textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.radioLabel:hover {
+  border-color: #475569;
+  background-color: #1e293b;
+}
+
+.radioLabel input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #3b82f6;
+}
+
+.radioLabel input[type='radio']:checked + span {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.radioLabel span {
+  color: #cbd5e1;
+  font-size: 15px;
+}
+
+.fileInput {
+  cursor: pointer;
+}
+
+.imagePreview {
+  margin-top: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #334155;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  background-color: #0f172a;
+}
+
+.btnNext,
+.btnSubmit {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
   font-size: 16px;
-  color: #ffffffc1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.hiddenBtn:hover {
-  color: #ffffff7b;
+.btnNext:hover,
+.btnSubmit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
-/* === Radio Buttons === */
-.radios {
+.btnNext:disabled,
+.btnSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnBack {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  background-color: transparent;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  padding: 12px 20px;
+  color: #cbd5e1;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
 }
 
-.radioInput {
+.btnBack:hover {
+  border-color: #475569;
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.summaryCard {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #334155;
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summaryLabel {
+  font-weight: 600;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.summaryValue {
+  color: #f1f5f9;
+  text-align: right;
+}
+
+.otpStep {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  text-align: center;
+}
+
+.otpText {
+  font-size: 16px;
+  color: #cbd5e1;
+}
+
+.otpInput {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid #3b82f6 !important;
+  border-radius: 0 !important;
+  padding: 16px 8px !important;
+  width: 200px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 16px;
+  color: #f1f5f9 !important;
+}
+
+.otpInput:focus {
+  box-shadow: none !important;
+}
+
+.checkboxGroup {
+  width: 100%;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #cbd5e1;
+}
+
+.checkboxLabel input[type='checkbox'] {
   width: 20px;
   height: 20px;
+  accent-color: #3b82f6;
   cursor: pointer;
-  background-color: transparent;
 }
 
-.radiosContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 0 20px;
-}
-.radios{ display: flex; place-content: center; align-items: center; } 
-.radioInput{ width: 20px; height: 20px; cursor: pointer; background-color: transparent; } 
-.radiosContainer{ display: flex; place-content: center; align-items: center; gap: 5px; margin: 0 5px; }
-
-.imageInput {
-  display: none;
+.checkboxLabel a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
 }
 
-.imgBtn {
-  padding: 15px;
-  margin-top: 10px;
-  width: 100%;
-  text-align: center;
-  background-color: #fff;
-  color: #0e2d43a4;
-}
-
-.profilePicture {
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
-  flex-direction: column;
-  align-items: center;
-}
-
-.pictureManager {
-  margin-bottom: 20px;
-}
-
-.pictureManager img {
-  border: 2px solid #0e2d43a4;
-  width: 250px;
-  height: 250px;
-  object-fit: cover;
-}
-
-.pictureManager input {
-  display: none;
-}
-
-.pictureBox {
-  margin: 40px 0;
-}
-
-.pictureManager .pictureBox label {
-  cursor: pointer;
-  margin: 10px;
-  padding: 80px;
-  border: 2px dashed rgba(0, 102, 255, 0.589);
-  color: #ffffff61;
-  border-radius: 5px;
-}
-
-/* === Étape finale / Message === */
-.finalStep h3 {
-  text-align: center;
+.checkboxLabel a:hover {
+  text-decoration: underline;
 }
 
 .messageBox {
-  background-color: #0e2d4387;
-  border-radius: 10px;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   text-align: center;
-  margin-top: 20px;
+  padding: 40px 20px;
 }
 
 .messageBox h3 {
-  color: #fff;
-  font-size: 18px;
+  font-size: 20px;
+  color: #f1f5f9;
+  line-height: 1.6;
 }
 
-.messageBox p {
-  font-size: 14px;
+.btnClose {
+  padding: 14px 32px;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  color: #f1f5f9;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* === Responsive === */
-@media (max-width: 820px) {
+.btnClose:hover {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+@media (max-width: 768px) {
   .container {
-    padding: 10px;
+    padding: 24px;
+    margin: 10px;
   }
 
-  .intro h3 {
-    font-size: 16px;
+  .header h2 {
+    font-size: 24px;
   }
 
-  .formGroup {
+  .progressBar {
+    padding: 0;
+  }
+
+  .progressCircle {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .radioGroup {
     flex-direction: column;
-    width: 100%;
-    align-items: center;
   }
 
-  .backBtn {
-    margin-top: 20px;
-    width: 100%;
+  .summaryItem {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  form input,
-  textarea,
-  select {
-    width: 100%;
-    height: 45px;
-  }
-
-  .btnSubmit,
-  .finalStep .btnSubmit {
-    width: 100%;
-    margin-top: 20px;
-  }
-
-  .pictureManager img {
-    width: 200px;
-    height: 200px;
-  }
-
-  .profilePicture img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .pictureManager .pictureBox label {
-    padding: 40px;
-  }
-
-  .messageBox {
-    padding: 10px;
-  }
-
-  .messageBox p {
-    font-size: 13px;
+  .summaryValue {
+    text-align: left;
   }
 }
 
-@media (min-width: 1024px) {
-  .hiddenBtn {
-    margin-left: 90%;
+@media (max-width: 480px) {
+  .container {
+    padding: 20px;
+  }
+
+  .closeBtn {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .stepTitle {
+    font-size: 20px;
   }
 }
