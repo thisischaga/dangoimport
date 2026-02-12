@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+  --font-sans: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-primary: #ffdc2b; /* Dominant yellow requested */
+  --color-primary-600: #e6c21a;
+  --color-accent: #002B5C;
+  --color-bg: #ffffff; /* page background white */
+  --color-surface: #ffffff; /* cards/surfaces on white */
+  --color-muted: #475569; /* darker muted for readability on white */
+  --color-text: #071022; /* dark text for white bg */
+  --color-success: #10B981;
+  --radius: 12px;
+  --shadow-1: 0 8px 24px rgba(2,6,23,0.6);
+  --container-max: 1200px;
+}
+
+/* Common utilities */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-600));
+  color: #071022;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.muted { color: var(--color-muted); }
+.max-wrap { max-width: var(--container-max); margin: 0 auto; }
+
+/* Small responsive helpers */
+@media (max-width: 768px) {
+  :root {
+    --container-max: 92%;
+  }
+}
