@@ -13,7 +13,8 @@ import {
   FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 
-const API_BASE = 'http://localhost:8000';
+import API_BASE_URL from '../apiConfig';
+const API_BASE = API_BASE_URL;
 const PAGE_SIZE = 12;
 
 /* ── Helpers ─────────────────────────────────────── */

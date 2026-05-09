@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
@@ -52,12 +53,14 @@ const CartPage = () => {
       },
       returnURL: `${window.location.origin}/`,
       cancelURL: `${window.location.origin}/cart`,
-      callbackURL: process.env.REACT_APP_PAYDUNYA_CALLBACK_URL || 'http://localhost:8000/api/paydunya/ipn',
+      callbackURL: process.env.REACT_APP_PAYDUNYA_CALLBACK_URL || `${API_BASE_URL}/api/paydunya/ipn`,
     };
 
     try {
       setPaydunyaLoading(true);
-      const response = await axios.post('/api/paydunya/create-invoice', payload);
+      console.log('🚀 Appel PayDunya URL:', `${API_BASE_URL}/api/paydunya/create-invoice`);
+      console.log('📦 Payload:', payload);
+      const response = await axios.post(`${API_BASE_URL}/api/paydunya/create-invoice`, payload);
       if (response.data?.url) {
         window.location.href = response.data.url;
       } else {

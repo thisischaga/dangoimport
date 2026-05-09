@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
@@ -19,7 +20,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:8000/api/auth/login', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       
       // Sauvegarde du token et de l'utilisateur
       localStorage.setItem('dangoToken', res.data.token);
@@ -44,8 +45,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100 my-auto">
         
         {/* En-tête */}
         <div className="flex flex-col items-center">

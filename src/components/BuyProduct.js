@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 import { 
   FaMapMarkerAlt, FaShoppingCart, FaShieldAlt, 
@@ -160,10 +161,11 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
         productPrice: price
       };
 
-      await axios.post('http://localhost:8000/acheter', orderData);
+      await axios.post(`${API_BASE_URL}/acheter`, orderData);
 
       if (formData.paymentMethod === 'online') {
-        const paydunyaRes = await axios.post('http://localhost:8000/api/paydunya/create-invoice', {
+        console.log('🚀 [BuyProduct] Appel PayDunya URL:', `${API_BASE_URL}/api/paydunya/create-invoice`);
+        const paydunyaRes = await axios.post(`${API_BASE_URL}/api/paydunya/create-invoice`, {
           amount: grandTotal,
           description: `Commande Dango Import - ${name}`,
           items: [

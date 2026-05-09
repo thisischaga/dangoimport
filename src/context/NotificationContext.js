@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 
 const NotificationContext = createContext();
@@ -14,7 +15,9 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
 
   useEffect(() => {
     // 1. Initialiser le socket
-    const newSocket = io('http://localhost:8000');
+    const newSocket = io(API_BASE_URL, {
+      transports: ['websocket', 'polling']
+    });
     setSocket(newSocket);
 
     // 2. Rejoindre la salle appropriée
@@ -29,7 +32,7 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
         const id = recipientType === 'admin' ? 'admin' : userId;
         if (!id) return;
 
-        const res = await axios.get(`http://localhost:8000/api/notifications?recipient=${id}`);
+        const res = await axios.get(`${API_BASE_URL}/api/notifications?recipient=${id}`);
         setNotifications(res.data);
         setUnreadCount(res.data.filter(n => !n.isRead).length);
       } catch (error) {
@@ -52,7 +55,7 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`http://localhost:8000/api/notifications/${id}/read`);
+      await axios.put(`${API_BASE_URL}/api/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {

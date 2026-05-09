@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 import { FaPaperPlane, FaUser, FaPhone, FaLink, FaCamera, FaShoppingBag } from 'react-icons/fa';
 
@@ -43,7 +44,7 @@ const DevisForm = ({ showForm }) => {
         formPayload.append('photo', photo);
       }
 
-      const response = await axios.post('http://localhost:8000/api/devis/create-invoice', formPayload, {
+      const response = await axios.post(`${API_BASE_URL}/api/devis/create-invoice`, formPayload, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -55,8 +56,8 @@ const PublishProduct = () => {
         ...formData,
         vendorName: user ? `${user.firstname} ${user.surname || ''}`.trim() : 'Vendeur Inconnu'
       };
-      // Pointing to local backend for now
-      await axios.post('http://localhost:8000/api/products', productData);
+      // Pointing to centralized backend
+      await axios.post(`${API_BASE_URL}/api/products`, productData);
       toast.success('Produit publié avec succès sur la marketplace !');
       navigate('/shopping'); // Redirect to shop to see the product
     } catch (error) {

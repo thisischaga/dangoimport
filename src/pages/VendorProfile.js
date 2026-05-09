@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BuyProduct from '../components/BuyProduct';
@@ -18,7 +19,7 @@ const VendorProfile = () => {
   useEffect(() => {
     const fetchVendorProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/products/vendor/${encodeURIComponent(vendorName)}`);
+        const res = await axios.get(`${API_BASE_URL}/api/products/vendor/${encodeURIComponent(vendorName)}`);
         setProducts(res.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des produits du vendeur :", error);

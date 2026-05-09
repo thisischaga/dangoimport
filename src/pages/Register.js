@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaShieldAlt } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
@@ -22,7 +23,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:8000/api/auth/send-otp', {
+      await axios.post(`${API_BASE_URL}/api/auth/send-otp`, {
         userEmail: formData.userEmail
       });
       toast.info('Un code de vérification a été envoyé à votre email.');
@@ -39,7 +40,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:8000/api/auth/signup', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
       
       // Connexion automatique après inscription
       localStorage.setItem('dangoToken', res.data.token);
@@ -57,8 +58,8 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100 my-auto">
         
         {/* En-tête */}
         <div className="flex flex-col items-center">
@@ -77,7 +78,7 @@ const Register = () => {
           /* ÉTAPE 1 : Informations */
           <form className="mt-8 space-y-6" onSubmit={handleSendOTP}>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Prénom</label>
                   <div className="relative">
