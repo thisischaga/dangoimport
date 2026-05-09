@@ -1,454 +1,185 @@
-import { useState } from 'react';
-import { FaCheckCircle, FaTimesCircle, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import styles from './devisForm.module.css';
+import { toast } from 'react-toastify';
+import { FaPaperPlane, FaUser, FaPhone, FaLink, FaCamera, FaShoppingBag } from 'react-icons/fa';
 
 const DevisForm = ({ showForm }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [otpStep, setOtpStep] = useState(false);
-  const [messageBoxIs, setMessageBoxIs] = useState(false);
-
   const [formData, setFormData] = useState({
-    userName: '',
-    userEmail: '',
-    categorie: '',
-    productQuantity: 1,
-    picture: null,
-    productDescription: '',
-    selectedCountry: '',
-    otp: '',
-    checked: true,
+    name: '',
+    phone: '',
+    productLink: '',
+    quantity: '',
+    description: ''
   });
+  const [photo, setPhoto] = useState(null);
+  const [photoName, setPhotoName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const [state, setState] = useState({
-    backendMessage: '',
-    isSuccess: null,
-    isError: null,
-    isLoading: false,
-    hideBtn: false,
-  });
-
-  const categories = [
-    'Électronique',
-    'Vêtements',
-    'Alimentation',
-    'Maison',
-    'Sport',
-    'Beauté',
-    'Autres (précisez dans la description)',
-  ];
-
-  const handleInputChange = (field) => (e) => {
-    setFormData({ ...formData, [field]: e.target.value });
+  const handlePhotoSelect = () => {
+    fileInputRef.current?.click();
   };
 
-  const handlePictureChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setFormData({ ...formData, picture: reader.result });
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const hideForm = () => {
-    showForm(false);
-    window.location.reload();
-  };
-
-  const validateStep = (step) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    switch (step) {
-      case 1:
-        if (!formData.userName || !formData.userEmail || !formData.selectedCountry) {
-          alert('Veuillez remplir tous les champs obligatoires !');
-          return false;
-        }
-        if (!emailRegex.test(formData.userEmail)) {
-          alert('Veuillez entrer un email valide');
-          return false;
-        }
-        return true;
-      case 2:
-        if (!formData.categorie || !formData.productQuantity) {
-          alert('Veuillez remplir tous les champs obligatoires !');
-          return false;
-        }
-        return true;
-      case 3:
-        if (!formData.productDescription) {
-          alert('Veuillez ajouter une description du produit !');
-          return false;
-        }
-        return true;
-      default:
-        return true;
-    }
-  };
-
-  const nextStep = (e) => {
-    e.preventDefault();
-    if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = (e) => {
-    e.preventDefault();
-    setCurrentStep(currentStep - 1);
-  };
-
-  const sendOtp = async (e) => {
-    e.preventDefault();
-    setState({ ...state, isLoading: true, hideBtn: true });
-    
-    try {
-      const res = await axios.post(
-        'https://dangoimport-server.onrender.com/api/send-otp',
-        { userEmail: formData.userEmail }
-      );
-      
-      if (res.data.message === 'OTP envoyé avec succès') {
-        setOtpStep(true);
-        setCurrentStep(0);
-      }
-      setState({ ...state, backendMessage: res.data.message, isLoading: false });
-    } catch (err) {
-      setState({
-        ...state,
-        backendMessage: 'Erreur lors de l\'envoi de l\'OTP',
-        isError: true,
-        isLoading: false,
-      });
+  const handlePhotoChange = (e) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setPhoto(selectedFile);
+      setPhotoName(selectedFile.name);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setState({ ...state, isLoading: true });
-
+    setLoading(true);
     try {
-      const otpResponse = await axios.post(
-        'https://dangoimport-server.onrender.com/api/verify-otp',
-        { userEmail: formData.userEmail, otp: formData.otp }
-      );
-
-      if (otpResponse.data.message !== 'OTP vérifié avec succès') {
-        setState({
-          ...state,
-          backendMessage: 'OTP invalide ou expiré.',
-          isError: true,
-          isLoading: false,
-        });
-        setMessageBoxIs(true);
-        return;
+      const formPayload = new FormData();
+      formPayload.append('name', formData.name);
+      formPayload.append('phone', formData.phone);
+      formPayload.append('productLink', formData.productLink);
+      formPayload.append('quantity', formData.quantity);
+      formPayload.append('description', formData.description);
+      formPayload.append('studyFee', 5000);
+      if (photo) {
+        formPayload.append('photo', photo);
       }
 
-      const commandeResponse = await axios.post(
-        'https://dangoimport-server.onrender.com/commander',
-        {
-          ...formData,
-          status: 'En attente',
-        }
-      );
+      const response = await axios.post('http://localhost:8000/api/devis/create-invoice', formPayload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      setState({
-        ...state,
-        backendMessage: commandeResponse.data.message,
-        isSuccess: true,
-        isLoading: false,
-      });
-      setOtpStep(false);
-      setMessageBoxIs(true);
+      toast.info('Redirection vers PayDunya pour finaliser le paiement...');
+      window.location.href = response.data.url;
     } catch (error) {
-      const message = error.response?.data?.message || 'Une erreur s\'est produite.';
-      setState({
-        ...state,
-        backendMessage: message,
-        isError: true,
-        isLoading: false,
-      });
-      setMessageBoxIs(true);
+      console.error(error);
+      toast.error('Erreur lors de la création du paiement du devis.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderProgressBar = () => (
-    <div className={styles.progressBar}>
-      {[1, 2, 3, 4].map((step) => (
-        <div
-          key={step}
-          className={`${styles.progressStep} ${
-            currentStep >= step ? styles.progressStepActive : ''
-          }`}
-        >
-          <div className={styles.progressCircle}>{step}</div>
-          {step < 4 && <div className={styles.progressLine} />}
-        </div>
-      ))}
-    </div>
-  );
-
   return (
-    <main className={styles.main}>
-      <div className={styles.overlay} onClick={hideForm} />
-      <div className={styles.container}>
-        <button className={styles.closeBtn} onClick={hideForm}>
-          <FaTimes size={24} />
-        </button>
-
-        {!otpStep && !messageBoxIs && (
-          <>
-            <div className={styles.header}>
-              <h2>Demande de devis</h2>
-              <p>Commandez vos produits depuis la Chine en toute simplicité</p>
-            </div>
-
-            {renderProgressBar()}
-          </>
-        )}
-
-        <div className={styles.formContent}>
-          {currentStep === 1 && (
-            <form className={styles.form}>
-              <h3 className={styles.stepTitle}>Informations personnelles</h3>
-              
-              <div className={styles.inputGroup}>
-                <label>Nom complet <span>*</span></label>
-                <input
-                  type="text"
-                  placeholder="Entrez votre nom..."
-                  onChange={handleInputChange('userName')}
-                  value={formData.userName}
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Email <span>*</span></label>
-                <input
-                  type="email"
-                  placeholder="exemple@email.com"
-                  onChange={handleInputChange('userEmail')}
-                  value={formData.userEmail}
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Pays de livraison <span>*</span></label>
-                <div className={styles.radioGroup}>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      value="Bénin"
-                      checked={formData.selectedCountry === 'Bénin'}
-                      onChange={handleInputChange('selectedCountry')}
-                    />
-                    <span>🇧🇯 Bénin</span>
-                  </label>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      value="Togo"
-                      checked={formData.selectedCountry === 'Togo'}
-                      onChange={handleInputChange('selectedCountry')}
-                    />
-                    <span>🇹🇬 Togo</span>
-                  </label>
-                </div>
-              </div>
-
-              <button className={styles.btnNext} onClick={nextStep}>
-                Suivant
-              </button>
-            </form>
-          )}
-
-          {currentStep === 2 && (
-            <form className={styles.form}>
-              <button className={styles.btnBack} onClick={prevStep}>
-                <FaArrowLeft /> Précédent
-              </button>
-
-              <h3 className={styles.stepTitle}>Détails du produit</h3>
-
-              <div className={styles.inputGroup}>
-                <label>Catégorie <span>*</span></label>
-                <select
-                  value={formData.categorie}
-                  onChange={handleInputChange('categorie')}
-                >
-                  <option value="">Sélectionnez une catégorie</option>
-                  {categories.map((cat, idx) => (
-                    <option key={idx} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Quantité <span>*</span></label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Quantité"
-                  onChange={handleInputChange('productQuantity')}
-                  value={formData.productQuantity}
-                />
-              </div>
-
-              <button className={styles.btnNext} onClick={nextStep}>
-                Suivant
-              </button>
-            </form>
-          )}
-
-          {currentStep === 3 && (
-            <form className={styles.form}>
-              <button className={styles.btnBack} onClick={prevStep}>
-                <FaArrowLeft /> Précédent
-              </button>
-
-              <h3 className={styles.stepTitle}>Description & Image</h3>
-
-              <div className={styles.inputGroup}>
-                <label>Image du produit</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePictureChange}
-                  className={styles.fileInput}
-                />
-                {formData.picture && (
-                  <div className={styles.imagePreview}>
-                    <img src={formData.picture} alt="Produit" />
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Description du produit <span>*</span></label>
-                <textarea
-                  placeholder="Décrivez votre produit en détail..."
-                  onChange={handleInputChange('productDescription')}
-                  value={formData.productDescription}
-                  rows={5}
-                />
-              </div>
-
-              <button className={styles.btnNext} onClick={nextStep}>
-                Suivant
-              </button>
-            </form>
-          )}
-
-          {currentStep === 4 && (
-            <div className={styles.summary}>
-              <button className={styles.btnBack} onClick={prevStep}>
-                <FaArrowLeft /> Précédent
-              </button>
-
-              <h3 className={styles.stepTitle}>Récapitulatif</h3>
-
-              <div className={styles.summaryCard}>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Nom :</span>
-                  <span className={styles.summaryValue}>{formData.userName}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Email :</span>
-                  <span className={styles.summaryValue}>{formData.userEmail}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Pays :</span>
-                  <span className={styles.summaryValue}>{formData.selectedCountry}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Catégorie :</span>
-                  <span className={styles.summaryValue}>{formData.categorie}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Quantité :</span>
-                  <span className={styles.summaryValue}>{formData.productQuantity}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Description :</span>
-                  <span className={styles.summaryValue}>{formData.productDescription}</span>
-                </div>
-                {formData.picture && (
-                  <div className={styles.imagePreview}>
-                    <img src={formData.picture} alt="Produit" />
-                  </div>
-                )}
-              </div>
-
-              <button
-                disabled={state.hideBtn}
-                className={styles.btnSubmit}
-                onClick={sendOtp}
-              >
-                {state.isLoading ? 'Envoi en cours...' : 'Envoyer la demande'}
-              </button>
-            </div>
-          )}
-
-          {otpStep && (
-            <div className={styles.otpStep}>
-              <h3 className={styles.stepTitle}>Vérification</h3>
-              <p className={styles.otpText}>
-                Un code a été envoyé à <strong>{formData.userEmail}</strong>
-              </p>
-
-              <div className={styles.inputGroup}>
-                <input
-                  type="text"
-                  maxLength={6}
-                  placeholder="• • • • • •"
-                  className={styles.otpInput}
-                  value={formData.otp}
-                  onChange={handleInputChange('otp')}
-                />
-              </div>
-
-              <div className={styles.checkboxGroup}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={formData.checked}
-                    onChange={(e) =>
-                      setFormData({ ...formData, checked: e.target.checked })
-                    }
-                  />
-                  <span>
-                    J'accepte les{' '}
-                    <a href="/cgu" target="_blank">
-                      conditions générales d'utilisation
-                    </a>
-                  </span>
-                </label>
-              </div>
-
-              {formData.checked && (
-                <button className={styles.btnSubmit} onClick={handleSubmit}>
-                  {state.isLoading ? 'Vérification...' : 'Confirmer'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {messageBoxIs && (
-            <div className={styles.messageBox}>
-              {state.isSuccess && <FaCheckCircle size={50} color="#10b981" />}
-              {state.isError && <FaTimesCircle size={50} color="#ef4444" />}
-              <h3>{state.backendMessage}</h3>
-              <button className={styles.btnClose} onClick={hideForm}>
-                Fermer
-              </button>
-            </div>
-          )}
-        </div>
+    <div className="text-white font-outfit">
+      <div className="mb-12 text-center">
+        <h2 className="text-4xl md:text-5xl font-playfair font-black mb-4">Demander un <span className="text-primary italic">Devis</span></h2>
+        <p className="text-gray-400">Réponse garantie sous 24h par nos agents de sourcing.</p>
+        <p className="text-sm text-yellow-300 font-bold mt-4">Pour l’étude de votre devis, un frais fixe de <span className="text-primary">5000 FCFA</span> est nécessaire. Ce montant est remboursable sur la commande finale après validation du paiement.</p>
       </div>
-    </main>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Nom */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Votre Nom complet</label>
+            <div className="relative group">
+              <FaUser className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
+              <input 
+                required
+                type="text" 
+                placeholder="Ex: John Doe"
+                className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-14 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+              />
+            </div>
+          </div>
+
+          {/* Téléphone */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Numéro WhatsApp</label>
+            <div className="relative group">
+              <FaPhone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
+              <input 
+                required
+                type="tel" 
+                placeholder="+229 96 00 00 00"
+                className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-14 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Lien Produit */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Lien 1688 / Alibaba ou Photo</label>
+          <div className="relative group">
+            <FaLink className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
+            <input 
+              required
+              type="url" 
+              placeholder="Collez le lien du produit ici..."
+              className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-14 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
+              value={formData.productLink}
+              onChange={(e) => setFormData({...formData, productLink: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Quantité */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Quantité souhaitée</label>
+            <div className="relative group">
+              <FaShoppingBag className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
+              <input 
+                required
+                type="number" 
+                placeholder="Quantité (ex: 50)"
+                className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-14 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
+                value={formData.quantity}
+                onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+              />
+            </div>
+          </div>
+
+          {/* Upload Photo (Visual only for now) */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Ou télécharger une image</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
+            <button
+              type="button"
+              onClick={handlePhotoSelect}
+              className="w-full bg-white/5 border border-white/10 border-dashed rounded-2xl py-5 px-6 flex items-center justify-between gap-4 hover:bg-white/10 transition-all"
+            >
+              <span className="flex items-center gap-3">
+                <FaCamera className="text-primary" />
+                <span className="text-sm text-gray-400">{photoName || 'Choisir un fichier'}</span>
+              </span>
+              {photoName && <span className="text-xs text-gray-400">{photoName}</span>}
+            </button>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary ml-1">Détails (Taille, Couleur, etc.)</label>
+          <textarea 
+            rows="4"
+            placeholder="Décrivez précisément ce que vous recherchez..."
+            className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-8 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all resize-none"
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+          ></textarea>
+        </div>
+
+        <button 
+          disabled={loading}
+          type="submit" 
+          className="w-full bg-primary text-secondary py-6 rounded-2xl text-xl font-black uppercase tracking-widest hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 disabled:opacity-50"
+        >
+          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE (5000 FCFA)'} <FaPaperPlane />
+        </button>
+      </form>
+    </div>
   );
 };
 

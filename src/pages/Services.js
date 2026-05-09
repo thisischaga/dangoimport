@@ -1,115 +1,141 @@
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import styles from './services.module.css';
-//import useInView from '../components/UseInView';
+
+// Images (Utilisation des photos premium demandées)
+import sourcingImg from '../images/service_sourcing.png';
+import devisImg from '../images/service_security.png';
+import qualityImg from '../images/service_quality.png';
+import deliveryImg from '../images/service_logistics.png';
+
 const Service = () => {
+  const navigate = useNavigate();
 
-//const [ref, isVisible] = useInView();
+  return (
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
+      <Header />
 
-  return(
-
-    <div className={styles.servicesPage} >
-        <Header/>
-        <main>
-            <div className={styles.mainContainer} >
-                <div className={styles.intro}>
-                    <h2>
-                        Nos services
-                    </h2>
-                    <h3>
-                        Chez Dango Import, nous vous accompagnons dans toutes les étapes de votre
-                        importation <br/>depuis la Chine vers le Bénin, le Togo et le Ghana. <br/>
-                        Que vous soyez commerçant, entrepreneur ou particulier, nous vous offrons un
-                        service <br/>de mesure, sécurisé et fiable.
-                    </h3>
-                </div>
-                <div className={styles.content}>
-                    
-                    <div className={styles.services}>
-                        <div className={styles.servicesContainer}>
-                            <div>
-                                <h4>*<br/>Assistance à la recherche de founisseurs</h4>
-                                <p>
-                                    Vous nous indiquer ce que vous voulez commander. <br/>
-                                   Nous trouvons pour vous les meilleurs founisseurs <br/>fiables
-                                   en Chine, avec des prix compétitifs.
-                                </p>
-                            </div>
-                            
-                        </div>
-                        <div className={styles.servicesContainer}>
-                            <div>
-                                <h4>* <br/> Elaboration de devis personnalisé</h4>
-                                <p>
-                                    Après avoir analysé votre demande, nous vous envoyons 
-                                    <br/>un devis clair incluant:<br/>
-                                    options de livraison,
-                                    le coût du produit,
-                                    les frais de transport et
-                                    les delais estimé
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className={styles.services}>
-                        <div className={styles.servicesContainer}>
-                            <div>
-                                <h4>* <br/> Suivis de la commande & contôle qualité</h4>
-                                <p>
-                                    Une fois le devis accepté, nous passons<br/>
-                                    la commande pour vous. <br/>
-                                    Nous assurons un suivis complet: paiement, <br/>vérification des articles,
-                                    préparation à l'expédition.
-                                </p>
-                            </div>
-                        </div>
-                        <div className={styles.servicesContainer}>
-                            <div>
-                                <h4>* <br/> Livraison à domicile ou point relais</h4>
-                                <p>
-                                    Nous livrons directement au Bénin, au Togo<br/>
-                                    ou au Ghana. <br/>
-                                    Vous êtes informés à chaque étape du processus<br/>
-                                    jusqu'à la reception finale.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3>Pourquoi choisir Dango Import ?</h3>
-                        <p>Votre partenaire fiable pour vos achats en Chine, livrés en Afrique de l'Ouest.</p>
-                    </div>
-                    <div className={styles.flex}>
-                
-                        <div>
-                            <h3>Etudes Newsletter</h3>
-                            <ul>
-                                <li>Accès prioritaire aux offres spéciales</li>
-                                <li>Conseils d'experts sur l'achat en Chine</li>
-                                <li>Communication claire et accompagnement personnalisé</li>
-                                <li>Tendancs du marché asiatique</li>
-                                <li>Suivi des delais & processus d'importation</li>
-                                <li>Histoires de clients & témoignages inspirants</li>
-                                <li>Guides pratiques & tutoriels</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3>Ce qui nous distingue</h3>
-                            <ul>
-                                <li>Livraison directe et sécurisée</li>
-                                <li>Sourcing fiable de founisseurs</li>
-                                <li>Communication claire et accompagnement <br/>personnalisé</li>
-                                <li>Gains de temps et économies</li>
-                                <li>Satisfaction garantie</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+      <main className="w-full block">
+        {/* HERO SECTION - Fidèle au design d'origine (Fond sombre) */}
+        <section className="relative min-h-[45vh] flex items-center justify-center bg-gray-900 text-white">
+          <div className="relative z-10 text-center w-full max-w-5xl px-6 py-12">
+            <span className="inline-block mb-5 text-yellow-400 tracking-[0.24em] font-bold text-sm uppercase">Services sur mesure</span>
+            <h1 className="mb-4 text-4xl md:text-5xl font-black leading-tight text-white">Importer de Chine en toute confiance</h1>
+            <p className="mx-auto mb-10 max-w-3xl text-lg text-gray-300 leading-relaxed">
+              Dango Import vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée vers le Bénin, le Togo et le Ghana.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button type="button" onClick={() => navigate('/shopping')} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
+                Voir notre vitrine
+              </button>
+              <button type="button" onClick={() => navigate('/shopping')} className="bg-transparent hover:bg-white/10 text-white px-8 py-3 border border-white/30 rounded font-bold transition-colors">
+                Demander un devis
+              </button>
             </div>
-        </main>
-        <Footer/>
+          </div>
+        </section>
+
+        {/* SECTION BLOCK - Fidèle au design d'origine (Grille de 4) */}
+        <section className="py-20 px-6 xl:px-20 bg-white">
+          <div className="max-w-6xl mx-auto mb-10">
+            <span className="uppercase tracking-[0.24em] text-gray-500 text-sm font-bold block mb-1">Étapes clés</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Un processus simple et transparent</h2>
+          </div>
+          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              <img src={sourcingImg} alt="Recherche fournisseur" className="w-full h-[200px] object-cover" />
+              <div className="p-6">
+                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Recherche fournisseur</h3>
+                <p className="m-0 text-gray-600 leading-relaxed text-sm">Nous identifions les usines les plus fiables et les produits les plus compétitifs selon vos besoins.</p>
+              </div>
+            </article>
+            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              <img src={devisImg} alt="Devis personnalisé" className="w-full h-[200px] object-cover" />
+              <div className="p-6">
+                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Devis personnalisé</h3>
+                <p className="m-0 text-gray-600 leading-relaxed text-sm">Nous envoyons un devis clair qui inclut produit, transport, douane et garanties.</p>
+              </div>
+            </article>
+            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              <img src={qualityImg} alt="Suivi qualité" className="w-full h-[200px] object-cover" />
+              <div className="p-6">
+                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Suivi qualité</h3>
+                <p className="m-0 text-gray-600 leading-relaxed text-sm">Contrôle qualité sur place, validation des commandes et suivi permanent jusqu'à l'expédition.</p>
+              </div>
+            </article>
+            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              <img src={deliveryImg} alt="Livraison ciblée" className="w-full h-[200px] object-cover" />
+              <div className="p-6">
+                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Livraison ciblée</h3>
+                <p className="m-0 text-gray-600 leading-relaxed text-sm">Livraison directe à domicile ou en point relais au Bénin, Togo et Ghana.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* SECTION HIGHLIGHT - Fidèle au design d'origine */}
+        <section className="bg-yellow-400 py-16 px-6 xl:px-20 text-center text-gray-900">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Plus qu’un service, un vrai partenaire</h2>
+            <p className="text-lg leading-relaxed">
+              Nous apportons une expertise concrète, une communication claire et une prise en charge complète pour que votre import soit fiable et rentable.
+            </p>
+          </div>
+        </section>
+
+        {/* SECTION DETAIL - Fidèle au design d'origine (2 colonnes) */}
+        <section className="max-w-6xl mx-auto py-16 px-6 xl:px-20 grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Accompagnement complet</h3>
+            <p className="text-gray-600 leading-relaxed">
+              De la recherche du fournisseur à la livraison finale, nous coordonnons toutes les étapes pour réduire les risques et les retards.
+            </p>
+          </div>
+          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Transparence et confiance</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Chaque commande est suivie avec des rapports clairs et des échanges réguliers afin que vous restiez informé en permanence.
+            </p>
+          </div>
+        </section>
+
+        {/* SECTION BOTTOM GRID - Fidèle au design d'origine */}
+        <section className="max-w-6xl mx-auto pb-16 px-6 xl:px-20 grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Études & Newsletter</h3>
+            <ul className="space-y-2 text-gray-600 list-disc list-inside">
+              <li>Offres prioritaires</li>
+              <li>Conseils sourcing</li>
+              <li>Actualités du marché chinois</li>
+              <li>Guides d’importation pratiques</li>
+            </ul>
+          </div>
+          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Ce qui nous distingue</h3>
+            <ul className="space-y-2 text-gray-600 list-disc list-inside">
+              <li>Fournisseurs validés</li>
+              <li>Transport sécurisé</li>
+              <li>Suivi personnalisé</li>
+              <li>Respect des délais</li>
+            </ul>
+          </div>
+        </section>
+
+        {/* CTA SECTION - Fidèle au design d'origine */}
+        <section className="bg-gray-900 text-white py-20 px-6 xl:px-20 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Prêt à lancer votre import ?</h2>
+            <p className="text-lg text-gray-300 mb-8">Contactez-nous et obtenez une solution sur mesure pour votre première commande.</p>
+            <button type="button" onClick={() => navigate('/shopping')} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
+              Commencer maintenant
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
-)
-}
+  );
+};
 
 export default Service;

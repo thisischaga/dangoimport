@@ -1,177 +1,188 @@
-import React, { useEffect, useState, useCallback, memo } from "react";
-import Slider from "react-slick";
-import { useLocation, useNavigate } from "react-router-dom";
-import styles from './header.module.css';
-
-// Import des images
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { FaSearch, FaShoppingCart, FaUser, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
-import slide1 from '../images/product1.png';
-import slide2 from '../images/avion.png';
-import slide3 from '../images/slide3.jpg';
+import NotificationPanel from './NotificationPanel';
 
-const StatItem = ({ value, label }) => (
-  <div className={styles.statItem}>
-    <div className={styles.statValue}>{value}</div>
-    <div className={styles.statLabel}>{label}</div>
-  </div>
-);
-
-const Header = ({setShowForm}) => {
-  const location = useLocation();
+const Header = () => {
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { getCartCount } = useCart();
 
-  const handleNavigation = useCallback((path) => {
-    navigate(path);
-    setMobileMenuOpen(false);
-    window.scrollTo(0, 0);
-  }, [navigate]);
-
-  const navigationItems = [
-    { path: '/', label: 'Accueil' },
-    { path: '/services', label: 'Services' },
-    { path: '/shopping', label: 'Boutique' },
-    { path: '/blog/articles', label: 'Blog' },
-    { path: '/about', label: 'À propos' }
-  ];
-
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 1000,
-    slidesToShow: 1,
-    autoplay: true,
-    autoplaySpeed: 5000,
-    fade: true,
-    pauseOnHover: false,
-    cssEase: "cubic-bezier(0.7, 0, 0.3, 1)"
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shopping?q=${encodeURIComponent(searchQuery.trim())}`);
+      setMobileMenuOpen(false);
+    }
   };
 
+  const checkAuth = () => {
+    const userData = localStorage.getItem('dangoUser');
+    if (userData) setUser(JSON.parse(userData));
+    else setUser(null);
+  };
+
+  useEffect(() => {
+    checkAuth();
+    window.addEventListener('authChange', checkAuth);
+    return () => window.removeEventListener('authChange', checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('dangoToken');
+    localStorage.removeItem('dangoUser');
+    setUser(null);
+    navigate('/login');
+  };
+
+  const mainLinks = [
+    { name: 'Accueil', path: '/' },
+    { name: 'Boutique', path: '/shopping' },
+    { name: 'Sourcing Pro', path: '/services' },
+    { name: 'À propos', path: '/about' }
+  ];
+
   return (
-    <header className={styles.header}>
-      {/* --- NAVBAR --- */}
-      <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
-        <div className={styles.navContainer}>
-          <div className={styles.logo} onClick={() => handleNavigation('/')}>
-            <div className={styles.logoImage}><img src={logo} alt="Logo" /></div>
-            <div className={styles.logoText}>
-              <span className={styles.logoName}>Dango Import</span>
-              <span className={styles.logoTagline}>China to Africa</span>
+    <header className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+
+          {/* Logo */}
+          <div onClick={() => navigate('/')} className="flex items-center gap-3 cursor-pointer shrink-0">
+            <img src={logo} alt="Dango Import" className="h-10 w-10 rounded-md border border-gray-200 object-cover" />
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-semibold text-gray-900 leading-none">DANGO</h1>
+              <p className="text-xs font-medium text-gray-500 mt-0.5">Import</p>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <ul className={styles.navLinks}>
-            {navigationItems.map((item) => (
-              <li 
-                key={item.path}
-                className={location.pathname === item.path ? styles.active : ""}
-                onClick={() => handleNavigation(item.path)}
-              >
-                {item.label}
-                <span className={styles.navIndicator}></span>
-              </li>
-            ))}
-          </ul>
+          {/* Search */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-8 relative">
+            <input
+              type="text"
+              placeholder="Rechercher un produit, une catégorie..."
+              className="w-full bg-gray-100 border-none rounded-lg py-2 px-4 pl-12 focus:outline-none transition-all text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-black transition-colors"
+            >
+              Chercher
+            </button>
+          </form>
 
-          <button className={styles.ctaButton} onClick={() => window.open('https://preview.mailerlite.io/preview/1579555/sites/156648060934423805/g4bOpM?fresh=1', '_blank')}>
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeWidth="2"/>
-            </svg>
-            Newsletter
-          </button>
-
-          {/* Burger Button */}
-          <div className={styles.mobileMenuBtn} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <span className={mobileMenuOpen ? styles.open : ''}></span>
-            <span className={mobileMenuOpen ? styles.open : ''}></span>
-            <span className={mobileMenuOpen ? styles.open : ''}></span>
-          </div>
-        </div>
-      </nav>
-
-      {/* --- MOBILE MENU (L'élément qui manquait) --- */}
-      <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.open : ''}`}>
-        {navigationItems.map((item) => (
-          <div 
-            key={item.path}
-            className={`${styles.mobileMenuItem} ${location.pathname === item.path ? styles.active : ""}`}
-            onClick={() => handleNavigation(item.path)}
-          >
-            {item.label}
-          </div>
-        ))}
-        <button className={styles.mobileCtaButton}>Newsletter</button>
-      </div>
-
-      {/* --- HERO SECTION --- */}
-      <div className={styles.hero}>
-        <div className={styles.heroBackground}>
-          <div className={styles.gradientOrb} style={{ top: '5%', left: '5%' }}></div>
-          <div className={styles.gridPattern}></div>
-        </div>
-
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <div className={styles.badge}>
-              <div className={styles.badgeDot}></div>
-              <span>Expert Logistique Chine-Afrique</span>
-            </div>
-
-            <h1 className={styles.heroTitle}>
-              Vos achats en Chine,<br />
-              <span className={styles.gradientText}>livrés en Afrique</span>
-            </h1>
-
-            <p className={styles.heroSubtitle}>
-              Bénéficiez de prix d'usine sans quitter votre domicile. Nous gérons l'achat, l'inspection et le transport vers le Bénin, Togo et Ghana.
-            </p>
-
-            <div className={styles.heroActions}>
-              <button className={styles.primaryButton} onClick={() => setShowForm(true)}>
-                <span>Demander un devis</span>
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeWidth="2"/></svg>
-              </button>
-              <button className={styles.secondaryButton} onClick={() => handleNavigation('/shopping')}>
-                Voir la boutique
-              </button>
-            </div>
-
-            <div className={styles.stats}>
-              <StatItem value="500+" label="Livraisons" />
-              <div className={styles.statDivider}></div>
-              <StatItem value="3" label="Pays" />
-              <div className={styles.statDivider}></div>
-              <StatItem value="98%" label="Satisfaction" />
-            </div>
-          </div>
-
-          <div className={styles.heroRight}>
-            <div className={styles.sliderWrapper}>
-              <div className={styles.sliderDecoration}></div>
-              <Slider {...sliderSettings} className={styles.slider}>
-                {[slide1, slide2, slide3].map((img, idx) => (
-                  <div key={idx} className={styles.slideItem}>
-                    <img src={img} alt={`Slide ${idx}`} className={styles.slideImage} />
-                  </div>
-                ))}
-              </Slider>
-              <div className={styles.floatingCard} style={{ top: '15%', right: '-5%' }}>
-                <span>📦 Suivi en temps réel</span>
+          {/* Actions */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            {user ? (
+              <div className="hidden sm:flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-medium text-gray-500">Bonjour,</span>
+                  <span className="text-sm font-semibold text-gray-900">{user.firstname || 'Utilisateur'}</span>
+                </div>
+                <button onClick={handleLogout} className="text-gray-400 hover:text-red-500 transition-colors" title="Se déconnecter">
+                  <FaSignOutAlt size={20} />
+                </button>
               </div>
-            </div>
+            ) : (
+              <button onClick={() => navigate('/login')} className="hidden sm:flex flex-col items-center justify-center text-gray-600 hover:text-gray-900 transition-colors">
+                <FaUser size={20} />
+                <span className="text-[10px] font-semibold mt-1">Connexion</span>
+              </button>
+            )}
+
+            {user && (
+              <div className="flex flex-col items-center justify-center">
+                <NotificationPanel />
+                <span className="text-[10px] font-medium mt-1 hidden sm:block">Notifications</span>
+              </div>
+            )}
+
+            <button onClick={() => navigate('/cart')} className="flex flex-col items-center justify-center text-gray-600 hover:text-gray-900 transition-colors relative">
+              <div className="relative">
+                <FaShoppingCart size={22} />
+                {getCartCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-[10px] font-semibold w-4 h-4 flex items-center justify-center rounded-full">
+                    {getCartCount()}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-semibold mt-1 hidden sm:block">Panier</span>
+            </button>
+
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-gray-900 p-2">
+              {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Bottom nav */}
+      <div className="border-t border-gray-100 hidden md:block bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center gap-8 h-12">
+            <button className="flex items-center gap-2 font-semibold text-sm text-gray-900 hover:text-gray-700">
+              <FaBars /> Toutes les catégories
+            </button>
+            <div className="w-px h-6 bg-gray-300"></div>
+            {mainLinks.map((link) => (
+              <button
+                key={link.name}
+                onClick={() => navigate(link.path)}
+                className={`text-sm font-medium transition-colors ${location.pathname === link.path ? 'text-yellow-600 border-b-2 border-yellow-500 h-full' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                {link.name}
+              </button>
+            ))}
+            <div className="ml-auto">
+              <span className="text-xs font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">Support 24/7</span>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
+          <div className="p-4">
+            <div className="relative mb-4">
+              <form onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  className="w-full bg-gray-100 border-none rounded-lg py-3 px-4 focus:outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+            </div>
+            <nav className="flex flex-col gap-2">
+              {mainLinks.map((link) => (
+                <button
+                  key={link.name}
+                  onClick={() => {
+                    navigate(link.path);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`text-left px-4 py-3 rounded-lg font-medium ${location.pathname === link.path ? 'bg-yellow-50 text-yellow-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  {link.name}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
 
-export default memo(Header);
+export default Header;

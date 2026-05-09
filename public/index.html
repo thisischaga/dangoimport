@@ -1,63 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Dango Import - Achetez facilement en Chine, livrés en Afrique de l'Ouest. Importation simple et rapide." />
+    <meta name="theme-color" content="#232f3e" />
+    <meta name="description" content="Dango Import - Vitrine d'importation Chine-Afrique Premium" />
 
-    <meta name="keywords" content="importation, chine, afrique de l'ouest, logistique, dango import">
-    <meta name="author" content="Dango Import">
-    <meta property="og:title" content="Dango Import" />
-    <meta property="og:description" content="Achetez en Chine, livrés chez vous en Afrique de l’Ouest." />
-    <meta property="og:image" content="%PUBLIC_URL%/logo192.png" />
-    <meta property="og:type" content="website" />
-    <meta name="google-adsense-account" content="ca-pub-2759671915983740">
-
-
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Dango Import</title>
-    <!--<meta name="google-site-verification" content="sc8OBXGYpC5ew-FbkViQimysuLxO940Tvry9v1X5zuw" />-->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBMFHNT5TF"></script>
+    <!-- Fonts Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
     
+    <!-- TAILWIND CDN SÉCURITÉ -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-MBMFHNT5TF');
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              amazon: { light: '#f3f3f3', DEFAULT: '#232f3e', dark: '#131921', yellow: '#febd69', orange: '#f3a847' },
+              primary: '#d4af37',
+              bg: '#eaeded',
+            },
+            fontFamily: {
+              sans: ['Outfit', 'sans-serif'],
+              playfair: ['Playfair Display', 'serif'],
+            }
+          }
+        }
+      }
     </script>
 
+    <title>Dango Import | Vitrine Amazon Style</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Vous devez activer JavaScript pour exécuter cette application.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>

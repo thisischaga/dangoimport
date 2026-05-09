@@ -1,560 +1,426 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
-
-:root {
-  --primary: #e74c3c;
-  --primary-dark: #c0392b;
-  --primary-light: #ff6b6b;
-  --secondary: #2c3e50;
-  --accent: #f39c12;
-
-  --bg-primary: #0a0e27;
-  --bg-secondary: #1a1f3a;
-  --bg-tertiary: #252b4a;
-
-  --text-primary: #ffffff;
-  --text-secondary: #b8c5d6;
-  --text-muted: #7a8ba0;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
-
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.pageWrapper {
-  font-family: 'Poppins', sans-serif;
-  background-color: var(--bg-primary);
+.page {
   min-height: 100vh;
-  color: var(--text-primary);
+  background: #ffffff;
+  color: #111827;
 }
 
 .main {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  display: block !important;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-/* ========== CTA SECTION ========== */
-.ctaSection {
-  padding: clamp(60px, 10vw, 100px) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.hero {
   position: relative;
-  overflow: hidden;
-}
-
-.ctaSection::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(231, 76, 60, 0.5) 50%, transparent);
-}
-
-.ctaContent {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: clamp(24px, 5vw, 40px);
-  padding: clamp(32px, 5vw, 60px);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-lg);
-}
-
-.ctaText h2 {
-  font-size: clamp(24px, 4vw, 36px);
-  font-weight: 800;
-  margin: 0 0 12px;
-  letter-spacing: -0.02em;
-}
-
-.ctaText p {
-  font-size: clamp(14px, 2vw, 18px);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.ctaButtons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  min-width: max-content;
-}
-
-.primaryBtn,
-.secondaryBtn {
-  padding: 16px 32px;
-  border-radius: var(--radius-xl);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all var(--transition-base);
-  border: none;
-  white-space: nowrap;
-  box-sizing: border-box;
-}
-
-.primaryBtn {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  box-shadow: 0 8px 30px rgba(231, 76, 60, 0.3);
-}
-
-.primaryBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(231, 76, 60, 0.5);
-}
-
-.secondaryBtn {
-  background: transparent;
-  color: var(--text-primary);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.secondaryBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-3px);
-}
-
-/* ========== FORM SECTION ========== */
-.formSection {
-  padding: 100px 0;
-}
-
-/* ========== SECTION HEADER ========== */
-.sectionHeader {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 80px;
-}
-
-.badge {
-  display: inline-flex;
-  padding: 8px 20px;
-  background: rgba(231, 76, 60, 0.1);
-  border: 1px solid rgba(231, 76, 60, 0.3);
-  border-radius: var(--radius-xl);
-  color: var(--primary);
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 24px;
-}
-
-.sectionHeader h2 {
-  font-size: clamp(36px, 5vw, 48px);
-  font-weight: 900;
-  margin: 0 0 20px;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-
-.sectionHeader p {
-  font-size: clamp(16px, 2vw, 18px);
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin: 0;
-}
-
-/* ========== STEPS SECTION ========== */
-.stepsSection {
-  padding: clamp(60px, 10vw, 120px) 0;
-  position: relative;
-}
-
-.stepsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
-  gap: clamp(20px, 3vw, 32px);
-}
-
-.stepCard {
-  position: relative;
-  padding: clamp(24px, 4vw, 40px);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(10px);
-  transition: all var(--transition-base);
-  animation: fadeInUp var(--transition-slow) ease-out backwards;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 16px;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stepCard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-}
-
-.stepCard:hover {
-  transform: translateY(-8px);
-  border-color: rgba(231, 76, 60, 0.3);
-  box-shadow: 0 20px 60px rgba(231, 76, 60, 0.2);
-}
-
-.stepCard:hover::before {
-  opacity: 1;
-}
-
-.stepNumber {
-  position: absolute;
-  top: clamp(16px, 2vw, 20px);
-  right: clamp(16px, 2vw, 20px);
-  width: clamp(40px, 6vw, 48px);
-  height: clamp(40px, 6vw, 48px);
-  border-radius: 50%;
+  min-height: 75vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(16px, 2.5vw, 20px);
+  background-size: cover;
+  background-position: center;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: min(100%, 1080px);
+  padding: 3rem 1.5rem;
+}
+
+.heroBadge {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  color: #f7c948;
+  letter-spacing: 0.3em;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin-bottom: 1.4rem;
+  font-size: clamp(2.5rem, 5vw, 4.8rem);
+  line-height: 1.05;
   font-weight: 900;
-  color: white;
-  box-shadow: var(--shadow-md);
-  z-index: 2;
+  letter-spacing: -0.04em;
+  color: #ffffff;
 }
 
-.stepIcon {
-  margin-bottom: clamp(12px, 2vw, 24px);
-  z-index: 1;
+.heroText {
+  margin: 0 auto 2.4rem;
+  max-width: 780px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #d1d5db;
 }
 
-.stepIcon svg {
-  width: clamp(24px, 4vw, 32px);
-  height: clamp(24px, 4vw, 32px);
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
-.stepContent h3 {
-  font-size: clamp(18px, 3vw, 24px);
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0 0 clamp(12px, 2vw, 16px);
-  letter-spacing: -0.02em;
+.primaryButton,
+.secondaryButton,
+.whiteButton,
+.linkButton {
+  border: 0;
+  cursor: pointer;
+  transition: all 240ms ease;
+  font-weight: 700;
 }
 
-.stepContent p {
-  font-size: clamp(14px, 2vw, 16px);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0 0 clamp(12px, 2vw, 20px);
+.primaryButton {
+  background: #f7c948;
+  color: #111827;
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  box-shadow: 0 18px 45px rgba(247, 201, 72, 0.2);
 }
 
-.stepFeatures {
-  list-style: none;
+.primaryButton:hover {
+  background: #e0b02c;
+  transform: translateY(-1px);
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  padding: 1rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.featuresSection {
+  padding: 4rem 1.5rem;
+  background: #ffffff;
+}
+
+.featuresGrid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.featureCard {
+  background: #ffffff;
+  color: #111827;
+  border-radius: 1.25rem;
   padding: 0;
-  margin: clamp(12px, 2vw, 20px) 0 0;
-  display: grid;
-  gap: clamp(8px, 1.5vw, 12px);
-}
-
-.stepFeatures li {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 12px);
-  font-size: clamp(13px, 1.8vw, 14px);
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.stepFeatures li svg {
-  color: var(--primary);
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-}
-
-.stepImage {
-  margin-top: clamp(16px, 2vw, 24px);
-  border-radius: var(--radius-lg);
+  gap: 0;
+  min-height: 320px;
+  text-align: center;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  aspect-ratio: 16 / 9;
-  z-index: 1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+  transition: transform 240ms ease, box-shadow 240ms ease;
 }
 
-.stepImage img {
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+.featureImageWrapper {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.featureImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
+  transition: transform 400ms ease;
 }
 
-.stepCard:hover .stepImage img {
+.featureCard:hover .featureImage {
   transform: scale(1.05);
 }
 
-/* ========== ADVANTAGES SECTION ========== */
-.advantagesSection {
-  padding: clamp(60px, 10vw, 120px) 0;
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+.featureContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featureCard h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.featureCard p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.collectionSection {
+  padding: 5rem 1.5rem;
+}
+
+.sectionHeader {
+  max-width: 1080px;
+  margin: 0 auto 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sectionLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sectionTitle {
+  margin: 0.35rem 0 0;
+  font-size: clamp(2rem, 2.5vw, 3rem);
+  font-weight: 800;
+  color: #111827;
+}
+
+.sectionUnderline {
+  height: 4px;
+  width: 90px;
+  background: #f7c948;
+  border-radius: 999px;
+}
+
+.productGrid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.productCard {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  transition: transform 240ms ease, box-shadow 240ms ease;
+  display: grid;
+}
+
+.productCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 65px rgba(15, 23, 42, 0.14);
+}
+
+.productImageWrapper {
+  position: relative;
+  background: #f8fafc;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.productImage {
+  max-width: 85%;
+  max-height: 85%;
+  object-fit: contain;
+}
+
+.productBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #111827;
+  color: #ffffff;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.productDetails {
+  padding: 1.35rem 1.35rem 1.75rem;
+}
+
+.productDetails h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.rating {
+  margin: 0.8rem 0;
+  color: #f7c948;
+  font-size: 0.92rem;
+}
+
+.productPrice {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #111827;
+}
+
+.ctaRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  padding: 1rem 1.75rem;
+  border-radius: 999px;
+}
+
+.linkButton:hover {
+  border-color: #f7c948;
+  color: #111827;
+}
+
+.linkIcon {
+  font-size: 1rem;
+}
+
+.calloutSection {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.calloutOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.calloutContent {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 960px);
+  text-align: center;
+  color: #f9fafb;
+}
+
+.calloutContent h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 900;
+}
+
+.calloutContent p {
+  margin: 0 auto 2rem;
+  max-width: 720px;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #d1d5db;
+}
+
+.whiteButton {
+  background: #ffffff;
+  color: #111827;
+  padding: 1rem 2.2rem;
+  border-radius: 999px;
+}
+
+.whiteButton:hover {
+  background: #f7c948;
+  color: #111827;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.modalCard {
+  width: min(100%, 720px);
+  background: #ffffff;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 32px 120px rgba(15, 23, 42, 0.18);
   position: relative;
 }
 
-.advantagesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(16px, 2.5vw, 24px);
+.modalClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
 }
 
-.advantageCard {
-  padding: clamp(24px, 4vw, 32px);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  transition: all var(--transition-base);
-  animation: fadeInUp var(--transition-slow) ease-out backwards;
-  display: grid;
-  place-items: center;
-  gap: clamp(16px, 2vw, 20px);
+.modalContent {
+  padding: 2.5rem;
 }
 
-.advantageCard:hover {
-  transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(231, 76, 60, 0.3);
-  box-shadow: 0 12px 40px rgba(231, 76, 60, 0.2);
-}
-
-.advantageIcon {
-  width: clamp(48px, 8vw, 64px);
-  height: clamp(48px, 8vw, 64px);
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.2) 0%, rgba(231, 76, 60, 0.1) 100%);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-  transition: all var(--transition-base);
-}
-
-.advantageIcon svg {
-  width: clamp(20px, 4vw, 24px);
-  height: clamp(20px, 4vw, 24px);
-}
-
-.advantageCard:hover .advantageIcon {
-  transform: scale(1.1) rotate(5deg);
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.3) 0%, rgba(231, 76, 60, 0.2) 100%);
-}
-
-.advantageCard h3 {
-  font-size: clamp(15px, 2.2vw, 18px);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* ========== NEWSLETTER SECTION ========== */
-.newsletterSection {
-  padding: clamp(60px, 10vw, 120px) 0;
-}
-
-.newsletterGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(32px, 6vw, 60px);
-  align-items: center;
-}
-
-.newsletterLeft h2 {
-  font-size: clamp(28px, 5vw, 40px);
-  font-weight: 900;
-  margin: 0 0 16px;
-  letter-spacing: -0.03em;
-}
-
-.newsletterLeft p {
-  font-size: clamp(15px, 2vw, 18px);
-  color: var(--text-secondary);
-  margin: 0 0 32px;
-}
-
-.benefitsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 12px;
-}
-
-.benefitsList li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 12px;
-  font-size: clamp(14px, 1.8vw, 16px);
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.benefitsList li svg {
-  color: var(--primary);
-  flex-shrink: 0;
-}
-
-.newsletterRight {
-  display: flex;
-  justify-content: center;
-}
-
-.newsletterCard {
-  padding: clamp(32px, 5vw, 48px);
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
-  border: 2px solid rgba(231, 76, 60, 0.3);
-  border-radius: var(--radius-xl);
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 500px;
-}
-
-/* ========== RESPONSIVE ========== */
-@media (max-width: 1024px) {
-  .newsletterGrid {
-    gap: 40px;
-  }
-}
-
-@media (max-width: 968px) {
-  /* GLOBAL */
-  .sectionHeader {
-    margin-bottom: 60px;
-  }
-
-  /* CTA SECTION */
-  .ctaContent {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 32px;
-    padding: 40px 32px;
-  }
-  
-  .ctaText h2 {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 600px;
-  }
-  
-  .ctaText p {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 500px;
-  }
-
-  .ctaButtons {
-    justify-content: center;
-    width: 100%;
-  }
-
-  /* NEWSLETTER */
-  .newsletterGrid {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 48px;
-  }
-
-  .newsletterLeft h2,
-  .newsletterLeft p {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .benefitsList {
-    justify-content: center;
-    max-width: 400px;
-    margin: 0 auto 32px;
-  }
-  
-  .newsletterRight {
-    justify-content: center;
+@media (max-width: 900px) {
+  .featuresGrid,
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  /* CTA SECTION */
-  .ctaSection {
-    padding: 60px 0;
-  }
-  
-  .ctaContent {
-    padding: 32px 24px;
-    gap: 24px;
+  .featuresGrid,
+  .productGrid {
+    grid-template-columns: 1fr;
   }
 
-  .ctaButtons {
-    grid-template-columns: 1fr;
-    width: 100%;
+  .heroContent {
+    padding: 2rem 1rem;
   }
-  
-  .primaryBtn,
-  .secondaryBtn {
-    width: 100%;
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .heroActions,
+  .ctaRow {
     justify-content: center;
-  }
-
-  /* STEPS */
-  .stepsGrid {
-    grid-template-columns: 1fr; /* Force 1 column on mobile */
-  }
-  
-  .stepCard {
-    padding: 24px;
-  }
-
-  /* ADVANTAGES */
-  .advantagesGrid {
-    grid-template-columns: 1fr;
-  }
-
-  /* NEWSLETTER */
-  .newsletterSection {
-    padding: 60px 0;
-  }
-  
-  .newsletterCard {
-    padding: 32px 24px;
   }
 }

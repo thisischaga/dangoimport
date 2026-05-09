@@ -6,32 +6,43 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@tanstack/react-query": "^5.69.0",
     "axios": "^1.8.4",
+    "cors": "^2.8.5",
     "cra-template": "1.2.0",
+    "date-fns": "^4.1.0",
     "dexie": "^4.0.11",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.4",
     "framer-motion": "^12.5.0",
     "jsonwebtoken": "^9.0.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "leaflet": "^1.9.4",
+    "paydunya": "^1.0.12",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-dropzone": "^14.3.8",
     "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
     "react-native-image-picker": "^8.2.0",
     "react-native-vector-icons": "^10.2.0",
+    "react-phone-input-2": "^2.15.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
     "react-scripts": "^5.0.1",
     "react-slick": "^0.31.0",
     "react-toastify": "^11.0.5",
     "recoil": "^0.7.7",
+    "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1",
-    "socket.io-client": "^4.8.1",
+    "socket.io-client": "^4.8.3",
     "zustand": "^5.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node server/index.js"
   },
+  "proxy": "http://localhost:8000",
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -49,5 +60,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^3.4.19"
   }
 }

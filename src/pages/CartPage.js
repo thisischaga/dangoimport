@@ -1,0 +1,240 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { toast } from 'react-toastify';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import BuyProduct from '../components/BuyProduct';
+import { FaTrash, FaPlus, FaMinus, FaShoppingBag, FaArrowLeft, FaTimes } from 'react-icons/fa';
+
+const CartPage = () => {
+  const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
+  const navigate = useNavigate();
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [paydunyaLoading, setPaydunyaLoading] = useState(false);
+
+  const handleCheckout = () => {
+    const user = localStorage.getItem('dangoUser');
+    if (!user) {
+      toast.warning("Veuillez vous connecter pour passer votre commande.");
+      navigate('/login', { state: { from: '/cart' } });
+      return;
+    }
+    setShowCheckout(true);
+  };
+
+  const handlePaydunyaPayment = async () => {
+    const user = localStorage.getItem('dangoUser');
+    if (!user) {
+      toast.warning("Veuillez vous connecter pour payer en ligne.");
+      navigate('/login', { state: { from: '/cart' } });
+      return;
+    }
+
+    const parsedUser = JSON.parse(user || '{}');
+    const items = cart.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.price * item.quantity,
+      description: item.description || item.name,
+    }));
+
+    const payload = {
+      amount: getCartTotal(),
+      description: 'Paiement de commande Dango Import',
+      items,
+      customer: {
+        name: parsedUser.firstname || parsedUser.name || 'Client Dango',
+        email: parsedUser.email || parsedUser.userEmail || 'client@dangoimport.com',
+        phone: parsedUser.phone || parsedUser.phoneNumber || '',
+      },
+      returnURL: `${window.location.origin}/`,
+      cancelURL: `${window.location.origin}/cart`,
+      callbackURL: process.env.REACT_APP_PAYDUNYA_CALLBACK_URL || 'http://localhost:8000/api/paydunya/ipn',
+    };
+
+    try {
+      setPaydunyaLoading(true);
+      const response = await axios.post('/api/paydunya/create-invoice', payload);
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      } else {
+        toast.error('Impossible de démarrer le paiement PayDunya.');
+      }
+    } catch (error) {
+      console.error('Erreur PayDunya:', error);
+      toast.error(
+        error.response?.data?.error ||
+        error.response?.data?.responseText ||
+        error.message ||
+        'Erreur lors de l’appel PayDunya.'
+      );
+    } finally {
+      setPaydunyaLoading(false);
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        <Header />
+        <main className="max-w-7xl mx-auto px-6 py-20 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 text-4xl mb-6">
+            <FaShoppingBag />
+          </div>
+          <h1 className="text-3xl font-black text-gray-900 mb-4">Votre panier est vide</h1>
+          <p className="text-gray-600 mb-8 max-w-md">Il semble que vous n'ayez pas encore ajouté de produits. Parcourez notre boutique pour trouver des articles incroyables !</p>
+          <button 
+            onClick={() => navigate('/shopping')}
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded-full font-bold transition-all"
+          >
+            Retourner à la boutique
+          </button>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-50 min-h-screen font-sans">
+      <Header />
+      
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex items-center gap-4 mb-10">
+          <button onClick={() => navigate('/shopping')} className="text-gray-500 hover:text-yellow-600 transition-colors">
+            <FaArrowLeft size={20} />
+          </button>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight">Mon Panier <span className="text-gray-400 font-medium ml-2">({getCartCount()} articles)</span></h1>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Cart Items List */}
+          <div className="flex-1 space-y-4">
+            {cart.map((item) => (
+              <div key={item._id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
+                <div className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+                  <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+                </div>
+                
+                <div className="flex-1">
+                  <Link to={`/shopping`} className="text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
+                  <p className="text-xs text-gray-500 mb-2">Vendu par <span className="font-bold">{item.vendorName}</span></p>
+                  
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                      <button 
+                        onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                        className="w-8 h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                      >
+                        <FaMinus size={10} />
+                      </button>
+                      <span className="w-6 text-center font-bold text-sm">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                        className="w-8 h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                      >
+                        <FaPlus size={10} />
+                      </button>
+                    </div>
+                    
+                    <button 
+                      onClick={() => removeFromCart(item._id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
+                    >
+                      <FaTrash size={12} /> Supprimer
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="text-right flex-shrink-0">
+                  <p className="text-xl font-black text-gray-900">{item.price * item.quantity} FCFA</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{item.price} FCFA / unité</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Order Summary */}
+          <div className="w-full lg:w-96">
+            <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100 sticky top-32">
+              <h2 className="text-xl font-black text-gray-900 mb-6 uppercase tracking-wider border-b border-gray-100 pb-4">Résumé</h2>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Sous-total</span>
+                  <span>{getCartTotal()} FCFA</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Livraison</span>
+                  <span className="text-gray-400 font-bold italic">Calculés au checkout</span>
+                </div>
+                <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
+                  <span className="font-bold text-gray-900 uppercase text-xs tracking-widest">Total à payer</span>
+                  <span className="text-3xl font-black text-gray-900 leading-none">{getCartTotal()} FCFA</span>
+                </div>
+              </div>
+
+               <button 
+                onClick={handleCheckout}
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-8 rounded-3xl text-2xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
+              >
+                Passer la commande
+              </button>
+
+              <button
+                onClick={handlePaydunyaPayment}
+                disabled={paydunyaLoading}
+                className="mt-4 w-full bg-gray-900 hover:bg-black text-white py-8 rounded-3xl text-2xl font-black uppercase tracking-widest shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {paydunyaLoading ? 'Ouverture de PayDunya…' : 'Payer en ligne'}
+              </button>
+              
+              <p className="text-[10px] text-center text-gray-400 mt-6 font-medium uppercase tracking-widest leading-relaxed">
+                Paiement à la livraison après vérification de vos articles.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Drawer de commande latéral (plus moderne) */}
+      <div className={`fixed inset-0 z-[100] transition-all duration-500 ${showCheckout ? 'visible' : 'invisible'}`}>
+        {/* Backdrop overlay */}
+        <div 
+          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-500 ${showCheckout ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setShowCheckout(false)}
+        />
+        
+        {/* Drawer Content */}
+        <div className={`absolute top-0 right-0 h-full w-full max-w-2xl bg-white shadow-2xl transform transition-transform duration-500 ease-out ${showCheckout ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="h-full flex flex-col">
+            {/* Header Drawer */}
+            <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-xl font-black text-gray-900 uppercase tracking-widest">Finaliser la commande</h3>
+              <button onClick={() => setShowCheckout(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <FaTimes size={20} />
+              </button>
+            </div>
+            
+            {/* Content Drawer */}
+            <div className="flex-1 overflow-y-auto p-0">
+              <BuyProduct 
+                image={cart[0].image} 
+                name={`Commande de ${getCartCount()} articles`} 
+                price={getCartTotal()} 
+                isVisibled={setShowCheckout} 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default CartPage;
