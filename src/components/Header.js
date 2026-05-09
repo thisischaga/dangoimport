@@ -177,6 +177,33 @@ const Header = () => {
                   {link.name}
                 </button>
               ))}
+              
+              {/* Auth links for mobile */}
+              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                {user ? (
+                  <>
+                    <div className="px-4 py-2 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Compte</span>
+                        <span className="text-sm font-bold text-gray-900">{user.firstname || 'Utilisateur'}</span>
+                      </div>
+                      <button onClick={handleLogout} className="text-red-500 text-sm font-bold flex items-center gap-2">
+                        <FaSignOutAlt /> Déconnexion
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      navigate('/login');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-yellow-400 text-gray-900 font-bold"
+                  >
+                    <FaUser /> Se connecter
+                  </button>
+                )}
+              </div>
             </nav>
           </div>
         </div>
