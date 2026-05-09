@@ -106,53 +106,56 @@ const CartPage = () => {
       <Header />
       
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-4 mb-6 sm:mb-10">
           <button onClick={() => navigate('/shopping')} className="text-gray-500 hover:text-yellow-600 transition-colors">
-            <FaArrowLeft size={20} />
+            <FaArrowLeft size={18} />
           </button>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight">Mon Panier <span className="text-gray-400 font-medium ml-2">({getCartCount()} articles)</span></h1>
+          <h1 className="text-2xl sm:text-4xl font-black text-gray-900 tracking-tight">Mon Panier <span className="text-gray-400 font-medium ml-2 text-base sm:text-xl">({getCartCount()} articles)</span></h1>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items List */}
           <div className="flex-1 space-y-4">
             {cart.map((item) => (
-              <div key={item._id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
-                <div className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+              <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
                   <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                 </div>
                 
-                <div className="flex-1">
-                  <Link to={`/shopping`} className="text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
-                  <p className="text-xs text-gray-500 mb-2">Vendu par <span className="font-bold">{item.vendorName}</span></p>
+                <div className="flex-1 w-full">
+                  <div className="flex justify-between items-start mb-1">
+                    <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
+                    <p className="text-lg font-black text-gray-900 sm:hidden">{item.price * item.quantity} F</p>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-3">Vendu par <span className="font-bold">{item.vendorName}</span></p>
                   
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                  <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-6">
+                    <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
                       <button 
                         onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
-                        <FaMinus size={10} />
+                        <FaMinus size={8} />
                       </button>
-                      <span className="w-6 text-center font-bold text-sm">{item.quantity}</span>
+                      <span className="w-5 sm:w-6 text-center font-bold text-xs sm:text-sm">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
-                        <FaPlus size={10} />
+                        <FaPlus size={8} />
                       </button>
                     </div>
                     
                     <button 
                       onClick={() => removeFromCart(item._id)}
-                      className="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
+                      className="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
                     >
-                      <FaTrash size={12} /> Supprimer
+                      <FaTrash size={10} /> <span className="hidden xs:inline">Supprimer</span>
                     </button>
                   </div>
                 </div>
                 
-                <div className="text-right flex-shrink-0">
+                <div className="text-right flex-shrink-0 hidden sm:block">
                   <p className="text-xl font-black text-gray-900">{item.price * item.quantity} FCFA</p>
                   <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{item.price} FCFA / unité</p>
                 </div>
@@ -162,8 +165,8 @@ const CartPage = () => {
 
           {/* Order Summary */}
           <div className="w-full lg:w-96">
-            <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100 sticky top-32">
-              <h2 className="text-xl font-black text-gray-900 mb-6 uppercase tracking-wider border-b border-gray-100 pb-4">Résumé</h2>
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 sticky top-32">
+              <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-6 uppercase tracking-wider border-b border-gray-100 pb-4">Résumé</h2>
               
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-gray-600 font-medium">
@@ -175,14 +178,14 @@ const CartPage = () => {
                   <span className="text-gray-400 font-bold italic">Calculés au checkout</span>
                 </div>
                 <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
-                  <span className="font-bold text-gray-900 uppercase text-xs tracking-widest">Total à payer</span>
-                  <span className="text-3xl font-black text-gray-900 leading-none">{getCartTotal()} FCFA</span>
+                  <span className="font-bold text-gray-900 uppercase text-[10px] tracking-widest">Total à payer</span>
+                  <span className="text-2xl sm:text-3xl font-black text-gray-900 leading-none">{getCartTotal()} FCFA</span>
                 </div>
               </div>
 
                <button 
                 onClick={handleCheckout}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-8 rounded-3xl text-2xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-5 sm:py-8 rounded-2xl sm:rounded-3xl text-lg sm:text-2xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
               >
                 Passer la commande
               </button>
@@ -190,9 +193,9 @@ const CartPage = () => {
               <button
                 onClick={handlePaydunyaPayment}
                 disabled={paydunyaLoading}
-                className="mt-4 w-full bg-gray-900 hover:bg-black text-white py-8 rounded-3xl text-2xl font-black uppercase tracking-widest shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 w-full bg-gray-900 hover:bg-black text-white py-5 sm:py-8 rounded-2xl sm:rounded-3xl text-lg sm:text-2xl font-black uppercase tracking-widest shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {paydunyaLoading ? 'Ouverture de PayDunya…' : 'Payer en ligne'}
+                {paydunyaLoading ? 'Ouverture...' : 'Payer en ligne'}
               </button>
               
               <p className="text-[10px] text-center text-gray-400 mt-6 font-medium uppercase tracking-widest leading-relaxed">

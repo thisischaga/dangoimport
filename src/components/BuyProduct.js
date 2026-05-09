@@ -229,12 +229,12 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
   return (
     <div className="bg-white flex flex-col lg:flex-row w-full overflow-hidden">
       {/* ── Gauche : Produit & Map ────────────────── */}
-      <div className="bg-gray-50 flex flex-col lg:w-2/5 lg:border-r border-gray-100 border-b lg:border-b-0">
-          <div className="p-6 flex items-center gap-4 border-b border-gray-100 bg-white/50">
-          <img src={image} alt={name} className="w-16 h-16 rounded-lg object-contain bg-white shadow" />
+      <div className="bg-gray-50 flex flex-col lg:w-2/5 lg:border-r border-gray-100 border-b lg:border-b-0 max-h-[40vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
+          <div className="p-4 sm:p-6 flex items-center gap-4 border-b border-gray-100 bg-white/50">
+          <img src={image} alt={name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-contain bg-white shadow" />
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{name}</h3>
-            <p className="text-yellow-600 font-semibold text-lg">{price.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
+            <h3 className="font-semibold text-gray-900 text-xs sm:text-sm line-clamp-1">{name}</h3>
+            <p className="text-yellow-600 font-semibold text-base sm:text-lg">{price.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
           </div>
         </div>
 
@@ -298,8 +298,8 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
       </div>
 
       {/* ── Droite : Formulaire ────────────────────── */}
-      <div className="p-6 sm:p-8 lg:w-3/5 overflow-y-auto max-h-[85vh]">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2 flex items-center gap-3">
+      <div className="p-4 sm:p-8 lg:w-3/5 overflow-y-auto max-h-[60vh] lg:max-h-[85vh]">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 flex items-center gap-3">
           Finaliser <span className="text-yellow-400 italic">l'Achat</span>
         </h2>
         {orderConfirmed && (
