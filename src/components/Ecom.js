@@ -12,6 +12,7 @@ import {
   FaHeart, FaEye, FaTag, FaCheckCircle,
   FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 import API_BASE_URL from '../apiConfig';
 const API_BASE = API_BASE_URL;
@@ -79,7 +80,10 @@ const Ecom = () => {
       : `${API_BASE}/api/products`;
     axios.get(url)
       .then(r => setProducts(r.data))
-      .catch(console.error)
+      .catch(err => {
+        console.error(err);
+        toast.error("Impossible de charger les produits. Vérifiez votre connexion.");
+      })
       .finally(() => setLoading(false));
   }, [query]);
 

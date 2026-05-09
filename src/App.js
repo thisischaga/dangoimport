@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
@@ -19,6 +20,8 @@ import VendorProfile from './pages/VendorProfile';
 import CartPage from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useState, useEffect } from 'react';
 
 function App() {
@@ -29,6 +32,19 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Intercepteur global pour les erreurs API
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const message = error.response?.data?.message || "Une erreur est survenue lors de la communication avec le serveur.";
+        // On évite d'afficher le toast pour les erreurs 401 sur le login
+        if (error.response?.status !== 401 || !window.location.pathname.includes('login')) {
+          toast.error(message);
+        }
+        return Promise.reject(error);
+      }
+    );
+
     const checkUser = () => {
       const userData = localStorage.getItem('dangoUser');
       if (userData) setUser(JSON.parse(userData));
@@ -36,7 +52,10 @@ function App() {
     };
     checkUser();
     window.addEventListener('authChange', checkUser);
-    return () => window.removeEventListener('authChange', checkUser);
+    return () => {
+      window.removeEventListener('authChange', checkUser);
+      axios.interceptors.response.eject(interceptor);
+    };
   }, []);
 
   return (
@@ -63,6 +82,7 @@ function App() {
               {/*<Route path='/blog/histoire-de-mamadou' element={<ArticleFour/>}/>*/}
               <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFour/>}/>
             </Routes>
+            <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         </Router>
       </NotificationProvider>
     </CartProvider>
