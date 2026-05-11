@@ -14,6 +14,12 @@ const CartPage = () => {
   const navigate = useNavigate();
   const [showCheckout, setShowCheckout] = useState(false);
   const [paydunyaLoading, setPaydunyaLoading] = useState(false);
+ 
+  const getImgUrl = (img) => {
+    if (!img) return '';
+    if (img.startsWith('http') || img.startsWith('data:')) return img;
+    return `${API_BASE_URL}/images/${img}`;
+  };
 
   const handleCheckout = () => {
     const user = localStorage.getItem('dangoUser');
@@ -117,40 +123,40 @@ const CartPage = () => {
           {/* Cart Items List */}
           <div className="flex-1 space-y-4">
             {cart.map((item) => (
-              <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
-                  <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+              <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-row items-center gap-4 sm:gap-6">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+                  <img src={getImgUrl(item.image)} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                 </div>
                 
-                <div className="flex-1 w-full">
+                <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
-                    <p className="text-lg font-black text-gray-900 sm:hidden">{item.price * item.quantity} F</p>
+                    <Link to={`/shopping`} className="text-sm sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
+                    <p className="text-base font-black text-gray-900 sm:hidden whitespace-nowrap ml-2">{item.price * item.quantity} F</p>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mb-3">Vendu par <span className="font-bold">{item.vendorName}</span></p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-2">Vendu par <span className="font-bold">{item.vendorName}</span></p>
                   
                   <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-6">
-                    <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                    <div className="flex items-center gap-1.5 sm:gap-3 bg-gray-50 rounded-lg p-0.5 sm:p-1 border border-gray-100">
                       <button 
                         onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
-                        <FaMinus size={8} />
+                        <FaMinus size={7} />
                       </button>
-                      <span className="w-5 sm:w-6 text-center font-bold text-xs sm:text-sm">{item.quantity}</span>
+                      <span className="w-4 sm:w-6 text-center font-bold text-[10px] sm:text-sm">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
-                        <FaPlus size={8} />
+                        <FaPlus size={7} />
                       </button>
                     </div>
                     
                     <button 
                       onClick={() => removeFromCart(item._id)}
-                      className="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
+                      className="text-gray-300 hover:text-red-500 transition-colors flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider"
                     >
-                      <FaTrash size={10} /> <span className="hidden xs:inline">Supprimer</span>
+                      <FaTrash size={9} /> <span className="hidden xs:inline">Retirer</span>
                     </button>
                   </div>
                 </div>
