@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import { toast } from 'react-toastify';
-import { FaPaperPlane, FaUser, FaPhone, FaLink, FaCamera, FaShoppingBag } from 'react-icons/fa';
+import { FaUser, FaPhone, FaLink, FaCamera, FaShoppingBag } from 'react-icons/fa';
 
 const DevisForm = ({ showForm }) => {
   const [formData, setFormData] = useState({
@@ -64,7 +64,7 @@ const DevisForm = ({ showForm }) => {
     <div className="text-white font-outfit">
       <div className="mb-12 text-center">
         <h2 className="text-4xl md:text-5xl font-playfair font-black mb-4">Demander un <span className="text-primary italic">Devis</span></h2>
-        <p className="text-gray-400">Réponse garantie sous 24h par nos agents de sourcing.</p>
+        <p className="text-gray-400">Réponse garantie sous 72h par nos agents de sourcing.</p>
         <p className="text-sm text-yellow-300 font-bold mt-4">Pour l’étude de votre devis, un frais fixe de <span className="text-primary">5000 FCFA</span> est nécessaire. Ce montant est remboursable sur la commande finale après validation du paiement.</p>
       </div>
 
@@ -94,7 +94,7 @@ const DevisForm = ({ showForm }) => {
               <input 
                 required
                 type="tel" 
-                placeholder="+229 96 00 00 00"
+                placeholder="+229 0159387180"
                 className="w-full bg-white/5 text-gray-900 placeholder:text-gray-500 border border-white/10 rounded-2xl py-5 px-14 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -177,7 +177,7 @@ const DevisForm = ({ showForm }) => {
           type="submit" 
           className="w-full bg-primary text-secondary py-6 rounded-2xl text-xl font-black uppercase tracking-widest hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 disabled:opacity-50"
         >
-          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE (5000 FCFA)'} <FaPaperPlane />
+          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE (5000 FCFA)'}
         </button>
       </form>
     </div>

@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import DevisForm from "../components/DevisForm";
+import axios from "axios";
+import API_BASE_URL from "../apiConfig";
 
 import heroImg from "../images/premium_cover_dango.png";
 import chinaAfrica from "../images/slide_china_africa.png";
@@ -21,7 +23,7 @@ import {
   FaShippingFast, FaHeadset, FaCheckCircle,
   FaTruck, FaLock, FaBoxOpen, FaQuoteLeft,
   FaEnvelope, FaPhone, FaWhatsapp,
-  FaSearch, FaClipboardCheck, FaPlaneDeparture, FaHandshake
+  FaSearch, FaClipboardCheck, FaHandshake
 } from "react-icons/fa";
 
 const TESTIMONIALS = [
@@ -34,7 +36,7 @@ const TESTIMONIALS = [
 const HOW_IT_WORKS = [
   { step: "01", icon: <FaSearch size={22} />, title: "Vous choisissez", desc: "Parcourez notre catalogue ou envoyez une image / un lien du produit que vous souhaitez importer." },
   { step: "02", icon: <FaClipboardCheck size={22} />, title: "Nous sourceons", desc: "Nos agents à Guangzhou contactent les usines, négocient les prix et inspectent la qualité." },
-  { step: "03", icon: <FaPlaneDeparture size={22} />, title: "On expédie", desc: "La marchandise est emballée et expédiée par voie maritime ou aérienne selon vos besoins." },
+  { step: "03", icon: <FaShippingFast size={22} />, title: "On expédie", desc: "La marchandise est emballée et expédiée par voie maritime ou aérienne selon vos besoins." },
   { step: "04", icon: <FaHandshake size={22} />, title: "Vous recevez", desc: "La livraison est effectuée à votre porte ou en point relais. Paiement libéré à la réception." },
 ];
 
@@ -77,6 +79,23 @@ const Home = () => {
   const location = useLocation();
   const { clearCart } = useCart();
   const [showForm, setShowForm] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+
+  const handleNewsletter = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterLoading(true);
+    try {
+      await axios.post(`${API_BASE_URL}/api/newsletter/subscribe`, { email: newsletterEmail });
+      toast.success("Merci ! Vous êtes bien inscrit à notre newsletter.");
+      setNewsletterEmail("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Erreur lors de l'inscription.");
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -387,11 +406,11 @@ const Home = () => {
 
               {/* Contact info */}
               <div className="mt-8 flex flex-col gap-3">
-                <a href="tel:+22900000000" className="flex items-center gap-3 text-gray-400 hover:text-yellow-400 transition-colors text-sm">
+                <a href="tel:+2290159387180" className="flex items-center gap-3 text-gray-400 hover:text-yellow-400 transition-colors text-sm">
                   <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
                     <FaPhone size={13} className="text-yellow-400" />
                   </div>
-                  +229 XX XX XX XX
+                  +229 0159387180
                 </a>
                 <a href="mailto:contact@dangoimport.com" className="flex items-center gap-3 text-gray-400 hover:text-yellow-400 transition-colors text-sm">
                   <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
@@ -404,22 +423,26 @@ const Home = () => {
 
             {/* Right — Subscribe form */}
             <form
-              onSubmit={e => e.preventDefault()}
+              onSubmit={handleNewsletter}
               className="w-full lg:max-w-md flex flex-col gap-4"
             >
               <div className="relative">
                 <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
+                  required
                   type="email"
                   placeholder="Votre adresse e-mail"
                   className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/40 transition-all text-sm"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                 />
               </div>
               <button
+                disabled={newsletterLoading}
                 type="submit"
-                className="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-yellow-400/20 active:scale-95"
+                className="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-yellow-400/20 active:scale-95 disabled:opacity-50"
               >
-                S'inscrire gratuitement
+                {newsletterLoading ? "INSCRIPTION..." : "S'inscrire gratuitement"}
               </button>
               <p className="text-gray-500 text-[11px] text-center">Aucun spam. Désabonnement en un clic.</p>
             </form>
