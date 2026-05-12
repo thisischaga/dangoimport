@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import DevisForm from '../components/DevisForm';
+import { FaTimes } from 'react-icons/fa';
 
 // Images (Utilisation des photos premium demandées)
 import sourcingImg from '../images/service_sourcing.png';
@@ -10,6 +13,7 @@ import deliveryImg from '../images/service_logistics.png';
 
 const Service = () => {
   const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
@@ -28,7 +32,7 @@ const Service = () => {
               <button type="button" onClick={() => navigate('/shopping')} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
                 Voir notre vitrine
               </button>
-              <button type="button" onClick={() => navigate('/shopping')} className="bg-transparent hover:bg-white/10 text-white px-8 py-3 border border-white/30 rounded font-bold transition-colors">
+              <button type="button" onClick={() => setShowForm(true)} className="bg-transparent hover:bg-white/10 text-white px-8 py-3 border border-white/30 rounded font-bold transition-colors">
                 Demander un devis
               </button>
             </div>
@@ -126,7 +130,7 @@ const Service = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Prêt à lancer votre import ?</h2>
             <p className="text-lg text-gray-300 mb-8">Contactez-nous et obtenez une solution sur mesure pour votre première commande.</p>
-            <button type="button" onClick={() => navigate('/shopping')} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
+            <button type="button" onClick={() => setShowForm(true)} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
               Commencer maintenant
             </button>
           </div>
@@ -134,6 +138,23 @@ const Service = () => {
       </main>
 
       <Footer />
+
+      {/* ── Sourcing Modal ── */}
+      {showForm && (
+        <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-5 backdrop-blur-sm">
+          <div className="w-full max-w-[720px] bg-white rounded-3xl overflow-hidden shadow-[0_32px_120px_rgba(15,23,42,0.2)] relative max-h-[95vh] overflow-y-auto">
+            <button
+              onClick={() => setShowForm(false)}
+              className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 p-2 rounded-full z-50 transition-colors"
+            >
+              <FaTimes size={18} />
+            </button>
+            <div className="p-8 md:p-10">
+              <DevisForm showForm={setShowForm} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
