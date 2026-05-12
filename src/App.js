@@ -20,7 +20,7 @@ import VendorProfile from './pages/VendorProfile';
 import CartPage from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useState, useEffect } from 'react';
 
