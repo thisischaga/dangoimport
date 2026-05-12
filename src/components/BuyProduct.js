@@ -23,20 +23,6 @@ L.Icon.Default.mergeOptions({
 });
 
 const STORE_LOCATION = { lat: 6.3813, lng: 2.3831 }; // Cotonou, Stade
-const BASE_FEE = 0;
-const FEE_PER_KM = 100;
-
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}
 
 // Composant interne pour recentrer la carte
 function ChangeView({ center }) {
@@ -52,7 +38,6 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState(null);
-  const [deliveryFee, setDeliveryFee] = useState(0);
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -81,12 +66,9 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
     }
   }, []);
 
-  // Gestion du calcul des frais
+  // Gestion de la position
   const updateLocationAndFee = useCallback((lat, lng) => {
     setLocation({ lat, lng });
-    const distance = calculateDistance(STORE_LOCATION.lat, STORE_LOCATION.lng, lat, lng);
-    const fee = BASE_FEE + Math.ceil(distance) * FEE_PER_KM;
-    setDeliveryFee(fee);
   }, []);
 
   // Debounce pour l'autocomplétion
@@ -139,7 +121,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
 
     setLoading(true);
     const totalProduct = price * formData.quantity;
-    const grandTotal = totalProduct + deliveryFee;
+    const grandTotal = totalProduct;
 
     try {
       const orderData = {
@@ -151,71 +133,34 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
         picture: image,
         userEmail: formData.email,
         status: 'En attente',
-        paymentMethod: formData.paymentMethod === 'online' ? 'PayDunya' : 'Paiement à la livraison',
+        paymentMethod: 'Paiement à la livraison',
         address: formData.address,
         city: formData.city || 'Non précisé',
         lat: location.lat,
         lng: location.lng,
-        deliveryFee: deliveryFee,
+        deliveryFee: 0,
         totalPrice: grandTotal,
         productPrice: price
       };
 
       await axios.post(`${API_BASE_URL}/acheter`, orderData);
 
-      if (formData.paymentMethod === 'online') {
-        console.log('🚀 [BuyProduct] Appel PayDunya URL:', `${API_BASE_URL}/api/paydunya/create-invoice`);
-        const paydunyaRes = await axios.post(`${API_BASE_URL}/api/paydunya/create-invoice`, {
-          amount: grandTotal,
-          description: `Commande Dango Import - ${name}`,
-          items: [
-            {
-              name: name,
-              quantity: formData.quantity,
-              price: price,
-              total: totalProduct
-            },
-            {
-              name: 'Frais de livraison',
-              quantity: 1,
-              price: deliveryFee,
-              total: deliveryFee
-            }
-          ],
-          customer: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
-          }
-        });
-
-        if (paydunyaRes.data?.url) {
-          toast.success('Redirection vers PayDunya...');
-          clearCart();
-          window.location.href = paydunyaRes.data.url;
-          return;
-        } else {
-          toast.error('Erreur lors de la création du lien de paiement.');
-        }
-      } else {
-        // marque la commande comme confirmée et ferme le modal après un bref délai
-        setOrderConfirmed(true);
-        toast.success('Commande enregistrée !');
-        clearCart();
-        setTimeout(() => {
-          isVisibled(false);
-          setOrderConfirmed(false);
-        }, 2200);
-      }
+      setOrderConfirmed(true);
+      toast.success('Commande enregistrée ! Notre équipe vous contactera pour la livraison.');
+      clearCart();
+      setTimeout(() => {
+        isVisibled(false);
+        setOrderConfirmed(false);
+      }, 2500);
     } catch (error) {
-      toast.error('Erreur lors de la commande.');
+      toast.error('Erreur lors de la commande. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
 
   const totalProduct = price * formData.quantity;
-  const grandTotal = totalProduct + deliveryFee;
+  const grandTotal = totalProduct;
 
   function MapEvents() {
     useMapEvents({
@@ -229,7 +174,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
   return (
     <div className="bg-white flex flex-col lg:flex-row w-full overflow-hidden">
       {/* ── Gauche : Produit & Map ────────────────── */}
-      <div className="bg-gray-50 flex flex-col lg:w-2/5 lg:border-r border-gray-100 border-b lg:border-b-0 max-h-[40vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
+      <div className="bg-gray-50 flex flex-col lg:w-2/5 lg:border-r border-gray-100 border-b lg:border-b-0 shrink-0">
           <div className="p-4 sm:p-6 flex items-center gap-4 border-b border-gray-100 bg-white/50">
           <img src={image} alt={name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-contain bg-white shadow" />
           <div>
@@ -239,7 +184,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative min-h-[220px] lg:min-h-0">
+        <div className="relative h-48 sm:h-64 lg:flex-1 lg:h-auto">
           <MapContainer 
             center={[STORE_LOCATION.lat, STORE_LOCATION.lng]} 
             zoom={13} 
@@ -283,12 +228,6 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
               <span className="text-gray-500 font-medium">Articles</span>
               <span className="font-black text-gray-900">{totalProduct.toLocaleString()} F</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">Livraison</span>
-              <span className={`font-black ${deliveryFee > 0 ? 'text-red-500' : 'text-gray-400'}`}>
-                {deliveryFee > 0 ? `+ ${deliveryFee.toLocaleString()} F` : 'À définir'}
-              </span>
-            </div>
             <div className="pt-3 mt-1 border-t border-gray-100 flex justify-between items-center">
               <span className="font-black text-gray-900 uppercase text-xs tracking-tighter">Total à payer</span>
               <span className="text-xl font-black text-gray-900">{grandTotal.toLocaleString()} F</span>
@@ -298,7 +237,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
       </div>
 
       {/* ── Droite : Formulaire ────────────────────── */}
-      <div className="p-4 sm:p-8 lg:w-3/5 overflow-y-auto max-h-[60vh] lg:max-h-[85vh]">
+      <div className="p-4 sm:p-8 lg:w-3/5 overflow-y-auto">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 flex items-center gap-3">
           Finaliser <span className="text-yellow-400 italic">l'Achat</span>
         </h2>
@@ -373,10 +312,10 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Paiement</label>
-                <select value={formData.paymentMethod} onChange={e => setFormData({...formData, paymentMethod: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm appearance-none">
+                <select disabled value="cash" className="w-full bg-gray-100 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none transition-all font-medium text-sm appearance-none cursor-not-allowed">
                   <option value="cash">Paiement à la livraison</option>
-                  <option value="online">Paiement en ligne</option>
                 </select>
+                <p className="text-[9px] text-yellow-600 font-bold mt-1">Paiement en ligne temporairement indisponible</p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Quantité</label>
@@ -402,7 +341,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
                 type="submit"
                 className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
               >
-                {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : (formData.paymentMethod === 'online' ? `Procéder au paiement (${grandTotal.toLocaleString()} F)` : `Confirmer la commande (${grandTotal.toLocaleString()} F)`) }
+                {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : `Confirmer la commande (${grandTotal.toLocaleString()} F)` }
                 {!loading && !orderConfirmed && <FaShoppingCart />}
               </button>
 

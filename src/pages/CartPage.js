@@ -123,17 +123,17 @@ const CartPage = () => {
           {/* Cart Items List */}
           <div className="flex-1 space-y-4">
             {cart.map((item) => (
-              <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-row items-center gap-4 sm:gap-6">
-                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+              <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
                   <img src={getImgUrl(item.image)} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <Link to={`/shopping`} className="text-sm sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-1">{item.name}</Link>
-                    <p className="text-base font-black text-gray-900 sm:hidden whitespace-nowrap ml-2">{item.price * item.quantity} F</p>
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-2">{item.name}</Link>
+                    <p className="text-base font-black text-gray-900 whitespace-nowrap">{item.price * item.quantity} F</p>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mb-2">Vendu par <span className="font-bold">{item.vendorName}</span></p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-3 uppercase tracking-wider">Vendu par <span className="font-bold text-gray-700">{item.vendorName}</span></p>
                   
                   <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-6">
                     <div className="flex items-center gap-1.5 sm:gap-3 bg-gray-50 rounded-lg p-0.5 sm:p-1 border border-gray-100">
@@ -179,10 +179,6 @@ const CartPage = () => {
                   <span>Sous-total</span>
                   <span>{getCartTotal()} FCFA</span>
                 </div>
-                <div className="flex justify-between text-gray-600 font-medium">
-                  <span>Livraison</span>
-                  <span className="text-gray-400 font-bold italic">Calculés au checkout</span>
-                </div>
                 <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
                   <span className="font-bold text-gray-900 uppercase text-[10px] tracking-widest">Total à payer</span>
                   <span className="text-2xl sm:text-3xl font-black text-gray-900 leading-none">{getCartTotal()} FCFA</span>
@@ -196,13 +192,7 @@ const CartPage = () => {
                 Passer la commande
               </button>
 
-              <button
-                onClick={handlePaydunyaPayment}
-                disabled={paydunyaLoading}
-                className="mt-4 w-full bg-gray-900 hover:bg-black text-white py-5 sm:py-8 rounded-2xl sm:rounded-3xl text-lg sm:text-2xl font-black uppercase tracking-widest shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {paydunyaLoading ? 'Ouverture...' : 'Payer en ligne'}
-              </button>
+              {/* Online payment disabled */}
               
               <p className="text-[10px] text-center text-gray-400 mt-6 font-medium uppercase tracking-widest leading-relaxed">
                 Paiement à la livraison après vérification de vos articles.

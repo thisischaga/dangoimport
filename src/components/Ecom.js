@@ -28,7 +28,8 @@ const getImgUrl = (img) => {
 const fmtPrice = (p) =>
   typeof p === 'number' ? p.toLocaleString('fr-FR') : p;
 
-const StarRating = ({ value = 5, count }) => {
+const StarRating = ({ value = 0, count }) => {
+  if (value === 0) return null;
   const stars = [1, 2, 3, 4, 5].map(i => {
     if (i <= Math.floor(value)) return 'full';
     if (i - value < 1 && value % 1 >= 0.5) return 'half';
@@ -41,7 +42,7 @@ const StarRating = ({ value = 5, count }) => {
         s === 'half'  ? <FaStarHalfAlt key={i} size={10} className="text-yellow-400" /> :
                         <FaRegStar key={i} size={10} className="text-gray-300" />
       )}
-      {count != null && <span className="text-[10px] text-gray-400 ml-1.5">({count})</span>}
+      {count != null && count > 0 && <span className="text-[10px] text-gray-400 ml-1.5">({count})</span>}
     </div>
   );
 };
@@ -288,7 +289,7 @@ const Ecom = () => {
                         <img
                           src={getImgUrl(p.image)}
                           alt={p.name}
-                          className="max-w-[80%] max-h-[80%] object-contain group-hover:scale-105 transition-transform duration-300"
+                          className="max-w-[85%] max-h-[85%] object-contain group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
                           onError={e => { e.target.style.display='none'; }}
                         />
                         {/* Overlay actions */}

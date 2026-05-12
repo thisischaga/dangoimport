@@ -44,14 +44,19 @@ const DevisForm = ({ showForm }) => {
         formPayload.append('photo', photo);
       }
 
-      const response = await axios.post(`${API_BASE_URL}/api/devis/create-invoice`, formPayload, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await axios.post(`${API_BASE_URL}/api/devis`, {
+        name: formData.name,
+        phone: formData.phone,
+        productLink: formData.productLink,
+        quantity: formData.quantity,
+        description: formData.description,
+        studyFee: 5000
       });
 
-      toast.info('Redirection vers PayDunya pour finaliser le paiement...');
-      window.location.href = response.data.url;
+      toast.success('Votre demande a été envoyée ! Un agent vous contactera sous 72h pour finaliser le sourcing.');
+      setFormData({ name: '', phone: '', productLink: '', quantity: '', description: '' });
+      setPhoto(null);
+      setPhotoName('');
     } catch (error) {
       console.error(error);
       toast.error('Erreur lors de la création du paiement du devis.');

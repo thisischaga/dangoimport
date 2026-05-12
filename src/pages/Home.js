@@ -10,10 +10,9 @@ import API_BASE_URL from "../apiConfig";
 
 import heroImg from "../images/premium_cover_dango.png";
 import chinaAfrica from "../images/slide_china_africa.png";
-import watch from "../images/poedagar_premium.png";
-import shoe from "../images/sneakers_premium.png";
-import beauty from "../images/beauty_premium.png";
-import gshock from "../images/gshock_premium.png";
+import parfum1 from "../images/WhatsApp Image 2026-05-11 at 21.49.32 (3).jpeg";
+import parfum2 from "../images/WhatsApp Image 2026-05-11 at 21.49.33 (2).jpeg";
+import parfum3 from "../images/WhatsApp Image 2026-05-11 at 21.49.34.jpeg";
 import secImage from "../images/service_security.png";
 import srcImage from "../images/service_sourcing.png";
 import logImage from "../images/service_logistics.png";
@@ -48,31 +47,34 @@ const STATS = [
 ];
 
 const FEATURED = [
-  { id: 1, name: "Montre Poedagar Luxe",   price: "17 000", badge: "Bestseller", img: watch,   rating: 4.8, reviews: 128 },
-  { id: 2, name: "Sneakers Urban Elite",   price: "12 000", badge: "Nouveau",    img: shoe,    rating: 4.6, reviews: 87  },
-  { id: 3, name: "Sérum Beauté Premium",   price: "1 500",  badge: "Promo",      img: beauty,  rating: 4.9, reviews: 214 },
-  { id: 4, name: "G-Shock Original",       price: "13 000", badge: "Populaire",  img: gshock,  rating: 4.7, reviews: 176 },
+  { id: 1, name: "Genie’s Secret Bombshell", price: "3 000", badge: "Premium", img: parfum1,   rating: 0, reviews: 0 },
+  { id: 2, name: "Kaly (Vanilla & Marshmallow)", price: "4 500", badge: "Premium", img: parfum2,   rating: 0, reviews: 0  },
+  { id: 3, name: "Mayar Eau de Parfum",       price: "2 500", badge: "Premium", img: parfum3,   rating: 0, reviews: 0 },
 ];
 
 const BADGE_COLOR = {
   Bestseller: "bg-yellow-400 text-gray-900",
   Nouveau:    "bg-emerald-500 text-white",
   Promo:      "bg-red-500 text-white",
+  Premium:    "bg-indigo-600 text-white",
   Populaire:  "bg-blue-500 text-white",
 };
 
-const StarRating = ({ rating }) => (
-  <div className="flex items-center gap-1">
-    {[1,2,3,4,5].map(i => (
-      <FaStar
-        key={i}
-        size={11}
-        className={i <= Math.round(rating) ? "text-yellow-400" : "text-gray-200"}
-      />
-    ))}
-    <span className="text-[11px] text-gray-500 ml-1 font-medium">{rating}</span>
-  </div>
-);
+const StarRating = ({ rating = 0 }) => {
+  if (!rating || rating === 0) return null;
+  return (
+    <div className="flex items-center gap-1">
+      {[1,2,3,4,5].map(i => (
+        <FaStar
+          key={i}
+          size={11}
+          className={i <= Math.round(rating) ? "text-yellow-400" : "text-gray-200"}
+        />
+      ))}
+      <span className="text-[11px] text-gray-500 ml-1 font-medium">{rating}</span>
+    </div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -227,7 +229,7 @@ const Home = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {FEATURED.map(p => (
                 <button
                   key={p.id}
@@ -240,7 +242,7 @@ const Home = () => {
                     <img
                       src={p.img}
                       alt={p.name}
-                      className="max-w-[80%] max-h-[80%] object-contain group-hover:scale-110 transition-transform duration-300"
+                      className="max-w-[80%] max-h-[80%] object-contain group-hover:scale-110 transition-transform duration-300 mix-blend-multiply"
                     />
                     {/* Badge */}
                     <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${BADGE_COLOR[p.badge] ?? 'bg-gray-200 text-gray-700'}`}>
@@ -252,7 +254,7 @@ const Home = () => {
                   <div className="p-5 flex flex-col gap-2 flex-1">
                     <h3 className="text-sm font-black text-gray-900 leading-tight line-clamp-2">{p.name}</h3>
                     <StarRating rating={p.rating} />
-                    <div className="text-[11px] text-gray-400 font-medium">{p.reviews} avis</div>
+                    {p.reviews > 0 && <div className="text-[11px] text-gray-400 font-medium">{p.reviews} avis</div>}
                     <div className="mt-auto pt-2 flex items-baseline gap-1">
                       <span className="text-xl font-black text-gray-900">{p.price}</span>
                       <span className="text-xs text-gray-400 font-bold">FCFA</span>
