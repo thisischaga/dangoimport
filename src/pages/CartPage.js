@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API_BASE_URL from '../apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';

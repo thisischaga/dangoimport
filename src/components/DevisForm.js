@@ -44,19 +44,16 @@ const DevisForm = ({ showForm }) => {
         formPayload.append('photo', photo);
       }
 
-      const response = await axios.post(`${API_BASE_URL}/api/devis`, {
-        name: formData.name,
-        phone: formData.phone,
-        productLink: formData.productLink,
-        quantity: formData.quantity,
-        description: formData.description,
-        studyFee: 5000
+      const response = await axios.post(`${API_BASE_URL}/api/devis/create-invoice`, formPayload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      toast.success('Votre demande a été envoyée ! Un agent vous contactera sous 72h pour finaliser le sourcing.');
-      setFormData({ name: '', phone: '', productLink: '', quantity: '', description: '' });
-      setPhoto(null);
-      setPhotoName('');
+      if (response.data && response.data.url) {
+        toast.success('Redirection vers FedaPay pour le paiement du devis...');
+        window.location.href = response.data.url;
+      } else {
+        toast.error('Erreur lors de la création du paiement.');
+      }
     } catch (error) {
       console.error(error);
       toast.error('Erreur lors de la création du paiement du devis.');
