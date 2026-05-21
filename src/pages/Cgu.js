@@ -6,195 +6,203 @@ import { FaFileContract, FaChevronRight, FaArrowUp } from "react-icons/fa";
 
 const SECTIONS = [
   {
-    id: "presentation",
-    title: "1. PRÉSENTATION DE DANGO IMPORT",
-    content: `Dango Import est une plateforme spécialisée dans :
-• l’assistance à l’importation de produits depuis la Chine ;
-• la recherche et la négociation avec des fournisseurs ;
-• la coordination logistique ;
-• la mise en relation commerciale ;
-• la vente de produits proposés par des vendeurs partenaires situés principalement au Bénin et au Togo.
+    id: "preambule",
+    title: "PRÉAMBULE",
+    content: `Les présentes Conditions Générales d’Utilisation (ci-après les « CGU ») définissent les règles d’accès et d’utilisation de la plateforme Dango Import.
+Dango Import est une plateforme numérique opérant :
+• une marketplace de mise en relation entre acheteurs et vendeurs partenaires ;
+• un service d’accompagnement à l’importation de produits depuis la Chine.
 
-Dango Import agit principalement comme :
-• intermédiaire commercial ;
-• plateforme numérique ;
-• facilitateur logistique ;
-• coordinateur de commandes.`,
+Dango Import agit en qualité d’intermédiaire technique et commercial, facilitant les transactions entre utilisateurs, sans être systématiquement vendeur des produits proposés. En accédant à la plateforme, tout utilisateur accepte sans réserve les présentes CGU.`,
   },
   {
-    id: "acceptation",
-    title: "2. ACCEPTATION DES CONDITIONS",
-    content: `L’utilisation du site implique l’acceptation pleine et entière des présentes CGU. Si vous n’acceptez pas ces conditions, vous ne devez pas utiliser les services proposés par Dango Import.`,
+    id: "objet",
+    title: "1. OBJET",
+    content: `Les CGU définissent :
+• les conditions d’utilisation du site ;
+• les règles de fonctionnement de la marketplace ;
+• les conditions d’accès aux services ;
+• les responsabilités des parties.`,
   },
   {
-    id: "services",
-    title: "3. SERVICES PROPOSÉS",
-    content: `La plateforme Dango Import propose notamment :
+    id: "definitions",
+    title: "2. DÉFINITIONS",
+    content: `• Utilisateur : toute personne utilisant la plateforme.
+• Client : utilisateur achetant un produit ou un service.
+• Vendeur partenaire : tiers proposant des produits via la marketplace.
+• Dango Import : opérateur de la plateforme.
+• Commande : transaction réalisée sur la plateforme.`,
+  },
+  {
+    id: "nature",
+    title: "3. NATURE DES SERVICES",
+    content: `3.1 Marketplace locale
+Dango Import permet la vente de produits proposés par des vendeurs partenaires sélectionnés.
 
-3.1 Service d’importation depuis la Chine
-• recherche fournisseurs ;
-• négociation commerciale ;
-• établissement de devis ;
-• assistance à l’importation ;
-• suivi logistique ;
-• livraison finale.
-
-3.2 Marketplace locale
-Le site permet également à des vendeurs partenaires indépendants de proposer leurs produits aux utilisateurs. Les produits disponibles sur la marketplace peuvent être proposés par :
-• des commerçants locaux ;
-• des partenaires indépendants ;
-• des vendeurs tiers situés au Bénin ou au Togo.`,
+3.2 Service d’importation Chine
+Dango Import propose un service d’accompagnement incluant :
+• sourcing fournisseur ;
+• négociation ;
+• achat ;
+• logistique ;
+• livraison.`,
   },
   {
     id: "role",
     title: "4. RÔLE DE DANGO IMPORT",
-    content: `Dango Import agit principalement comme une plateforme intermédiaire entre acheteurs, vendeurs partenaires et fournisseurs. À ce titre :
-• Dango Import facilite les transactions ;
-• Dango Import coordonne certaines opérations logistiques ;
-• Dango Import peut centraliser les paiements ;
-• Dango Import peut assister dans le suivi des commandes.
+    content: `Dango Import agit uniquement comme :
+• intermédiaire commercial ;
+• plateforme technique ;
+• coordinateur logistique.
 
-Toutefois, Dango Import n’est pas systématiquement propriétaire des produits proposés sur la marketplace.`,
+👉 Dango Import n’est pas vendeur final des produits des vendeurs partenaires.`,
   },
   {
-    id: "devis",
-    title: "5. DEMANDE DE DEVIS PERSONNALISÉ",
-    content: `5.1 Fonctionnement
-Les utilisateurs souhaitant obtenir un devis personnalisé pour une importation doivent soumettre une demande via la plateforme. Cette prestation peut inclure :
-• recherche de fournisseurs ;
-• négociation de prix ;
-• estimation des frais ;
-• étude logistique ;
-• établissement d’un devis détaillé.
-
-5.2 Acompte obligatoire
-Toute demande de devis personnalisé nécessite le paiement préalable d’un acompte de 5 000 FCFA. Cet acompte permet notamment de couvrir :
-• le temps de traitement ;
-• les négociations fournisseurs ;
-• les recherches commerciales ;
-• les frais opérationnels engagés.
-
-5.3 Déduction de l’acompte
-Si le client valide sa commande, le montant de l’acompte sera déduit du montant final à payer.
-Exemple : montant commande : 30 000 FCFA ; acompte déjà payé : 5 000 FCFA ; reste à payer : 25 000 FCFA.
-
-5.4 Non-remboursement de l’acompte
-En cas d’abandon du projet, de refus du devis, d’absence de validation de commande ou d’annulation volontaire par le client après traitement, l’acompte reste acquis à Dango Import et ne pourra faire l’objet d’aucun remboursement.`,
+    id: "acces",
+    title: "5. ACCÈS AUX SERVICES",
+    content: `L’accès au site est ouvert au public. Certaines fonctionnalités nécessitent la création d’un compte utilisateur.`,
   },
   {
-    id: "delais",
-    title: "6. DÉLAIS",
-    content: `Les délais communiqués par Dango Import sont donnés à titre indicatif. Ces délais peuvent varier en fonction :
-• des fournisseurs ;
-• du transport ;
-• des procédures douanières ;
-• des contraintes logistiques ;
-• des cas de force majeure.
+    id: "marketplace",
+    title: "6. MARKETPLACE ET PRODUITS",
+    content: `Les produits affichés peuvent provenir :
+• de vendeurs partenaires locaux ;
+• de fournisseurs validés ;
+• de partenaires commerciaux.
 
-Dango Import ne saurait être tenu responsable des retards indépendants de sa volonté.`,
-  },
-  {
-    id: "produits",
-    title: "7. PRODUITS ET DISPONIBILITÉ",
-    content: `Les produits proposés sur la plateforme peuvent être :
-• importés ;
-• fournis par des partenaires locaux ;
-• proposés par des vendeurs tiers.
-
-La disponibilité des produits dépend des stocks des partenaires et fournisseurs. Dango Import ne garantit pas la disponibilité permanente des produits affichés sur la plateforme.`,
-  },
-  {
-    id: "responsabilite_vendeurs",
-    title: "8. RESPONSABILITÉ DES VENDEURS PARTENAIRES",
-    content: `Les vendeurs partenaires restent seuls responsables :
-• des produits proposés ;
-• de leur conformité ;
-• de leur qualité ;
-• de leur disponibilité ;
-• des garanties applicables ;
-• des informations communiquées sur les produits.
-
-Dango Import agit principalement comme intermédiaire commercial et logistique.`,
-  },
-  {
-    id: "limitation",
-    title: "9. LIMITATION DE RESPONSABILITÉ",
-    content: `Dango Import ne saurait être tenu responsable :
-• des variations mineures de couleurs ou textures dues aux prises de vue ou aux écrans ;
-• des différences mineures d’emballage ;
-• des erreurs de fournisseurs ou partenaires ;
-• des ruptures de stock ;
-• des retards de livraison indépendants de sa volonté ;
-• des dommages causés par une mauvaise utilisation des produits ;
-• des informations inexactes fournies par les vendeurs partenaires ;
-• des pertes indirectes liées à l’utilisation des produits ou services.`,
+Les informations produits sont fournies sous la responsabilité des vendeurs.`,
   },
   {
     id: "prix",
-    title: "10. PRIX ET PAIEMENTS",
-    content: `Les prix affichés sur la plateforme peuvent être modifiés à tout moment sans préavis. Les paiements peuvent être effectués via les moyens proposés sur la plateforme.
-Dango Import se réserve le droit de suspendre toute commande en cas de suspicion de fraude, de paiement non validé, de litige ou d’informations incorrectes.`,
+    title: "7. PRIX ET STRUCTURE TARIFAIRE",
+    content: `Les prix affichés sur la plateforme sont déterminés après validation entre Dango Import et le vendeur.
+Le prix inclut :
+• coût du produit ;
+• commission Dango Import ;
+• frais opérationnels éventuels.`,
+  },
+  {
+    id: "commission",
+    title: "8. COMMISSION DANGO IMPORT",
+    content: `Dango Import perçoit une commission sur chaque transaction.
+• Commission minimale : 1 000 FCFA par produit
+• Commission variable selon :
+o catégorie de produit ;
+o complexité logistique ;
+o accords commerciaux.`,
+  },
+  {
+    id: "paiements",
+    title: "9. PAIEMENTS ET FLUX FINANCIERS",
+    content: `9.1 Paiement client
+Le client paie via les moyens disponibles sur la plateforme.
+
+9.2 Centralisation des fonds
+Dango Import peut centraliser temporairement les paiements afin de sécuriser la transaction.
+
+9.3 Validation de commande
+Les fonds ne sont pas immédiatement reversés au vendeur. Ils sont conservés jusqu’à :
+• confirmation de livraison, ou
+• validation de la commande.
+
+9.4 Reversement aux vendeurs
+Après validation, les fonds sont reversés au vendeur après déduction de la commission Dango Import dans un délai de J+24 heures ouvrées.`,
   },
   {
     id: "livraison",
-    title: "11. LIVRAISON",
-    content: `Les livraisons peuvent être assurées :
-• par Dango Import ;
-• par des partenaires logistiques ;
-• par les vendeurs partenaires eux-mêmes.
+    title: "10. LIVRAISON",
+    content: `La livraison peut être assurée par :
+• Dango Import ;
+• le vendeur ;
+• ou un prestataire tiers.
 
-Les délais de livraison restent indicatifs. Le client est responsable de fournir des informations exactes concernant son adresse et ses coordonnées.`,
+La responsabilité du produit est transférée au client lors de la remise effective ou confirmation de réception.`,
+  },
+  {
+    id: "importation",
+    title: "11. SERVICE D’IMPORTATION",
+    content: `Le service d’importation est proposé sur devis. Un acompte peut être exigé pour lancement du processus.
+Cet acompte :
+• couvre les coûts de recherche et négociation ;
+• reste acquis en cas d’abandon ou non-validation du projet.`,
   },
   {
     id: "retours",
-    title: "12. POLITIQUE DE RETOUR ET REMBOURSEMENT",
-    content: `12.1 Conditions générales
-Les demandes de retour doivent être effectuées dans un délai raisonnable après réception du produit. Les produits retournés doivent être non utilisés, être dans leur état d’origine, et être accompagnés de leurs accessoires éventuels.
-
-12.2 Produits non retournables
-Ne sont notamment pas éligibles au retour : les commandes personnalisées, les produits importés spécialement pour le client, les produits utilisés ou endommagés après réception, les produits ouverts ou incomplets, les produits commandés sur mesure.
-
-12.3 Validation des retours
-Dango Import se réserve le droit d’accepter ou de refuser toute demande de retour après analyse du dossier.`,
+    title: "12. POLITIQUE DE RETOUR",
+    content: `Les retours sont régis par la Politique de Retour officielle de Dango Import.`,
   },
   {
-    id: "compte",
-    title: "13. COMPTE UTILISATEUR",
-    content: `L’utilisateur est responsable de la confidentialité de ses identifiants, des activités effectuées depuis son compte, et des informations fournies sur la plateforme.
-Dango Import se réserve le droit de suspendre ou supprimer un compte en cas de fraude, d’utilisation abusive, de comportement nuisible ou de violation des présentes CGU.`,
+    id: "responsabilite_vendeurs",
+    title: "13. RESPONSABILITÉ DES VENDEURS",
+    content: `Les vendeurs sont responsables :
+• de la conformité des produits ;
+• des descriptions ;
+• des stocks ;
+• de la qualité des articles.`,
   },
   {
-    id: "propriete",
-    title: "14. PROPRIÉTÉ INTELLECTUELLE",
-    content: `Tous les contenus présents sur la plateforme (textes, logos, images, graphismes, éléments visuels, structure du site) restent la propriété exclusive de Dango Import ou de leurs propriétaires respectifs. Toute reproduction non autorisée est interdite.`,
-  },
-  {
-    id: "communications",
-    title: "15. COMMUNICATIONS ÉLECTRONIQUES",
-    content: `En utilisant la plateforme, l’utilisateur accepte de recevoir des communications électroniques : emails, notifications, messages WhatsApp, SMS, informations liées aux commandes.`,
+    id: "limitation",
+    title: "14. LIMITATION DE RESPONSABILITÉ",
+    content: `Dango Import ne peut être tenu responsable :
+• des variations mineures (couleur, texture, rendu écran) ;
+• des erreurs des vendeurs ;
+• des retards indépendants de sa volonté ;
+• des dommages indirects ;
+• de la mauvaise utilisation des produits.`,
   },
   {
     id: "force_majeure",
-    title: "16. FORCE MAJEURE",
-    content: `Dango Import ne pourra être tenu responsable des retards ou inexécutions causés par des événements indépendants de sa volonté : catastrophes naturelles, conflits, coupures internet, blocages douaniers, grèves, crises sanitaires, défaillance transporteurs.`,
+    title: "15. FORCE MAJEURE",
+    content: `Dango Import ne saurait être tenu responsable de tout retard ou inexécution résultant d’un événement de force majeure, incluant notamment :
+• catastrophes naturelles (inondations, incendies, tremblements de terre) ;
+• crises sanitaires ou pandémies ;
+• conflits armés ou troubles sociaux ;
+• grèves ou blocages des transports ;
+• interruptions de réseau internet ou électrique ;
+• blocages douaniers ou restrictions administratives ;
+• défaillance des prestataires logistiques ou fournisseurs.
+
+👉 Dans de tels cas, l’exécution des obligations est suspendue pendant toute la durée de l’événement.`,
+  },
+  {
+    id: "compte",
+    title: "16. COMPTE UTILISATEUR",
+    content: `L’utilisateur est responsable :
+• de la confidentialité de ses identifiants ;
+• de toute activité réalisée depuis son compte.
+
+Dango Import peut suspendre ou supprimer un compte en cas de violation des CGU.`,
+  },
+  {
+    id: "communications",
+    title: "17. COMMUNICATIONS",
+    content: `L’utilisateur accepte de recevoir des communications liées aux services :
+• email ;
+• SMS ;
+• WhatsApp ;
+• notifications système.`,
+  },
+  {
+    id: "propriete",
+    title: "18. PROPRIÉTÉ INTELLECTUELLE",
+    content: `Tous les contenus de la plateforme sont protégés et appartiennent à Dango Import ou à ses partenaires.`,
   },
   {
     id: "modification",
-    title: "17. MODIFICATION DES CONDITIONS",
-    content: `Dango Import se réserve le droit de modifier les présentes CGU à tout moment. Les nouvelles versions prendront effet dès leur publication sur la plateforme.`,
+    title: "19. MODIFICATION DES CGU",
+    content: `Dango Import se réserve le droit de modifier les présentes CGU à tout moment. Les modifications sont applicables dès leur publication.`,
   },
   {
     id: "droit",
-    title: "18. DROIT APPLICABLE",
-    content: `Les présentes CGU sont régies par les lois applicables en République du Bénin et, le cas échéant, par les réglementations applicables au Togo pour certaines opérations commerciales locales.`,
+    title: "20. DROIT APPLICABLE",
+    content: `Les présentes CGU sont régies par le droit en vigueur en République du Bénin.`,
   },
   {
     id: "contact",
-    title: "19. CONTACT",
-    content: `Pour toute question concernant les présentes conditions :
-Dango Import
-Email : Contact@dangoimport.com
-Téléphone / WhatsApp : 0158266342 / 0159387180
+    title: "21. CONTACT",
+    content: `Dango Import
+Email : contact@dangoimport.com
+Téléphone : +229 01 58 26 63 42 / +229 01 59 38 71 80
 Adresse : Cotonou, Bénin`,
   },
 ];
@@ -226,7 +234,7 @@ export default function Cgu() {
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">Conditions Générales d'Utilisation</h1>
           <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-            Dernière mise à jour : <span className="text-yellow-400 font-bold">1er mai 2026</span>
+            Dernière mise à jour : <span className="text-yellow-400 font-bold">10 mai 2026</span>
           </p>
         </div>
       </section>

@@ -37,6 +37,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
   const { clearCart } = useCart();
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fedapayLoading, setFedapayLoading] = useState(false);
   const [location, setLocation] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -52,6 +53,48 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
     deliveryNotes: '',
     quantity: 1
   });
+
+  // ─── FedaPay Live Checkout ───────────────────────────────────────────
+  const handleFedapayPayment = async () => {
+    if (!formData.phone || formData.phone.length < 8) return toast.warning('Numéro de téléphone invalide.');
+    if (!location) return toast.warning('Veuillez indiquer votre position sur la carte.');
+
+    const grandTotal = price * formData.quantity;
+    setFedapayLoading(true);
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/fedapay/checkout`, {
+        userName: formData.name,
+        userNumber: formData.phone,
+        productQuantity: formData.quantity,
+        userPref: formData.deliveryNotes || formData.address,
+        selectedCountry: 'Benin',
+        picture: image,
+        userEmail: formData.email,
+        lat: location.lat,
+        lng: location.lng,
+        deliveryFee: 0,
+        address: formData.address,
+        city: formData.city || 'Non précisé',
+        totalPrice: grandTotal,
+        productPrice: price,
+        description: `Achat - ${name}`,
+        type: 'achat'
+      });
+
+      if (response.data && response.data.url) {
+        clearCart();
+        window.location.href = response.data.url; // Redirection Hosted Checkout
+      } else {
+        toast.error('Erreur lors de la création du paiement FedaPay.');
+        setFedapayLoading(false);
+      }
+    } catch (error) {
+      console.error('Erreur FedaPay Checkout :', error);
+      toast.error('Impossible de démarrer le paiement FedaPay.');
+      setFedapayLoading(false);
+    }
+  };
 
   // Auto-remplissage au montage
   useEffect(() => {
@@ -312,10 +355,14 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Paiement</label>
-                <select disabled value="cash" className="w-full bg-gray-100 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none transition-all font-medium text-sm appearance-none cursor-not-allowed">
+                <select
+                  value={formData.paymentMethod}
+                  onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                  className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm appearance-none cursor-pointer"
+                >
                   <option value="cash">Paiement à la livraison</option>
+                  <option value="fedapay">Paiement en ligne (FedaPay)</option>
                 </select>
-                <p className="text-[9px] text-yellow-600 font-bold mt-1">Paiement en ligne temporairement indisponible</p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Quantité</label>
@@ -336,14 +383,40 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
 
           <div className="pt-4 border-t border-gray-50">
             <div className="flex flex-col items-center gap-4">
-              <button
-                disabled={loading || !location || orderConfirmed}
-                type="submit"
-                className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
-              >
-                {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : `Confirmer la commande (${grandTotal.toLocaleString()} F)` }
-                {!loading && !orderConfirmed && <FaShoppingCart />}
-              </button>
+
+              {/* Bouton Cash à la livraison */}
+              {formData.paymentMethod === 'cash' && (
+                <button
+                  disabled={loading || !location || orderConfirmed}
+                  type="submit"
+                  className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
+                >
+                  {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : `Confirmer la commande (${grandTotal.toLocaleString()} F)`}
+                  {!loading && !orderConfirmed && <FaShoppingCart />}
+                </button>
+              )}
+
+              {/* Bouton FedaPay */}
+              {formData.paymentMethod === 'fedapay' && (
+                <button
+                  type="button"
+                  onClick={handleFedapayPayment}
+                  disabled={fedapayLoading || !location || orderConfirmed}
+                  className="w-full max-w-md bg-[#0f3460] text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-[#16213e] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
+                >
+                  {fedapayLoading
+                    ? <><FaSpinner className="animate-spin" /> Ouverture du paiement...</>
+                    : orderConfirmed
+                    ? 'Paiement confirmé ✓'
+                    : (
+                      <>
+                        <img src="https://fedapay.com/wp-content/uploads/2020/05/logo.png" alt="FedaPay" className="h-5 object-contain brightness-0 invert" />
+                        Payer {grandTotal.toLocaleString()} F via FedaPay
+                      </>
+                    )
+                  }
+                </button>
+              )}
 
               <div className="flex items-center justify-center gap-6 text-[10px] font-medium text-gray-300">
                 <div className="flex items-center gap-2"><FaShieldAlt className="text-emerald-400" /> Transactions sécurisées</div>

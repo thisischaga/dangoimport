@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -13,7 +12,7 @@ const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
   const navigate = useNavigate();
   const [showCheckout, setShowCheckout] = useState(false);
-  const [paydunyaLoading, setPaydunyaLoading] = useState(false);
+  const [fedapayLoading, setFedapayLoading] = useState(false);
  
   const getImgUrl = (img) => {
     if (!img) return '';
@@ -31,57 +30,49 @@ const CartPage = () => {
     setShowCheckout(true);
   };
 
-  const handlePaydunyaPayment = async () => {
+  const handleFedapayPayment = async () => {
     const user = localStorage.getItem('dangoUser');
     if (!user) {
-      toast.warning("Veuillez vous connecter pour payer en ligne.");
+      toast.warning('Veuillez vous connecter pour payer en ligne.');
       navigate('/login', { state: { from: '/cart' } });
       return;
     }
 
     const parsedUser = JSON.parse(user || '{}');
-    const items = cart.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-      total: item.price * item.quantity,
-      description: item.description || item.name,
-    }));
+    const itemsList = cart.map(i => `${i.name} x${i.quantity}`).join(', ');
 
-    const payload = {
-      amount: getCartTotal(),
-      description: 'Paiement de commande Dango Import',
-      items,
-      customer: {
-        name: parsedUser.firstname || parsedUser.name || 'Client Dango',
-        email: parsedUser.email || parsedUser.userEmail || 'client@dangoimport.com',
-        phone: parsedUser.phone || parsedUser.phoneNumber || '',
-      },
-      returnURL: `${window.location.origin}/`,
-      cancelURL: `${window.location.origin}/cart`,
-      callbackURL: process.env.REACT_APP_PAYDUNYA_CALLBACK_URL || `${API_BASE_URL}/api/paydunya/ipn`,
-    };
+    setFedapayLoading(true);
 
     try {
-      setPaydunyaLoading(true);
-      console.log('🚀 Appel PayDunya URL:', `${API_BASE_URL}/api/paydunya/create-invoice`);
-      console.log('📦 Payload:', payload);
-      const response = await axios.post(`${API_BASE_URL}/api/paydunya/create-invoice`, payload);
-      if (response.data?.url) {
-        window.location.href = response.data.url;
+      const response = await axios.post(`${API_BASE_URL}/api/fedapay/checkout`, {
+        userName: parsedUser.firstname ? `${parsedUser.firstname} ${parsedUser.surname || ''}` : parsedUser.userName || 'Client Dango',
+        userNumber: parsedUser.phone || parsedUser.userNumber || '00000000', // A demander si manquant
+        productQuantity: getCartCount(),
+        picture: cart[0]?.image || 'logo.png', // Image par défaut pour le panier
+        userEmail: parsedUser.email || parsedUser.userEmail || 'client@dangoimport.com',
+        lat: 0,
+        lng: 0,
+        deliveryFee: 0,
+        address: 'A compléter après paiement',
+        city: 'A compléter',
+        totalPrice: getCartTotal(),
+        productPrice: getCartTotal(),
+        description: `Panier Dango Import - ${itemsList}`,
+        type: 'cart'
+      });
+
+      if (response.data && response.data.url) {
+        // Optionnel : ne pas vider le panier tout de suite, ou le vider
+        // On pourrait vider le panier une fois le paiement confirmé
+        window.location.href = response.data.url; // Redirection Hosted Checkout
       } else {
-        toast.error('Impossible de démarrer le paiement PayDunya.');
+        toast.error('Erreur lors de la création du paiement FedaPay.');
+        setFedapayLoading(false);
       }
     } catch (error) {
-      console.error('Erreur PayDunya:', error);
-      toast.error(
-        error.response?.data?.error ||
-        error.response?.data?.responseText ||
-        error.message ||
-        'Erreur lors de l’appel PayDunya.'
-      );
-    } finally {
-      setPaydunyaLoading(false);
+      console.error('Erreur FedaPay Checkout :', error);
+      toast.error('Impossible de démarrer le paiement FedaPay.');
+      setFedapayLoading(false);
     }
   };
 
@@ -187,15 +178,31 @@ const CartPage = () => {
 
                <button 
                 onClick={handleCheckout}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-5 sm:py-8 rounded-2xl sm:rounded-3xl text-lg sm:text-2xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
               >
                 Passer la commande
               </button>
 
-              {/* Online payment disabled */}
-              
-              <p className="text-[10px] text-center text-gray-400 mt-6 font-medium uppercase tracking-widest leading-relaxed">
-                Paiement à la livraison après vérification de vos articles.
+              {/* Bouton FedaPay — Paiement en ligne */}
+              <button
+                onClick={handleFedapayPayment}
+                disabled={fedapayLoading}
+                className="w-full bg-[#0f3460] hover:bg-[#16213e] disabled:opacity-60 text-white py-4 sm:py-5 rounded-2xl sm:rounded-3xl text-base sm:text-lg font-black uppercase tracking-widest shadow-md transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3"
+              >
+                {fedapayLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    Ouverture...
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-yellow-300">&#128274;</span> Payer en ligne — FedaPay
+                  </>
+                )}
+              </button>
+
+              <p className="text-[10px] text-center text-gray-400 mt-2 font-medium uppercase tracking-widest leading-relaxed">
+                Paiement sécurisé via FedaPay ou à la livraison.
               </p>
             </div>
           </div>

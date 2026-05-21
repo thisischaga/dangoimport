@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../dangoimport-server"
+		},
+		{
+			"path": "../../../admin-panel"
+		}
+	],
+	"settings": {}
+}

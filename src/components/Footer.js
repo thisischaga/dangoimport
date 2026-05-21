@@ -61,6 +61,7 @@ const Footer = () => {
           <ul className="space-y-3 text-gray-300 font-medium">
             <li onClick={() => navigate('/cgu')} className="hover:text-yellow-500 cursor-pointer transition-colors">Conditions Générales</li>
             <li onClick={() => navigate('/politique-de-confidentialité')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Confidentialité</li>
+            <li onClick={() => navigate('/politique-de-retour')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Retour</li>
             <li onClick={() => navigate('/about')} className="hover:text-yellow-500 cursor-pointer transition-colors">À propos de nous</li>
             <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors">Aide & Support</li>
           </ul>

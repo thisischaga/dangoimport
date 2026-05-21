@@ -3,9 +3,11 @@ import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
+import CguVendeur from "./pages/CguVendeur";
 import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
+import PolitiqueRetour from './pages/PolitiqueRetour';
 import Ecom from './components/Ecom';
 import PerFinance from './blog/PerFinance';
 import Epargne from './blog/Epargne';
@@ -67,7 +69,9 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path='/services' element={<Services/>}/>
               <Route path='/cgu' element={<Cgu/>}/>
+              <Route path='/cgu-vendeur' element={<CguVendeur/>}/>
               <Route path='/politique-de-confidentialité' element={<Politique/>}/>
+              <Route path='/politique-de-retour' element={<PolitiqueRetour/>}/>
               <Route path='/shopping' element={<Ecom/>}/>
               {/* La route /publish a été retirée (gestion via panel admin uniquement) */}
 
