@@ -47,7 +47,7 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
     name: '',
     email: '',
     phone: '',
-    paymentMethod: 'cash',
+    paymentMethod: 'cash', // new field to select payment method
     address: '',
     city: '',
     deliveryNotes: '',
@@ -157,6 +157,12 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
     );
   };
 
+  // UI for selecting payment method
+  const handlePaymentMethodChange = (e) => {
+    setFormData({ ...formData, paymentMethod: e.target.value });
+  };
+
+  // Updated order handler to respect payment method
   const handleOrder = async (e) => {
     e.preventDefault();
     if (!formData.phone || formData.phone.length < 8) return toast.warning("Numéro de téléphone invalide.");
@@ -167,6 +173,12 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
     const grandTotal = totalProduct;
 
     try {
+      if (formData.paymentMethod === 'fedapay') {
+        // Use existing FedaPay checkout flow
+        await handleFedapayPayment();
+        return;
+      }
+
       const orderData = {
         userName: formData.name,
         userNumber: formData.phone,
@@ -297,7 +309,20 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
 
         <form onSubmit={handleOrder} className="space-y-6">
           <div className="grid gap-5">
-            {/* Nom & Email */}
+            {/* Sélection du mode de paiement */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium text-gray-400 ml-1">Mode de paiement</label>
+              <div className="flex gap-4">
+                <label className="flex items-center space-x-2">
+                  <input type="radio" name="paymentMethod" value="cash" checked={formData.paymentMethod === 'cash'} onChange={handlePaymentMethodChange} className="form-radio" />
+                  <span className="text-sm">Cash</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input type="radio" name="paymentMethod" value="fedapay" checked={formData.paymentMethod === 'fedapay'} onChange={handlePaymentMethodChange} className="form-radio" />
+                  <span className="text-sm">FedaPay</span>
+                </label>
+              </div>
+            </div>
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Nom complet</label>
