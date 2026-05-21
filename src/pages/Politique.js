@@ -6,126 +6,65 @@ import { FaShieldAlt, FaChevronRight, FaArrowUp, FaLock } from "react-icons/fa";
 
 const SECTIONS = [
   {
-    id: "qui-sommes-nous",
-    title: "1. QUI SOMMES-NOUS ?",
-    content: `Dango Import est une plateforme spécialisée dans :
-• l’assistance à l’importation de produits depuis la Chine ;
-• la recherche et la négociation avec des fournisseurs ;
-• la coordination logistique ;
-• la vente de produits proposés par des partenaires locaux ;
-• la mise en relation entre vendeurs partenaires et acheteurs.
-
-Dans le cadre de ses activités, Dango Import collecte certaines données nécessaires au bon fonctionnement de ses services.`,
-  },
-  {
     id: "donnees-collectees",
-    title: "2. DONNÉES PERSONNELLES COLLECTÉES",
-    content: `Nous pouvons collecter différentes catégories d’informations personnelles.
-
-2.1 Informations fournies directement par l’utilisateur
-Lorsque vous utilisez la plateforme, vous pouvez nous transmettre : nom et prénom, numéro de téléphone, adresse email, adresse de livraison, informations de facturation, ville et pays, messages envoyés via formulaires, WhatsApp ou support client, informations liées aux demandes de devis, informations relatives aux commandes.
-
-2.2 Informations collectées automatiquement
-Lors de l’utilisation du site, certaines informations peuvent être collectées automatiquement : adresse IP, type d’appareil, navigateur utilisé, système d’exploitation, pages visitées, durée de navigation, historique d’utilisation, données techniques de connexion.
-
-2.3 Informations liées aux paiements
-Selon les moyens de paiement utilisés, certaines informations peuvent être traitées : identifiant de transaction, montant payé, statut du paiement, historique des paiements. Les informations bancaires sensibles peuvent être traitées directement par les prestataires de paiement sécurisés et ne sont pas nécessairement stockées par Dango Import.`,
+    title: "1. DONNÉES COLLECTÉES",
+    content: `Nous collectons les données suivantes :\n- Données d’identification : Nom, prénom, adresse, numéro de téléphone, email, photo de profil.\n- Données de connexion : Adresse IP, type de navigateur, pages visitées, date et heure de connexion.\n- Données de commande : Produits commandés, adresse de livraison, mode de paiement (sans stockage complet des données bancaires).\n- Données vendeurs : RCCM, NIF, pièces d’identité, informations bancaires (pour reversement), historique de ventes.\n- Données de communication : Messages envoyés via WhatsApp, email ou le support client.\n- Cookies et technologies similaires : Données de navigation et préférences.`
   },
   {
     id: "finalites",
-    title: "3. FINALITÉS DE LA COLLECTE DES DONNÉES",
-    content: `Les données collectées sont utilisées notamment pour :
-• traiter les commandes ;
-• établir les devis personnalisés ;
-• contacter les utilisateurs ;
-• assurer les livraisons ;
-• gérer les paiements ;
-• améliorer les services ;
-• répondre aux demandes clients ;
-• gérer les litiges ;
-• prévenir les fraudes ;
-• assurer la sécurité de la plateforme ;
-• envoyer des informations importantes concernant les services.`,
+    title: "2. FINALITÉS DU TRAITEMENT",
+    content: `Nous utilisons vos données pour :\n- Créer et gérer votre compte\n- Traiter vos commandes et assurer la livraison\n- Gérer les paiements et les reversements aux vendeurs\n- Communiquer avec vous (commandes, support, promotions)\n- Améliorer notre plateforme et personnaliser l’expérience\n- Assurer la sécurité et lutter contre la fraude\n- Respecter nos obligations légales`
   },
   {
-    id: "devis-importation",
-    title: "4. DEMANDES DE DEVIS ET IMPORTATION",
-    content: `Dans le cadre des demandes de devis personnalisés :
-• certaines informations peuvent être transmises à des fournisseurs ou partenaires logistiques ;
-• les informations collectées servent à négocier les prix, vérifier la disponibilité et organiser les opérations d’importation.
-
-Dango Import s’efforce de limiter les données partagées au strict nécessaire.`,
+    id: "base-legale",
+    title: "3. BASE LÉGALE DU TRAITEMENT",
+    content: `- Exécution du contrat (commandes, reversement)\n- Consentement (pour certaines communications marketing)\n- Intérêt légitime (amélioration du service, sécurité)\n- Obligation légale (comptabilité, lutte contre la fraude)`
   },
   {
-    id: "marketplace",
-    title: "5. MARKETPLACE ET VENDEURS PARTENAIRES",
-    content: `Certains produits proposés sur la plateforme proviennent de vendeurs partenaires indépendants situés notamment au Bénin et au Togo. Dans ce cadre, certaines informations nécessaires à l’exécution des commandes peuvent être partagées avec les partenaires concernés, notamment : nom, numéro de téléphone, adresse de livraison, détails de commande.
-Les vendeurs partenaires s’engagent à utiliser ces informations uniquement dans le cadre du traitement des commandes.`,
-  },
-  {
-    id: "partage-tiers",
-    title: "6. PARTAGE DES DONNÉES AVEC DES TIERS",
-    content: `Dango Import peut partager certaines données avec : prestataires de paiement, partenaires logistiques, vendeurs partenaires, fournisseurs, services techniques, hébergeurs, autorités compétentes lorsque la loi l’exige.
-Dango Import ne vend pas les données personnelles de ses utilisateurs à des tiers.`,
-  },
-  {
-    id: "cookies",
-    title: "7. COOKIES ET TECHNOLOGIES SIMILAIRES",
-    content: `Le site peut utiliser des cookies et technologies similaires afin de : améliorer l’expérience utilisateur, analyser le trafic, mémoriser certaines préférences, mesurer les performances du site, faciliter certaines fonctionnalités.
-Des outils tiers tels que Google Analytics, Meta Pixel, TikTok Pixel ou autres outils analytiques et publicitaires peuvent être utilisés selon les besoins de la plateforme. L’utilisateur peut configurer son navigateur pour limiter ou refuser certains cookies.`,
+    id: "partage",
+    title: "4. PARTAGE DES DONNÉES",
+    content: `Nous pouvons partager vos données avec :\n- Les Vendeurs Partenaires (uniquement les informations nécessaires à l’exécution de la commande)\n- Les prestataires logistiques et transporteurs\n- FedaPay (ou tout prestataire de paiement)\n- Les autorités compétentes sur demande légale\n- Nos sous‑traitants techniques (hébergement, maintenance)\nNous ne vendons jamais vos données personnelles à des tiers.`
   },
   {
     id: "conservation",
-    title: "8. CONSERVATION DES DONNÉES",
-    content: `Les données personnelles sont conservées pendant une durée raisonnable nécessaire au traitement des commandes, au respect des obligations légales, à la gestion des litiges, à la sécurité de la plateforme, au suivi commercial.
-Certaines données peuvent être conservées plus longtemps lorsque la loi l’exige.`,
+    title: "5. CONSERVATION DES DONNÉES",
+    content: `Nous conservons vos données uniquement le temps nécessaire aux finalités :\n- Données de compte : tant que le compte est actif + 2 ans après suppression\n- Données de commande : 5 ans (obligations comptables)\n- Données vendeurs : durée de la relation contractuelle + obligations légales`
+  },
+  {
+    id: "mineurs",
+    title: "6. MINORITÉ",
+    content: `La plateforme s’adresse aux majeurs (18 ans et plus). Les personnes de moins de 18 ans ne sont pas autorisées à créer un compte ou à passer commande sans le consentement parental vérifiable. Toute inscription ou commande effectuée par un mineur sans consentement sera supprimée. Les parents sont invités à surveiller l’utilisation du service.`
+  },
+  {
+    id: "droits",
+    title: "7. VOS DROITS",
+    content: `Conformément à la loi béninoise et au RGPD, vous disposez des droits suivants :\n- Droit d’accès : obtenir une copie de vos données\n- Droit de rectification : corriger des informations inexactes\n- Droit à l’effacement (« droit à l’oubli »)\n- Droit d’opposition : vous opposer à un traitement, notamment à des fins marketing\n- Droit à la limitation du traitement\n- Droit à la portabilité des données\n- Droit de retirer votre consentement à tout moment\n- Droit de ne pas faire l’objet d’une décision automatisée` 
+  },
+  {
+    id: "cookies",
+    title: "8. COOKIES ET TECHNOLOGIES SIMILAIRES",
+    content: `Nous utilisons des cookies pour améliorer votre navigation, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences via les paramètres de votre navigateur.`
   },
   {
     id: "securite",
     title: "9. SÉCURITÉ DES DONNÉES",
-    content: `Dango Import met en œuvre des mesures de sécurité raisonnables afin de protéger les données personnelles contre les accès non autorisés, les pertes, les divulgations, les modifications, les utilisations abusives.
-Toutefois, aucun système informatique ou transmission internet ne peut garantir une sécurité absolue.`,
+    content: `Nous mettons en place des mesures techniques et organisationnelles (chiffrement, accès restreint, audits) pour protéger vos données contre tout accès non autorisé, perte ou altération.`
   },
   {
-    id: "communications",
-    title: "10. COMMUNICATIONS ET MARKETING",
-    content: `Dango Import peut envoyer : emails, notifications, messages WhatsApp, SMS, offres promotionnelles, informations relatives aux commandes. L’utilisateur peut demander à ne plus recevoir certaines communications marketing.`,
-  },
-  {
-    id: "droits",
-    title: "11. DROITS DES UTILISATEURS",
-    content: `Sous réserve des lois applicables, les utilisateurs peuvent demander : l’accès à leurs données, la correction de leurs informations, la suppression de certaines données, la limitation de certains traitements, des informations sur l’utilisation de leurs données.
-Toute demande peut être adressée via les coordonnées de contact indiquées ci-dessous.`,
-  },
-  {
-    id: "protection-comptes",
-    title: "12. PROTECTION DES COMPTES",
-    content: `L’utilisateur est responsable de la confidentialité de ses identifiants, de la sécurité de son compte, et des activités effectuées depuis son espace personnel. Il est recommandé d’utiliser un mot de passe sécurisé et de ne pas partager ses accès.`,
-  },
-  {
-    id: "mineurs",
-    title: "13. DONNÉES DES MINEURS",
-    content: `Les services de Dango Import ne sont pas destinés aux mineurs sans autorisation parentale. Dango Import ne collecte pas volontairement des données personnelles de mineurs sans consentement approprié.`,
-  },
-  {
-    id: "liens-tiers",
-    title: "14. LIENS VERS DES SITES TIERS",
-    content: `Le site peut contenir des liens vers des plateformes ou services tiers. Dango Import n’est pas responsable des pratiques de confidentialité de ces services externes. Les utilisateurs sont invités à consulter leurs politiques respectives.`,
+    id: "transfert",
+    title: "10. TRANSFERT INTERNATIONAL DE DONNÉES",
+    content: `Certaines données peuvent être transférées vers des prestataires situés hors du Bénin (ex. serveurs cloud). Nous assurons que ces transferts sont encadrés par des garanties appropriées.`
   },
   {
     id: "modification",
-    title: "15. MODIFICATION DE LA POLITIQUE DE CONFIDENTIALITÉ",
-    content: `Dango Import se réserve le droit de modifier la présente Politique de Confidentialité à tout moment. Les modifications prennent effet dès leur publication sur la plateforme. Les utilisateurs sont invités à consulter régulièrement cette politique.`,
+    title: "11. MODIFICATION DE LA POLITIQUE",
+    content: `Nous nous réservons le droit de modifier cette politique à tout moment. La version mise à jour sera publiée sur le site avec la nouvelle date. Nous vous encourageons à la consulter régulièrement.`
   },
   {
     id: "contact",
-    title: "16. CONTACT",
-    content: `Pour toute question concernant cette Politique de Confidentialité ou le traitement des données personnelles :
-Dango Import
-Email : contact@dangoimport.com
-Téléphone / WhatsApp : 0158266342 / 0159387180
-Adresse : Cotonou, Bénin`,
-  },
+    title: "12. CONTACT",
+    content: `Pour toute question relative à cette Politique de Confidentialité ou au traitement de vos données :\nDango HUB\nEmail : contact@dangoimport.com\nWhatsApp : +229 01 58 26 63 42 / +229 01 59 38 71 80\nAdresse : Abomey‑Calavi / Cotonou, Bénin`
+  }
 ];
 
 export default function Politique() {

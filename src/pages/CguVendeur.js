@@ -7,153 +7,67 @@ const SECTIONS = [
   {
     id: "preambule",
     title: "1. PRÉAMBULE",
-    content: `Les présentes Conditions Générales d’Utilisation (ci-après « CGU Vendeurs ») régissent les relations contractuelles entre :
-• Dango Import (ci-après « la Plateforme » ou « Dango Import »), opérateur de marketplace et intermédiaire commercial ;
-• et tout vendeur professionnel ou particulier référencé sur la plateforme (ci-après « le Vendeur »).
-
-Dango Import agit en qualité de plateforme intermédiaire de mise en relation, de commercialisation et de gestion des commandes, incluant le traitement des paiements et la coordination logistique.`,
+    content: `Les présentes Conditions Générales d’Utilisation – VENDEURS RÉFÉRENCÉS (CGU Vendeurs) – DANGO IMPORT MARKETPLACE\nDernière mise à jour : 21 mai 2026\n\nLes présentes Conditions Générales d’Utilisation (CGU Vendeurs) régissent la relation entre DANGO HUB (ci-après « la Plateforme ») et tout vendeur référencé sur la marketplace.\nDANGO HUB agit en tant qu’intermédiaire de mise en relation, de commercialisation, de gestion des commandes, des paiements et de la logistique.`
   },
   {
     id: "objet",
     title: "2. OBJET",
-    content: `Les présentes CGU ont pour objet de définir :
-• les conditions d’inscription des Vendeurs ;
-• les modalités de mise en ligne des produits ;
-• les règles de fixation des prix ;
-• les conditions de vente via la plateforme ;
-• les modalités de paiement et reversement ;
-• les obligations de qualité et de service ;
-• les règles de responsabilité et de sanctions.`,
+    content: `Définir les conditions d’inscription, de référencement des produits, de fixation des prix, de commissions, de paiement, de livraison, de retours et les obligations réciproques des parties.`
   },
   {
     id: "statut",
     title: "3. STATUT DU VENDEUR",
-    content: `Le Vendeur reconnaît agir en qualité de :
-• commerçant indépendant, ou
-• fournisseur partenaire référencé,
-et reste seul responsable :
-• de ses produits ;
-• de sa conformité légale ;
-• de ses obligations fiscales et commerciales.`,
+    content: `Le Vendeur agit en tant que commerçant indépendant. Il reste seul responsable de ses produits, de leur conformité légale, fiscale et commerciale.`
   },
   {
-    id: "selection",
-    title: "4. SÉLECTION ET RÉFÉRENCEMENT",
-    content: `Dango Import se réserve le droit de :
-• accepter ou refuser tout Vendeur ;
-• suspendre ou retirer un Vendeur sans préavis en cas de non-respect des présentes CGU ;
-• demander des pièces justificatives (identité, localisation, RCCM si disponible).`,
+    id: "inscription",
+    title: "4. INSCRIPTION ET RÉFÉRENCEMENT",
+    content: `DANGO HUB se réserve le droit d’accepter, refuser, suspendre ou radier tout vendeur. Le Vendeur s’engage à fournir des informations exactes et des justificatifs (identité, RCCM, etc.) sur demande.`
   },
   {
-    id: "mise_en_vente",
-    title: "5. MODALITÉS DE MISE EN VENTE",
-    content: `Les produits sont :
-• soit intégrés par Dango Import après négociation avec le Vendeur ;
-• soit fournis par le Vendeur selon un accord de référencement.
-
-Le Vendeur garantit :
-• la disponibilité réelle des produits ;
-• la conformité des descriptions ;
-• la véracité des informations fournies.`,
+    id: "produits",
+    title: "5. PRODUITS ET MISE EN LIGNE",
+    content: `Le Vendeur garantit :\n• La disponibilité réelle des produits\n• L’exactitude des descriptions et photos\n• La conformité légale et la qualité des produits. Les produits contrefaits, illicites, dangereux ou non conformes sont interdits.`
   },
   {
     id: "prix",
     title: "6. FIXATION DES PRIX",
-    content: `Les prix affichés sur la plateforme sont :
-• fixés après négociation entre Dango Import et le Vendeur ;
-• exprimés en francs CFA (FCFA) ;
-• TTC des commissions de la plateforme.
-
-Le Vendeur accepte que :
-• le prix final consommateur soit déterminé par Dango Import après ajout de sa commission ;
-• toute modification de prix nécessite validation préalable.`,
+    content: `• Le prix affiché sur la plateforme est le prix final consommateur (TTC).\n• Le prix est déterminé d’un commun accord entre DANGO HUB et le Vendeur.\n• DANGO HUB peut refuser ou demander l’ajustement d’un prix non conforme au marché.\n• Toute modification de prix doit être validée par DANGO HUB.`
   },
   {
-    id: "commission",
-    title: "7. COMMISSION DE DANGO IMPORT",
-    content: `Le Vendeur accepte l’application d’une commission :
-• standard : 15 % du prix net vendeur ;
-• minimum : 1 000 FCFA par commande.
-
-La commission est automatiquement déduite lors du traitement de la commande.`,
+    id: "commissions",
+    title: "7. COMMISSIONS",
+    content: `Phase de lancement (6 premiers mois) :\nCatégorie | Commission Dango | Minimum par commande\nMode, Beauté, Chaussures | 12 – 15 % | 500 FCFA\nMaison, Bazar, Décoration | 10 – 13 % | 500 FCFA\nÉlectronique & Accessoires | 8 – 10 % | 500 FCFA\nProduits importés via Dango Import | 7 – 10 % | 1 000 FCFA\n\n• Offre de bienvenue : 0 % de commission Dango sur les 5 premières ventes.\n• Tarif dégressif selon le volume mensuel de ventes.\n• La commission est calculée sur le prix HT et déduite automatiquement.`
+  },
+  {
+    id: "frais-prestataires",
+    title: "8. FRAIS DES PRESTATAIRES DE PAIEMENT",
+    content: `Les frais prélevés par FedaPay (environ 2 % pour Mobile Money et jusqu’à 4 % pour cartes bancaires) sont à la charge du Vendeur et sont déduits automatiquement avant tout reversement.`
   },
   {
     id: "paiement",
-    title: "8. PAIEMENT ET REVERSEMENT AU VENDEUR",
-    content: `8.1 Encaissement
-Dango Import encaisse l’intégralité du paiement client en qualité d’intermédiaire.
-
-8.2 Reversement
-Le Vendeur est payé selon les règles suivantes :
-• J+1 (24h ouvrées après confirmation de livraison) ;
-• sous réserve : o absence de litige ; o validation de livraison ; o absence de fraude ou contestation.
-
-8.3 Gel des fonds
-Dango Import peut suspendre le reversement en cas de :
-• litige client ;
-• produit non conforme ;
-• suspicion de fraude ;
-• retour en cours de traitement.`,
+    title: "9. PAIEMENT ET REVERSEMENT",
+    content: `• DANGO HUB encaisse l’intégralité des paiements clients.\n• Le reversement au Vendeur est effectué sous 48 heures maximum (J+2 ouvrés) après confirmation de livraison.\n• En cas de réclamation ou retour dans le délai de 7 jours, le reversement est suspendu jusqu’à résolution du litige.`
   },
   {
     id: "livraison",
-    title: "9. LIVRAISON",
-    content: `La livraison est assurée :
-• soit par Dango Import ;
-• soit par un prestataire logistique partenaire ;
-• soit exceptionnellement par le Vendeur selon accord.
-
-Le Vendeur doit :
-• préparer correctement les produits ;
-• respecter les délais convenus ;
-• assurer la conformité du colis.`,
+    title: "10. LIVRAISON ET LOGISTIQUE",
+    content: `Le Vendeur doit préparer les commandes dans un délai maximum de 12 heures après validation.\nDélais de livraison exigés : même jour pour les commandes locales et maximum 24 heures pour le Bénin et le Togo.\nLa livraison est assurée par DANGO HUB ou ses partenaires logistiques.`
   },
   {
     id: "retours",
-    title: "10. RETOURS ET REMBOURSEMENTS",
-    content: `Le Vendeur accepte que :
-• les retours soient gérés par Dango Import ;
-• les remboursements puissent être décidés par la plateforme ;
-• les coûts liés à une erreur ou défaut vendeur soient à sa charge.`,
+    title: "11. RETOURS ET REMBOURSEMENTS",
+    content: `Les retours et remboursements sont régis par la Politique de Retour et de Remboursement de DANGO HUB. Les frais de retour sont supportés selon la responsabilité de chaque partie (Vendeur, Plateforme ou Client).`
   },
   {
-    id: "responsabilite",
-    title: "11. RESPONSABILITÉ DU VENDEUR",
-    content: `Le Vendeur est responsable :
-• de la qualité des produits ;
-• des défauts de fabrication ;
-• des erreurs de description ;
-• des retards imputables à son activité ;
-• de tout dommage causé par ses produits.`,
-  },
-  {
-    id: "contournement",
-    title: "12. INTERDICTION DE CONTOURNEMENT",
-    content: `Il est strictement interdit au Vendeur de :
-• contacter directement un client identifié via la plateforme dans le but de contourner Dango Import ;
-• finaliser une vente hors plateforme après mise en relation initiale par Dango Import.
-
-Sanctions :
-• 1er manquement : suspension + pénalité financière ;
-• récidive : radiation définitive.`,
-  },
-  {
-    id: "coherence",
-    title: "13. COHÉRENCE COMMERCIALE",
-    content: `Le Vendeur s’engage à :
-• maintenir une cohérence de prix sur ses produits référencés ;
-• éviter toute pratique visant à détourner le trafic généré par Dango Import ;
-• coopérer dans une logique de partenariat commercial.`,
+    id: "interdiction",
+    title: "12. INTERDICTION DE CONT...",
+    content: `Le Vendeur s’interdit strictement de contacter directement les clients acquis via la plateforme afin de contourner DANGO HUB. Toute violation entraîne la suspension immédiate et la résiliation possible du compte.`
   },
   {
     id: "obligations",
-    title: "14. OBLIGATIONS DU VENDEUR",
-    content: `Le Vendeur doit :
-• fournir des informations exactes ;
-• maintenir ses stocks à jour ;
-• respecter les délais ;
-• répondre aux réclamations ;
-• assurer un minimum de qualité de service.`,
+    title: "13. OBLIGATIONS DU VENDEUR",
+    content: `• Maintenir des stocks à jour\n• Respecter les délais de préparation et de qualité\n• Répondre aux réclamations clients dans les 24 heures\n• Coopérer avec DANGO HUB pour le bon fonctionnement de la marketplace.`
   },
   {
     id: "donnees",
@@ -194,7 +108,8 @@ Sanctions :
   },
 ];
 
-export default function CguVendeur() {
+
+const CguVendeur = () => {
   const [active, setActive] = useState("preambule");
   const [showTop, setShowTop] = useState(false);
 
@@ -237,11 +152,10 @@ export default function CguVendeur() {
                 <button
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${
-                    active === s.id
-                      ? "bg-yellow-400 text-gray-900 shadow-md shadow-yellow-400/20"
-                      : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${active === s.id
+                    ? "bg-yellow-400 text-gray-900 shadow-md shadow-yellow-400/20"
+                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                 >
                   <FaChevronRight size={8} className="shrink-0" />
                   {s.title}
@@ -270,16 +184,16 @@ export default function CguVendeur() {
               <h2 className="text-xl font-black text-gray-900 mb-4 pb-3 border-b border-gray-100">{s.title}</h2>
               {s.content.split("\n").map((line, i) =>
                 line.trim() === "" ? <div key={i} className="h-2" /> :
-                line.startsWith("•") ? (
-                  <p key={i} className="flex items-start gap-2 text-gray-600 text-sm leading-relaxed mb-1">
-                    <span className="text-indigo-500 mt-1 shrink-0">•</span>
-                    {line.slice(1).trim()}
-                  </p>
-                ) : line.match(/^\d+\.\d+/) ? (
-                  <p key={i} className="text-gray-900 font-black text-sm mt-4 mb-1">{line}</p>
-                ) : (
-                  <p key={i} className="text-gray-600 text-sm leading-relaxed">{line}</p>
-                )
+                  line.startsWith("•") ? (
+                    <p key={i} className="flex items-start gap-2 text-gray-600 text-sm leading-relaxed mb-1">
+                      <span className="text-indigo-500 mt-1 shrink-0">•</span>
+                      {line.slice(1).trim()}
+                    </p>
+                  ) : line.match(/^\d+\.\d+/) ? (
+                    <p key={i} className="text-gray-900 font-black text-sm mt-4 mb-1">{line}</p>
+                  ) : (
+                    <p key={i} className="text-gray-600 text-sm leading-relaxed">{line}</p>
+                  )
               )}
             </section>
           ))}
@@ -300,3 +214,6 @@ export default function CguVendeur() {
     </div>
   );
 }
+
+
+export default CguVendeur;

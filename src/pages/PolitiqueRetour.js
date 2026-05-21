@@ -82,28 +82,42 @@ Après validation, les remboursements Mobile Money sont traités sous quelques j
   },
   {
     id: "procedure",
-    title: "9. Procédure de retour",
-    content: `Pour initier un retour, le client doit :
-• communiquer son numéro de commande ;
-• décrire précisément le problème ;
-• fournir des photos ou vidéos justificatives.
-
-Dango Import analysera le dossier et coordonnera la décision avec le vendeur partenaire.`,
+    title: "8. PROCÉDURE DE RETOUR",
+    content: `1. Contactez le service client via WhatsApp avec le numéro de commande + photos/vidéos explicites.
+2. Attendez la validation de Dango Import.
+3. Retournez le produit dans son état d’origine (emballage compris).
+4. Une fois le produit vérifié et accepté, le remboursement ou l’échange est traité.`
+  },
+  {
+    id: "import",
+    title: "9. CAS PARTICULIER – SERVICE IMPORT CHINE (SUR DEVIS)",
+    content: `Les commandes réalisées via le service Import sur devis sont non annulables et non remboursables, sauf en cas de :
+• Défaut majeur ou vice caché
+• Non-conformité substantielle et manifeste
+• Fraude avérée
+Les acomptes versés pour le sourcing et les négociations restent acquis à Dango Import.`
+  },
+  {
+    id: "abus",
+    title: "10. LUTTE CONTRE LES ABUS",
+    content: `Dango Import se réserve le droit de refuser toute demande abusive, frauduleuse ou répétée. En cas d’abus constaté, des mesures (refus de retour, suspension de compte) pourront être prises.`
   },
   {
     id: "role",
-    title: "10. Rôle de Dango Import",
-    content: `Dango Import agit comme intermédiaire commercial et coordinateur logistique. Elle facilite le traitement des réclamations et les remboursements, mais la responsabilité produit peut relever du vendeur partenaire.`,
-  },
-  {
-    id: "importation",
-    title: "11. Cas particulier – Importation sur devis",
-    content: `Les commandes via le service Import Chine sont spécifiques. L’acompte de devis est non remboursable. La commande validée est non annulable et non remboursable, sauf défaut majeur ou fraude avérée.`,
+    title: "11. RÔLE DE DANGO IMPORT",
+    content: `Dango Import agit en tant qu’intermédiaire et coordinateur. Elle facilite le traitement des retours tout en veillant à un équilibre équitable entre clients et vendeurs partenaires.`
   },
   {
     id: "modification",
-    title: "12. Modification de la Politique",
-    content: `Dango Import se réserve le droit de modifier la présente Politique à tout moment. La version en vigueur est celle publiée sur la plateforme à la date de consultation.`,
+    title: "12. MODIFICATION DE LA POLITIQUE",
+    content: `Dango Import se réserve le droit de modifier cette politique à tout moment. La version en vigueur est celle publiée sur le site.`
+  },
+  {
+    id: "contact",
+    title: "13. CONTACT",
+    content: `• WhatsApp / Téléphone : +229 01 58 26 63 42 / +229 01 59 38 71 80
+• Email : contact@dangoimport.com
+• Adresse : Abomey-Calavi, Bénin`
   },
 ];
 
@@ -173,8 +187,14 @@ export default function PolitiqueRetour() {
               <span className="font-black uppercase tracking-widest text-xs">Engagement Satisfaction</span>
             </div>
             <p className="text-sm text-emerald-900 leading-relaxed font-medium">
-              Chez Dango Import, la satisfaction de nos clients et la protection de toutes les parties sont essentielles. Cette politique définit clairement les règles pour garantir des transactions sereines.
-            </p>
+  PRÉAMBULE<br/>
+  Chez Dango Import, nous plaçons la satisfaction du client au cœur de nos priorités tout en <br/>
+  protégeant les intérêts des vendeurs partenaires et de la plateforme.<br/>
+  Cette politique définit de manière claire et transparente les règles relatives aux retours, <br/>
+  échanges et remboursements.<br/>
+  En passant une commande sur Dango Import, le client accepte pleinement les dispositions de <br/>
+  la présente politique.
+</p>
           </div>
 
           {SECTIONS.map(s => (

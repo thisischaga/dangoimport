@@ -9,7 +9,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#131921] text-white pt-10 sm:pt-16 pb-6 sm:pb-8 border-t-4 border-yellow-500">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 text-sm">
-        
+
         {/* Col 1: Brand & About */}
         <div className="space-y-6">
           <div className="flex items-center gap-3">
@@ -59,11 +59,13 @@ const Footer = () => {
         <div className="space-y-6">
           <h4 className="font-black text-base uppercase tracking-widest text-yellow-500">Informations</h4>
           <ul className="space-y-3 text-gray-300 font-medium">
-            <li onClick={() => navigate('/cgu')} className="hover:text-yellow-500 cursor-pointer transition-colors">Conditions Générales</li>
             <li onClick={() => navigate('/politique-de-confidentialité')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Confidentialité</li>
             <li onClick={() => navigate('/politique-de-retour')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Retour</li>
+            <li onClick={() => navigate('/cgu')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Dango Import</li>
+            <li onClick={() => navigate('/cgu-vendeur')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Vendeurs</li>
             <li onClick={() => navigate('/about')} className="hover:text-yellow-500 cursor-pointer transition-colors">À propos de nous</li>
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors">Aide & Support</li>
+<li onClick={() => navigate('/mentions-legales')} className="hover:text-yellow-500 cursor-pointer transition-colors">Mentions Légales</li>
+            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors">Aide &amp; Support</li>
           </ul>
         </div>
 

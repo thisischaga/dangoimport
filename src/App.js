@@ -8,6 +8,7 @@ import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
 import PolitiqueRetour from './pages/PolitiqueRetour';
+import MentionsLegales from './pages/MentionsLegales';
 import Ecom from './components/Ecom';
 import PerFinance from './blog/PerFinance';
 import Epargne from './blog/Epargne';
@@ -72,6 +73,7 @@ function App() {
               <Route path='/cgu-vendeur' element={<CguVendeur/>}/>
               <Route path='/politique-de-confidentialité' element={<Politique/>}/>
               <Route path='/politique-de-retour' element={<PolitiqueRetour/>}/>
+              <Route path='/mentions-legales' element={<MentionsLegales />} />
               <Route path='/shopping' element={<Ecom/>}/>
               {/* La route /publish a été retirée (gestion via panel admin uniquement) */}
 
