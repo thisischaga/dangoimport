@@ -122,6 +122,50 @@ const Ecom = () => {
 
   const openProduct = (p) => { setProductDetail(p); setShowModal(true); };
 
+  const isMaintenance = true; // Basculer à false pour restaurer la boutique
+
+  if (isMaintenance) {
+    return (
+      <div className="bg-gray-50 min-h-screen font-sans flex flex-col justify-between">
+        <div>
+          <Header />
+          <main className="max-w-4xl mx-auto px-6 py-20">
+            <div className="bg-white rounded-3xl p-8 md:p-12 border border-gray-100 shadow-[0_15px_50px_rgba(0,0,0,0.05)] text-center max-w-2xl mx-auto">
+              <div className="w-20 h-20 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-8">
+                <FaSpinner size={32} className="text-yellow-500 animate-spin" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">
+                Marketplace en Maintenance
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                Notre espace Marketplace est actuellement en cours de maintenance technique pour améliorer votre expérience d'achat. L'accès au catalogue et la validation des paniers seront rétablis très prochainement.
+              </p>
+              <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left space-y-3">
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">
+                  Besoin d'importer un produit ?
+                </p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Notre service de sourcing personnalisé reste 100% opérationnel. Vous pouvez soumettre une demande gratuite depuis la page d'accueil.
+                </p>
+                <button
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center gap-2 text-xs font-black text-yellow-600 hover:text-yellow-700 transition-colors"
+                >
+                  Retourner à l'accueil pour faire une demande →
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 font-medium">
+                Merci de votre patience ! Pour toute assistance :<br/>
+                <span className="font-bold text-gray-600">contact@dangoimport.com</span> ou par WhatsApp au <span className="font-bold text-gray-600">+229 01 58 26 63 42</span> / <span className="font-bold text-gray-600">+229 01 59 38 71 80</span>
+              </p>
+            </div>
+          </main>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <Header />
@@ -416,7 +460,7 @@ const Ecom = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl"
+            className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <button

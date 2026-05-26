@@ -43,7 +43,7 @@ const Header = () => {
 
   const mainLinks = [
     { name: 'Accueil', path: '/' },
-    { name: 'Boutique', path: '/shopping' },
+    { name: 'Marketplace', path: '/shopping' },
     { name: 'Sourcing Pro', path: '/services' },
     { name: 'À propos', path: '/about' }
   ];

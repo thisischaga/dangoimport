@@ -94,7 +94,7 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex gap-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
             <span onClick={() => navigate('/')} className="hover:text-white cursor-pointer transition-colors">Accueil</span>
-            <span onClick={() => navigate('/shopping')} className="hover:text-white cursor-pointer transition-colors">Boutique</span>
+            <span onClick={() => navigate('/shopping')} className="hover:text-white cursor-pointer transition-colors">Marketplace</span>
             <span onClick={() => navigate('/blog/articles')} className="hover:text-white cursor-pointer transition-colors">Blog</span>
           </div>
           <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">

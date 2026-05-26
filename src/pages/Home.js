@@ -126,27 +126,27 @@ const Home = () => {
             HERO
         ════════════════════════════════════════ */}
         <section
-          className="relative min-h-[88vh] flex items-center justify-center bg-cover bg-center"
+          className="relative min-h-[80vh] flex items-center justify-center bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImg})` }}
         >
           {/* Gradient overlay — top dark, bottom fade */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black/85" />
 
           <div className="relative z-10 text-center w-full max-w-5xl px-6 py-16 flex flex-col items-center">
             {/* Tag pill */}
-            <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/40 text-yellow-300 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-[0.25em] mb-6 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-              Plateforme B2B Premium — Bénin & Afrique
+            <div className="inline-flex items-center gap-2 bg-emerald-400/20 border border-emerald-400/40 text-emerald-300 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-[0.25em] mb-6 backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Grand Marketplace Chine-Afrique
             </div>
 
             <h1 className="mb-6 text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight">
-              L'excellence de la Chine,<br />
-              <span className="text-yellow-400">directement chez vous.</span>
+              Le Premier Marketplace<br />
+              <span className="text-yellow-400">Chine - Afrique.</span>
             </h1>
 
             <p className="mb-10 max-w-2xl text-base md:text-lg text-gray-300 leading-relaxed">
-              Sourcez, commandez et recevez vos produits en toute sécurité.
-              Nos agents à Guangzhou traitent avec les usines pour vous.
+              Explorez des milliers de produits de vendeurs et fabricants vérifiés.
+              Sécurité de paiement, contrôle qualité et logistique de bout en bout.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
@@ -154,13 +154,13 @@ const Home = () => {
                 onClick={() => navigate("/shopping")}
                 className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 px-8 py-4 rounded-full font-black shadow-2xl shadow-yellow-400/30 transition-all hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 text-sm uppercase tracking-widest"
               >
-                Explorer la boutique <FaArrowRight />
+                Explorer le Marketplace <FaArrowRight />
               </button>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-8 py-4 border border-white/25 rounded-full font-bold transition-all text-sm uppercase tracking-widest hover:-translate-y-0.5"
               >
-                Demande de sourcing
+                Service Sourcing Pro
               </button>
             </div>
 
@@ -170,6 +170,83 @@ const Home = () => {
               <span className="flex items-center gap-1.5"><FaTruck className="text-yellow-400" /> Livraison rapide</span>
               <span className="flex items-center gap-1.5"><FaHeadset className="text-yellow-400" /> Support 24/7</span>
             </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════
+            DEUX VOIES D'IMPORTATION (HIGHLIGHTING MARKETPLACE)
+        ════════════════════════════════════════ */}
+        <section className="relative z-20 max-w-5xl mx-auto px-6 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            {/* CARD 1: MARKETPLACE (HIGHLIGHTED & RECOMMENDED) */}
+            <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 text-white rounded-3xl p-8 shadow-2xl border border-emerald-500/30 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-500" />
+              <div>
+                <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-6">
+                  Recommandé / En Direct
+                </div>
+                <h3 className="text-2xl font-black mb-3">Le Marketplace</h3>
+                <p className="text-gray-300 text-sm leading-relaxed mb-6">
+                  Achetez directement des produits sélectionnés et importés auprès de nos vendeurs partenaires. Commande simplifiée, paiement en ligne sécurisé et livraison rapide garantie.
+                </p>
+                <ul className="space-y-2 mb-8 text-xs text-gray-300 font-medium">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Large choix de produits en ligne
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Paiement en ligne sécurisé
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Retours et remboursements sous 7 jours
+                  </li>
+                </ul>
+              </div>
+              <button
+                onClick={() => navigate("/shopping")}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+              >
+                Accéder au Marketplace <FaArrowRight />
+              </button>
+            </div>
+
+            {/* CARD 2: SOURCING SUR DEVIS */}
+            <div className="bg-white text-gray-900 rounded-3xl p-8 shadow-[0_15px_50px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-yellow-500/10 transition-all duration-500" />
+              <div>
+                <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/30 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-6">
+                  Sur Devis / Commande Spécifique
+                </div>
+                <h3 className="text-2xl font-black mb-3">Sourcing sur Mesure</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                  Vous cherchez un produit spécifique ou souhaitez importer en grande quantité directement depuis les usines en Chine ? Nos agents s'occupent de tout.
+                </p>
+                <ul className="space-y-2 mb-8 text-xs text-gray-500 font-medium">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                    Recherche de fournisseurs en 48h
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                    Négociation directe d'usine
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                    Inspection qualité & logistique complète
+                  </li>
+                </ul>
+              </div>
+              <button
+                onClick={() => setShowForm(true)}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                Faire une demande de sourcing
+              </button>
+            </div>
+
           </div>
         </section>
 
@@ -187,9 +264,9 @@ const Home = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               {[
-                { img: secImage, icon: <FaShieldAlt />, title: "Sécurité absolue",    desc: "Vos fonds sont protégés jusqu'à la livraison complète de la marchandise." },
-                { img: srcImage, icon: <FaBoxOpen />,   title: "Sourcing usine",      desc: "Nos agents traitent directement avec les usines pour les meilleurs prix." },
-                { img: logImage, icon: <FaShippingFast />, title: "Logistique incluse", desc: "Dédouanement et expédition maritime ou aérienne gérés par nos soins." },
+                { img: secImage, icon: <FaShieldAlt />, title: "Marketplace Sécurisé", desc: "Commandez en direct de Chine en bénéficiant de notre système de paiement et de livraison sécurisé." },
+                { img: srcImage, icon: <FaBoxOpen />,   title: "Fournisseurs Vérifiés",  desc: "Accédez à un large catalogue de produits proposés par des vendeurs et fabricants audités." },
+                { img: logImage, icon: <FaShippingFast />, title: "Logistique Clé en Main", desc: "Nous prenons en charge le transport et le dédouanement complet de tous vos achats." },
               ].map((s, i) => (
                 <article
                   key={i}
@@ -212,20 +289,20 @@ const Home = () => {
         </section>
 
         {/* ═══════════════════════════════════════
-            FEATURED PRODUCTS
+            FEATURED PRODUCTS (MARKETPLACE SELECT)
         ════════════════════════════════════════ */}
         <section className="py-24 px-6 bg-gray-50">
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-wrap items-end justify-between gap-4 mb-12">
               <div>
-                <span className="text-yellow-500 font-bold uppercase tracking-[0.3em] text-xs block mb-2">La sélection premium</span>
-                <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos produits les plus demandés</h2>
+                <span className="text-yellow-500 font-bold uppercase tracking-[0.3em] text-xs block mb-2">Sélection Marketplace</span>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900">Les meilleures ventes du Marketplace</h2>
               </div>
               <button
                 onClick={() => navigate("/shopping")}
                 className="flex items-center gap-2 text-sm font-black text-gray-900 border-b-2 border-yellow-400 pb-0.5 hover:text-yellow-600 transition-colors"
               >
-                Voir tout <FaArrowRight className="text-xs" />
+                Voir tous les produits <FaArrowRight className="text-xs" />
               </button>
             </div>
 
@@ -459,7 +536,7 @@ const Home = () => {
       {/* ── Sourcing Modal ── */}
       {showForm && (
         <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-5 backdrop-blur-sm">
-          <div className="w-full max-w-[720px] bg-white rounded-3xl overflow-hidden shadow-[0_32px_120px_rgba(15,23,42,0.2)] relative max-h-[95vh] overflow-y-auto">
+          <div className="w-full max-w-[720px] bg-white rounded-3xl overflow-hidden shadow-[0_32px_120px_rgba(15,23,42,0.2)] relative max-h-[95vh] overflow-y-auto no-scrollbar">
             <button
               onClick={() => setShowForm(false)}
               className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 p-2 rounded-full z-50 transition-colors"

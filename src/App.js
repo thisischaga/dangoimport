@@ -26,6 +26,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useState, useEffect } from 'react';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -65,6 +66,7 @@ function App() {
     <CartProvider>
       <NotificationProvider recipientType="user" userId={user?.email}>
         <Router>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />

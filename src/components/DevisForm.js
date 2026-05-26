@@ -48,7 +48,10 @@ const DevisForm = ({ showForm }) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      if (response.data && response.data.url) {
+      if (response.data && response.data.success) {
+        toast.success(response.data.message || 'Votre demande de devis a été enregistrée avec succès.');
+        if (showForm) showForm(false);
+      } else if (response.data && response.data.url) {
         toast.success('Redirection vers FedaPay pour le paiement du devis...');
         window.location.href = response.data.url;
       } else {
@@ -67,7 +70,7 @@ const DevisForm = ({ showForm }) => {
       <div className="mb-12 text-center">
         <h2 className="text-4xl md:text-5xl font-playfair font-black mb-4">Demander un <span className="text-primary italic">Devis</span></h2>
         <p className="text-gray-400">Réponse garantie sous 72h par nos agents de sourcing.</p>
-        <p className="text-sm text-yellow-300 font-bold mt-4">Pour l’étude de votre devis, un frais fixe de <span className="text-primary">5000 FCFA</span> est nécessaire. Ce montant est remboursable sur la commande finale après validation du paiement.</p>
+        <p className="text-sm text-green-400 font-bold mt-4">Exceptionnellement, l'étude de devis est <span className="text-yellow-300">GRATUITE</span> actuellement ! Envoyez votre demande sans frais.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -179,7 +182,7 @@ const DevisForm = ({ showForm }) => {
           type="submit" 
           className="w-full bg-primary text-secondary py-6 rounded-2xl text-xl font-black uppercase tracking-widest hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 disabled:opacity-50"
         >
-          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE (5000 FCFA)'}
+          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE GRATUITEMENT'}
         </button>
       </form>
     </div>
