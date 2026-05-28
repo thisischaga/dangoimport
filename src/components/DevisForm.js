@@ -182,7 +182,7 @@ const DevisForm = ({ showForm }) => {
           type="submit" 
           className="w-full bg-primary text-secondary py-6 rounded-2xl text-xl font-black uppercase tracking-widest hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 disabled:opacity-50"
         >
-          {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE GRATUITEMENT'}
+          {loading ? 'REDIRECTION EN COURS...' : 'PAYER 5000 FCFA & ENVOYER'}
         </button>
       </form>
     </div>
