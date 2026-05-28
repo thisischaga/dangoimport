@@ -38,9 +38,9 @@ const StarRating = ({ value = 0, count }) => {
   return (
     <div className="flex items-center gap-0.5">
       {stars.map((s, i) =>
-        s === 'full'  ? <FaStar key={i} size={10} className="text-yellow-400" /> :
-        s === 'half'  ? <FaStarHalfAlt key={i} size={10} className="text-yellow-400" /> :
-                        <FaRegStar key={i} size={10} className="text-gray-300" />
+        s === 'full' ? <FaStar key={i} size={10} className="text-yellow-400" /> :
+          s === 'half' ? <FaStarHalfAlt key={i} size={10} className="text-yellow-400" /> :
+            <FaRegStar key={i} size={10} className="text-gray-300" />
       )}
       {count != null && count > 0 && <span className="text-[10px] text-gray-400 ml-1.5">({count})</span>}
     </div>
@@ -48,11 +48,11 @@ const StarRating = ({ value = 0, count }) => {
 };
 
 const SORT_OPTIONS = [
-  { value: 'default',    label: 'Mise en avant'   },
-  { value: 'price_asc',  label: 'Prix croissant'  },
+  { value: 'default', label: 'Mise en avant' },
+  { value: 'price_asc', label: 'Prix croissant' },
   { value: 'price_desc', label: 'Prix décroissant' },
-  { value: 'name_asc',   label: 'A → Z'           },
-  { value: 'rating',     label: 'Mieux notés'     },
+  { value: 'name_asc', label: 'A → Z' },
+  { value: 'rating', label: 'Mieux notés' },
 ];
 
 /* ── Component ───────────────────────────────────── */
@@ -98,15 +98,15 @@ const Ecom = () => {
   const filtered = useMemo(() => {
     let list = activeCategory === 'Tous' ? products : products.filter(p => p.category === activeCategory);
     if (priceMax) list = list.filter(p => Number(p.price) <= priceMax);
-    if (sortBy === 'price_asc')  list = [...list].sort((a,b) => a.price - b.price);
-    if (sortBy === 'price_desc') list = [...list].sort((a,b) => b.price - a.price);
-    if (sortBy === 'name_asc')   list = [...list].sort((a,b) => a.name.localeCompare(b.name));
-    if (sortBy === 'rating')     list = [...list].sort((a,b) => (b.rating||5) - (a.rating||5));
+    if (sortBy === 'price_asc') list = [...list].sort((a, b) => a.price - b.price);
+    if (sortBy === 'price_desc') list = [...list].sort((a, b) => b.price - a.price);
+    if (sortBy === 'name_asc') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === 'rating') list = [...list].sort((a, b) => (b.rating || 5) - (a.rating || 5));
     return list;
   }, [products, activeCategory, sortBy, priceMax]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const displayed = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+  const displayed = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleAddToCart = (e, p) => {
     e.stopPropagation();
@@ -122,7 +122,7 @@ const Ecom = () => {
 
   const openProduct = (p) => { setProductDetail(p); setShowModal(true); };
 
-  const isMaintenance = true; // Basculer à false pour restaurer la boutique
+  const isMaintenance = false; // Maintenance terminée — boutique opérationnelle
 
   if (isMaintenance) {
     return (
@@ -155,7 +155,7 @@ const Ecom = () => {
                 </button>
               </div>
               <p className="text-xs text-gray-400 font-medium">
-                Merci de votre patience ! Pour toute assistance :<br/>
+                Merci de votre patience ! Pour toute assistance :<br />
                 <span className="font-bold text-gray-600">contact@dangoimport.com</span> ou par WhatsApp au <span className="font-bold text-gray-600">+229 01 58 26 63 42</span> / <span className="font-bold text-gray-600">+229 01 59 38 71 80</span>
               </p>
             </div>
@@ -202,14 +202,13 @@ const Ecom = () => {
         <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 overflow-x-auto">
           <div className="flex gap-2 w-max">
             {categories.map(cat => (
-                <button
+              <button
                 key={cat}
                 onClick={() => { setActiveCategory(cat); setPage(1); }}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                  activeCategory === cat
+                className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeCategory === cat
                     ? "bg-yellow-400 text-gray-900"
                     : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -235,11 +234,10 @@ const Ecom = () => {
                   <button
                     key={cat}
                     onClick={() => { setActiveCategory(cat); setPage(1); }}
-                    className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      activeCategory === cat
+                    className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeCategory === cat
                         ? 'bg-yellow-400 text-gray-900 shadow-md shadow-yellow-400/25'
                         : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
-                    }`}
+                      }`}
                   >
                     {cat}
                     <span className="ml-1.5 text-[10px] opacity-60">
@@ -298,10 +296,10 @@ const Ecom = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-40 gap-6">
                 <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-gray-100 border-t-yellow-400 animate-spin" />
-                    <FaShoppingCart className="absolute inset-0 m-auto text-yellow-400 text-lg" />
+                  <div className="w-16 h-16 rounded-full border-4 border-gray-100 border-t-yellow-400 animate-spin" />
+                  <FaShoppingCart className="absolute inset-0 m-auto text-yellow-400 text-lg" />
                 </div>
-                  <p className="text-gray-400 font-semibold text-[10px]">Chargement du catalogue...</p>
+                <p className="text-gray-400 font-semibold text-[10px]">Chargement du catalogue...</p>
               </div>
             ) : displayed.length === 0 ? (
               <div className="text-center py-32 max-w-md mx-auto">
@@ -334,7 +332,7 @@ const Ecom = () => {
                           src={getImgUrl(p.image)}
                           alt={p.name}
                           className="max-w-[85%] max-h-[85%] object-contain group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
-                          onError={e => { e.target.style.display='none'; }}
+                          onError={e => { e.target.style.display = 'none'; }}
                         />
                         {/* Overlay actions */}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
@@ -353,10 +351,10 @@ const Ecom = () => {
                           </span>
                         )}
                         {/* Wishlist */}
-                          <button
-                            onClick={e => toggleWishlist(e, p._id)}
-                            className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow transition-transform hover:scale-105"
-                          >
+                        <button
+                          onClick={e => toggleWishlist(e, p._id)}
+                          className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow transition-transform hover:scale-105"
+                        >
                           <FaHeart size={12} className={wishlist.includes(p._id) ? 'text-red-500' : 'text-gray-300'} />
                         </button>
                       </div>
@@ -397,11 +395,10 @@ const Ecom = () => {
                           ) : (
                             <button
                               onClick={e => handleAddToCart(e, p)}
-                              className={`w-full py-2 rounded-lg text-xs font-semibold tracking-wide transition-all flex items-center justify-center gap-2 active:scale-95 ${
-                                addedId === p._id
+                              className={`w-full py-2 rounded-lg text-xs font-semibold tracking-wide transition-all flex items-center justify-center gap-2 active:scale-95 ${addedId === p._id
                                   ? 'bg-emerald-500 text-white shadow-md'
                                   : 'bg-yellow-400 hover:bg-yellow-300 text-gray-900'
-                              }`}
+                                }`}
                             >
                               <FaShoppingCart size={10} />
                               {addedId === p._id ? '✓ Ajouté au panier' : 'Ajouter au panier'}
@@ -417,27 +414,26 @@ const Ecom = () => {
                 {totalPages > 1 && (
                   <div className="mt-10 flex items-center justify-center gap-2">
                     <button
-                      onClick={() => setPage(p => Math.max(1, p-1))}
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-yellow-400 hover:text-yellow-500 transition-all"
                     >
                       <FaChevronLeft size={12} />
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i+1).map(n => (
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
                       <button
                         key={n}
                         onClick={() => setPage(n)}
-                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all ${
-                          n === page
+                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all ${n === page
                             ? 'bg-yellow-400 text-gray-900'
                             : 'bg-white border border-gray-200 text-gray-500 hover:border-yellow-400'
-                        }`}
+                          }`}
                       >
                         {n}
                       </button>
                     ))}
                     <button
-                      onClick={() => setPage(p => Math.min(totalPages, p+1))}
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-yellow-400 hover:text-yellow-500 transition-all"
                     >
@@ -460,7 +456,7 @@ const Ecom = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl"
+            className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <button

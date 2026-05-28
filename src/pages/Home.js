@@ -26,10 +26,10 @@ import {
 } from "react-icons/fa";
 
 const TESTIMONIALS = [
-  { name: "Kofi Mensah",    role: "Grossiste — Cotonou",     rating: 5, text: "Dango Import m'a permis de réduire mes coûts de 35% en traitant directement avec les usines chinoises. Livraison parfaite en 3 semaines." },
-  { name: "Aïssa Traoré",   role: "Revendeuse — Lomé",       rating: 5, text: "Service impeccable. J'ai commandé des montres et des accessoires, tout est arrivé conforme à mes attentes. Je recommande sans hésiter." },
-  { name: "Ibrahim Diallo",  role: "Entrepreneur — Dakar",    rating: 5, text: "Le service de sourcing est exceptionnel. L'équipe m'a trouvé un fournisseur en 48h et a géré toute la logistique. Excellent." },
-  { name: "Fatou Sow",       role: "Commerçante — Abidjan",   rating: 5, text: "J'apprécie la transparence sur les prix et les délais. Aucune mauvaise surprise. Je passe ma 5ème commande cette année." },
+  { name: "Kofi Mensah", role: "Grossiste — Cotonou", rating: 5, text: "Dango Import m'a permis de réduire mes coûts de 35% en traitant directement avec les usines chinoises. Livraison parfaite en 3 semaines." },
+  { name: "Aïssa Traoré", role: "Revendeuse — Lomé", rating: 5, text: "Service impeccable. J'ai commandé des montres et des accessoires, tout est arrivé conforme à mes attentes. Je recommande sans hésiter." },
+  { name: "Ibrahim Diallo", role: "Entrepreneur — Dakar", rating: 5, text: "Le service de sourcing est exceptionnel. L'équipe m'a trouvé un fournisseur en 48h et a géré toute la logistique. Excellent." },
+  { name: "Fatou Sow", role: "Commerçante — Abidjan", rating: 5, text: "J'apprécie la transparence sur les prix et les délais. Aucune mauvaise surprise. Je passe ma 5ème commande cette année." },
 ];
 
 const HOW_IT_WORKS = [
@@ -47,24 +47,24 @@ const STATS = [
 ];
 
 const FEATURED = [
-  { id: 1, name: "Genie’s Secret Bombshell", price: "3 000", badge: "Premium", img: parfum1,   rating: 0, reviews: 0 },
-  { id: 2, name: "Kaly (Vanilla & Marshmallow)", price: "4 500", badge: "Premium", img: parfum2,   rating: 0, reviews: 0  },
-  { id: 3, name: "Mayar Eau de Parfum",       price: "2 500", badge: "Premium", img: parfum3,   rating: 0, reviews: 0 },
+  { id: 1, name: "Genie’s Secret Bombshell", price: "3 000", badge: "Premium", img: parfum1, rating: 0, reviews: 0 },
+  { id: 2, name: "Kaly (Vanilla & Marshmallow)", price: "4 500", badge: "Premium", img: parfum2, rating: 0, reviews: 0 },
+  { id: 3, name: "Mayar Eau de Parfum", price: "2 500", badge: "Premium", img: parfum3, rating: 0, reviews: 0 },
 ];
 
 const BADGE_COLOR = {
   Bestseller: "bg-yellow-400 text-gray-900",
-  Nouveau:    "bg-emerald-500 text-white",
-  Promo:      "bg-red-500 text-white",
-  Premium:    "bg-indigo-600 text-white",
-  Populaire:  "bg-blue-500 text-white",
+  Nouveau: "bg-emerald-500 text-white",
+  Promo: "bg-red-500 text-white",
+  Premium: "bg-indigo-600 text-white",
+  Populaire: "bg-blue-500 text-white",
 };
 
 const StarRating = ({ rating = 0 }) => {
   if (!rating || rating === 0) return null;
   return (
     <div className="flex items-center gap-1">
-      {[1,2,3,4,5].map(i => (
+      {[1, 2, 3, 4, 5].map(i => (
         <FaStar
           key={i}
           size={11}
@@ -178,7 +178,7 @@ const Home = () => {
         ════════════════════════════════════════ */}
         <section className="relative z-20 max-w-5xl mx-auto px-6 py-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             {/* CARD 1: MARKETPLACE (HIGHLIGHTED & RECOMMENDED) */}
             <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 text-white rounded-3xl p-8 shadow-2xl border border-emerald-500/30 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-500" />
@@ -265,7 +265,7 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               {[
                 { img: secImage, icon: <FaShieldAlt />, title: "Marketplace Sécurisé", desc: "Commandez en direct de Chine en bénéficiant de notre système de paiement et de livraison sécurisé." },
-                { img: srcImage, icon: <FaBoxOpen />,   title: "Fournisseurs Vérifiés",  desc: "Accédez à un large catalogue de produits proposés par des vendeurs et fabricants audités." },
+                { img: srcImage, icon: <FaBoxOpen />, title: "Fournisseurs Vérifiés", desc: "Accédez à un large catalogue de produits proposés par des vendeurs et fabricants audités." },
                 { img: logImage, icon: <FaShippingFast />, title: "Logistique Clé en Main", desc: "Nous prenons en charge le transport et le dédouanement complet de tous vos achats." },
               ].map((s, i) => (
                 <article
@@ -536,7 +536,7 @@ const Home = () => {
       {/* ── Sourcing Modal ── */}
       {showForm && (
         <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-5 backdrop-blur-sm">
-          <div className="w-full max-w-[720px] bg-white rounded-3xl overflow-hidden shadow-[0_32px_120px_rgba(15,23,42,0.2)] relative max-h-[95vh] overflow-y-auto no-scrollbar">
+          <div className="w-full max-w-[720px] bg-white rounded-3xl overflow-hidden shadow-[0_32px_120px_rgba(15,23,42,0.2)] relative max-h-[95vh] overflow-y-auto">
             <button
               onClick={() => setShowForm(false)}
               className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 p-2 rounded-full z-50 transition-colors"

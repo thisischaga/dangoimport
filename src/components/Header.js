@@ -45,7 +45,8 @@ const Header = () => {
     { name: 'Accueil', path: '/' },
     { name: 'Marketplace', path: '/shopping' },
     { name: 'Sourcing Pro', path: '/services' },
-    { name: 'À propos', path: '/about' }
+    { name: 'À propos', path: '/about' },
+    { name: 'Mentions Légales', path: '/mentions-legales' }
   ];
 
   return (

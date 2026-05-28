@@ -12,22 +12,27 @@
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   @apply bg-gray-100;
 }
+
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 rounded-full;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400;
 }
 
 /* Slick Carousel Overrides */
-.slick-prev:before, .slick-next:before {
+.slick-prev:before,
+.slick-next:before {
   color: #232f3e !important;
 }
 
 @layer components {
+
   /* Conteneur universel avec marges côtés sur desktop */
   .page-container {
     @apply w-full max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16;
@@ -37,13 +42,4 @@
   .section-inner {
     @apply w-full max-w-5xl mx-auto px-6 sm:px-8 lg:px-14 xl:px-20;
   }
-}
-
-/* Hide scrollbars but keep functionality */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }

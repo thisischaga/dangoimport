@@ -25,17 +25,26 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = (product) => {
+    let isUpdate = false;
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item._id === product._id);
       if (existingItem) {
-        toast.info(`Quantité mise à jour pour ${product.name}`);
-        return prevCart.map(item => 
+        isUpdate = true;
+        return prevCart.map(item =>
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      toast.success(`${product.name} ajouté au panier`);
+      isUpdate = false;
       return [...prevCart, { ...product, quantity: 1 }];
     });
+    // Toast appelé après setCart, hors du callback (évite setState-during-render)
+    setTimeout(() => {
+      if (isUpdate) {
+        toast.info(`Quantité mise à jour pour ${product.name}`);
+      } else {
+        toast.success(`${product.name} ajouté au panier`);
+      }
+    }, 0);
   };
 
   const removeFromCart = (productId) => {
