@@ -2,8 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/Home";
-import Services from "./pages/Services";
 import CguVendeur from "./pages/CguVendeur";
+import Services from "./pages/Services";
+import DevenirVendeur from "./pages/DevenirVendeur";
 import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
@@ -20,6 +21,8 @@ import PublishProduct from './pages/PublishProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VendorProfile from './pages/VendorProfile';
+import ClientActivity from './pages/ClientActivity';
+import VendorDashboard from './pages/VendorDashboard';
 import CartPage from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -80,6 +83,9 @@ function App() {
               {/* La route /publish a été retirée (gestion via panel admin uniquement) */}
 
               <Route path='/vendor/:vendorName' element={<VendorProfile/>}/>
+              <Route path='/dashboard-vendeur' element={<VendorDashboard/>}/>
+              <Route path='/mes-commandes' element={<ClientActivity/>}/>
+              <Route path='/devenir-vendeur' element={<DevenirVendeur/>}/>
               <Route path='/login' element={<Login/>}/>
               <Route path='/register' element={<Register/>}/>
               <Route path='/cart' element={<CartPage/>}/>

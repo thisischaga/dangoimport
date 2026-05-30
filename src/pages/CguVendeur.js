@@ -42,7 +42,7 @@ const SECTIONS = [
   {
     id: "frais-prestataires",
     title: "8. FRAIS DES PRESTATAIRES DE PAIEMENT",
-    content: `Les frais prélevés par FedaPay (environ 2 % pour Mobile Money et jusqu’à 4 % pour cartes bancaires) sont à la charge du Vendeur et sont déduits automatiquement avant tout reversement.`
+    content: `Les prestataires de paiements prélèvent des frais lors du paiement final par le client (environ 2 à 4% en fonction du moyen de paiement). Ces frais sont propres aux prestataires de paiement et sont imputables au client lors de l'achat.`
   },
   {
     id: "paiement",
@@ -57,11 +57,11 @@ const SECTIONS = [
   {
     id: "retours",
     title: "11. RETOURS ET REMBOURSEMENTS",
-    content: `Les retours et remboursements sont régis par la Politique de Retour et de Remboursement de DANGO HUB. Les frais de retour sont supportés selon la responsabilité de chaque partie (Vendeur, Plateforme ou Client).`
+    content: `Les retours et remboursements sont régis par <a href="https://dangoimport.com/politique-retour" target="_blank" rel="noopener noreferrer" style="color:#2563EB">la Politique de Retour et de Remboursement de DANGO HUB</a>. Les frais de retour sont supportés selon la responsabilité de chaque partie (Vendeur, Plateforme ou Client).`
   },
   {
     id: "interdiction",
-    title: "12. INTERDICTION DE CONT...",
+    title: "12. INTERDICTION DE CONTACT DIRECT AVEC LES CLIENTS",
     content: `Le Vendeur s’interdit strictement de contacter directement les clients acquis via la plateforme afin de contourner DANGO HUB. Toute violation entraîne la suspension immédiate et la résiliation possible du compte.`
   },
   {
@@ -182,19 +182,7 @@ const CguVendeur = () => {
               onMouseEnter={() => setActive(s.id)}
             >
               <h2 className="text-xl font-black text-gray-900 mb-4 pb-3 border-b border-gray-100">{s.title}</h2>
-              {s.content.split("\n").map((line, i) =>
-                line.trim() === "" ? <div key={i} className="h-2" /> :
-                  line.startsWith("•") ? (
-                    <p key={i} className="flex items-start gap-2 text-gray-600 text-sm leading-relaxed mb-1">
-                      <span className="text-indigo-500 mt-1 shrink-0">•</span>
-                      {line.slice(1).trim()}
-                    </p>
-                  ) : line.match(/^\d+\.\d+/) ? (
-                    <p key={i} className="text-gray-900 font-black text-sm mt-4 mb-1">{line}</p>
-                  ) : (
-                    <p key={i} className="text-gray-600 text-sm leading-relaxed">{line}</p>
-                  )
-              )}
+              <div className="text-gray-600 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: s.content.replace(/\n/g, '<br/>') }} />
             </section>
           ))}
         </article>

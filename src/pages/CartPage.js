@@ -14,7 +14,7 @@ const CartPage = () => {
   const navigate = useNavigate();
   const [showCheckout, setShowCheckout] = useState(false);
   const [fedapayLoading, setFedapayLoading] = useState(false);
- 
+
   const getImgUrl = (img) => {
     if (!img) return '';
     if (img.startsWith('http') || img.startsWith('data:')) return img;
@@ -59,7 +59,8 @@ const CartPage = () => {
         totalPrice: getCartTotal(),
         productPrice: getCartTotal(),
         description: `Panier Dango Import - ${itemsList}`,
-        type: 'cart'
+        type: 'cart',
+        vendorName: cart.map(item => item.vendorName || 'Vendeur Indépendant').join(', ')
       });
 
       if (response.data && response.data.url) {
@@ -87,7 +88,7 @@ const CartPage = () => {
           </div>
           <h1 className="text-3xl font-black text-gray-900 mb-4">Votre panier est vide</h1>
           <p className="text-gray-600 mb-8 max-w-md">Il semble que vous n'ayez pas encore ajouté de produits. Parcourez notre boutique pour trouver des articles incroyables !</p>
-          <button 
+          <button
             onClick={() => navigate('/shopping')}
             className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded-full font-bold transition-all"
           >
@@ -102,7 +103,7 @@ const CartPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center gap-4 mb-6 sm:mb-10">
           <button onClick={() => navigate('/shopping')} className="text-gray-500 hover:text-yellow-600 transition-colors">
@@ -119,32 +120,32 @@ const CartPage = () => {
                 <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
                   <img src={getImgUrl(item.image)} alt={item.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                 </div>
-                
+
                 <div className="flex-1 min-w-0 w-full">
                   <div className="flex justify-between items-start mb-1 gap-2">
                     <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-2">{item.name}</Link>
                     <p className="text-base font-black text-gray-900 whitespace-nowrap">{item.price * item.quantity} F</p>
                   </div>
                   <p className="text-[10px] sm:text-xs text-gray-500 mb-3 uppercase tracking-wider">Vendu par <span className="font-bold text-gray-700">{item.vendorName}</span></p>
-                  
+
                   <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-6">
                     <div className="flex items-center gap-1.5 sm:gap-3 bg-gray-50 rounded-lg p-0.5 sm:p-1 border border-gray-100">
-                      <button 
+                      <button
                         onClick={() => updateQuantity(item._id, item.quantity - 1)}
                         className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
                         <FaMinus size={7} />
                       </button>
                       <span className="w-4 sm:w-6 text-center font-bold text-[10px] sm:text-sm">{item.quantity}</span>
-                      <button 
+                      <button
                         onClick={() => updateQuantity(item._id, item.quantity + 1)}
                         className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
                       >
                         <FaPlus size={7} />
                       </button>
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={() => removeFromCart(item._id)}
                       className="text-gray-300 hover:text-red-500 transition-colors flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider"
                     >
@@ -152,7 +153,7 @@ const CartPage = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="text-right flex-shrink-0 hidden sm:block">
                   <p className="text-xl font-black text-gray-900">{item.price * item.quantity} FCFA</p>
                   <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{item.price} FCFA / unité</p>
@@ -165,7 +166,7 @@ const CartPage = () => {
           <div className="w-full lg:w-96">
             <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 sticky top-32">
               <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-6 uppercase tracking-wider border-b border-gray-100 pb-4">Résumé</h2>
-              
+
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-gray-600 font-medium">
                   <span>Sous-total</span>
@@ -177,30 +178,14 @@ const CartPage = () => {
                 </div>
               </div>
 
-               <button 
+              <button
                 onClick={handleCheckout}
                 className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
               >
                 Passer la commande
               </button>
 
-              {/* Bouton FedaPay — Paiement en ligne */}
-              <button
-                onClick={handleFedapayPayment}
-                disabled={fedapayLoading}
-                className="w-full bg-[#0f3460] hover:bg-[#16213e] disabled:opacity-60 text-white py-4 sm:py-5 rounded-2xl sm:rounded-3xl text-base sm:text-lg font-black uppercase tracking-widest shadow-md transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3"
-              >
-                {fedapayLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                    Ouverture...
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-yellow-300">&#128274;</span> Payer en ligne — FedaPay
-                  </>
-                )}
-              </button>
+
 
               <p className="text-[10px] text-center text-gray-400 mt-2 font-medium uppercase tracking-widest leading-relaxed">
                 Paiement sécurisé via FedaPay ou à la livraison.
@@ -213,11 +198,11 @@ const CartPage = () => {
       {/* Drawer de commande latéral (plus moderne) */}
       <div className={`fixed inset-0 z-[100] transition-all duration-500 ${showCheckout ? 'visible' : 'invisible'}`}>
         {/* Backdrop overlay */}
-        <div 
+        <div
           className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-500 ${showCheckout ? 'opacity-100' : 'opacity-0'}`}
           onClick={() => setShowCheckout(false)}
         />
-        
+
         {/* Drawer Content */}
         <div className={`absolute top-0 right-0 h-full w-full max-w-2xl bg-white shadow-2xl transform transition-transform duration-500 ease-out ${showCheckout ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="h-full flex flex-col">
@@ -228,14 +213,15 @@ const CartPage = () => {
                 <FaTimes size={20} />
               </button>
             </div>
-            
+
             {/* Content Drawer */}
             <div className="flex-1 overflow-y-auto p-0">
-              <BuyProduct 
-                image={cart[0].image} 
-                name={`Commande de ${getCartCount()} articles`} 
-                price={getCartTotal()} 
-                isVisibled={setShowCheckout} 
+              <BuyProduct
+                image={cart[0].image}
+                name={`Commande de ${getCartCount()} articles`}
+                price={getCartTotal()}
+                vendorName={cart.map(item => item.vendorName || 'Vendeur Indépendant').join(', ')}
+                isVisibled={setShowCheckout}
               />
             </div>
           </div>

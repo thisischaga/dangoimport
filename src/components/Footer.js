@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 
 const Footer = () => {
@@ -17,18 +17,20 @@ const Footer = () => {
             <h4 className="font-black text-xl tracking-tight">DANGO <span className="text-yellow-500">IMPORT</span></h4>
           </div>
           <p className="text-gray-400 leading-relaxed font-medium">
-            Votre partenaire de confiance pour le sourcing et l'importation de produits de qualité supérieure. Nous connectons les marchés mondiaux pour vous offrir le meilleur de l'innovation et du style.
+            Dango Import est la marketplace locale de référence au Bénin et au Togo. Découvrez des
+            milliers de produits de vendeurs béninois et togolais. Achetez malin et vendez facilement
+            avec livraison rapide.
           </p>
           <div className="flex gap-4">
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
+            <a href="https://www.facebook.com/share/1CSKDF4dLi/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
               <FaFacebook size={16} />
-            </button>
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
-              <FaTwitter size={16} />
-            </button>
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
+            </a>
+            <a href="https://www.instagram.com/dango_hub?igsh=eTVnNm96eGJlODRr&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
               <FaInstagram size={16} />
-            </button>
+            </a>
+            <a href="https://www.tiktok.com/@dangoimport?_r=1&_t=ZN-96ZY6iOteqM" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
+              <FaTiktok size={16} />
+            </a>
           </div>
         </div>
 
@@ -63,8 +65,9 @@ const Footer = () => {
             <li onClick={() => navigate('/politique-de-retour')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Retour</li>
             <li onClick={() => navigate('/cgu')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Dango Import</li>
             <li onClick={() => navigate('/cgu-vendeur')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Vendeurs</li>
+            <li onClick={() => navigate('/devenir-vendeur')} className="hover:text-yellow-500 cursor-pointer transition-colors font-black text-yellow-400">🛒 Devenir Vendeur</li>
             <li onClick={() => navigate('/about')} className="hover:text-yellow-500 cursor-pointer transition-colors">À propos de nous</li>
-<li onClick={() => navigate('/mentions-legales')} className="hover:text-yellow-500 cursor-pointer transition-colors">Mentions Légales</li>
+            <li onClick={() => navigate('/mentions-legales')} className="hover:text-yellow-500 cursor-pointer transition-colors">Mentions Légales</li>
             <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors">Aide &amp; Support</li>
           </ul>
         </div>
@@ -75,11 +78,11 @@ const Footer = () => {
           <ul className="space-y-4 text-gray-400 font-medium">
             <li className="flex items-start gap-3">
               <FaMapMarkerAlt className="text-yellow-500 mt-1 shrink-0" />
-              <span>Cotonou, Bénin<br />Quartier Haie Vive</span>
+              <span>Îlot : CSB, AGONKANMEY<br />ABOMEY-CALAVI</span>
             </li>
             <li className="flex items-center gap-3">
               <FaPhoneAlt className="text-yellow-500 shrink-0" />
-              <span>+229 0159387180</span>
+              <span>+229 0158266342</span>
             </li>
             <li className="flex items-center gap-3">
               <FaEnvelope className="text-yellow-500 shrink-0" />

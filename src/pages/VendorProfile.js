@@ -126,7 +126,7 @@ const VendorProfile = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto relative p-1 shadow-2xl">
             <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-gray-500 hover:text-black z-50"><FaTimes size={24} /></button>
-            <BuyProduct image={productDetail.image} name={productDetail.name} price={productDetail.price} isVisibled={setShowForm} />
+            <BuyProduct image={productDetail.image} name={productDetail.name} price={productDetail.price} vendorName={productDetail.vendorName} isVisibled={setShowForm} />
           </div>
         </div>
       )}

@@ -4,6 +4,8 @@ import { useCart } from '../context/CartContext';
 import { FaSearch, FaShoppingCart, FaUser, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 import NotificationPanel from './NotificationPanel';
+import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -22,10 +24,27 @@ const Header = () => {
     }
   };
 
-  const checkAuth = () => {
+  const checkAuth = async () => {
     const userData = localStorage.getItem('dangoUser');
-    if (userData) setUser(JSON.parse(userData));
-    else setUser(null);
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      // Fetch latest status quietly
+      if (parsedUser.userEmail) {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/api/users/me/${parsedUser.userEmail}`);
+          if (res.data) {
+            const updatedUser = { ...parsedUser, isVendor: res.data.isVendor, vendorName: res.data.vendorName };
+            setUser(updatedUser);
+            localStorage.setItem('dangoUser', JSON.stringify(updatedUser));
+          }
+        } catch (error) {
+          console.error("Impossible de rafraîchir le profil", error);
+        }
+      }
+    } else {
+      setUser(null);
+    }
   };
 
   useEffect(() => {
@@ -44,10 +63,15 @@ const Header = () => {
   const mainLinks = [
     { name: 'Accueil', path: '/' },
     { name: 'Marketplace', path: '/shopping' },
-    { name: 'Sourcing Pro', path: '/services' },
-    { name: 'À propos', path: '/about' },
-    { name: 'Mentions Légales', path: '/mentions-legales' }
+    { name: 'Sourcing Pro', path: '/services' }
   ];
+  if (user) {
+    mainLinks.push({ name: 'Mes Commandes', path: '/mes-commandes' });
+    if (user.isVendor) {
+      mainLinks.push({ name: 'Espace Vendeur', path: '/dashboard-vendeur' });
+    }
+  }
+  mainLinks.push({ name: 'Mentions Légales', path: '/mentions-legales' });
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">

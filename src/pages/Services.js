@@ -11,7 +11,7 @@ import devisImg from '../images/service_security.png';
 import qualityImg from '../images/service_quality.png';
 import deliveryImg from '../images/service_logistics.png';
 
-const Service = () => {
+const Services = () => {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
 
@@ -159,4 +159,4 @@ const Service = () => {
   );
 };
 
-export default Service;
+export default Services;

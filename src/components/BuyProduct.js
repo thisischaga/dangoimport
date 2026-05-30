@@ -33,7 +33,7 @@ function ChangeView({ center }) {
   return null;
 }
 
-const BuyProduct = ({ image, name, price, isVisibled }) => {
+const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
   const { clearCart } = useCart();
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,8 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
         totalPrice: grandTotal,
         productPrice: price,
         description: `Achat - ${name}`,
-        type: 'achat'
+        type: 'achat',
+        vendorName: vendorName || 'Vendeur Indépendant'
       });
 
       if (response.data && response.data.url) {
@@ -195,7 +196,8 @@ const BuyProduct = ({ image, name, price, isVisibled }) => {
         lng: location.lng,
         deliveryFee: 0,
         totalPrice: grandTotal,
-        productPrice: price
+        productPrice: price,
+        vendorName: vendorName || 'Vendeur Indépendant'
       };
 
       await axios.post(`${API_BASE_URL}/acheter`, orderData);
