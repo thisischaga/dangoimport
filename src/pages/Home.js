@@ -77,6 +77,20 @@ const Home = () => {
     window.history.replaceState({}, document.title, location.pathname);
   }, [location.search, clearCart, location.pathname]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (location.state?.openSourcing || params.get("sourcing") === "true") {
+      setShowForm(true);
+      if (location.state?.openSourcing) {
+        window.history.replaceState({ ...location.state, openSourcing: undefined }, document.title);
+      } else if (params.get("sourcing") === "true") {
+        params.delete("sourcing");
+        const newSearch = params.toString();
+        window.history.replaceState({}, document.title, location.pathname + (newSearch ? `?${newSearch}` : ''));
+      }
+    }
+  }, [location.state, location.search, location.pathname]);
+
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif" }} className="bg-[#f8f9fa] min-h-screen text-gray-900 flex flex-col overflow-x-hidden">
       <Header />

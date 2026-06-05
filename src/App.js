@@ -30,6 +30,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useState, useEffect } from 'react';
 import ScrollToTop from './components/ScrollToTop';
+import { CONFIG } from './config';
+import Maintenance from './pages/Maintenance';
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -79,16 +81,29 @@ function App() {
               <Route path='/politique-de-confidentialité' element={<Politique/>}/>
               <Route path='/politique-de-retour' element={<PolitiqueRetour/>}/>
               <Route path='/mentions-legales' element={<MentionsLegales />} />
-              <Route path='/shopping' element={<Ecom/>}/>
-              {/* La route /publish a été retirée (gestion via panel admin uniquement) */}
+              {/* Marketplace routes with maintenance mode toggle */}
+              {CONFIG.IS_MARKETPLACE_MAINTENANCE ? (
+                <>
+                  <Route path='/shopping' element={<Maintenance />} />
+                  <Route path='/cart' element={<Maintenance />} />
+                  <Route path='/devenir-vendeur' element={<Maintenance />} />
+                  <Route path='/dashboard-vendeur' element={<Maintenance />} />
+                  <Route path='/vendor/:vendorName' element={<Maintenance />} />
+                  <Route path='/mes-commandes' element={<Maintenance />} />
+                </>
+              ) : (
+                <>
+                  <Route path='/shopping' element={<Ecom/>}/>
+                  <Route path='/vendor/:vendorName' element={<VendorProfile/>}/>
+                  <Route path='/dashboard-vendeur' element={<VendorDashboard/>}/>
+                  <Route path='/mes-commandes' element={<ClientActivity/>}/>
+                  <Route path='/devenir-vendeur' element={<DevenirVendeur/>}/>
+                  <Route path='/cart' element={<CartPage/>}/>
+                </>
+              )}
 
-              <Route path='/vendor/:vendorName' element={<VendorProfile/>}/>
-              <Route path='/dashboard-vendeur' element={<VendorDashboard/>}/>
-              <Route path='/mes-commandes' element={<ClientActivity/>}/>
-              <Route path='/devenir-vendeur' element={<DevenirVendeur/>}/>
               <Route path='/login' element={<Login/>}/>
               <Route path='/register' element={<Register/>}/>
-              <Route path='/cart' element={<CartPage/>}/>
               <Route path='/blog/articles' element={<Blog/>}/>
               <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
               <Route path='/blog/epargne' element={<Epargne/>}/>
