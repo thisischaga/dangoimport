@@ -22,12 +22,16 @@ const Login = () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       
-      // Sauvegarde du token et de l'utilisateur
+      // Sauvegarde du token et de l'utilisateur avec TOUS les champs
       localStorage.setItem('dangoToken', res.data.token);
       localStorage.setItem('dangoUser', JSON.stringify({ 
         email: res.data.user.userEmail,
         firstname: res.data.user.userFirstname,
-        surname: res.data.user.userSurname
+        surname: res.data.user.userSurname,
+        isVendor: res.data.user.isVendor || false,
+        vendorName: res.data.user.vendorName || '',
+        balance: res.data.user.balance || 0,
+        bankDetails: res.data.user.bankDetails || {}
       }));
       
       toast.success('Connexion réussie !');
