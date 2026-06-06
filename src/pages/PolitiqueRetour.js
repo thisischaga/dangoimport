@@ -43,7 +43,7 @@ Le colis ou son contenu a subi un dommage avant remise au client.`,
 • produits alimentaires et périssables ;
 • cosmétiques et produits d’hygiène ouverts ;
 • sous-vêtements ;
-• produits personnalisés ou fabriqués sur mesure ;
+
 • produits commandés spécialement pour un client ;
 • produits ouverts, utilisés ou consommés au-delà d’un usage raisonnable de vérification ;
 • produits détériorés par le client ;
