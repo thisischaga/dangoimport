@@ -3,13 +3,15 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import VendorWithdrawal from '../components/VendorWithdrawal';
 import API_BASE_URL from '../apiConfig';
-import { FaStore, FaMoneyBillWave, FaChartLine, FaBoxOpen, FaSpinner } from 'react-icons/fa';
+import { FaStore, FaMoneyBillWave, FaChartLine, FaBoxOpen, FaSpinner, FaWallet } from 'react-icons/fa';
 
 const VendorDashboard = () => {
   const [achats, setAchats] = useState([]);
   const [commandes, setCommandes] = useState([]);
   const [products, setProducts] = useState([]);
+  const [userBalance, setUserBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -29,6 +31,10 @@ const VendorDashboard = () => {
         setAchats(response.data.achats || []);
         setCommandes(response.data.commandes || []);
         setProducts(response.data.products || []);
+        
+        // Récupérer les infos utilisateur (solde)
+        const userResponse = await axios.get(`${API_BASE_URL}/api/users/me/${user.email}`);
+        setUserBalance(userResponse.data.balance || 0);
       } catch (error) {
         console.error("Erreur de récupération des données vendeur :", error);
       } finally {
@@ -74,7 +80,7 @@ const VendorDashboard = () => {
         ) : (
           <>
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-10">
               <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                 <div className="flex items-center gap-4 mb-2">
                   <div className="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center text-xl">
@@ -103,6 +109,16 @@ const VendorDashboard = () => {
                   <h3 className="text-gray-500 font-semibold text-sm uppercase tracking-wide">Produits en Ligne</h3>
                 </div>
                 <p className="text-3xl font-black text-gray-900 mt-2">{products.length} <span className="text-lg font-bold text-gray-400">articles</span></p>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-xl">
+                    <FaWallet />
+                  </div>
+                  <h3 className="text-gray-500 font-semibold text-sm uppercase tracking-wide">Solde Disponible</h3>
+                </div>
+                <p className="text-3xl font-black text-gray-900 mt-2">{userBalance} <span className="text-lg font-bold">FCFA</span></p>
               </div>
             </div>
 
@@ -160,6 +176,11 @@ const VendorDashboard = () => {
                   </table>
                 </div>
               )}
+            </div>
+
+            {/* Withdrawal Section */}
+            <div className="mt-10">
+              <VendorWithdrawal vendorEmail={user.email} userBalance={userBalance} />
             </div>
           </>
         )}
