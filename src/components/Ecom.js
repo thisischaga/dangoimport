@@ -80,7 +80,10 @@ const Ecom = () => {
       ? `${API_BASE}/api/products/search?q=${encodeURIComponent(query)}`
       : `${API_BASE}/api/products`;
     axios.get(url)
-      .then(r => setProducts(r.data))
+      .then(r => {
+        console.log('Produits reçus:', r.data);
+        setProducts(r.data);
+      })
       .catch(err => {
         console.error(err);
         toast.error("Impossible de charger les produits. Vérifiez votre connexion.");
@@ -352,8 +355,8 @@ const Ecom = () => {
                         )}
                         {/* Parameters badge */}
                         {p.parameters && p.parameters.length > 0 && (
-                          <span className="absolute top-3 left-3 mt-8 bg-purple-600/85 text-white text-[9px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-                            ⚙️ {p.parameters.length} option{p.parameters.length > 1 ? 's' : ''}
+                          <span className="absolute top-10 left-3 bg-purple-600/85 text-white text-[9px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                            ⚙️ {p.parameters.length}
                           </span>
                         )}
                         {/* Wishlist */}
