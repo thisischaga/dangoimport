@@ -28,19 +28,31 @@ const Header = () => {
     const userData = localStorage.getItem('dangoUser');
     if (userData) {
       const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      // Fetch latest status quietly
+      // Fetch latest status from server
       if (parsedUser.userEmail) {
         try {
           const res = await axios.get(`${API_BASE_URL}/api/users/me/${parsedUser.userEmail}`);
           if (res.data) {
-            const updatedUser = { ...parsedUser, isVendor: res.data.isVendor, vendorName: res.data.vendorName };
+            console.log('Données utilisateur récupérées du serveur:', res.data);
+            // Mise à jour avec toutes les données du serveur
+            const updatedUser = { 
+              ...parsedUser, 
+              isVendor: res.data.isVendor || false, 
+              vendorName: res.data.vendorName || '',
+              balance: res.data.balance || 0,
+              bankDetails: res.data.bankDetails || {}
+            };
+            console.log('Profil mis à jour:', updatedUser);
             setUser(updatedUser);
             localStorage.setItem('dangoUser', JSON.stringify(updatedUser));
           }
         } catch (error) {
-          console.error("Impossible de rafraîchir le profil", error);
+          console.error("Erreur rafraîchissement profil:", error);
+          // En cas d'erreur, utilise les données du localStorage
+          setUser(parsedUser);
         }
+      } else {
+        setUser(parsedUser);
       }
     } else {
       setUser(null);
@@ -49,8 +61,17 @@ const Header = () => {
 
   useEffect(() => {
     checkAuth();
+    
+    // Vérifier toutes les 15 secondes si le statut vendeur a changé
+    const interval = setInterval(() => {
+      checkAuth();
+    }, 15000);
+    
     window.addEventListener('authChange', checkAuth);
-    return () => window.removeEventListener('authChange', checkAuth);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('authChange', checkAuth);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -66,12 +87,18 @@ const Header = () => {
     { name: 'Sourcing Pro', path: '/services' }
   ];
   if (user) {
+    console.log('Utilisateur connecté:', user);
     mainLinks.push({ name: 'Mes Commandes', path: '/mes-commandes' });
     if (user.isVendor) {
       mainLinks.push({ name: 'Espace Vendeur', path: '/dashboard-vendeur' });
     }
   }
   mainLinks.push({ name: 'Mentions Légales', path: '/mentions-legales' });
+
+  // Debug: afficher l'état utilisateur
+  if (user && typeof window !== 'undefined') {
+    window.dangoUserDebug = user;
+  }
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
