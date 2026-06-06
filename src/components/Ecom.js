@@ -470,6 +470,7 @@ const Ecom = () => {
               name={productDetail.name}
               price={productDetail.price}
               vendorName={productDetail.vendorName}
+              parameters={productDetail.parameters || []}
               isVisibled={setShowModal}
             />
           </div>

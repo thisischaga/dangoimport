@@ -33,7 +33,7 @@ function ChangeView({ center }) {
   return null;
 }
 
-const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
+const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisibled }) => {
   const { clearCart } = useCart();
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,23 +43,43 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   
+  // État pour les sélections de paramètres
+  const [selectedOptions, setSelectedOptions] = useState({});
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    paymentMethod: 'cash', // new field to select payment method
+    paymentMethod: 'cash',
     address: '',
     city: '',
     deliveryNotes: '',
     quantity: 1
   });
 
+  // Calculer le prix avec les surcoûts des options
+  const calculateTotalPrice = () => {
+    let totalPrice = price;
+    parameters.forEach(param => {
+      const selectedValue = selectedOptions[param.name];
+      if (selectedValue) {
+        const option = param.options?.find(opt => opt.value === selectedValue);
+        if (option && option.priceAdjustment) {
+          totalPrice += option.priceAdjustment;
+        }
+      }
+    });
+    return totalPrice;
+  };
+
+  const finalPrice = calculateTotalPrice();
+
   // ─── FedaPay Live Checkout ───────────────────────────────────────────
   const handleFedapayPayment = async () => {
     if (!formData.phone || formData.phone.length < 8) return toast.warning('Numéro de téléphone invalide.');
     if (!location) return toast.warning('Veuillez indiquer votre position sur la carte.');
 
-    const grandTotal = price * formData.quantity;
+    const grandTotal = finalPrice * formData.quantity;
     setFedapayLoading(true);
 
     try {
@@ -77,7 +97,8 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
         address: formData.address,
         city: formData.city || 'Non précisé',
         totalPrice: grandTotal,
-        productPrice: price,
+        productPrice: finalPrice,
+        selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : null,
         description: `Achat - ${name}`,
         type: 'achat',
         vendorName: vendorName || 'Vendeur Indépendant'
@@ -170,7 +191,7 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
     if (!location) return toast.warning("Veuillez indiquer votre position sur la carte.");
 
     setLoading(true);
-    const totalProduct = price * formData.quantity;
+    const totalProduct = finalPrice * formData.quantity;
     const grandTotal = totalProduct;
 
     try {
@@ -196,7 +217,8 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
         lng: location.lng,
         deliveryFee: 0,
         totalPrice: grandTotal,
-        productPrice: price,
+        productPrice: finalPrice,
+        selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : null,
         vendorName: vendorName || 'Vendeur Indépendant'
       };
 
@@ -216,7 +238,7 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
     }
   };
 
-  const totalProduct = price * formData.quantity;
+  const totalProduct = finalPrice * formData.quantity;
   const grandTotal = totalProduct;
 
   function MapEvents() {
@@ -236,7 +258,10 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
           <img src={image} alt={name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-contain bg-white shadow" />
           <div>
             <h3 className="font-semibold text-gray-900 text-xs sm:text-sm line-clamp-1">{name}</h3>
-            <p className="text-yellow-600 font-semibold text-base sm:text-lg">{price.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-yellow-600 font-semibold text-base sm:text-lg">{finalPrice.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
+              {finalPrice > price && <p className="text-[10px] text-gray-400 line-through">{price.toLocaleString()} F</p>}
+            </div>
           </div>
         </div>
 
@@ -308,6 +333,31 @@ const BuyProduct = ({ image, name, price, vendorName, isVisibled }) => {
           </div>
         )}
         <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">Informations de livraison</p>
+
+        {/* Paramètres du produit */}
+        {parameters && parameters.length > 0 && (
+          <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Options du produit</h3>
+            {parameters.map((param) => (
+              <div key={param.name} className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">{param.name}</label>
+                <select 
+                  value={selectedOptions[param.name] || ''}
+                  onChange={(e) => setSelectedOptions({ ...selectedOptions, [param.name]: e.target.value })}
+                  className="w-full bg-white border border-purple-200 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm"
+                >
+                  <option value="">Choisir...</option>
+                  {param.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.value}
+                      {option.priceAdjustment > 0 && ` (+${option.priceAdjustment.toLocaleString()} F)`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleOrder} className="space-y-6">
           <div className="grid gap-5">
