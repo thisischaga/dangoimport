@@ -350,6 +350,12 @@ const Ecom = () => {
                             {p.category}
                           </span>
                         )}
+                        {/* Parameters badge */}
+                        {p.parameters && p.parameters.length > 0 && (
+                          <span className="absolute top-3 left-3 mt-8 bg-purple-600/85 text-white text-[9px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                            ⚙️ {p.parameters.length} option{p.parameters.length > 1 ? 's' : ''}
+                          </span>
+                        )}
                         {/* Wishlist */}
                         <button
                           onClick={e => toggleWishlist(e, p._id)}
@@ -376,6 +382,25 @@ const Ecom = () => {
                             {p.vendorName || 'Vendeur'}
                           </Link>
                         </div>
+
+                        {/* Paramètres du produit */}
+                        {p.parameters && p.parameters.length > 0 && (
+                          <div className="text-[9px] space-y-1 py-2 border-y border-gray-100">
+                            {p.parameters.slice(0, 2).map((param) => (
+                              <div key={param.name} className="flex items-center gap-1.5">
+                                <span className="font-semibold text-gray-600">{param.name}:</span>
+                                <span className="text-gray-400">
+                                  {param.options?.slice(0, 3).map(opt => opt.value).join(', ')}
+                                  {param.options?.length > 3 && '...'}
+                                </span>
+                              </div>
+                            ))}
+                            {p.parameters.length > 2 && (
+                              <div className="text-gray-400 italic">+{p.parameters.length - 2} autre(s)</div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="mt-auto pt-4 border-t border-gray-50">
                           <div className="flex items-baseline gap-2 mb-1">
                             <span className="text-xl font-semibold text-gray-900">{fmtPrice(p.price)}</span>

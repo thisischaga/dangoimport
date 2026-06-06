@@ -307,8 +307,18 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">Articles</span>
-              <span className="font-black text-gray-900">{totalProduct.toLocaleString()} F</span>
+              <span className="text-gray-500 font-medium">Prix unitaire</span>
+              <span className="font-black text-gray-900">{price.toLocaleString()} F</span>
+            </div>
+            {finalPrice > price && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500 font-medium">Surcoûts options</span>
+                <span className="font-black text-green-600">+{(finalPrice - price).toLocaleString()} F</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 font-medium">Quantité</span>
+              <span className="font-black text-gray-900">×{formData.quantity}</span>
             </div>
             <div className="pt-3 mt-1 border-t border-gray-100 flex justify-between items-center">
               <span className="font-black text-gray-900 uppercase text-xs tracking-tighter">Total à payer</span>
@@ -334,28 +344,80 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
         )}
         <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">Informations de livraison</p>
 
-        {/* Paramètres du produit */}
+        {/* Paramètres du produit - Affichage détaillé */}
+        {parameters && parameters.length > 0 && (
+          <div className="mb-6 p-5 bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-2xl space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">⚙️</span>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Options disponibles</h3>
+              <span className="ml-auto text-[10px] bg-purple-200 text-purple-900 px-2 py-1 rounded-full font-bold">{parameters.length} paramètre{parameters.length > 1 ? 's' : ''}</span>
+            </div>
+
+            {/* Grille des paramètres */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {parameters.map((param) => (
+                <div key={param.name} className="bg-white rounded-xl p-4 border border-purple-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">{param.name}</p>
+                  <div className="space-y-2">
+                    {param.options?.map((option) => (
+                      <div key={option.value} className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">{option.value}</span>
+                        {option.priceAdjustment > 0 ? (
+                          <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded">+{option.priceAdjustment.toLocaleString()} F</span>
+                        ) : (
+                          <span className="text-xs text-gray-400">Inclus</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Formulaire de sélection des options */}
         {parameters && parameters.length > 0 && (
           <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-4">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Options du produit</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Sélectionner vos options</h3>
             {parameters.map((param) => (
               <div key={param.name} className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">{param.name}</label>
-                <select 
-                  value={selectedOptions[param.name] || ''}
-                  onChange={(e) => setSelectedOptions({ ...selectedOptions, [param.name]: e.target.value })}
-                  className="w-full bg-white border border-purple-200 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm"
-                >
-                  <option value="">Choisir...</option>
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">{param.name}</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {param.options?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.value}
-                      {option.priceAdjustment > 0 && ` (+${option.priceAdjustment.toLocaleString()} F)`}
-                    </option>
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setSelectedOptions({ ...selectedOptions, [param.name]: option.value })}
+                      className={`p-3 rounded-lg border-2 transition-all text-sm font-medium text-center ${
+                        selectedOptions[param.name] === option.value
+                          ? 'border-purple-500 bg-purple-100 text-purple-900'
+                          : 'border-white bg-white text-gray-700 hover:border-purple-300'
+                      }`}
+                    >
+                      <div>{option.value}</div>
+                      {option.priceAdjustment > 0 && (
+                        <div className="text-[10px] mt-1 font-bold text-green-600">+{option.priceAdjustment.toLocaleString()} F</div>
+                      )}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             ))}
+            {/* Afficher le prix avec surcoûts */}
+            {Object.keys(selectedOptions).length > 0 && (
+              <div className="mt-4 pt-4 border-t border-purple-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-600 uppercase">Prix final:</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-purple-600">{finalPrice.toLocaleString()} F</span>
+                    {finalPrice > price && (
+                      <span className="text-xs line-through text-gray-400">{price.toLocaleString()} F</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
