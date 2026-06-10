@@ -123,12 +123,12 @@
   --brand-hover: #e6c600;
   --brand-light: #fff0a0;
   --brand-dim: #e6c600;
-  --brand-soft: #e6c600;
+  --brand-soft: #fffbeb;
   --brand-muted: rgba(255, 220, 43, 0.14);
   --brand-border: #ffdc2b;
-  --brand-btn: #e6c600;
-  --brand-btn-hover: #e6c600;
-  --brand-btn-border: #e6c600;
+  --brand-btn: #fff0a0;
+  --brand-btn-hover: #ffe97a;
+  --brand-btn-border: #f5dc7a;
   --ink: #2d3748;
   --ink-deep: #1e2a33;
   --surface-dark: #344955;
@@ -147,6 +147,18 @@
     background: var(--brand-btn-hover);
     border-color: var(--brand);
     box-shadow: 0 4px 14px rgba(255, 220, 43, 0.18);
+  }
+  .btn-home {
+    @apply font-semibold transition-all;
+    background: #ffdc2b;
+    color: #2d3748;
+    border: 1px solid #e6c600;
+    box-shadow: 0 2px 8px rgba(255, 220, 43, 0.25);
+  }
+  .btn-home:hover {
+    background: #e6c600;
+    border-color: #c9a800;
+    box-shadow: 0 4px 14px rgba(255, 220, 43, 0.35);
   }
   .btn-brand-outline {
     @apply border font-semibold transition-colors;

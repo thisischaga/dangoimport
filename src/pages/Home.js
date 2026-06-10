@@ -179,11 +179,11 @@ const Home = () => {
           <div className="absolute bottom-20 right-10 w-48 h-48 bg-white/5 rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
 
           <div className="relative z-10 text-center w-full max-w-5xl px-6 py-24 flex flex-col items-center">
-            {/* Tag */}
+            {/* Tag 
             <div className="inline-flex items-center gap-2 bg-[#ffdc2b]/20 border border-[#ffdc2b]/40 text-[#ffdc2b] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 animate-fade-in">
               <FaFire size={10} className="animate-pulse" />
               Marketplace N°1 au Bénin & Togo
-            </div>
+            </div>*/}
 
             {/* Heading */}
             <h1 className="mb-4 leading-tight tracking-tight animate-fade-in-up">
@@ -202,7 +202,7 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up delay-300">
               <button
                 onClick={() => navigate("/shopping")}
-                className="bg-[#fffbeb] hover:bg-white text-[#2d3748] px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wide transition-all flex items-center gap-2.5 shadow-xl shadow-black/10 border border-[#ffdc2b]/40 hover:scale-105 active:scale-95"
+                className="btn-home px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wide flex items-center gap-2.5 hover:scale-105 active:scale-95"
               >
                 <FaStore size={14} /> Découvrir la boutique
               </button>
@@ -254,7 +254,7 @@ const Home = () => {
               </div>
               <button
                 onClick={() => navigate("/shopping")}
-                className="mt-8 inline-flex items-center gap-2 btn-brand px-6 py-3 rounded-xl font-bold text-sm hover:scale-105"
+                className="mt-8 inline-flex items-center gap-2 btn-home px-6 py-3 rounded-xl font-bold text-sm hover:scale-105"
               >
                 Explorer la plateforme <FaArrowRight size={12} />
               </button>
@@ -304,7 +304,7 @@ const Home = () => {
                 </ul>
                 <button
                   onClick={() => navigate("/shopping")}
-                  className="flex items-center gap-2 btn-brand px-6 py-2.5 rounded-xl font-bold text-sm"
+                  className="flex items-center gap-2 btn-home px-6 py-2.5 rounded-xl font-bold text-sm"
                 >
                   Accéder à la boutique <FaChevronRight size={10} />
                 </button>
@@ -333,7 +333,7 @@ const Home = () => {
                 </ul>
                 <button
                   onClick={() => setShowForm(true)}
-                  className="flex items-center gap-2 bg-[#fffbeb] group-hover:bg-white border border-[#ffdc2b]/40 text-[#2d3748] px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
+                  className="flex items-center gap-2 btn-home px-6 py-2.5 rounded-xl font-bold text-sm"
                 >
                   Demander un devis <FaChevronRight size={10} />
                 </button>
@@ -356,7 +356,7 @@ const Home = () => {
               <button
                 type="button"
                 onClick={() => navigate('/shopping')}
-                className="btn-brand-outline px-5 py-2.5 rounded-xl text-sm flex items-center gap-2"
+                className="btn-home px-5 py-2.5 rounded-xl text-sm flex items-center gap-2"
               >
                 Voir tout le catalogue <FaArrowRight size={11} />
               </button>
@@ -501,7 +501,7 @@ const Home = () => {
                 <button
                   disabled={newsletterLoading}
                   type="submit"
-                  className="btn-brand px-8 py-3.5 rounded-xl font-black text-sm disabled:opacity-50 whitespace-nowrap hover:scale-105 active:scale-95"
+                  className="btn-home px-8 py-3.5 rounded-xl font-black text-sm disabled:opacity-50 whitespace-nowrap hover:scale-105 active:scale-95"
                 >
                   {newsletterLoading ? "En cours..." : "S'inscrire"}
                 </button>

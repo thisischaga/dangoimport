@@ -182,6 +182,7 @@ const ProductDetail = () => {
         return () => { document.title = 'Dango Import'; };
     }, [product]);
 
+    // Réinitialiser le formulaire à chaque changement de produit (données via React Query)
     useEffect(() => {
         window.scrollTo(0, 0);
         setQuantity(1);
