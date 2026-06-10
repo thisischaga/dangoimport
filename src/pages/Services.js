@@ -29,7 +29,7 @@ const Services = () => {
               Dango Import vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée vers le Bénin, le Togo et le Ghana.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <button type="button" onClick={() => navigate('/shopping')} className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
+              <button type="button" onClick={() => navigate('/shopping')} className="btn-brand px-8 py-3 rounded shadow-md font-bold">
                 Voir notre vitrine
               </button>
               <button type="button" onClick={() => setShowForm(true)} className="bg-transparent hover:bg-white/10 text-white px-8 py-3 border border-white/30 rounded font-bold transition-colors">
@@ -130,7 +130,7 @@ const Services = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Prêt à lancer votre import ?</h2>
             <p className="text-lg text-gray-300 mb-8">Contactez-nous et obtenez une solution sur mesure pour votre première commande.</p>
-            <button type="button" onClick={() => setShowForm(true)} className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-8 py-3 rounded shadow-md font-bold transition-colors">
+            <button type="button" onClick={() => setShowForm(true)} className="btn-brand px-8 py-3 rounded shadow-md font-bold">
               Commencer maintenant
             </button>
           </div>

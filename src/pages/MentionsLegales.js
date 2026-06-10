@@ -93,7 +93,7 @@ export default function MentionsLegales() {
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${
-                    active === s.id ? "bg-[#ffdc2b] text-gray-900 shadow-md shadow-[#ffdc2b]/20" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    active === s.id ? "bg-[#fff0a0] text-gray-900 shadow-md shadow-[#fff0a0]/40 border border-[#f5dc7a]" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   <FaChevronRight size={8} className="shrink-0" />
@@ -130,7 +130,7 @@ export default function MentionsLegales() {
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 btn-brand rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95"
         >
           <FaArrowUp size={14} />
         </button>

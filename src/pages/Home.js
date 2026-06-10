@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import DevisForm from "../components/DevisForm";
 import axios from "axios";
 import API_BASE_URL from "../apiConfig";
+import { useFeaturedProducts } from "../hooks/useProducts";
 
 import heroImg from "../images/premium_cover_dango.png";
 import parfum1 from "../images/WhatsApp Image 2026-05-11 at 21.49.32 (3).jpeg";
@@ -99,27 +100,11 @@ const Home = () => {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterDone, setNewsletterDone] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const { data: featuredFromApi = [] } = useFeaturedProducts();
+  const featuredProducts = featuredFromApi.length > 0
+    ? featuredFromApi.slice(0, 6)
+    : FALLBACK_FEATURED;
   const statsRef = useRef(null);
-
-  useEffect(() => {
-    const loadFeatured = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/products/featured`);
-        const list = res.data?.data || res.data || [];
-        if (list.length > 0) {
-          setFeaturedProducts(list.slice(0, 6));
-          return;
-        }
-        const all = await axios.get(`${API_BASE_URL}/api/products`);
-        const products = Array.isArray(all.data) ? all.data : (all.data?.data || []);
-        setFeaturedProducts(products.filter((p) => p.isPublished !== false).slice(0, 6));
-      } catch {
-        setFeaturedProducts(FALLBACK_FEATURED);
-      }
-    };
-    loadFeatured();
-  }, []);
 
   /* Intersection observer for stats count-up */
   useEffect(() => {
@@ -269,7 +254,7 @@ const Home = () => {
               </div>
               <button
                 onClick={() => navigate("/shopping")}
-                className="mt-8 inline-flex items-center gap-2 bg-[#2d3748] hover:bg-[#3d4f5f] text-white px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 shadow-[inset_0_-2px_0_#ffdc2b]"
+                className="mt-8 inline-flex items-center gap-2 btn-brand px-6 py-3 rounded-xl font-bold text-sm hover:scale-105"
               >
                 Explorer la plateforme <FaArrowRight size={12} />
               </button>
@@ -319,7 +304,7 @@ const Home = () => {
                 </ul>
                 <button
                   onClick={() => navigate("/shopping")}
-                  className="flex items-center gap-2 bg-[#2d3748] group-hover:bg-[#3d4f5f] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-[inset_0_-2px_0_#ffdc2b]"
+                  className="flex items-center gap-2 btn-brand px-6 py-2.5 rounded-xl font-bold text-sm"
                 >
                   Accéder à la boutique <FaChevronRight size={10} />
                 </button>
@@ -516,7 +501,7 @@ const Home = () => {
                 <button
                   disabled={newsletterLoading}
                   type="submit"
-                  className="bg-[#2d3748] hover:bg-[#3d4f5f] text-white px-8 py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 whitespace-nowrap hover:scale-105 active:scale-95 shadow-[inset_0_-2px_0_#ffdc2b]"
+                  className="btn-brand px-8 py-3.5 rounded-xl font-black text-sm disabled:opacity-50 whitespace-nowrap hover:scale-105 active:scale-95"
                 >
                   {newsletterLoading ? "En cours..." : "S'inscrire"}
                 </button>

@@ -6,7 +6,12 @@ import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FedapayCard from '../components/FedapayCard';
-import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
+import {
+    initiateFedapayCheckout,
+    buildCartFedapayPayload,
+    buildCartOrderPayload,
+    submitDirectOrder,
+} from '../services/fedapayCheckout';
 
 const getImgUrl = (img) => {
     if (!img) return '';
@@ -105,6 +110,7 @@ export default function Checkout() {
     const [submitting, setSubmitting] = useState(false);
     const [apiCart, setApiCart] = useState(null);
     const [order, setOrder] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState('fedapay');
 
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '', phone: '',
@@ -157,7 +163,7 @@ export default function Checkout() {
         load();
     }, [navigate]);
 
-    // Retour FedaPay
+    // Retour après paiement FedaPay
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         if (params.get('token') || params.get('status') === 'approved') {
@@ -201,21 +207,58 @@ export default function Checkout() {
         setStep(s => s + 1);
     };
 
-    // ─── Passer la commande via FedaPay ──────────────────────────────────────
+    // ─── Passer la commande ──────────────────────────────────────────────────
     const handlePlaceOrder = async () => {
         if (!cartItems.length) return;
 
         if (!form.phone || form.phone.replace(/\D/g, '').length < 8) {
-            toast.warning('Veuillez renseigner un numéro de téléphone valide pour FedaPay.');
+            toast.warning('Veuillez renseigner un numéro de téléphone valide.');
             return;
         }
 
         const token = localStorage.getItem('dangoToken');
         setSubmitting(true);
-        const toastId = toast.loading('Redirection vers FedaPay...');
 
+        if (paymentMethod === 'fedapay') {
+            const toastId = toast.loading('Redirection vers FedaPay...');
+            try {
+                const payload = buildCartFedapayPayload({
+                    form,
+                    cartItems,
+                    subtotal,
+                    shippingFee,
+                    total,
+                    shippingLabel: selectedShipping?.label,
+                });
+
+                const data = await initiateFedapayCheckout(payload, token);
+
+                toast.update(toastId, {
+                    render: 'Ouverture du paiement sécurisé FedaPay...',
+                    type: 'success',
+                    isLoading: false,
+                    autoClose: 2000,
+                });
+
+                setTimeout(() => {
+                    window.location.href = data.url;
+                }, 600);
+            } catch (err) {
+                console.error(err);
+                toast.update(toastId, {
+                    render: err.message || 'Impossible de démarrer le paiement FedaPay.',
+                    type: 'error',
+                    isLoading: false,
+                    autoClose: 4000,
+                });
+                setSubmitting(false);
+            }
+            return;
+        }
+
+        const toastId = toast.loading('Enregistrement de votre commande...');
         try {
-            const payload = buildCartFedapayPayload({
+            const payload = buildCartOrderPayload({
                 form,
                 cartItems,
                 subtotal,
@@ -224,22 +267,26 @@ export default function Checkout() {
                 shippingLabel: selectedShipping?.label,
             });
 
-            const data = await initiateFedapayCheckout(payload, token);
+            const data = await submitDirectOrder(payload, token);
+
+            clearCart?.();
+            setOrder({
+                orderNumber: data.achatId
+                    ? `#${String(data.achatId).slice(-8).toUpperCase()}`
+                    : 'Confirmée',
+            });
+            setStep(4);
 
             toast.update(toastId, {
-                render: 'Ouverture du paiement sécurisé FedaPay...',
+                render: 'Commande enregistrée ! Notre équipe vous contactera pour la livraison.',
                 type: 'success',
                 isLoading: false,
-                autoClose: 2000,
+                autoClose: 4000,
             });
-
-            setTimeout(() => {
-                window.location.href = data.url;
-            }, 600);
         } catch (err) {
             console.error(err);
             toast.update(toastId, {
-                render: err.message || 'Impossible de démarrer le paiement FedaPay.',
+                render: err.message || 'Impossible de finaliser la commande.',
                 type: 'error',
                 isLoading: false,
                 autoClose: 4000,
@@ -347,7 +394,7 @@ export default function Checkout() {
                                 </div>
                                 {i < STEPS.length - 1 && (
                                     <div className={`flex-1 h-0.5 mx-2 sm:mx-3 mb-4 transition-colors duration-500 max-w-[60px]
-                    ${step > num ? 'bg-[#ffdc2b]' : 'bg-gray-200'}`} />
+                    ${step > num ? 'bg-[#fff0a0]' : 'bg-gray-200'}`} />
                                 )}
                             </React.Fragment>
                         );
@@ -445,10 +492,57 @@ export default function Checkout() {
                                 <div className="p-6 sm:p-8">
                                     <h2 className="text-lg font-bold text-gray-900 mb-2">Paiement</h2>
                                     <p className="text-sm text-gray-500 mb-6">
-                                        Vous serez redirigé vers FedaPay pour finaliser le paiement en toute sécurité.
+                                        Choisissez votre mode de paiement. Pour payer en ligne, vous serez redirigé vers FedaPay.
                                     </p>
 
-                                    <FedapayCard />
+                                    <div className="space-y-3">
+                                        <label
+                                            className={`block cursor-pointer rounded-xl transition-all ${
+                                                paymentMethod === 'fedapay' ? 'ring-2 ring-gray-900' : ''
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="fedapay"
+                                                checked={paymentMethod === 'fedapay'}
+                                                onChange={() => setPaymentMethod('fedapay')}
+                                                className="sr-only"
+                                            />
+                                            <FedapayCard selected={paymentMethod === 'fedapay'} />
+                                        </label>
+
+                                        <label
+                                            className={`block cursor-pointer rounded-xl border-2 p-4 flex items-start gap-4 transition-all ${
+                                                paymentMethod === 'cash'
+                                                    ? 'border-gray-900 bg-[#fffbeb]'
+                                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="cash"
+                                                checked={paymentMethod === 'cash'}
+                                                onChange={() => setPaymentMethod('cash')}
+                                                className="sr-only"
+                                            />
+                                            <div className="w-10 h-10 rounded-lg bg-[#2d3748] text-[#ffdc2b] flex items-center justify-center shrink-0">
+                                                <TruckIcon />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="font-semibold text-gray-900 text-sm">Paiement à la livraison</p>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    Réglez en espèces ou Mobile Money à la réception. La commande est enregistrée sans paiement en ligne.
+                                                </p>
+                                            </div>
+                                            {paymentMethod === 'cash' && (
+                                                <div className="w-4 h-4 rounded-full border-2 border-gray-900 flex items-center justify-center shrink-0">
+                                                    <div className="w-2 h-2 rounded-full bg-gray-900" />
+                                                </div>
+                                            )}
+                                        </label>
+                                    </div>
 
                                     <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5 text-sm">
                                         <div className="flex justify-between text-gray-600">
@@ -463,7 +557,7 @@ export default function Checkout() {
                                         </div>
                                         <div className="flex justify-between pt-2 border-t border-gray-200 font-bold text-gray-900">
                                             <span>Total à payer</span>
-                                            <span className="text-base bg-[#ffdc2b] px-2 py-0.5 rounded">{total.toLocaleString('fr-FR')} F</span>
+                                            <span className="text-base bg-[#fff0a0] border border-[#f5dc7a] px-2 py-0.5 rounded">{total.toLocaleString('fr-FR')} F</span>
                                         </div>
                                     </div>
 
@@ -471,7 +565,7 @@ export default function Checkout() {
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
                                         </svg>
-                                        Paiement sécurisé — vos données sont protégées
+                                        Commande sécurisée — vos données sont protégées
                                     </p>
                                 </div>
                             )}
@@ -488,7 +582,9 @@ export default function Checkout() {
                                     <p className="text-gray-500 text-sm mb-1">Numéro de commande</p>
                                     <p className="text-gray-900 font-bold text-lg mb-6">{order.orderNumber}</p>
                                     <p className="text-sm text-gray-500 mb-6">
-                                        Un email de confirmation vous a été envoyé à <strong>{form.email}</strong>.
+                                        {paymentMethod === 'cash'
+                                            ? <>Nous vous contacterons au <strong>{form.phone}</strong> pour confirmer la livraison.</>
+                                            : <>Un email de confirmation vous a été envoyé à <strong>{form.email}</strong>.</>}
                                     </p>
                                     <button
                                         type="button"
@@ -530,14 +626,19 @@ export default function Checkout() {
                                             {submitting ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
-                                                    Redirection…
+                                                    {paymentMethod === 'fedapay' ? 'Redirection…' : 'Enregistrement…'}
                                                 </>
-                                            ) : (
+                                            ) : paymentMethod === 'fedapay' ? (
                                                 <>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                         <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
                                                     </svg>
                                                     Payer {total.toLocaleString('fr-FR')} F via FedaPay
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CheckIcon />
+                                                    Confirmer — {total.toLocaleString('fr-FR')} F à la livraison
                                                 </>
                                             )}
                                         </button>
@@ -614,9 +715,9 @@ export default function Checkout() {
 
                             <div className="mt-4 space-y-2">
                                 {[
-                                    'Paiement sécurisé FedaPay',
+                                    'Paiement en ligne FedaPay',
+                                    'Paiement à la livraison',
                                     'Livraison suivie',
-                                    'Retour sous 7 jours',
                                 ].map((label) => (
                                     <div key={label} className="flex items-center gap-2 text-xs text-gray-500">
                                         <span className="w-1 h-1 rounded-full bg-[#ffdc2b]" />

@@ -8,7 +8,7 @@ const FedapayCard = ({ selected = true, compact = false }) => (
             selected ? 'border-gray-900 bg-[#ffdc2b]/10' : 'border-gray-200 bg-white'
         } ${compact ? 'p-4' : 'p-5'}`}
     >
-        <div className="w-12 h-12 rounded-xl bg-[#ffdc2b] flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="w-12 h-12 rounded-xl bg-[#fff0a0] border border-[#f5dc7a] flex items-center justify-center shrink-0 overflow-hidden">
             <img
                 src="https://fedapay.com/wp-content/uploads/2020/05/logo.png"
                 alt="FedaPay"

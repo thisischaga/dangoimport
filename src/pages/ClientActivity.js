@@ -52,7 +52,7 @@ const ClientActivity = () => {
             <p className="text-gray-500 mb-8 max-w-md">Vous n'avez pas encore passé de commandes. Parcourez la boutique pour découvrir nos produits locaux.</p>
             <button 
               onClick={() => navigate('/shopping')}
-              className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-6 py-3 rounded-lg font-bold transition-colors"
+              className="btn-brand px-6 py-3 rounded-lg font-bold"
             >
               Découvrir la boutique
             </button>

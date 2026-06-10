@@ -194,7 +194,7 @@ const PublishProduct = () => {
                 <button 
                   disabled={loading}
                   type="submit" 
-                  className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-4 rounded-xl text-lg font-black uppercase tracking-widest shadow-[0_10px_20px_rgba(247,201,72,0.3)] transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full btn-brand py-4 rounded-xl text-lg font-black uppercase tracking-widest transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {loading ? 'PUBLICATION EN COURS...' : 'PUBLIER SUR LA VITRINE'}
                 </button>

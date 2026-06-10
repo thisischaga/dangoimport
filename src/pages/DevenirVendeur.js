@@ -255,7 +255,7 @@ const DevenirVendeur = () => {
               <button
                 disabled={loading}
                 type="submit"
-                className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-[#ffdc2b]/10 flex items-center justify-center gap-2"
+                className="w-full btn-brand py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? "Envoi en cours..." : "Envoyer ma demande"} <FaArrowRight />
               </button>

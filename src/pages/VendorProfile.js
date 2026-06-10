@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-import API_BASE_URL from '../apiConfig';
+import { useVendorProducts } from '../hooks/useProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BuyProduct from '../components/BuyProduct';
@@ -11,24 +10,9 @@ import { FaStore, FaMapMarkerAlt, FaStar, FaTimes, FaSpinner } from 'react-icons
 const VendorProfile = () => {
   const { vendorName } = useParams();
   const { addToCart } = useCart();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: products = [], isLoading: loading } = useVendorProducts(vendorName);
   const [showForm, setShowForm] = useState(false);
   const [productDetail, setProductDetail] = useState(null);
-
-  useEffect(() => {
-    const fetchVendorProducts = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/products/vendor/${encodeURIComponent(vendorName)}`);
-        setProducts(res.data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des produits du vendeur :", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVendorProducts();
-  }, [vendorName]);
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">

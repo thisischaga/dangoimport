@@ -100,7 +100,7 @@ const Maintenance = () => {
               <button
                 disabled={loading}
                 type="submit"
-                className="bg-[#ffdc2b] hover:bg-[#e6c600] disabled:opacity-50 text-slate-950 px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#ffdc2b]/10 hover:shadow-[#ffdc2b]/20 whitespace-nowrap"
+                className="btn-brand disabled:opacity-50 px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 {loading ? (
                   <FaSpinner className="animate-spin" />

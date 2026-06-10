@@ -184,7 +184,7 @@ export default function ArticleLayout({
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 btn-brand rounded-full shadow-xl flex items-center justify-center hover:scale-110"
         >
           <FaArrowUp size={14} />
         </button>

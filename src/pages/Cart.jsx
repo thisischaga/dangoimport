@@ -234,7 +234,7 @@ const Cart = () => {
                   className="w-full btn-brand font-black py-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 mb-3 disabled:opacity-50"
                 >
                   {loading ? <FaSpinner className="animate-spin" /> : <FaLock size={14} />}
-                  Payer via FedaPay
+                  Commander — FedaPay ou livraison
                 </button>
                 <button
                   onClick={() => navigate('/shopping')}
@@ -247,7 +247,7 @@ const Cart = () => {
                 <div className="mt-6 space-y-2">
                   {[
                     { text: 'Vendeurs vérifiés' },
-                    { text: 'Paiement sécurisé FedaPay' },
+                    { text: 'FedaPay ou paiement à la livraison' },
                     { text: 'Livraison rapide au Bénin & Togo' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs text-gray-500 font-medium">

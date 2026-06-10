@@ -90,7 +90,7 @@ const CartPage = () => {
           <p className="text-gray-600 mb-8 max-w-md">Il semble que vous n'ayez pas encore ajouté de produits. Parcourez notre boutique pour trouver des articles incroyables !</p>
           <button
             onClick={() => navigate('/shopping')}
-            className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-8 py-3 rounded-full font-bold transition-all"
+            className="btn-brand px-8 py-3 rounded-full font-bold"
           >
             Retourner à la boutique
           </button>
@@ -180,7 +180,7 @@ const CartPage = () => {
 
               <button
                 onClick={handleCheckout}
-                className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
+                className="w-full btn-brand py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest transition-all hover:-translate-y-1 active:translate-y-0"
               >
                 Passer la commande
               </button>

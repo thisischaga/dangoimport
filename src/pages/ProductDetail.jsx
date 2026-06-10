@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import API_BASE_URL from '../apiConfig';
+import { useProduct, useSimilarProducts } from '../hooks/useProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import {
@@ -73,19 +74,24 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [product, setProduct] = useState(null);
+    const { data: product, isLoading: loading, isError: productLoadError } = useProduct(id);
+    const { data: similarProducts = [] } = useSimilarProducts(id);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedCustomOptions, setSelectedCustomOptions] = useState({});
-    const [loading, setLoading] = useState(true);
     const [cartLoading, setCartLoading] = useState(false);
-    const [similarProducts, setSimilarProducts] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [inWishlist, setInWishlist] = useState(false);
-    const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('description');
+
+    const error = useMemo(() => {
+        if (loading) return '';
+        if (productLoadError || !product) return 'Produit non trouvé.';
+        if (product.isPublished === false) return 'Ce produit n\'est plus disponible.';
+        return '';
+    }, [loading, productLoadError, product]);
 
     const gallery = useMemo(() => buildGallery(product), [product]);
 
@@ -151,46 +157,6 @@ const ProductDetail = () => {
         }
     }, [id]);
 
-    const fetchProduct = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError('');
-            const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                setError('Produit non trouvé.');
-                setProduct(null);
-                return;
-            }
-
-            if (data.data.isPublished === false) {
-                setError('Ce produit n\'est plus disponible.');
-                setProduct(null);
-                return;
-            }
-
-            setProduct(data.data);
-            setSelectedImage(0);
-            fetchReviews();
-        } catch (err) {
-            console.error('Erreur fetchProduct :', err);
-            setError('Erreur lors du chargement du produit. Veuillez réessayer.');
-        } finally {
-            setLoading(false);
-        }
-    }, [id, fetchReviews]);
-
-    const fetchSimilarProducts = useCallback(async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/products/similar/${id}`);
-            const data = await response.json();
-            if (data.success) setSimilarProducts(data.data || []);
-        } catch (err) {
-            console.error('Erreur fetchSimilarProducts :', err);
-        }
-    }, [id]);
-
     const checkWishlist = useCallback(async () => {
         try {
             const token = localStorage.getItem('dangoToken');
@@ -218,16 +184,15 @@ const ProductDetail = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        setError('');
         setQuantity(1);
         setSelectedColor('');
         setSelectedSize('');
         setSelectedCustomOptions({});
         setActiveTab('description');
-        fetchProduct();
-        fetchSimilarProducts();
+        setSelectedImage(0);
+        fetchReviews();
         checkWishlist();
-    }, [id, fetchProduct, fetchSimilarProducts, checkWishlist]);
+    }, [id, fetchReviews, checkWishlist]);
 
     const validateBeforeCart = () => {
         if (!product) return false;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
 
 const CartContext = createContext();
@@ -12,32 +12,30 @@ export const CartProvider = ({ children }) => {
       try {
         return JSON.parse(savedCart);
       } catch (e) {
-        console.error("Erreur chargement panier", e);
+        console.error('Erreur chargement panier', e);
         return [];
       }
     }
     return [];
   });
 
-  // Sauvegarder le panier à chaque modification
   useEffect(() => {
     localStorage.setItem('dangoCart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product) => {
+  const addToCart = useCallback((product) => {
     let isUpdate = false;
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item._id === product._id);
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item._id === product._id);
       if (existingItem) {
         isUpdate = true;
-        return prevCart.map(item =>
+        return prevCart.map((item) =>
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       isUpdate = false;
       return [...prevCart, { ...product, quantity: 1 }];
     });
-    // Toast appelé après setCart, hors du callback (évite setState-during-render)
     setTimeout(() => {
       if (isUpdate) {
         toast.info(`Quantité mise à jour pour ${product.name}`);
@@ -45,43 +43,52 @@ export const CartProvider = ({ children }) => {
         toast.success(`${product.name} ajouté au panier`);
       }
     }, 0);
-  };
+  }, []);
 
-  const removeFromCart = (productId) => {
-    setCart(prevCart => prevCart.filter(item => item._id !== productId));
-    toast.warn("Article retiré du panier");
-  };
+  const removeFromCart = useCallback((productId) => {
+    setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
+    toast.warn('Article retiré du panier');
+  }, []);
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = useCallback((productId, newQuantity) => {
     if (newQuantity < 1) return;
-    setCart(prevCart => prevCart.map(item => 
-      item._id === productId ? { ...item, quantity: newQuantity } : item
-    ));
-  };
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item._id === productId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
     localStorage.removeItem('dangoCart');
-  };
+  }, []);
 
-  const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
+  const getCartTotal = useCallback(
+    () => cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+    [cart]
+  );
 
-  const getCartCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
-  };
+  const getCartCount = useCallback(
+    () => cart.reduce((count, item) => count + item.quantity, 0),
+    [cart]
+  );
+
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getCartTotal,
+      getCartCount,
+    }),
+    [cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal, getCartCount]
+  );
 
   return (
-    <CartContext.Provider value={{ 
-      cart, 
-      addToCart, 
-      removeFromCart, 
-      updateQuantity, 
-      clearCart, 
-      getCartTotal, 
-      getCartCount 
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

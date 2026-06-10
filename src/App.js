@@ -31,6 +31,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useState, useEffect } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {
@@ -68,6 +70,7 @@ function App() {
   }, []);
 
   return (
+    <QueryClientProvider client={queryClient}>
     <CartProvider>
       <NotificationProvider recipientType="user" userId={user?.email}>
         <Router>
@@ -117,6 +120,7 @@ function App() {
         </Router>
       </NotificationProvider>
     </CartProvider>
+    </QueryClientProvider>
   );
 }
 

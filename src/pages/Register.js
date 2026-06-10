@@ -143,7 +143,7 @@ const Register = () => {
             <button
               disabled={loading}
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-[#ffdc2b] hover:bg-[#e6c600] focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
+              className="group relative w-full flex justify-center py-3 px-4 text-sm font-bold rounded-xl btn-brand focus:outline-none disabled:opacity-50"
             >
               {loading ? 'ENVOI DU CODE...' : "CONTINUER"}
             </button>
@@ -177,7 +177,7 @@ const Register = () => {
             <button
               disabled={loading}
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-[#ffdc2b] hover:bg-[#e6c600] focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
+              className="w-full flex justify-center py-3 px-4 text-sm font-bold rounded-xl btn-brand focus:outline-none disabled:opacity-50"
             >
               {loading ? 'VÉRIFICATION...' : "VÉRIFIER ET S'INSCRIRE"}
             </button>

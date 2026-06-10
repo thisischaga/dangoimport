@@ -67,12 +67,8 @@ const Header = () => {
 
   useEffect(() => {
     checkAuth();
-    const interval = setInterval(checkAuth, 15000);
     window.addEventListener('authChange', checkAuth);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('authChange', checkAuth);
-    };
+    return () => window.removeEventListener('authChange', checkAuth);
   }, []);
 
   const handleLogout = () => {
@@ -151,7 +147,7 @@ const Header = () => {
               />
               <button
                 type="submit"
-                className="mr-1.5 bg-[#2d3748] text-white px-4 py-1.5 rounded-md text-xs font-bold hover:bg-[#3d4f5f] transition-colors shadow-[inset_0_-2px_0_#ffdc2b]"
+                className="mr-1.5 btn-brand px-4 py-1.5 rounded-md text-xs font-bold"
               >
                 Chercher
               </button>

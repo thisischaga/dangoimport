@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from "axios";
 import Header from "../components/Header";
+import { useProductsCatalog } from '../hooks/useProducts';
 import Footer from "../components/Footer";
 import { useCart } from '../context/CartContext';
 import {
@@ -80,8 +80,6 @@ const Ecom = () => {
   const { cart, addToCart } = useCart();
   const location    = useLocation();
 
-  const [products, setProducts]         = useState([]);
-  const [loading, setLoading]           = useState(true);
   const [sortBy, setSortBy]             = useState('default');
   const [activeCategory, setActiveCategory] = useState('Tous');
   const [addedId, setAddedId]           = useState(null);
@@ -90,21 +88,17 @@ const Ecom = () => {
   const [priceMax, setPriceMax]         = useState(null);
 
   const query = new URLSearchParams(location.search).get('q');
+  const { data: products = [], isLoading: loading, isError } = useProductsCatalog({ search: query });
 
   useEffect(() => {
-    setLoading(true);
     setPage(1);
-    const url = query
-      ? `${API_BASE}/api/products/search?q=${encodeURIComponent(query)}`
-      : `${API_BASE}/api/products`;
-    axios.get(url)
-      .then((r) => {
-        const raw = Array.isArray(r.data) ? r.data : (r.data?.data || []);
-        setProducts(raw.filter((p) => p && p.isPublished !== false));
-      })
-      .catch(() => toast.error('Impossible de charger les produits. Vérifiez votre connexion.'))
-      .finally(() => setLoading(false));
   }, [query]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error('Impossible de charger les produits. Vérifiez votre connexion.');
+    }
+  }, [isError]);
 
   const categories = useMemo(() => {
     const cats = [...new Set(products.map(p => p.category).filter(Boolean))];

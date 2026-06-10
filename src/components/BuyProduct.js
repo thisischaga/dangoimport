@@ -302,7 +302,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
           <button 
             type="button"
             onClick={handleLocateMe}
-            className="absolute bottom-4 right-4 z-[1000] bg-white text-gray-900 p-3 rounded-lg shadow hover:bg-[#ffdc2b] transition-all active:scale-95"
+            className="absolute bottom-4 right-4 z-[1000] bg-white text-gray-900 p-3 rounded-lg shadow hover:bg-[#fff0a0] transition-all active:scale-95"
             title="Me localiser"
           >
             <FaLocationArrow />
@@ -537,7 +537,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                 <button
                   disabled={loading || !location || orderConfirmed}
                   type="submit"
-                  className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-[#ffdc2b] hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
+                  className="w-full max-w-md btn-brand py-3 sm:py-4 rounded-lg text-lg font-semibold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                 >
                   {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : `Confirmer la commande (${grandTotal.toLocaleString()} F)`}
                   {!loading && !orderConfirmed && <FaShoppingCart />}

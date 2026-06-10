@@ -15,12 +15,31 @@ const VendorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem('dangoUser'));
-  // Assume vendorName is stored in user profile or derives from firstname + surname
-  const vendorName = user ? `${user.firstname || ''} ${user.surname || ''}`.trim() : '';
+  const userEmail = (() => {
+    try {
+      const raw = localStorage.getItem('dangoUser');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed.email || parsed.userEmail || null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const vendorName = (() => {
+    try {
+      const raw = localStorage.getItem('dangoUser');
+      if (!raw) return '';
+      const user = JSON.parse(raw);
+      if (user.vendorName) return user.vendorName;
+      return `${user.firstname || ''} ${user.surname || ''}`.trim();
+    } catch {
+      return '';
+    }
+  })();
 
   useEffect(() => {
-    if (!user) {
+    if (!userEmail) {
       navigate('/login');
       return;
     }
@@ -31,23 +50,22 @@ const VendorDashboard = () => {
         setAchats(response.data.achats || []);
         setCommandes(response.data.commandes || []);
         setProducts(response.data.products || []);
-        
-        // Récupérer les infos utilisateur (solde)
-        const userResponse = await axios.get(`${API_BASE_URL}/api/users/me/${user.email}`);
+
+        const userResponse = await axios.get(`${API_BASE_URL}/api/users/me/${userEmail}`);
         setUserBalance(userResponse.data.balance || 0);
       } catch (error) {
-        console.error("Erreur de récupération des données vendeur :", error);
+        console.error('Erreur de récupération des données vendeur :', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     if (vendorName) {
       fetchVendorData();
     } else {
       setLoading(false);
     }
-  }, [navigate, vendorName, user]);
+  }, [navigate, vendorName, userEmail]);
 
   // Calculs statistiques
   const totalSalesCount = achats.length + commandes.length;
@@ -180,7 +198,7 @@ const VendorDashboard = () => {
 
             {/* Withdrawal Section */}
             <div className="mt-10">
-              <VendorWithdrawal vendorEmail={user.email} userBalance={userBalance} />
+              <VendorWithdrawal vendorEmail={userEmail} userBalance={userBalance} />
             </div>
           </>
         )}
