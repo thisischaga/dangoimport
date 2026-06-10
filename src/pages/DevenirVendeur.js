@@ -84,13 +84,13 @@ const DevenirVendeur = () => {
         
         {/* Banner */}
         <section className="relative py-20 bg-gray-900 text-white text-center px-6">
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-transparent to-yellow-500/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#ffdc2b]/10 via-transparent to-[#e6c600]/10" />
           <div className="relative z-10 max-w-4xl mx-auto">
-            <span className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/30 text-yellow-300 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">
+            <span className="inline-flex items-center gap-2 bg-[#ffdc2b]/20 border border-[#ffdc2b]/30 text-[#fff0a0] px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">
               <FaStore /> Rejoignez-nous
             </span>
             <h1 className="text-4xl md:text-5xl font-black mb-4">
-              Devenir Vendeur sur <span className="text-yellow-400">Dango Import</span>
+              Devenir Vendeur sur <span className="text-[#ffdc2b]">Dango Import</span>
             </h1>
             <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto font-light">
               Développez votre commerce, touchez des milliers de clients au Bénin &amp; Togo, et bénéficiez de notre infrastructure logistique et de paiement sécurisé.
@@ -104,7 +104,7 @@ const DevenirVendeur = () => {
           {/* Info Column */}
           <div className="lg:col-span-5 space-y-8 my-auto">
             <div>
-              <span className="text-yellow-600 font-bold uppercase tracking-wider text-xs block mb-2">Avantages Vendeur</span>
+              <span className="text-[#e6c600] font-bold uppercase tracking-wider text-xs block mb-2">Avantages Vendeur</span>
               <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
                 Pourquoi vendre avec nous ?
               </h2>
@@ -118,7 +118,7 @@ const DevenirVendeur = () => {
                 { title: "Paiement garanti", text: "Intégration complète de Mobile Money (MTN, Moov, Celtiis, T-Money) et Cash on Delivery avec reversement rapide." }
               ].map((item, i) => (
                 <div key={i} className="flex gap-4 items-start">
-                  <FaCheckCircle className="text-yellow-500 text-lg shrink-0 mt-1" />
+                  <FaCheckCircle className="text-[#e6c600] text-lg shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-gray-900 text-base mb-1">{item.title}</h3>
                     <p className="text-gray-500 text-sm leading-relaxed">{item.text}</p>
@@ -157,7 +157,7 @@ const DevenirVendeur = () => {
                       required
                       type="text"
                       placeholder="Jean Dupont"
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
@@ -171,7 +171,7 @@ const DevenirVendeur = () => {
                     <input
                       type="text"
                       placeholder="Ex: Dango Shop"
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm"
                       value={formData.businessName}
                       onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                     />
@@ -188,7 +188,7 @@ const DevenirVendeur = () => {
                       required
                       type="tel"
                       placeholder="Ex: +229 0159387180"
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
@@ -203,7 +203,7 @@ const DevenirVendeur = () => {
                       required
                       type="email"
                       placeholder="nom@email.com"
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
@@ -219,7 +219,7 @@ const DevenirVendeur = () => {
                     required
                     type="text"
                     placeholder="Ex: Cotonou, Bénin"
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   />
@@ -232,7 +232,7 @@ const DevenirVendeur = () => {
                   required
                   rows="4"
                   placeholder="Décrivez brièvement vos articles (vêtements, parfums, cosmétiques, accessoires...)"
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm resize-none"
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm resize-none"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
@@ -246,7 +246,7 @@ const DevenirVendeur = () => {
                     required
                     type="file"
                     accept="image/*,application/pdf"
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b]/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#fffbeb] file:text-[#e6c600] hover:file:bg-[#fffbeb]/80 transition-all"
                     onChange={handleFileChange}
                   />
                 </div>
@@ -255,7 +255,7 @@ const DevenirVendeur = () => {
               <button
                 disabled={loading}
                 type="submit"
-                className="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-yellow-400/10 flex items-center justify-center gap-2"
+                className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-[#ffdc2b]/10 flex items-center justify-center gap-2"
               >
                 {loading ? "Envoi en cours..." : "Envoyer ma demande"} <FaArrowRight />
               </button>

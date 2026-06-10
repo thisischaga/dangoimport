@@ -97,7 +97,7 @@ const VendorWithdrawal = ({ vendorEmail, userBalance }) => {
   const getStatusIcon = (status) => {
     switch(status) {
       case 'pending':
-        return <FaHourglassHalf className="text-yellow-500" />;
+        return <FaHourglassHalf className="text-[#e6c600]" />;
       case 'approved':
         return <FaCheck className="text-green-500" />;
       case 'rejected':
@@ -127,7 +127,7 @@ const VendorWithdrawal = ({ vendorEmail, userBalance }) => {
   const getStatusColor = (status) => {
     switch(status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-[#fffbeb] text-[#e6c600]';
       case 'approved':
         return 'bg-green-100 text-green-700';
       case 'rejected':

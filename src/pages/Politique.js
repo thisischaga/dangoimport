@@ -163,7 +163,7 @@ export default function Politique() {
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
             <p className="text-gray-400 text-xs">
               Voir aussi nos{" "}
-              <Link to="/cgu" className="text-yellow-600 font-bold underline">Conditions Générales d'Utilisation</Link>
+              <Link to="/cgu" className="text-[#e6c600] font-bold underline">Conditions Générales d'Utilisation</Link>
               {" "}— © 2026 Dango Import Group. Tous droits réservés.
             </p>
           </div>

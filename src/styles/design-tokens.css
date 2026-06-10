@@ -2,8 +2,8 @@
 
 :root {
   --font-sans: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --color-primary: #ffdc2b; /* Dominant yellow requested */
-  --color-primary-600: #e6c21a;
+  --color-primary: #ffdc2b;
+  --color-primary-600: #e6c600;
   --color-accent: #002B5C;
   --color-bg: #ffffff; /* page background white */
   --color-surface: #ffffff; /* cards/surfaces on white */

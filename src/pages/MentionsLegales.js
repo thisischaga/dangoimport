@@ -73,12 +73,12 @@ export default function MentionsLegales() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 py-20 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="w-16 h-16 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FaGavel className="text-yellow-400 text-2xl" />
+          <div className="w-16 h-16 bg-[#ffdc2b]/10 border border-[#ffdc2b]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <FaGavel className="text-[#ffdc2b] text-2xl" />
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">Mentions Légales – Dango Hub</h1>
           <p className="text-gray-400 text-sm md:text-base">
-            Dernière mise à jour : <span className="text-yellow-400 font-bold">21 mai 2026</span>
+            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">21 mai 2026</span>
           </p>
         </div>
       </section>
@@ -93,7 +93,7 @@ export default function MentionsLegales() {
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${
-                    active === s.id ? "bg-yellow-400 text-gray-900 shadow-md shadow-yellow-400/20" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    active === s.id ? "bg-[#ffdc2b] text-gray-900 shadow-md shadow-[#ffdc2b]/20" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   <FaChevronRight size={8} className="shrink-0" />
@@ -104,8 +104,8 @@ export default function MentionsLegales() {
           </div>
         </aside>
         <article className="flex-1 min-w-0 space-y-10">
-          <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-6">
-            <p className="text-sm text-yellow-900 leading-relaxed font-medium">
+          <div className="bg-[#fffbeb] border border-[#fffbeb] rounded-2xl p-6">
+            <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
               <strong>Mentions légales de Dango HUB</strong> – Toutes les informations obligatoires concernant la société, l’hébergement, les responsabilités et les contacts.
             </p>
           </div>
@@ -116,7 +116,7 @@ export default function MentionsLegales() {
                 line.trim() === "" ? <div key={i} className="h-2" /> :
                 line.startsWith("•") ? (
                   <p key={i} className="flex items-start gap-2 text-gray-600 text-sm leading-relaxed mb-1">
-                    <span className="text-yellow-500 mt-1 shrink-0">•</span>{line.slice(1).trim()}
+                    <span className="text-[#e6c600] mt-1 shrink-0">•</span>{line.slice(1).trim()}
                   </p>
                 ) : (
                   <p key={i} className="text-gray-600 text-sm leading-relaxed">{line}</p>
@@ -130,7 +130,7 @@ export default function MentionsLegales() {
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         >
           <FaArrowUp size={14} />
         </button>

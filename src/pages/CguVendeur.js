@@ -131,12 +131,12 @@ const CguVendeur = () => {
       {/* Hero */}
       <section className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 py-20 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="w-16 h-16 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FaUserTie className="text-yellow-400 text-2xl" />
+          <div className="w-16 h-16 bg-[#ffdc2b]/10 border border-[#ffdc2b]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <FaUserTie className="text-[#ffdc2b] text-2xl" />
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">CGU Vendeurs Référencés</h1>
           <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-            Dernière mise à jour : <span className="text-yellow-400 font-bold">12 mai 2026</span>
+            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">12 mai 2026</span>
           </p>
         </div>
       </section>
@@ -153,7 +153,7 @@ const CguVendeur = () => {
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${active === s.id
-                    ? "bg-yellow-400 text-gray-900 shadow-md shadow-yellow-400/20"
+                    ? "bg-[#ffdc2b] text-gray-900 shadow-md shadow-[#ffdc2b]/20"
                     : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                 >
@@ -192,7 +192,7 @@ const CguVendeur = () => {
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         >
           <FaArrowUp size={14} />
         </button>

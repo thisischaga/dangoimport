@@ -13,7 +13,7 @@ const NotificationPanel = () => {
       {/* Bell Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-500 hover:text-yellow-500 transition-colors focus:outline-none"
+        className="relative p-2 text-gray-500 hover:text-[#e6c600] transition-colors focus:outline-none"
       >
         <FaBell size={20} />
         {unreadCount > 0 && (

@@ -78,7 +78,7 @@ const Login = () => {
                   required
                   type="email"
                   placeholder="votre@email.com"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                  className="input-dango pl-12 bg-gray-50 focus:bg-white"
                   value={formData.userEmail}
                   onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
                 />
@@ -91,7 +91,7 @@ const Login = () => {
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
                   Mot de passe
                 </label>
-                <a href="#" className="text-xs font-bold text-yellow-600 hover:text-yellow-500">
+                <a href="#" className="text-xs font-bold text-gray-700 hover:text-gray-900">
                   Mot de passe oublié ?
                 </a>
               </div>
@@ -101,7 +101,7 @@ const Login = () => {
                   required
                   type="password"
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                  className="input-dango pl-12 bg-gray-50 focus:bg-white"
                   value={formData.userPassword}
                   onChange={(e) => setFormData({ ...formData, userPassword: e.target.value })}
                 />
@@ -114,10 +114,10 @@ const Login = () => {
             <button
               disabled={loading}
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
+              className="group relative w-full flex justify-center py-3 px-4 text-sm font-bold rounded-xl btn-brand disabled:opacity-50"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <FaSignInAlt className="h-5 w-5 text-yellow-600 group-hover:text-yellow-700" />
+                <FaSignInAlt className="h-5 w-5 text-[#e6c600] group-hover:text-[#e6c600]" />
               </span>
               {loading ? 'CONNEXION...' : 'SE CONNECTER'}
             </button>
@@ -127,7 +127,7 @@ const Login = () => {
         {/* Inscription Link */}
         <div className="mt-6 text-center text-sm text-gray-600">
           Nouveau sur Dango Import ?{' '}
-          <Link to="/register" className="font-bold text-yellow-600 hover:text-yellow-500 hover:underline">
+          <Link to="/register" className="font-bold text-[#e6c600] hover:text-[#e6c600] hover:underline">
             Créer un compte
           </Link>
         </div>

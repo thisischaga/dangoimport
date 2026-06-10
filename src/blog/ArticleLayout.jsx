@@ -52,7 +52,7 @@ export default function ArticleLayout({
     <div className="bg-white min-h-screen font-sans">
       {/* Reading progress bar */}
       <div
-        className="fixed top-0 left-0 h-1 bg-yellow-400 z-[200] transition-all"
+        className="fixed top-0 left-0 h-1 bg-[#ffdc2b] z-[200] transition-all"
         style={{ width: `${progress}%` }}
       />
 
@@ -100,7 +100,7 @@ export default function ArticleLayout({
         {/* Back link */}
         <Link
           to="/blog/articles"
-          className="inline-flex items-center gap-2 text-xs font-black text-gray-400 hover:text-yellow-600 uppercase tracking-widest mb-10 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-black text-gray-400 hover:text-[#e6c600] uppercase tracking-widest mb-10 transition-colors"
         >
           <FaArrowLeft size={10} /> Retour au blog
         </Link>
@@ -109,7 +109,7 @@ export default function ArticleLayout({
         <article className="
           prose prose-lg prose-gray max-w-none
           prose-headings:font-black prose-headings:text-gray-900 prose-headings:tracking-tight
-          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-l-4 prose-h2:border-yellow-400 prose-h2:pl-4
+          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-l-4 prose-h2:border-[#ffdc2b] prose-h2:pl-4
           prose-p:leading-relaxed prose-p:text-gray-600
           prose-li:text-gray-600 prose-li:leading-relaxed
           prose-strong:text-gray-900
@@ -167,7 +167,7 @@ export default function ArticleLayout({
                     <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider self-start ${CATEGORY_COLOR[r.category] ?? 'bg-gray-100 text-gray-600'}`}>
                       {r.category}
                     </span>
-                    <h3 className="font-black text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                    <h3 className="font-black text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-[#e6c600] transition-colors">
                       {r.title}
                     </h3>
                   </div>
@@ -184,7 +184,7 @@ export default function ArticleLayout({
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
         >
           <FaArrowUp size={14} />
         </button>

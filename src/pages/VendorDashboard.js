@@ -74,7 +74,7 @@ const VendorDashboard = () => {
         
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <FaSpinner className="animate-spin text-4xl mb-4 text-yellow-500" />
+            <FaSpinner className="animate-spin text-4xl mb-4 text-[#e6c600]" />
             <p>Chargement de vos données...</p>
           </div>
         ) : (
@@ -103,7 +103,7 @@ const VendorDashboard = () => {
 
               <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                 <div className="flex items-center gap-4 mb-2">
-                  <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-lg flex items-center justify-center text-xl">
+                  <div className="w-12 h-12 bg-[#fffbeb] text-[#e6c600] rounded-lg flex items-center justify-center text-xl">
                     <FaBoxOpen />
                   </div>
                   <h3 className="text-gray-500 font-semibold text-sm uppercase tracking-wide">Produits en Ligne</h3>
@@ -165,7 +165,7 @@ const VendorDashboard = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                              sale.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                              sale.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-[#fffbeb] text-[#e6c600]'
                             }`}>
                               {sale.status}
                             </span>

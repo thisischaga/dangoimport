@@ -38,7 +38,7 @@ const VendorProfile = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-4xl shadow-sm border border-yellow-200">
+            <div className="w-24 h-24 bg-[#fffbeb] text-[#e6c600] rounded-full flex items-center justify-center text-4xl shadow-sm border border-[#ffdc2b]/25">
               <FaStore />
             </div>
             <div>
@@ -47,7 +47,7 @@ const VendorProfile = () => {
               </h1>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <span className="flex items-center gap-1"><FaMapMarkerAlt className="text-gray-400" /> Bénin</span>
-                <span className="flex items-center gap-1"><FaStar className="text-yellow-400" /> Vendeur Vérifié</span>
+                <span className="flex items-center gap-1"><FaStar className="text-[#ffdc2b]" /> Vendeur Vérifié</span>
               </div>
             </div>
           </div>
@@ -63,7 +63,7 @@ const VendorProfile = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <FaSpinner className="animate-spin text-4xl mb-4 text-yellow-500" />
+            <FaSpinner className="animate-spin text-4xl mb-4 text-[#e6c600]" />
             <p>Chargement de la boutique...</p>
           </div>
         ) : products.length === 0 ? (

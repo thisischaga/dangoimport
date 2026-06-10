@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
+import { initiateFedapayCheckout } from '../services/fedapayCheckout';
 import { toast } from 'react-toastify';
 import { 
   FaMapMarkerAlt, FaShoppingCart, FaShieldAlt, 
@@ -81,9 +82,11 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
 
     const grandTotal = finalPrice * formData.quantity;
     setFedapayLoading(true);
+    const toastId = toast.loading('Redirection vers FedaPay...');
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/fedapay/checkout`, {
+      const token = localStorage.getItem('dangoToken');
+      const data = await initiateFedapayCheckout({
         userName: formData.name,
         userNumber: formData.phone,
         productQuantity: formData.quantity,
@@ -101,19 +104,25 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
         selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : null,
         description: `Achat - ${name}`,
         type: 'achat',
-        vendorName: vendorName || 'Vendeur Indépendant'
-      });
+        vendorName: vendorName || 'Vendeur Indépendant',
+      }, token);
 
-      if (response.data && response.data.url) {
-        clearCart();
-        window.location.href = response.data.url; // Redirection Hosted Checkout
-      } else {
-        toast.error('Erreur lors de la création du paiement FedaPay.');
-        setFedapayLoading(false);
-      }
+      toast.update(toastId, {
+        render: 'Ouverture du paiement FedaPay...',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000,
+      });
+      clearCart();
+      setTimeout(() => { window.location.href = data.url; }, 600);
     } catch (error) {
       console.error('Erreur FedaPay Checkout :', error);
-      toast.error('Impossible de démarrer le paiement FedaPay.');
+      toast.update(toastId, {
+        render: error.message || 'Impossible de démarrer le paiement FedaPay.',
+        type: 'error',
+        isLoading: false,
+        autoClose: 4000,
+      });
       setFedapayLoading(false);
     }
   };
@@ -259,7 +268,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
           <div>
             <h3 className="font-semibold text-gray-900 text-xs sm:text-sm line-clamp-1">{name}</h3>
             <div className="flex items-baseline gap-2">
-              <p className="text-yellow-600 font-semibold text-base sm:text-lg">{finalPrice.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
+              <p className="text-[#e6c600] font-semibold text-base sm:text-lg">{finalPrice.toLocaleString()} F <span className="text-[10px] text-gray-400">CFA</span></p>
               {finalPrice > price && <p className="text-[10px] text-gray-400 line-through">{price.toLocaleString()} F</p>}
             </div>
           </div>
@@ -293,7 +302,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
           <button 
             type="button"
             onClick={handleLocateMe}
-            className="absolute bottom-4 right-4 z-[1000] bg-white text-gray-900 p-3 rounded-lg shadow hover:bg-yellow-400 transition-all active:scale-95"
+            className="absolute bottom-4 right-4 z-[1000] bg-white text-gray-900 p-3 rounded-lg shadow hover:bg-[#ffdc2b] transition-all active:scale-95"
             title="Me localiser"
           >
             <FaLocationArrow />
@@ -331,7 +340,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
       {/* ── Droite : Formulaire ────────────────────── */}
       <div className="p-4 sm:p-8 lg:w-3/5 overflow-y-auto">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 flex items-center gap-3">
-          Finaliser <span className="text-yellow-400 italic">l'Achat</span>
+          Finaliser <span className="text-[#ffdc2b] italic">l'Achat</span>
         </h2>
         {orderConfirmed && (
           <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center gap-3">
@@ -442,14 +451,14 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Nom complet</label>
                 <div className="relative">
                   <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input required type="text" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm" placeholder="Ex: Jean Dupont" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <input required type="text" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-[#ffdc2b]/10 focus:border-[#ffdc2b] transition-all font-medium text-sm" placeholder="Ex: Jean Dupont" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Email</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input required type="email" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm" placeholder="votre@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                  <input required type="email" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-[#ffdc2b]/10 focus:border-[#ffdc2b] transition-all font-medium text-sm" placeholder="votre@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                 </div>
               </div>
             </div>
@@ -471,15 +480,15 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
               <label className="text-[10px] font-medium text-gray-400 ml-1">Adresse ou Quartier</label>
               <div className="relative">
                 <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
-                <input required type="text" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-11 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm" placeholder="Commencez à taper..." value={formData.address} onChange={e => { setLocation(null); setFormData({...formData, address: e.target.value}); }} />
-                {isSearching && <FaSpinner className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-yellow-500" />}
+                <input required type="text" className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 pl-11 pr-11 focus:outline-none focus:ring-4 focus:ring-[#ffdc2b]/10 focus:border-[#ffdc2b] transition-all font-medium text-sm" placeholder="Commencez à taper..." value={formData.address} onChange={e => { setLocation(null); setFormData({...formData, address: e.target.value}); }} />
+                {isSearching && <FaSpinner className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-[#e6c600]" />}
               </div>
               
               {/* Suggestions Dropdown */}
               {showSuggestions && suggestions.length > 0 && (
                 <ul className="absolute z-[2000] w-full bg-white mt-1.5 rounded-lg shadow-md border border-gray-100 overflow-hidden max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
                   {suggestions.map((s, idx) => (
-                    <li key={idx} onClick={() => handleSelectSuggestion(s)} className="px-4 py-3 hover:bg-yellow-50 cursor-pointer border-b border-gray-50 last:border-0 text-[11px] font-medium text-gray-700 transition-colors">
+                    <li key={idx} onClick={() => handleSelectSuggestion(s)} className="px-4 py-3 hover:bg-[#fffbeb] cursor-pointer border-b border-gray-50 last:border-0 text-[11px] font-medium text-gray-700 transition-colors">
                       {s.display_name}
                     </li>
                   ))}
@@ -497,7 +506,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                 <select
                   value={formData.paymentMethod}
                   onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm appearance-none cursor-pointer"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-[#ffdc2b]/10 focus:border-[#ffdc2b] transition-all font-medium text-sm appearance-none cursor-pointer"
                 >
                   <option value="cash">Paiement à la livraison</option>
                   <option value="fedapay">Paiement en ligne (FedaPay)</option>
@@ -516,7 +525,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
             {/* Notes */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-medium text-gray-400 ml-1">Instructions (Optionnel)</label>
-              <textarea rows={2} className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 transition-all font-medium text-sm" placeholder="Appartement, étage, point de repère..." value={formData.deliveryNotes} onChange={e => setFormData({...formData, deliveryNotes: e.target.value})} />
+              <textarea rows={2} className="w-full bg-gray-50 border border-gray-100 rounded-lg py-3 px-4 focus:outline-none focus:ring-4 focus:ring-[#ffdc2b]/10 focus:border-[#ffdc2b] transition-all font-medium text-sm" placeholder="Appartement, étage, point de repère..." value={formData.deliveryNotes} onChange={e => setFormData({...formData, deliveryNotes: e.target.value})} />
             </div>
           </div>
 
@@ -528,7 +537,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                 <button
                   disabled={loading || !location || orderConfirmed}
                   type="submit"
-                  className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
+                  className="w-full max-w-md bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-lg font-semibold hover:bg-[#ffdc2b] hover:text-gray-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
                 >
                   {loading ? <FaSpinner className="animate-spin" /> : orderConfirmed ? 'Commande confirmée' : `Confirmer la commande (${grandTotal.toLocaleString()} F)`}
                   {!loading && !orderConfirmed && <FaShoppingCart />}

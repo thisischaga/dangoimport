@@ -1,112 +1,153 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import {
+  FaFacebook, FaInstagram, FaTiktok, FaTwitter,
+  FaEnvelope, FaPhoneAlt, FaMapMarkerAlt,
+} from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 
+const linkClass = 'text-[13px] text-[#dddddd] hover:text-white hover:underline leading-snug block py-2 sm:py-1';
+const headingClass = 'text-white font-bold text-sm mb-4';
+
 const Footer = () => {
-  const navigate = useNavigate();
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const columns = [
+    {
+      title: 'Boutique',
+      links: [
+        { label: 'Accueil', to: '/' },
+        { label: 'Tous les produits', to: '/shopping' },
+        { label: 'Mon panier', to: '/cart' },
+        { label: 'Blog', to: '/blog/articles' },
+      ],
+    },
+    {
+      title: 'Aide & infos',
+      links: [
+        { label: 'À propos', to: '/about' },
+        { label: 'Services & sourcing', to: '/services' },
+        { label: 'Politique de retour', to: '/politique-de-retour' },
+        { label: 'Politique de confidentialité', to: '/politique-de-confidentialité' },
+        { label: 'CGU', to: '/cgu' },
+        { label: 'Mentions légales', to: '/mentions-legales' },
+      ],
+    },
+    {
+      title: 'Paiement & livraison',
+      links: [
+        { label: 'Paiement FedaPay (MTN, Moov, carte)', to: '/shopping', note: true },
+        { label: 'Livraison au Bénin & Togo', to: '/services' },
+        { label: 'Mes commandes', to: '/mes-commandes' },
+      ],
+    },
+    {
+      title: 'Vendeurs',
+      links: [
+        { label: 'Créer un compte vendeur', to: '/devenir-vendeur', highlight: true },
+        { label: 'CGU vendeurs', to: '/cgu-vendeur' },
+      ],
+    },
+  ];
+
+  const socials = [
+    { href: 'https://www.facebook.com/share/1CSKDF4dLi/?mibextid=wwXIfr', icon: FaFacebook, label: 'Facebook' },
+    { href: 'https://www.instagram.com/dango_hub?igsh=eTVnNm96eGJlODRr&utm_source=qr', icon: FaInstagram, label: 'Instagram' },
+    { href: 'https://www.tiktok.com/@dangoimport?_r=1&_t=ZN-96ZY6iOteqM', icon: FaTiktok, label: 'TikTok' },
+    { href: 'https://twitter.com/dangoimport', icon: FaTwitter, label: 'Twitter' },
+  ];
 
   return (
-    <footer className="bg-[#131921] text-white pt-10 sm:pt-16 pb-6 sm:pb-8 border-t-4 border-yellow-500">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 text-sm">
+    <footer className="mt-16">
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className="w-full bg-[#4a6274] hover:bg-[#5a7284] text-white text-sm py-3.5 transition-colors"
+      >
+        Retour en haut
+      </button>
 
-        {/* Col 1: Brand & About */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Dango Import" className="h-10 w-10 rounded-lg" />
-            <h4 className="font-black text-xl tracking-tight">DANGO <span className="text-yellow-500">IMPORT</span></h4>
-          </div>
-          <p className="text-gray-400 leading-relaxed font-medium">
-            Dango Import est la marketplace locale de référence au Bénin et au Togo. Découvrez des
-            milliers de produits de vendeurs béninois et togolais. Achetez malin et vendez facilement
-            avec livraison rapide.
-          </p>
-          <div className="flex gap-4">
-            <a href="https://www.facebook.com/share/1CSKDF4dLi/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
-              <FaFacebook size={16} />
-            </a>
-            <a href="https://www.instagram.com/dango_hub?igsh=eTVnNm96eGJlODRr&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
-              <FaInstagram size={16} />
-            </a>
-            <a href="https://www.tiktok.com/@dangoimport?_r=1&_t=ZN-96ZY6iOteqM" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-all">
-              <FaTiktok size={16} />
-            </a>
-          </div>
-        </div>
-
-        {/* Col 2: Services */}
-        <div className="space-y-6">
-          <h4 className="font-black text-base uppercase tracking-widest text-yellow-500">Nos Services</h4>
-          <ul className="space-y-3 text-gray-300 font-medium">
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-              Sourcing International
-            </li>
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-              Logistique & Transport
-            </li>
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-              Contrôle Qualité
-            </li>
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-              Dango Business Pro
-            </li>
-          </ul>
-        </div>
-
-        {/* Col 3: Links */}
-        <div className="space-y-6">
-          <h4 className="font-black text-base uppercase tracking-widest text-yellow-500">Informations</h4>
-          <ul className="space-y-3 text-gray-300 font-medium">
-            <li onClick={() => navigate('/politique-de-confidentialité')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Confidentialité</li>
-            <li onClick={() => navigate('/politique-de-retour')} className="hover:text-yellow-500 cursor-pointer transition-colors">Politique de Retour</li>
-            <li onClick={() => navigate('/cgu')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Dango Import</li>
-            <li onClick={() => navigate('/cgu-vendeur')} className="hover:text-yellow-500 cursor-pointer transition-colors">CGU Vendeurs</li>
-            <li onClick={() => navigate('/devenir-vendeur')} className="hover:text-yellow-500 cursor-pointer transition-colors font-black text-yellow-400">🛒 Devenir Vendeur</li>
-            <li onClick={() => navigate('/about')} className="hover:text-yellow-500 cursor-pointer transition-colors">À propos de nous</li>
-            <li onClick={() => navigate('/mentions-legales')} className="hover:text-yellow-500 cursor-pointer transition-colors">Mentions Légales</li>
-            <li onClick={() => navigate('/services')} className="hover:text-yellow-500 cursor-pointer transition-colors">Aide &amp; Support</li>
-          </ul>
-        </div>
-
-        {/* Col 4: Contact */}
-        <div className="space-y-6">
-          <h4 className="font-black text-base uppercase tracking-widest text-yellow-500">Contactez-nous</h4>
-          <ul className="space-y-4 text-gray-400 font-medium">
-            <li className="flex items-start gap-3">
-              <FaMapMarkerAlt className="text-yellow-500 mt-1 shrink-0" />
-              <span>Îlot : CSB, AGONKANMEY<br />ABOMEY-CALAVI</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <FaPhoneAlt className="text-yellow-500 shrink-0" />
-              <span>+229 0158266342</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <FaEnvelope className="text-yellow-500 shrink-0" />
-              <span>contact@dangoimport.com</span>
-            </li>
-          </ul>
+      <div className="bg-[#344955] text-[#e8eaed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-10 py-10 sm:py-12 grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h4 className={headingClass}>{col.title}</h4>
+              <ul className="space-y-1">
+                {col.links.map((link) => (
+                  <li key={link.to + link.label}>
+                    {link.note ? (
+                      <span className="text-[12px] text-[#999] leading-snug block py-0.5">
+                        {link.label}
+                      </span>
+                    ) : (
+                      <Link
+                        to={link.to}
+                        className={`${linkClass} ${link.highlight ? '!text-[#fffbeb] font-semibold hover:!text-[#ffdc2b]' : ''}`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="mt-16 border-t border-white/5 pt-8">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex gap-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-            <span onClick={() => navigate('/')} className="hover:text-white cursor-pointer transition-colors">Accueil</span>
-            <span onClick={() => navigate('/shopping')} className="hover:text-white cursor-pointer transition-colors">Marketplace</span>
-            <span onClick={() => navigate('/blog/articles')} className="hover:text-white cursor-pointer transition-colors">Blog</span>
+      <div className="bg-[#344955] border-t border-[#4a6274]/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-10 py-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Dango Import" className="h-9 w-9 rounded object-cover" />
+            <div>
+              <p className="text-white font-bold text-sm">Dango Import</p>
+              <p className="text-[#999] text-xs">Marketplace · Bénin & Togo</p>
+            </div>
           </div>
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-            © 2026 Dango Import. Tous droits réservés.
-          </p>
+
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-5 text-xs text-[#cccccc]">
+            <span className="flex items-center gap-2">
+              <FaMapMarkerAlt size={11} className="text-[#999] shrink-0" />
+              ABOMEY-CALAVI, Bénin
+            </span>
+            <a href="tel:+2290158266342" className="flex items-center gap-2 hover:text-white transition-colors">
+              <FaPhoneAlt size={11} className="text-[#999] shrink-0" />
+              +229 0158266342
+            </a>
+            <a href="mailto:contact@dangoimport.com" className="flex items-center gap-2 hover:text-white transition-colors">
+              <FaEnvelope size={11} className="text-[#999] shrink-0" />
+              contact@dangoimport.com
+            </a>
+          </div>
+
+          <div className="flex gap-2">
+            {socials.map(({ href, icon: Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="w-10 h-10 sm:w-9 sm:h-9 rounded border border-[#555] flex items-center justify-center text-[#ccc] hover:border-white hover:text-white transition-colors"
+              >
+                <Icon size={14} />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-[#2a3640] py-5">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-[11px] text-[#999]">
+          <Link to="/" className="hover:text-white transition-colors">Accueil</Link>
+          <Link to="/shopping" className="hover:text-white transition-colors">Marketplace</Link>
+          <Link to="/services" className="hover:text-white transition-colors">Services</Link>
+          <span className="hidden sm:inline text-[#555]">|</span>
+          <p>© {new Date().getFullYear()} Dango Import. Tous droits réservés.</p>
         </div>
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;

@@ -70,7 +70,7 @@ const DevisForm = ({ showForm }) => {
       <div className="mb-12 text-center">
         <h2 className="text-4xl md:text-5xl font-playfair font-black mb-4">Demander un <span className="text-primary italic">Devis</span></h2>
         <p className="text-gray-400">Réponse garantie sous 72h par nos agents de sourcing.</p>
-        <p className="text-sm text-yellow-500 font-bold mt-4">Frais d'étude de devis : <span className="text-yellow-300">5 000 FCFA</span>.</p>
+        <p className="text-sm text-[#e6c600] font-bold mt-4">Frais d'étude de devis : <span className="text-[#fff0a0]">5 000 FCFA</span>.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">

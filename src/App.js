@@ -17,13 +17,15 @@ import Blog from './blog/Blog';
 import Countdown from './components/Countdown'; // créer un composant Countdown
 import ArticleThree from './blog/ArticleThree';
 import ArticleFour from './blog/ArticleFour';
-import PublishProduct from './pages/PublishProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VendorProfile from './pages/VendorProfile';
 import ClientActivity from './pages/ClientActivity';
 import VendorDashboard from './pages/VendorDashboard';
 import CartPage from './pages/CartPage';
+import ProductDetail from './pages/ProductDetail';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToastContainer, toast } from 'react-toastify';
@@ -85,7 +87,11 @@ function App() {
               <Route path='/dashboard-vendeur' element={<VendorDashboard/>}/>
               <Route path='/mes-commandes' element={<ClientActivity/>}/>
               <Route path='/devenir-vendeur' element={<DevenirVendeur/>}/>
-              <Route path='/cart' element={<CartPage/>}/>
+              
+              {/* New E-commerce routes */}
+              <Route path='/product/:id' element={<ProductDetail/>}/>
+              <Route path='/cart' element={<Cart/>}/>
+              <Route path='/checkout' element={<Checkout/>}/>
 
               <Route path='/login' element={<Login/>}/>
               <Route path='/register' element={<Register/>}/>
@@ -96,7 +102,18 @@ function App() {
               {/*<Route path='/blog/histoire-de-mamadou' element={<ArticleFour/>}/>*/}
               <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFour/>}/>
             </Routes>
-            <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+            <ToastContainer
+              position="top-right"
+              autoClose={3500}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              draggable
+              theme="dark"
+              toastClassName="dango-toast-item"
+              className="dango-toast"
+            />
         </Router>
       </NotificationProvider>
     </CartProvider>

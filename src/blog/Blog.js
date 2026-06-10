@@ -59,7 +59,7 @@ export default function Blog() {
       {/* ── Hero ─────────────────────────────────── */}
       <section className="bg-gradient-to-br from-slate-900 to-gray-800 py-20 px-6 xl:px-20">
         <div className="max-w-6xl mx-auto">
-          <span className="text-yellow-400 text-xs font-black uppercase tracking-[0.3em] block mb-3">Le Magazine Dango</span>
+          <span className="text-[#ffdc2b] text-xs font-black uppercase tracking-[0.3em] block mb-3">Le Magazine Dango</span>
           <h1 className="text-4xl md:text-5xl font-black text-white leading-tight max-w-2xl">
             Finance, Épargne & Entrepreneuriat
           </h1>
@@ -88,11 +88,11 @@ export default function Blog() {
                 </span>
                 <span className="text-xs text-gray-400 flex items-center gap-1"><FaClock size={10} /> {featured.readTime} de lecture</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight group-hover:text-yellow-600 transition-colors">
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight group-hover:text-[#e6c600] transition-colors">
                 {featured.title}
               </h2>
               <p className="text-gray-500 text-sm leading-relaxed">{featured.excerpt}</p>
-              <span className="inline-flex items-center gap-2 text-yellow-600 font-black text-sm mt-2 group-hover:gap-3 transition-all">
+              <span className="inline-flex items-center gap-2 text-[#e6c600] font-black text-sm mt-2 group-hover:gap-3 transition-all">
                 Lire l'article <FaArrowRight size={12} />
               </span>
             </div>
@@ -123,11 +123,11 @@ export default function Blog() {
                     </span>
                     <span className="text-[11px] text-gray-400 flex items-center gap-1"><FaClock size={9} /> {a.readTime}</span>
                   </div>
-                  <h3 className="font-black text-gray-900 leading-snug line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                  <h3 className="font-black text-gray-900 leading-snug line-clamp-2 group-hover:text-[#e6c600] transition-colors">
                     {a.title}
                   </h3>
                   <p className="text-gray-400 text-sm leading-relaxed line-clamp-3 flex-1">{a.excerpt}</p>
-                  <span className="inline-flex items-center gap-1.5 text-yellow-600 font-black text-xs mt-auto group-hover:gap-2.5 transition-all">
+                  <span className="inline-flex items-center gap-1.5 text-[#e6c600] font-black text-xs mt-auto group-hover:gap-2.5 transition-all">
                     Lire <FaArrowRight size={10} />
                   </span>
                 </div>

@@ -90,7 +90,7 @@ const CartPage = () => {
           <p className="text-gray-600 mb-8 max-w-md">Il semble que vous n'ayez pas encore ajouté de produits. Parcourez notre boutique pour trouver des articles incroyables !</p>
           <button
             onClick={() => navigate('/shopping')}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded-full font-bold transition-all"
+            className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-8 py-3 rounded-full font-bold transition-all"
           >
             Retourner à la boutique
           </button>
@@ -106,7 +106,7 @@ const CartPage = () => {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center gap-4 mb-6 sm:mb-10">
-          <button onClick={() => navigate('/shopping')} className="text-gray-500 hover:text-yellow-600 transition-colors">
+          <button onClick={() => navigate('/shopping')} className="text-gray-500 hover:text-[#e6c600] transition-colors">
             <FaArrowLeft size={18} />
           </button>
           <h1 className="text-2xl sm:text-4xl font-black text-gray-900 tracking-tight">Mon Panier <span className="text-gray-400 font-medium ml-2 text-base sm:text-xl">({getCartCount()} articles)</span></h1>
@@ -123,7 +123,7 @@ const CartPage = () => {
 
                 <div className="flex-1 min-w-0 w-full">
                   <div className="flex justify-between items-start mb-1 gap-2">
-                    <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-yellow-600 transition-colors line-clamp-2">{item.name}</Link>
+                    <Link to={`/shopping`} className="text-base sm:text-lg font-bold text-gray-900 hover:text-[#e6c600] transition-colors line-clamp-2">{item.name}</Link>
                     <p className="text-base font-black text-gray-900 whitespace-nowrap">{item.price * item.quantity} F</p>
                   </div>
                   <p className="text-[10px] sm:text-xs text-gray-500 mb-3 uppercase tracking-wider">Vendu par <span className="font-bold text-gray-700">{item.vendorName}</span></p>
@@ -132,14 +132,14 @@ const CartPage = () => {
                     <div className="flex items-center gap-1.5 sm:gap-3 bg-gray-50 rounded-lg p-0.5 sm:p-1 border border-gray-100">
                       <button
                         onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-[#fffbeb] transition-colors"
                       >
                         <FaMinus size={7} />
                       </button>
                       <span className="w-4 sm:w-6 text-center font-bold text-[10px] sm:text-sm">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-yellow-50 transition-colors"
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-[#fffbeb] transition-colors"
                       >
                         <FaPlus size={7} />
                       </button>
@@ -180,7 +180,7 @@ const CartPage = () => {
 
               <button
                 onClick={handleCheckout}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
+                className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-5 sm:py-6 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black uppercase tracking-widest shadow-lg transition-all hover:-translate-y-1 active:translate-y-0"
               >
                 Passer la commande
               </button>

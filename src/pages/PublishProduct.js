@@ -94,7 +94,7 @@ const PublishProduct = () => {
                       required
                       type="text"
                       placeholder="Ex: Montre de luxe..."
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                     />
@@ -110,7 +110,7 @@ const PublishProduct = () => {
                       type="number"
                       min="1"
                       placeholder="Ex: 15000"
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                     />
@@ -123,7 +123,7 @@ const PublishProduct = () => {
                     <FaTag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <select 
                       required
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all appearance-none"
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all appearance-none"
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
@@ -147,7 +147,7 @@ const PublishProduct = () => {
                     required
                     rows="4"
                     placeholder="Décrivez les caractéristiques de votre produit..."
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all resize-none"
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all resize-none"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                   ></textarea>
@@ -177,7 +177,7 @@ const PublishProduct = () => {
                     
                     {!imagePreview && (
                       <div className="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                        <label className="relative cursor-pointer rounded-md bg-white font-semibold text-yellow-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-yellow-600 focus-within:ring-offset-2 hover:text-yellow-500">
+                        <label className="relative cursor-pointer rounded-md bg-white font-semibold text-[#e6c600] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#e6c600] focus-within:ring-offset-2 hover:text-[#e6c600]">
                           <span>Télécharger un fichier</span>
                           <input required type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
                         </label>
@@ -194,7 +194,7 @@ const PublishProduct = () => {
                 <button 
                   disabled={loading}
                   type="submit" 
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 py-4 rounded-xl text-lg font-black uppercase tracking-widest shadow-[0_10px_20px_rgba(247,201,72,0.3)] transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 py-4 rounded-xl text-lg font-black uppercase tracking-widest shadow-[0_10px_20px_rgba(247,201,72,0.3)] transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {loading ? 'PUBLICATION EN COURS...' : 'PUBLIER SUR LA VITRINE'}
                 </button>

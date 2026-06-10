@@ -87,7 +87,7 @@ const Register = () => {
                       required
                       type="text"
                       placeholder="Prénom"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all text-sm"
                       value={formData.userFirstname}
                       onChange={(e) => setFormData({ ...formData, userFirstname: e.target.value })}
                     />
@@ -101,7 +101,7 @@ const Register = () => {
                       required
                       type="text"
                       placeholder="Nom"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all text-sm"
                       value={formData.userSurname}
                       onChange={(e) => setFormData({ ...formData, userSurname: e.target.value })}
                     />
@@ -117,7 +117,7 @@ const Register = () => {
                     required
                     type="email"
                     placeholder="votre@email.com"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all text-sm"
                     value={formData.userEmail}
                     onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
                   />
@@ -132,7 +132,7 @@ const Register = () => {
                     required
                     type="password"
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] focus:bg-white transition-all text-sm"
                     value={formData.userPassword}
                     onChange={(e) => setFormData({ ...formData, userPassword: e.target.value })}
                   />
@@ -143,7 +143,7 @@ const Register = () => {
             <button
               disabled={loading}
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-yellow-400 hover:bg-yellow-500 focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-[#ffdc2b] hover:bg-[#e6c600] focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
             >
               {loading ? 'ENVOI DU CODE...' : "CONTINUER"}
             </button>
@@ -160,7 +160,7 @@ const Register = () => {
                   type="text"
                   maxLength="6"
                   placeholder="000000"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center text-2xl font-black tracking-[0.5em] transition-all"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] text-center text-2xl font-black tracking-[0.5em] transition-all"
                   value={formData.otp}
                   onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
                 />
@@ -168,7 +168,7 @@ const Register = () => {
               <button 
                 type="button" 
                 onClick={() => setStep(1)}
-                className="w-full text-center text-xs font-bold text-yellow-600 hover:underline uppercase tracking-widest"
+                className="w-full text-center text-xs font-bold text-[#e6c600] hover:underline uppercase tracking-widest"
               >
                 Modifier l'email
               </button>
@@ -177,7 +177,7 @@ const Register = () => {
             <button
               disabled={loading}
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-yellow-400 hover:bg-yellow-500 focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-[#ffdc2b] hover:bg-[#e6c600] focus:outline-none transition-all disabled:opacity-50 shadow-[0_4px_14px_rgba(247,201,72,0.4)]"
             >
               {loading ? 'VÉRIFICATION...' : "VÉRIFIER ET S'INSCRIRE"}
             </button>
@@ -187,7 +187,7 @@ const Register = () => {
         {/* Login Link */}
         <div className="mt-6 text-center text-sm text-gray-600">
           Vous avez déjà un compte ?{' '}
-          <Link to="/login" className="font-bold text-yellow-600 hover:text-yellow-500 hover:underline">
+          <Link to="/login" className="font-bold text-[#e6c600] hover:text-[#e6c600] hover:underline">
             Se connecter
           </Link>
         </div>

@@ -40,7 +40,7 @@ const ClientActivity = () => {
         
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <FaSpinner className="animate-spin text-4xl mb-4 text-yellow-500" />
+            <FaSpinner className="animate-spin text-4xl mb-4 text-[#e6c600]" />
             <p>Chargement de vos commandes...</p>
           </div>
         ) : achats.length === 0 && commandes.length === 0 ? (
@@ -52,7 +52,7 @@ const ClientActivity = () => {
             <p className="text-gray-500 mb-8 max-w-md">Vous n'avez pas encore passé de commandes. Parcourez la boutique pour découvrir nos produits locaux.</p>
             <button 
               onClick={() => navigate('/shopping')}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 py-3 rounded-lg font-bold transition-colors"
+              className="bg-[#ffdc2b] hover:bg-[#e6c600] text-gray-900 px-6 py-3 rounded-lg font-bold transition-colors"
             >
               Découvrir la boutique
             </button>
@@ -62,7 +62,7 @@ const ClientActivity = () => {
             {commandes.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaBoxOpen className="text-yellow-500" /> Commandes Globales (Panier)
+                  <FaBoxOpen className="text-[#e6c600]" /> Commandes Globales (Panier)
                 </h2>
                 <div className="grid gap-4">
                   {commandes.map((cmd) => (
@@ -77,7 +77,7 @@ const ClientActivity = () => {
                       <div className="flex flex-col md:items-end gap-2">
                         <span className="text-xl font-black text-gray-900">{cmd.totalPrice} FCFA</span>
                         <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          cmd.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          cmd.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-[#fffbeb] text-[#e6c600]'
                         }`}>
                           {cmd.status}
                         </span>
@@ -91,7 +91,7 @@ const ClientActivity = () => {
             {achats.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaShoppingBag className="text-yellow-500" /> Achats Directs
+                  <FaShoppingBag className="text-[#e6c600]" /> Achats Directs
                 </h2>
                 <div className="grid gap-4">
                   {achats.map((achat) => (
@@ -113,7 +113,7 @@ const ClientActivity = () => {
                       <div className="flex flex-col md:items-end gap-2">
                         <span className="text-xl font-black text-gray-900">{achat.totalPrice} FCFA</span>
                         <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          achat.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          achat.status === 'Payé' ? 'bg-green-100 text-green-700' : 'bg-[#fffbeb] text-[#e6c600]'
                         }`}>
                           {achat.status}
                         </span>
