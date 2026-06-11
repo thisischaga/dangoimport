@@ -1,113 +1,244 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
 import { useProductsCatalog } from '../hooks/useProducts';
 import Footer from "../components/Footer";
 import { useCart } from '../context/CartContext';
 import {
   FaStar, FaStarHalfAlt, FaRegStar,
-  FaTimes, FaSearch, FaShoppingCart,
+  FaSearch, FaShoppingCart,
   FaUserCircle, FaFilter, FaSortAmountDown,
   FaHeart, FaEye, FaTag, FaCheckCircle,
-  FaChevronLeft, FaChevronRight, FaFire, FaBolt
+  FaChevronLeft, FaChevronRight, FaFire, FaMedal, FaClock,
+  FaShieldAlt, FaTruck, FaTimes, FaBolt, FaPercent,
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { resolveImageUrl, getProductImage } from '../utils/imageUrl';
+import { getProductImage } from '../utils/imageUrl';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 16;
 
-/* ── Helpers ─────────────────────────────── */
-const getImgUrl = resolveImageUrl;
-const getProductImg = getProductImage;
+const SORT_OPTIONS = [
+  { value: 'default', label: 'Mise en avant' },
+  { value: 'price_asc', label: 'Prix croissant' },
+  { value: 'price_desc', label: 'Prix décroissant' },
+  { value: 'name_asc', label: 'A → Z' },
+  { value: 'rating', label: 'Mieux notés' },
+];
+
+const QUICK_FILTERS = [
+  { id: 'all', label: 'Tous', icon: FaTag },
+  { id: 'featured', label: 'Vedettes', icon: FaFire },
+  { id: 'new', label: 'Nouveautés', icon: FaClock },
+  { id: 'bestseller', label: 'Top ventes', icon: FaMedal },
+  { id: 'promo', label: 'Promos', icon: FaPercent },
+];
+
+const TRUST_BADGES = [
+  { icon: FaShieldAlt, text: 'Paiement sécurisé' },
+  { icon: FaTruck, text: 'Livraison 24h' },
+  { icon: FaBolt, text: 'Vendeurs vérifiés' },
+];
+
 const getPrice = (p) => Number(p?.salePrice ?? p?.price ?? 0);
-const fmtPrice = (p) => typeof p === 'number' ? p.toLocaleString('fr-FR') : p;
+const fmtPrice = (n) => Number(n).toLocaleString('fr-FR');
 
 const StarRating = ({ value = 0, count }) => {
-  if (value === 0) return null;
-  const stars = [1,2,3,4,5].map(i =>
+  if (!value) return null;
+  const stars = [1, 2, 3, 4, 5].map((i) =>
     i <= Math.floor(value) ? 'full' : (i - value < 1 && value % 1 >= 0.5) ? 'half' : 'empty'
   );
   return (
     <div className="flex items-center gap-0.5">
       {stars.map((s, i) =>
-        s === 'full' ? <FaStar key={i} size={10} className="text-[#ffdc2b]" /> :
-        s === 'half' ? <FaStarHalfAlt key={i} size={10} className="text-[#ffdc2b]" /> :
-        <FaRegStar key={i} size={10} className="text-gray-200" />
+        s === 'full' ? <FaStar key={i} size={9} className="text-[#ffdc2b]" /> :
+        s === 'half' ? <FaStarHalfAlt key={i} size={9} className="text-[#ffdc2b]" /> :
+        <FaRegStar key={i} size={9} className="text-gray-200" />
       )}
-      {count != null && count > 0 && (
-        <span className="text-[10px] text-gray-400 ml-1">({count})</span>
-      )}
+      {count > 0 && <span className="text-[9px] text-gray-400 ml-0.5">({count})</span>}
     </div>
   );
 };
 
-const SORT_OPTIONS = [
-  { value: 'default',    label: 'Mise en avant' },
-  { value: 'price_asc', label: 'Prix croissant' },
-  { value: 'price_desc',label: 'Prix décroissant' },
-  { value: 'name_asc',  label: 'A → Z' },
-  { value: 'rating',    label: 'Mieux notés' },
-];
-
-/* ── Skeleton product card ───────────────── */
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="aspect-square skeleton" />
-      <div className="p-5 space-y-3">
-        <div className="skeleton h-4 rounded-full w-3/4" />
-        <div className="skeleton h-3 rounded-full w-1/2" />
-        <div className="skeleton h-8 rounded-lg w-full mt-2" />
+      <div className="p-3 space-y-2">
+        <div className="skeleton h-3 rounded w-3/4" />
+        <div className="skeleton h-4 rounded w-1/2" />
+        <div className="skeleton h-8 rounded-lg w-full" />
       </div>
     </div>
   );
 }
 
-/* ════════════════════════════════════════════ */
+function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCart, onAddCart, onToggleWish }) {
+  const img = getProductImage(product);
+  const hasPromo = product.salePrice > 0 && product.salePrice < product.price;
+  const price = hasPromo ? product.salePrice : getPrice(product);
+
+  return (
+    <div
+      onClick={onOpen}
+      className="product-card bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group cursor-pointer hover:shadow-lg hover:border-[#ffdc2b] hover:-translate-y-0.5 transition-all duration-200"
+    >
+      <div className="aspect-square bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden">
+        {img ? (
+          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
+        ) : (
+          <FaTag className="text-gray-200 text-3xl" />
+        )}
+
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <span className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-gray-700">
+            <FaEye size={13} />
+          </span>
+        </div>
+
+        {product.isFeatured && (
+          <span className="absolute top-2 left-2 text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-[#ffdc2b] text-[#2d3748]">Top</span>
+        )}
+        {product.isNewArrival && (
+          <span className="badge-new absolute top-2 right-10">Nouveau</span>
+        )}
+        {hasPromo && (
+          <span className="absolute bottom-2 left-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded flex items-center gap-0.5">
+            <FaFire size={7} /> Promo
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={onToggleWish}
+          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all ${
+            isWished ? 'bg-red-500 text-white' : 'bg-white/95 text-gray-300 hover:text-red-400'
+          }`}
+        >
+          <FaHeart size={10} />
+        </button>
+      </div>
+
+      <div className="p-3 flex flex-col flex-1 border-t border-gray-100">
+        {product.category && (
+          <p className="text-[10px] text-gray-400 font-medium mb-0.5 line-clamp-1">{product.category}</p>
+        )}
+        <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.25rem] group-hover:text-[#c9a800] transition-colors">
+          {product.name}
+        </h3>
+
+        <div className="mt-1">
+          <StarRating value={product.rating} count={product.totalReviews} />
+        </div>
+
+        <div className="flex items-center gap-1 text-[9px] text-gray-400 mt-1">
+          <FaUserCircle size={9} />
+          <span className="line-clamp-1">
+            {product.vendorName || 'Vendeur'}
+          </span>
+        </div>
+
+        <div className="mt-auto pt-2">
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-base font-black text-[#2d3748]">{fmtPrice(price)}</span>
+            <span className="text-[10px] text-gray-400 font-bold">FCFA</span>
+            {hasPromo && (
+              <span className="text-[10px] text-gray-400 line-through">{fmtPrice(product.price)}</span>
+            )}
+          </div>
+          <p className="text-[9px] text-gray-400 mt-0.5 flex items-center gap-1">
+            <FaCheckCircle size={8} className="text-[#ffdc2b]" /> MOQ 1 · Livraison locale
+          </p>
+
+          {inCart ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onGoCart(); }}
+              className="mt-2 w-full py-2 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"
+            >
+              Voir le panier
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onAddCart}
+              className={`mt-2 w-full py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                justAdded ? 'bg-emerald-500 text-white' : 'btn-brand'
+              }`}
+            >
+              <FaShoppingCart size={10} />
+              {justAdded ? '✓ Ajouté' : 'Ajouter'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const Ecom = () => {
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
   const { cart, addToCart } = useCart();
-  const location    = useLocation();
+  const location = useLocation();
 
-  const [sortBy, setSortBy]             = useState('default');
+  const [sortBy, setSortBy] = useState('default');
   const [activeCategory, setActiveCategory] = useState('Tous');
-  const [addedId, setAddedId]           = useState(null);
-  const [wishlist, setWishlist]         = useState([]);
-  const [page, setPage]                 = useState(1);
-  const [priceMax, setPriceMax]         = useState(null);
+  const [quickFilter, setQuickFilter] = useState('all');
+  const [addedId, setAddedId] = useState(null);
+  const [wishlist, setWishlist] = useState([]);
+  const [page, setPage] = useState(1);
+  const [priceMax, setPriceMax] = useState(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const query = new URLSearchParams(location.search).get('q');
+  const searchParams = new URLSearchParams(location.search);
+  const query = searchParams.get('q');
+  const categoryFromUrl = searchParams.get('category');
   const { data: products = [], isLoading: loading, isError } = useProductsCatalog({ search: query });
 
   useEffect(() => {
     setPage(1);
-  }, [query]);
+  }, [query, categoryFromUrl, quickFilter, activeCategory, sortBy, priceMax]);
 
   useEffect(() => {
-    if (isError) {
-      toast.error('Impossible de charger les produits. Vérifiez votre connexion.');
-    }
+    if (categoryFromUrl) setActiveCategory(categoryFromUrl);
+  }, [categoryFromUrl]);
+
+  useEffect(() => {
+    if (isError) toast.error('Impossible de charger les produits.');
   }, [isError]);
 
   const categories = useMemo(() => {
-    const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+    const cats = [...new Set(products.map((p) => p.category).filter(Boolean))];
     return ['Tous', ...cats];
   }, [products]);
 
   const maxPrice = useMemo(() => Math.max(0, ...products.map(getPrice)), [products]);
 
   const filtered = useMemo(() => {
-    let list = activeCategory === 'Tous' ? products : products.filter(p => p.category === activeCategory);
-    if (priceMax) list = list.filter(p => getPrice(p) <= priceMax);
-    if (sortBy === 'price_asc')  list = [...list].sort((a, b) => getPrice(a) - getPrice(b));
+    let list = activeCategory === 'Tous' ? products : products.filter((p) => p.category === activeCategory);
+
+    if (quickFilter === 'featured') list = list.filter((p) => p.isFeatured);
+    if (quickFilter === 'new') list = list.filter((p) => p.isNewArrival);
+    if (quickFilter === 'bestseller') list = list.filter((p) => p.isBestSeller);
+    if (quickFilter === 'promo') list = list.filter((p) => p.salePrice > 0 && p.salePrice < p.price);
+
+    if (priceMax) list = list.filter((p) => getPrice(p) <= priceMax);
+
+    if (sortBy === 'price_asc') list = [...list].sort((a, b) => getPrice(a) - getPrice(b));
     if (sortBy === 'price_desc') list = [...list].sort((a, b) => getPrice(b) - getPrice(a));
-    if (sortBy === 'name_asc')   list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortBy === 'rating')     list = [...list].sort((a, b) => (b.rating || 5) - (a.rating || 5));
+    if (sortBy === 'name_asc') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === 'rating') list = [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    if (sortBy === 'default') {
+      list = [...list].sort((a, b) => {
+        const score = (p) => (p.isFeatured ? 4 : 0) + (p.isBestSeller ? 2 : 0) + (p.isNewArrival ? 1 : 0);
+        return score(b) - score(a);
+      });
+    }
+
     return list;
-  }, [products, activeCategory, sortBy, priceMax]);
+  }, [products, activeCategory, quickFilter, sortBy, priceMax]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const displayed  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const displayed = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleAddToCart = (e, p) => {
     e.stopPropagation();
@@ -118,315 +249,277 @@ const Ecom = () => {
 
   const toggleWishlist = (e, id) => {
     e.stopPropagation();
-    setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id]);
+    setWishlist((w) => (w.includes(id) ? w.filter((x) => x !== id) : [...w, id]));
   };
 
-  // Determine if product is "new" (last 7 days)
-  const isNew = (p) => {
-    if (!p.createdAt) return false;
-    const d = new Date(p.createdAt);
-    return (Date.now() - d.getTime()) < 7 * 24 * 60 * 60 * 1000;
+  const resetFilters = () => {
+    setActiveCategory('Tous');
+    setQuickFilter('all');
+    setPriceMax(null);
+    setSortBy('default');
+    setPage(1);
+    navigate('/shopping');
+  };
+
+  const setCategory = (cat) => {
+    setActiveCategory(cat);
+    setPage(1);
+    const params = new URLSearchParams(location.search);
+    if (cat === 'Tous') params.delete('category');
+    else params.set('category', cat);
+    const qs = params.toString();
+    navigate(`/shopping${qs ? `?${qs}` : ''}`, { replace: true });
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
+    <div className="bg-[#f5f5f5] min-h-screen font-sans">
       <Header />
 
-      {/* ── Sticky bar ────────────────────────── */}
-      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-[104px] z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-base font-black text-gray-900 leading-none">
-              {query ? `Résultats pour "${query}"` : "Toute la boutique"}
-            </h1>
-            <p className="text-xs text-gray-400 mt-0.5">
-              <span className="font-semibold text-gray-700">{filtered.length}</span> produit{filtered.length > 1 ? 's' : ''}
-              {activeCategory !== 'Tous' && <> · <span className="text-[#e6c600] font-semibold">{activeCategory}</span></>}
-            </p>
+      {/* Bandeau marketplace */}
+      <div className="bg-[#fffbeb] border-b border-[#ffdc2b]/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-4">
+            {TRUST_BADGES.map((b, i) => (
+              <span key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2d3748]">
+                <b.icon className="text-[#e6c600]" size={12} /> {b.text}
+              </span>
+            ))}
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <FaSortAmountDown className="text-gray-400" size={12} />
-            <select
-              value={sortBy}
-              onChange={e => { setSortBy(e.target.value); setPage(1); }}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] cursor-pointer"
-            >
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
+          <p className="text-[11px] text-gray-500 font-medium">
+            <span className="font-black text-[#2d3748]">{filtered.length}</span> produit{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}
+          </p>
         </div>
       </div>
 
-      {/* ── Mobile category pills ─────────────── */}
-      {categories.length > 2 && (
-        <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 overflow-x-auto">
-          <div className="flex gap-2 w-max">
-            {categories.map(cat => (
+      {/* Toolbar */}
+      <div className="bg-white border-b border-gray-200 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="text-lg sm:text-xl font-black text-gray-900">
+                {query ? `« ${query} »` : 'Marketplace'}
+              </h1>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {activeCategory !== 'Tous' && <span className="text-[#c9a800] font-bold">{activeCategory} · </span>}
+                Achetez auprès de vendeurs locaux vérifiés
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
               <button
-                key={cat}
-                onClick={() => { setActiveCategory(cat); setPage(1); }}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  activeCategory === cat
-                    ? 'bg-[#2d3748] text-white shadow-md shadow-[#2d3748]/15'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                type="button"
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-700"
+              >
+                <FaFilter size={11} /> Filtres
+              </button>
+              <div className="flex items-center gap-2">
+                <FaSortAmountDown className="text-gray-400 hidden sm:block" size={12} />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtres rapides */}
+          <div className="home-hide-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+            {QUICK_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => { setQuickFilter(f.id); setPage(1); }}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  quickFilter === f.id
+                    ? 'bg-[#ffdc2b] text-[#2d3748] border border-[#e6c600]'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#fffbeb] border border-transparent'
                 }`}
               >
-                {cat}
+                <f.icon size={10} /> {f.label}
               </button>
             ))}
           </div>
         </div>
-      )}
+      </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      {/* Catégories mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-2.5 home-hide-scrollbar overflow-x-auto">
+        <div className="flex gap-2 w-max">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategory(cat)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                activeCategory === cat
+                  ? 'bg-[#ffdc2b] text-[#2d3748]'
+                  : 'bg-gray-100 text-gray-500'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* ── Sidebar ───────────────────────── */}
-          <aside className="hidden lg:flex flex-col gap-6 w-52 shrink-0">
-            {/* Categories */}
-            <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-1.5 mb-3">
-                <FaFilter size={8} /> Catégories
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6">
+
+          {/* Sidebar */}
+          <aside className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block lg:w-56 shrink-0 space-y-5`}>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+                <FaFilter size={9} /> Catégories
               </p>
-              <div className="flex flex-col gap-1">
-                {categories.map(cat => (
+              <div className="flex flex-col gap-0.5 max-h-64 overflow-y-auto">
+                {categories.map((cat) => (
                   <button
                     key={cat}
-                    onClick={() => { setActiveCategory(cat); setPage(1); }}
-                    className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className={`text-left px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
                       activeCategory === cat
-                        ? 'bg-[#2d3748] text-white shadow-md shadow-[#2d3748]/15'
-                        : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                        ? 'bg-[#fffbeb] text-[#2d3748] border-l-2 border-[#ffdc2b]'
+                        : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
                     {cat}
-                    <span className="ml-1.5 text-[10px] opacity-60">
-                      ({cat === 'Tous' ? products.length : products.filter(p => p.category === cat).length})
+                    <span className="text-[10px] text-gray-400 ml-1">
+                      ({cat === 'Tous' ? products.length : products.filter((p) => p.category === cat).length})
                     </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Price filter */}
             {maxPrice > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold text-gray-400 tracking-[0.2em] flex items-center gap-1.5 mb-3">
-                  <FaTag size={8} /> Budget max
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                  Budget max
                 </p>
-                <div className="bg-white rounded-xl p-4 border border-gray-100 space-y-4">
-                  <input
-                    type="range" min={0} max={maxPrice} step={500}
-                    value={priceMax ?? maxPrice}
-                    onChange={e => { setPriceMax(Number(e.target.value)); setPage(1); }}
-                    className="w-full accent-[#ffdc2b]"
-                  />
-                  <div className="flex justify-between text-xs font-semibold text-gray-500">
-                    <span>0</span>
-                    <span className="text-[#e6c600]">{fmtPrice(priceMax ?? maxPrice)} F</span>
-                  </div>
-                  {priceMax && (
-                    <button
-                      onClick={() => setPriceMax(null)}
-                      className="text-[10px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest"
-                    >
-                      Réinitialiser
-                    </button>
-                  )}
+                <input
+                  type="range"
+                  min={0}
+                  max={maxPrice}
+                  step={500}
+                  value={priceMax ?? maxPrice}
+                  onChange={(e) => setPriceMax(Number(e.target.value))}
+                  className="w-full accent-[#ffdc2b]"
+                />
+                <div className="flex justify-between text-xs font-semibold text-gray-500 mt-2">
+                  <span>0 F</span>
+                  <span className="text-[#c9a800]">{fmtPrice(priceMax ?? maxPrice)} F</span>
                 </div>
+                {priceMax && (
+                  <button
+                    type="button"
+                    onClick={() => setPriceMax(null)}
+                    className="mt-2 text-[10px] font-bold text-red-500 uppercase"
+                  >
+                    Réinitialiser
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Wishlist count */}
+            {(activeCategory !== 'Tous' || quickFilter !== 'all' || priceMax || query) && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="w-full py-2.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-1.5"
+              >
+                <FaTimes size={10} /> Effacer les filtres
+              </button>
+            )}
+
             {wishlist.length > 0 && (
-              <div className="bg-red-50 rounded-xl p-4 border border-red-100">
-                <p className="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1.5 mb-1">
-                  <FaHeart size={8} /> Souhaits
+              <div className="bg-[#fffbeb] rounded-xl p-4 border border-[#ffdc2b]/40">
+                <p className="text-[10px] font-black text-[#2d3748] uppercase flex items-center gap-1.5">
+                  <FaHeart size={9} className="text-red-400" /> Favoris
                 </p>
-                <p className="text-sm font-black text-red-600">{wishlist.length} article{wishlist.length > 1 ? 's' : ''}</p>
+                <p className="text-sm font-black text-gray-800 mt-1">{wishlist.length} article{wishlist.length > 1 ? 's' : ''}</p>
               </div>
             )}
           </aside>
 
-          {/* ── Product grid ──────────────────── */}
+          {/* Grille produits */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 {Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}
               </div>
             ) : displayed.length === 0 ? (
-              <div className="text-center py-32 max-w-md mx-auto">
-                <div className="bg-white w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200 shadow-lg">
-                  <FaSearch size={36} />
+              <div className="text-center py-24 bg-white rounded-2xl border border-gray-200">
+                <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4 text-gray-300">
+                  <FaSearch size={24} />
                 </div>
-                <h3 className="text-2xl font-black text-gray-900 mb-3">Aucun résultat</h3>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                  {query ? `Rien trouvé pour "${query}".` : "Aucun produit pour ces critères."}
+                <h3 className="text-xl font-black text-gray-900 mb-2">Aucun produit trouvé</h3>
+                <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto">
+                  {query ? `Aucun résultat pour « ${query} ».` : 'Essayez d\'autres filtres ou catégories.'}
                 </p>
-                <button
-                  onClick={() => { setActiveCategory('Tous'); setPriceMax(null); navigate('/shopping'); }}
-                  className="btn-brand px-6 py-2.5 rounded-xl text-sm"
-                >
-                  Voir toute la boutique
+                <button type="button" onClick={resetFilters} className="btn-home px-6 py-2.5 rounded-lg text-sm font-bold">
+                  Voir tout le catalogue
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
-                  {displayed.map((p, idx) => {
-                    const inCart   = cart.some(item => item._id === p._id);
-                    const isWished = wishlist.includes(p._id);
-                    const newProduct = isNew(p);
-
-                    return (
-                      <div
-                        key={p._id}
-                        onClick={() => navigate(`/product/${p._id}`)}
-                        className="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-pointer hover:-translate-y-1 animate-fade-in-up"
-                        style={{ animationDelay: `${idx * 0.04}s` }}
-                      >
-                        {/* Image zone */}
-                        <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-5 relative overflow-hidden">
-                          {getProductImg(p) ? (
-                            <img
-                              src={getProductImg(p)}
-                              alt={p.name}
-                              className="product-img max-w-[85%] max-h-[85%] object-contain mix-blend-multiply"
-                              onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                          ) : (
-                            <FaTag className="text-gray-200 text-3xl" />
-                          )}
-
-                          {/* Overlay on hover */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/8 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <button
-                              onClick={e => { e.stopPropagation(); navigate(`/product/${p._id}`); }}
-                              className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg text-gray-700 hover:text-[#e6c600] transition-colors"
-                            >
-                              <FaEye size={14} />
-                            </button>
-                          </div>
-
-                          {/* Badges */}
-                          {p.category && (
-                            <span className="absolute top-3 left-3 bg-gray-900/70 text-white text-[9px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-                              {p.category}
-                            </span>
-                          )}
-                          {newProduct && (
-                            <span className="badge-new absolute top-3 right-10">Nouveau</span>
-                          )}
-                          {p.salePrice > 0 && p.salePrice < p.price && (
-                            <span className="absolute top-8 left-3 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <FaFire size={8} /> Promo
-                            </span>
-                          )}
-
-                          {/* Wishlist */}
-                          <button
-                            onClick={e => toggleWishlist(e, p._id)}
-                            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all hover:scale-110 ${
-                              isWished ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-300 hover:text-red-400'
-                            }`}
-                          >
-                            <FaHeart size={12} />
-                          </button>
-                        </div>
-
-                        {/* Info */}
-                        <div className="p-4 flex flex-col gap-2.5 flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-[#e6c600] transition-colors">
-                            {p.name}
-                          </h3>
-                          <StarRating value={p.rating ?? 5} count={p.reviews ?? 0} />
-                          <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
-                            <FaUserCircle className="text-gray-300" />
-                            <span>Vendu par </span>
-                            <Link
-                              to={`/vendor/${p.vendorName}`}
-                              className="text-blue-500 hover:underline font-semibold"
-                              onClick={e => e.stopPropagation()}
-                            >
-                              {p.vendorName || 'Vendeur'}
-                            </Link>
-                          </div>
-
-                          <div className="mt-auto pt-3 border-t border-gray-50">
-                            <div className="flex items-baseline gap-2 mb-1">
-                              {p.salePrice > 0 && p.salePrice < p.price ? (
-                                <>
-                                  <span className="text-lg font-black text-red-600">{fmtPrice(p.salePrice)}</span>
-                                  <span className="text-xs text-gray-400 line-through">{fmtPrice(p.price)}</span>
-                                  <span className="text-[10px] text-gray-400">FCFA</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="text-lg font-black text-gray-900">{fmtPrice(getPrice(p))}</span>
-                                  <span className="text-xs text-gray-400">FCFA</span>
-                                </>
-                              )}
-                            </div>
-                            <p className="text-[10px] text-gray-400 font-medium flex items-center gap-1 mb-3">
-                              <FaCheckCircle size={9} className="text-[#ffdc2b]" /> Livraison calculée à l'achat
-                            </p>
-
-                            {inCart ? (
-                              <button
-                                onClick={e => { e.stopPropagation(); navigate('/cart'); }}
-                                className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
-                              >
-                                <FaCheckCircle size={10} /> Déjà au panier
-                              </button>
-                            ) : (
-                              <button
-                                onClick={e => handleAddToCart(e, p)}
-                                className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 active:scale-95 ${
-                                  addedId === p._id
-                                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                                    : 'btn-brand hover:shadow-md'
-                                }`}
-                              >
-                                <FaShoppingCart size={10} />
-                                {addedId === p._id ? '✓ Ajouté !' : 'Ajouter au panier'}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                  {displayed.map((p) => (
+                    <MarketplaceCard
+                      key={p._id}
+                      product={p}
+                      inCart={cart.some((item) => item._id === p._id)}
+                      isWished={wishlist.includes(p._id)}
+                      justAdded={addedId === p._id}
+                      onOpen={() => navigate(`/product/${p._id}`)}
+                      onGoCart={() => navigate('/cart')}
+                      onAddCart={(e) => handleAddToCart(e, p)}
+                      onToggleWish={(e) => toggleWishlist(e, p._id)}
+                    />
+                  ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="mt-10 flex items-center justify-center gap-2">
+                  <div className="mt-8 flex items-center justify-center gap-1.5 flex-wrap">
                     <button
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#e6c600] hover:text-[#e6c600] transition-all"
+                      className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#ffdc2b]"
                     >
-                      <FaChevronLeft size={12} />
+                      <FaChevronLeft size={11} />
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-                      <button
-                        key={n}
-                        onClick={() => setPage(n)}
-                        className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
-                          n === page
-                            ? 'bg-[#2d3748] text-white shadow-md shadow-[#2d3748]/15'
-                            : 'bg-white border border-gray-200 text-gray-500 hover:border-[#e6c600]'
-                        }`}
-                      >
-                        {n}
-                      </button>
-                    ))}
+                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                      let n;
+                      if (totalPages <= 7) n = i + 1;
+                      else if (page <= 4) n = i + 1;
+                      else if (page >= totalPages - 3) n = totalPages - 6 + i;
+                      else n = page - 3 + i;
+                      return (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setPage(n)}
+                          className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
+                            n === page
+                              ? 'bg-[#ffdc2b] text-[#2d3748] border border-[#e6c600]'
+                              : 'bg-white border border-gray-200 text-gray-500 hover:border-[#ffdc2b]'
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      );
+                    })}
                     <button
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      type="button"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#e6c600] hover:text-[#e6c600] transition-all"
+                      className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#ffdc2b]"
                     >
-                      <FaChevronRight size={12} />
+                      <FaChevronRight size={11} />
                     </button>
                   </div>
                 )}
