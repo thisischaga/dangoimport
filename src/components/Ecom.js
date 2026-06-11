@@ -12,24 +12,13 @@ import {
   FaChevronLeft, FaChevronRight, FaFire, FaBolt
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import API_BASE_URL from '../apiConfig';
+import { resolveImageUrl, getProductImage } from '../utils/imageUrl';
 
-const API_BASE  = API_BASE_URL;
 const PAGE_SIZE = 12;
 
 /* ── Helpers ─────────────────────────────── */
-const getImgUrl = (img) => {
-  if (!img || typeof img !== 'string') return null;
-  const trimmed = img.trim();
-  if (!trimmed) return null;
-  if (trimmed.startsWith('http') || trimmed.startsWith('data:')) return trimmed;
-  return `${API_BASE}/images/${trimmed}`;
-};
-
-const getProductImg = (p) => {
-  if (p?.images?.length) return getImgUrl(p.images[0]?.url || p.images[0]);
-  return getImgUrl(p?.image);
-};
+const getImgUrl = resolveImageUrl;
+const getProductImg = getProductImage;
 const getPrice = (p) => Number(p?.salePrice ?? p?.price ?? 0);
 const fmtPrice = (p) => typeof p === 'number' ? p.toLocaleString('fr-FR') : p;
 

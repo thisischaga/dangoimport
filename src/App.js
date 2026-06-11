@@ -72,7 +72,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
     <CartProvider>
-      <NotificationProvider recipientType="user" userId={user?.email}>
+      <NotificationProvider recipientType="user" userId={user?.email || user?.userEmail}>
         <Router>
             <ScrollToTop />
             <Routes>

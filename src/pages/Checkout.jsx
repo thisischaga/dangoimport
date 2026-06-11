@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import API_BASE_URL from '../apiConfig';
+import { resolveImageUrl } from '../utils/imageUrl';
 import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -13,11 +14,7 @@ import {
     submitDirectOrder,
 } from '../services/fedapayCheckout';
 
-const getImgUrl = (img) => {
-    if (!img) return '';
-    if (img.startsWith('http') || img.startsWith('data:')) return img;
-    return `${API_BASE_URL}/images/${img}`;
-};
+const getImgUrl = (img) => resolveImageUrl(img) || '';
 
 const normalizeCartItems = (raw) => {
     if (!raw) return [];

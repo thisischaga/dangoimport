@@ -8,6 +8,7 @@ import DevisForm from "../components/DevisForm";
 import axios from "axios";
 import API_BASE_URL from "../apiConfig";
 import { useFeaturedProducts } from "../hooks/useProducts";
+import { getProductImage } from "../utils/imageUrl";
 
 import heroImg from "../images/premium_cover_dango.png";
 import parfum1 from "../images/WhatsApp Image 2026-05-11 at 21.49.32 (3).jpeg";
@@ -22,12 +23,7 @@ import {
   FaFire, FaBolt
 } from "react-icons/fa";
 
-const getProductImg = (p) => {
-  const img = p?.images?.[0]?.url || p?.image;
-  if (!img) return null;
-  if (img.startsWith('http') || img.startsWith('data:')) return img;
-  return `${API_BASE_URL}/images/${img}`;
-};
+const getProductImg = (p) => getProductImage(p);
 
 const FALLBACK_FEATURED = [
   { _id: '1', name: "Genie's Secret Bombshell", price: 3000, image: parfum1, category: 'Parfum', isNewArrival: true },

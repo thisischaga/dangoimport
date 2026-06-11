@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import API_BASE_URL from '../apiConfig';
+import { resolveImageUrl } from '../utils/imageUrl';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
@@ -15,11 +16,7 @@ const CartPage = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [fedapayLoading, setFedapayLoading] = useState(false);
 
-  const getImgUrl = (img) => {
-    if (!img) return '';
-    if (img.startsWith('http') || img.startsWith('data:')) return img;
-    return `${API_BASE_URL}/images/${img}`;
-  };
+  const getImgUrl = (img) => resolveImageUrl(img) || '';
 
   const handleCheckout = () => {
     const user = localStorage.getItem('dangoUser');
