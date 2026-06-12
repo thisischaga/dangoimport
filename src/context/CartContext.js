@@ -23,18 +23,21 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('dangoCart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = useCallback((product) => {
+  const addToCart = useCallback((product, qty = 1) => {
+    const quantityToAdd = Math.max(1, parseInt(qty, 10) || 1);
     let isUpdate = false;
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
       if (existingItem) {
         isUpdate = true;
         return prevCart.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          item._id === product._id
+            ? { ...item, ...product, quantity: item.quantity + quantityToAdd }
+            : item
         );
       }
       isUpdate = false;
-      return [...prevCart, { ...product, quantity: 1 }];
+      return [...prevCart, { ...product, quantity: quantityToAdd }];
     });
     setTimeout(() => {
       if (isUpdate) {

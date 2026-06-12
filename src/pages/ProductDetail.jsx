@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import API_BASE_URL from '../apiConfig';
 import { resolveImageUrl } from '../utils/imageUrl';
 import { useProduct, useSimilarProducts } from '../hooks/useProducts';
+import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import {
@@ -55,6 +56,15 @@ const getVideoEmbedUrl = (url) => {
     return null;
 };
 
+const toOptionList = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.filter(Boolean);
+    if (typeof val === 'string') {
+        return val.split(/[,;|]/).map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+};
+
 const StarRow = ({ value = 0, size = 16 }) => (
     <div className="flex gap-0.5">
         {[...Array(5)].map((_, i) => (
@@ -73,12 +83,12 @@ const ProductDetail = () => {
 
     const { data: product, isLoading: loading, isError: productLoadError } = useProduct(id);
     const { data: similarProducts = [] } = useSimilarProducts(id);
+    const { addToCart } = useCart();
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedCustomOptions, setSelectedCustomOptions] = useState({});
-    const [cartLoading, setCartLoading] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [inWishlist, setInWishlist] = useState(false);
     const [activeTab, setActiveTab] = useState('description');
@@ -126,7 +136,19 @@ const ProductDetail = () => {
         return fields;
     }, [product]);
 
-    const isLowStock = product && product.stock > 0 && product.stock <= (product.minStock || 10);
+    const productColors = useMemo(() => toOptionList(product?.color), [product?.color]);
+    const productSizes = useMemo(() => toOptionList(product?.size), [product?.size]);
+
+    const { maxQuantity, inStock } = useMemo(() => {
+        const raw = product?.stock;
+        const stock = Number(raw);
+        if (raw === undefined || raw === null || !Number.isFinite(stock)) {
+            return { maxQuantity: 99, inStock: true };
+        }
+        return { maxQuantity: Math.max(0, stock), inStock: stock > 0 };
+    }, [product?.stock]);
+
+    const isLowStock = product && inStock && product.stock <= (product.minStock || 10);
 
     const infoCards = useMemo(() => {
         if (!product) return [];
@@ -192,20 +214,35 @@ const ProductDetail = () => {
         checkWishlist();
     }, [id, fetchReviews, checkWishlist]);
 
+    const buildCartItem = useCallback(() => {
+        const primaryImage = gallery[0]?.url || getImgUrl(product?.image);
+        return {
+            ...product,
+            price: effectivePrice,
+            salePrice: product.salePrice ?? product.price,
+            image: primaryImage,
+            selectedOptions: {
+                color: selectedColor,
+                size: selectedSize,
+                ...selectedCustomOptions,
+            },
+        };
+    }, [product, effectivePrice, gallery, selectedColor, selectedSize, selectedCustomOptions]);
+
     const validateBeforeCart = () => {
         if (!product) return false;
 
-        if (product.stock <= 0) {
+        if (!inStock) {
             toast.warning('Ce produit est en rupture de stock.');
             return false;
         }
 
-        if (product.color?.length > 0 && !selectedColor) {
+        if (productColors.length > 0 && !selectedColor) {
             toast.warning('Veuillez choisir une couleur.');
             return false;
         }
 
-        if (product.size?.length > 0 && !selectedSize) {
+        if (productSizes.length > 0 && !selectedSize) {
             toast.warning('Veuillez choisir une taille.');
             return false;
         }
@@ -223,7 +260,7 @@ const ProductDetail = () => {
             return false;
         }
 
-        if (quantity > product.stock) {
+        if (quantity > maxQuantity) {
             toast.warning('Quantité supérieure au stock disponible.');
             return false;
         }
@@ -231,52 +268,15 @@ const ProductDetail = () => {
         return true;
     };
 
-    const handleAddToCart = async () => {
-        const token = localStorage.getItem('dangoToken');
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-
+    const handleAddToCart = () => {
         if (!validateBeforeCart()) return;
-
-        try {
-            setCartLoading(true);
-
-            const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    productId: id,
-                    quantity: parseInt(quantity, 10),
-                    selectedOptions: {
-                        color: selectedColor,
-                        size: selectedSize,
-                        ...selectedCustomOptions,
-                    },
-                }),
-            });
-
-            const data = await response.json();
-            if (response.ok && data.success) {
-                toast.success('Produit ajouté au panier !');
-            } else {
-                toast.error(data.message || "Erreur lors de l'ajout au panier.");
-            }
-        } catch (err) {
-            console.error('Erreur handleAddToCart :', err);
-            toast.error("Erreur lors de l'ajout au panier.");
-        } finally {
-            setCartLoading(false);
-        }
+        addToCart(buildCartItem(), quantity);
     };
 
-    const handleBuyNow = async () => {
-        await handleAddToCart();
-        navigate('/cart');
+    const handleBuyNow = () => {
+        if (!validateBeforeCart()) return;
+        addToCart(buildCartItem(), quantity);
+        navigate('/checkout');
     };
 
     const handleWishlist = async () => {
@@ -663,7 +663,7 @@ const ProductDetail = () => {
                         )}
 
                         {/* Couleurs */}
-                        {product.color?.length > 0 && (
+                        {productColors.length > 0 && (
                             <div className="mb-5">
                                 <label className="block text-sm font-semibold text-gray-900 mb-2">
                                     Couleur
@@ -674,7 +674,7 @@ const ProductDetail = () => {
                                     )}
                                 </label>
                                 <div className="flex flex-wrap gap-2">
-                                    {product.color.map((color) => (
+                                    {productColors.map((color) => (
                                         <button
                                             key={color}
                                             type="button"
@@ -693,7 +693,7 @@ const ProductDetail = () => {
                         )}
 
                         {/* Tailles */}
-                        {product.size?.length > 0 && (
+                        {productSizes.length > 0 && (
                             <div className="mb-5">
                                 <label className="block text-sm font-semibold text-gray-900 mb-2">
                                     Taille
@@ -704,7 +704,7 @@ const ProductDetail = () => {
                                     )}
                                 </label>
                                 <div className="flex flex-wrap gap-2">
-                                    {product.size.map((size) => (
+                                    {productSizes.map((size) => (
                                         <button
                                             key={size}
                                             type="button"
@@ -770,33 +770,39 @@ const ProductDetail = () => {
                             <div className="flex items-center gap-3 w-fit">
                                 <button
                                     type="button"
+                                    disabled={!inStock}
                                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                    className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg"
+                                    className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     −
                                 </button>
                                 <input
                                     type="number"
                                     value={quantity}
+                                    disabled={!inStock}
                                     onChange={(e) => {
                                         const val = parseInt(e.target.value, 10);
                                         if (isNaN(val) || val <= 0) setQuantity(1);
-                                        else setQuantity(Math.min(product.stock, val));
+                                        else setQuantity(Math.min(maxQuantity, val));
                                     }}
                                     min="1"
-                                    max={product.stock}
-                                    className="w-16 h-10 text-center border border-gray-300 rounded-lg font-semibold focus:outline-none focus:border-gray-900"
+                                    max={maxQuantity}
+                                    className="w-16 h-10 text-center border border-gray-300 rounded-lg font-semibold focus:outline-none focus:border-gray-900 disabled:opacity-40"
                                 />
                                 <button
                                     type="button"
+                                    disabled={!inStock}
                                     onClick={() =>
-                                        setQuantity((q) => Math.min(product.stock, q + 1))
+                                        setQuantity((q) => Math.min(maxQuantity, q + 1))
                                     }
-                                    className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg"
+                                    className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     +
                                 </button>
                             </div>
+                            {!inStock && (
+                                <p className="text-sm text-red-600 mt-2">Produit en rupture de stock.</p>
+                            )}
                         </div>
 
                         {/* Actions */}
@@ -804,11 +810,11 @@ const ProductDetail = () => {
                             <button
                                 type="button"
                                 onClick={handleAddToCart}
-                                disabled={cartLoading || product.stock === 0}
+                                disabled={!inStock}
                                 className="flex-1 btn-brand disabled:bg-gray-200 disabled:text-gray-400 py-3 rounded-xl transition flex items-center justify-center gap-2"
                             >
                                 <FaShoppingCart size={18} />
-                                {cartLoading ? 'Ajout...' : 'Ajouter au panier'}
+                                Ajouter au panier
                             </button>
                             <button
                                 type="button"
@@ -826,7 +832,7 @@ const ProductDetail = () => {
                         <button
                             type="button"
                             onClick={handleBuyNow}
-                            disabled={product.stock === 0}
+                            disabled={!inStock}
                             className="w-full mt-3 btn-brand-outline disabled:opacity-40 disabled:cursor-not-allowed py-3 rounded-xl transition"
                         >
                             Acheter maintenant

@@ -141,62 +141,43 @@ const CguVendeur = () => {
         </div>
       </section>
 
-      <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12">
+      <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
+        <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-2xl">
+          <p className="text-sm text-indigo-900 leading-relaxed font-medium">
+            <strong>Espace Vendeur :</strong> En tant que partenaire référencé sur Dango Import, vous vous engagez à respecter ces conditions pour garantir la meilleure expérience client possible.
+          </p>
+        </div>
 
-        {/* Sidebar — Table of contents */}
-        <aside className="lg:w-72 shrink-0">
-          <div className="lg:sticky lg:top-28 bg-gray-50 rounded-3xl border border-gray-100 p-6">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-5">Sommaire</p>
-            <nav className="flex flex-col gap-1">
-              {SECTIONS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => scrollTo(s.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all ${active === s.id
-                    ? "bg-[#fff0a0] text-gray-900 shadow-md shadow-[#fff0a0]/40 border border-[#f5dc7a]"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                    }`}
-                >
-                  <FaChevronRight size={8} className="shrink-0" />
-                  {s.title}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </aside>
-
-        {/* Content */}
-        <article className="flex-1 min-w-0 space-y-10">
-          {/* Intro box */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
-            <p className="text-sm text-indigo-900 leading-relaxed font-medium">
-              <strong>Espace Vendeur :</strong> En tant que partenaire référencé sur Dango Import, vous vous engagez à respecter ces conditions pour garantir la meilleure expérience client possible.
-            </p>
-          </div>
-
+        <div className="prose-container space-y-8">
           {SECTIONS.map(s => (
-            <section
-              key={s.id}
-              id={s.id}
-              className="scroll-mt-32"
-              onMouseEnter={() => setActive(s.id)}
-            >
-              <h2 className="text-xl font-black text-gray-900 mb-4 pb-3 border-b border-gray-100">{s.title}</h2>
-              <div className="text-gray-600 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: s.content.replace(/\n/g, '<br/>') }} />
+            <section key={s.id} id={s.id} className="scroll-mt-32">
+              <h2 className="text-2xl font-black text-gray-900 mb-5">{s.title}</h2>
+              <div className="space-y-4">
+                {s.content.split("\n").map((line, i) => {
+                  if (line.trim() === "") return null;
+                  if (line.startsWith("•")) {
+                    return (
+                      <p key={i} className="flex items-start gap-3 text-gray-700 text-base leading-relaxed pl-4">
+                        <span className="text-indigo-500 mt-1 shrink-0 text-lg">•</span>
+                        <span>{line.slice(1).trim()}</span>
+                      </p>
+                    );
+                  }
+                  return <p key={i} className="text-gray-700 text-base leading-relaxed">{line}</p>;
+                })}
+              </div>
             </section>
           ))}
-        </article>
-      </div>
+        </div>
+      </article>
 
       {/* Scroll to top */}
-      {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 btn-brand rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95"
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gray-900 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-[#ffdc2b] hover:text-gray-900 transition-colors"
         >
           <FaArrowUp size={14} />
         </button>
-      )}
 
       <Footer />
     </div>

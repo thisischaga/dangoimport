@@ -27,6 +27,45 @@ export async function initiateFedapayCheckout(payload, token) {
     return data;
 }
 
+/**
+ * Initialise un paiement FedaPay API Direct (Push USSD) sans redirection.
+ */
+export async function initiateFedapayDirectPay(payload, token) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/fedapay/direct-pay`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        const detail = data.error ? ` (${data.error})` : '';
+        throw new Error((data.message || "Erreur lors du déclenchement du paiement FedaPay.") + detail);
+    }
+
+    if (!data.transactionId) {
+        throw new Error(data.message || 'ID de transaction FedaPay indisponible.');
+    }
+
+    return data;
+}
+
+/**
+ * Vérifie le statut d'une transaction FedaPay.
+ */
+export async function checkFedapayTransactionStatus(transactionId) {
+    const response = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${transactionId}`);
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la vérification du statut.');
+    }
+    return data;
+}
+
 function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel }) {
     const productNames = cartItems.map((i) => i.name).join(', ');
     const vendorName = [...new Set(cartItems.map((i) => i.vendorName).filter(Boolean))].join(', ') || 'Dango Import';
@@ -57,11 +96,13 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
     };
 }
 
-export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel }) {
+export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode }) {
     const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel });
     return {
         ...base,
-        userNumber: form.phone,
+        userNumber: fedapayPhone || form.phone,
+        network: network,
+        countryCode: countryCode || 'BJ',
         paymentMethod: 'FedaPay',
     };
 }

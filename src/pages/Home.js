@@ -15,6 +15,15 @@ import parfum1 from "../images/WhatsApp Image 2026-05-11 at 21.49.32 (3).jpeg";
 import parfum2 from "../images/WhatsApp Image 2026-05-11 at 21.49.33 (2).jpeg";
 import parfum3 from "../images/WhatsApp Image 2026-05-11 at 21.49.34.jpeg";
 
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { motion } from "framer-motion";
+
+import slide1Img from "../images/sourcing_slide.png";
+import slide2Img from "../images/slide2.png";
+import slide3Img from "../images/slide3.png";
+
 import {
   FaArrowRight, FaTimes, FaShieldAlt, FaShippingFast,
   FaLock, FaStore, FaHandshake, FaGlobe, FaPercent, FaStar,
@@ -42,13 +51,6 @@ const CATEGORIES = [
   { name: 'Alimentation', icon: FaUtensils, color: 'bg-orange-50 text-orange-600' },
 ];
 
-const TRUST_BADGES = [
-  { icon: FaShieldAlt, title: 'Paiement sécurisé', desc: 'FedaPay & Cash' },
-  { icon: FaTruck, title: 'Livraison 24h', desc: 'Cotonou & environs' },
-  { icon: FaMedal, title: 'Vendeurs vérifiés', desc: 'Qualité contrôlée' },
-  { icon: FaGlobe, title: 'Sourcing Chine', desc: 'Import B2B' },
-];
-
 const STATS = [
   { value: 1000, display: "1 000+", label: "Produits", icon: <FaBoxOpen />, bg: "bg-[#ffdc2b]/20" },
   { value: 5000, display: "5 000+", label: "Clients", icon: <FaUsers />, bg: "bg-gray-100" },
@@ -73,80 +75,74 @@ function ProductCard({ product, badge, onClick }) {
   const hasPromo = product?.salePrice && product.salePrice < product.price;
 
   return (
-    <button type="button" onClick={onClick} className="home-product-card group">
-      <div className="aspect-square bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden">
+    <button type="button" onClick={onClick} className="group bg-white rounded-md overflow-hidden border border-gray-200 flex flex-col text-left transition-all h-full">
+      <div className="aspect-square w-full bg-[#f8f8f8] flex items-center justify-center p-3 relative">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
+          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" />
         ) : (
-          <FaBoxOpen className="text-gray-200 text-3xl" />
+          <FaBoxOpen className="text-gray-300 text-4xl" />
         )}
         {badge && (
-          <span className="absolute top-2 left-2 text-[9px] font-black uppercase px-2 py-0.5 rounded bg-[#ffdc2b] text-[#2d3748]">
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">
             {badge}
           </span>
         )}
-        {product?.isNewArrival && !badge && (
-          <span className="badge-new absolute top-2 left-2">Nouveau</span>
-        )}
         {hasPromo && (
-          <span className="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-500 text-white">
+          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">
             -{Math.round((1 - product.salePrice / product.price) * 100)}%
           </span>
         )}
       </div>
-      <div className="p-3 border-t border-gray-100">
-        <p className="text-[11px] text-gray-400 font-medium mb-1 line-clamp-1">{product.category || 'Marketplace'}</p>
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem] group-hover:text-[#c9a800] transition-colors">
+      <div className="p-3 flex-1 flex flex-col">
+        <h3 className="text-[13px] sm:text-[14px] text-[#0F1111] line-clamp-2 mb-1 group-hover:text-[#C45500] leading-snug">
           {product.name}
         </h3>
-        <div className="mt-2 flex items-baseline gap-1 flex-wrap">
-          <span className="text-base sm:text-lg font-black text-[#2d3748]">{fmtPrice(product)}</span>
-          <span className="text-[10px] font-bold text-gray-400">FCFA</span>
-          {hasPromo && (
-            <span className="text-[10px] text-gray-400 line-through ml-1">{Number(product.price).toLocaleString('fr-FR')}</span>
-          )}
-        </div>
-        <p className="text-[10px] text-gray-400 mt-1">MOQ : 1 pièce · Livraison locale</p>
         {product.rating > 0 && (
-          <div className="flex items-center gap-1 mt-1.5">
-            <FaStar className="text-[#ffdc2b] text-[10px]" />
-            <span className="text-[10px] font-bold text-gray-600">{product.rating}</span>
+          <div className="flex items-center gap-1 mb-1">
+            <div className="flex text-[#FFA41C] text-[12px]">
+              {[...Array(5)].map((_, i) => (
+                <FaStar key={i} className={i < Math.floor(product.rating) ? "text-[#FFA41C]" : "text-gray-300"} />
+              ))}
+            </div>
             {product.totalReviews > 0 && (
-              <span className="text-[10px] text-gray-400">({product.totalReviews})</span>
+              <span className="text-[12px] text-[#007185] hover:text-[#C45500] hover:underline cursor-pointer">{product.totalReviews}</span>
             )}
           </div>
         )}
+        <div className="mt-auto pt-1">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[17px] sm:text-[21px] font-medium text-[#B12704]">{fmtPrice(product)}</span>
+            <span className="text-[12px] text-[#B12704]">FCFA</span>
+          </div>
+          {hasPromo && (
+            <span className="text-[12px] text-[#565959] line-through">Prix de base: {Number(product.price).toLocaleString('fr-FR')} FCFA</span>
+          )}
+        </div>
       </div>
     </button>
   );
 }
 
-function ProductRow({ title, subtitle, icon, products, viewAllPath, badge }) {
+function ProductRow({ title, subtitle, products, viewAllPath, badge }) {
   const navigate = useNavigate();
   if (!products?.length) return null;
 
   return (
-    <section className="mb-10">
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          {icon && <span className="w-9 h-9 rounded-lg bg-[#fffbeb] border border-[#ffdc2b]/40 flex items-center justify-center text-[#e6c600]">{icon}</span>}
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-gray-900">{title}</h2>
-            {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
-          </div>
-        </div>
+    <section className="mb-8 bg-white border-y sm:border sm:border-gray-200 sm:rounded-md pt-5 pb-6 px-4 sm:px-6">
+      <div className="flex items-baseline gap-4 mb-4">
+        <h2 className="text-[21px] font-bold text-[#0F1111] tracking-tight">{title}</h2>
         {viewAllPath && (
           <button
             type="button"
             onClick={() => navigate(viewAllPath)}
-            className="text-xs font-bold text-[#e6c600] hover:underline flex items-center gap-1 shrink-0"
+            className="text-[14px] font-medium text-[#007185] hover:text-[#C45500] hover:underline"
           >
-            Voir tout <FaChevronRight size={9} />
+            Voir plus
           </button>
         )}
       </div>
-      <div className="home-product-row">
-        {products.map((p, i) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {products.slice(0, 5).map((p, i) => (
           <ProductCard
             key={p._id || i}
             product={p}
@@ -159,50 +155,12 @@ function ProductRow({ title, subtitle, icon, products, viewAllPath, badge }) {
   );
 }
 
-function AnimatedStat({ stat, visible }) {
-  const [displayed, setDisplayed] = useState(0);
-  const raf = useRef(null);
-
-  useEffect(() => {
-    if (!visible) return;
-    const duration = 1400;
-    const start = Date.now();
-    const tick = () => {
-      const progress = Math.min((Date.now() - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayed(Math.round(eased * stat.value));
-      if (progress < 1) raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  }, [visible, stat.value]);
-
-  const formatted = stat.display.includes('+')
-    ? displayed.toLocaleString('fr-FR') + '+'
-    : stat.display.includes('%')
-      ? displayed + '%'
-      : displayed.toString();
-
-  return (
-    <div className={`${stat.bg} rounded-xl p-5 flex flex-col items-center text-center`}>
-      <div className="text-2xl mb-2 text-gray-800">{stat.icon}</div>
-      <p className="text-2xl font-black text-gray-900">{formatted}</p>
-      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mt-1">{stat.label}</p>
-    </div>
-  );
-}
-
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
   const [showForm, setShowForm] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterLoading, setNewsletterLoading] = useState(false);
-  const [newsletterDone, setNewsletterDone] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(false);
   const [heroSearch, setHeroSearch] = useState("");
-  const statsRef = useRef(null);
 
   const { data: featuredFromApi = [], isLoading: featuredLoading } = useFeaturedProducts();
   const { data: catalog = [], isLoading: catalogLoading } = useProductsCatalog({ limit: 48 });
@@ -229,37 +187,12 @@ const Home = () => {
     return catalog.filter((p) => p.salePrice && p.salePrice < p.price).slice(0, 10);
   }, [catalog]);
 
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
-      { threshold: 0.3 }
-    );
-    if (statsRef.current) obs.observe(statsRef.current);
-    return () => obs.disconnect();
-  }, []);
-
   const handleHeroSearch = (e) => {
     e?.preventDefault();
     if (heroSearch.trim()) {
       navigate(`/shopping?q=${encodeURIComponent(heroSearch.trim())}`);
     } else {
       navigate('/shopping');
-    }
-  };
-
-  const handleNewsletter = async (e) => {
-    e.preventDefault();
-    if (!newsletterEmail) return;
-    setNewsletterLoading(true);
-    try {
-      await axios.post(`${API_BASE_URL}/api/newsletter/subscribe`, { email: newsletterEmail });
-      toast.success("Merci ! Vous êtes bien inscrit à notre newsletter.");
-      setNewsletterEmail("");
-      setNewsletterDone(true);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Erreur lors de l'inscription.");
-    } finally {
-      setNewsletterLoading(false);
     }
   };
 
@@ -325,64 +258,148 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Bannière principale */}
-              <div className="lg:col-span-7">
-                <div
-                  className="home-promo-banner"
-                  style={{ backgroundImage: `linear-gradient(to right, rgba(15,23,42,0.92), rgba(15,23,42,0.6)), url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                >
-                  <span className="inline-flex items-center gap-1.5 bg-[#ffdc2b] text-[#2d3748] text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3">
-                    <FaFire size={10} /> Offres du moment
-                  </span>
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight max-w-lg">
-                    La marketplace Bénin & Togo
-                  </h1>
-                  <p className="text-sm text-gray-300 mt-2 max-w-md">
-                    Des milliers de produits locaux, livraison rapide et sourcing depuis la Chine.
-                  </p>
-
-                  <form onSubmit={handleHeroSearch} className="mt-5 flex gap-2 max-w-lg">
-                    <div className="flex-1 flex items-center bg-white rounded-lg overflow-hidden border-2 border-[#ffdc2b]">
-                      <FaSearch className="ml-3 text-gray-400 shrink-0" size={14} />
-                      <input
-                        type="text"
-                        placeholder="Rechercher produits, catégories..."
-                        className="flex-1 px-3 py-3 text-sm text-gray-800 focus:outline-none"
-                        value={heroSearch}
-                        onChange={(e) => setHeroSearch(e.target.value)}
-                      />
+              {/* Bannière principale (Slider) */}
+              <div className="lg:col-span-7 flex flex-col gap-4">
+                <div className="rounded-2xl overflow-hidden relative shadow-sm">
+                  <Slider
+                    dots={true}
+                    infinite={true}
+                    speed={500}
+                    slidesToShow={1}
+                    slidesToScroll={1}
+                    autoplay={true}
+                    autoplaySpeed={4000}
+                    arrows={false}
+                    appendDots={dots => (
+                      <div style={{ bottom: '10px' }}>
+                        <ul style={{ margin: "0px" }}> {dots} </ul>
+                      </div>
+                    )}
+                  >
+                    {/* Slide 1 - Électronique */}
+                    <div className="outline-none">
+                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-10 flex items-center justify-between">
+                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%]">
+                          <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                            <FaBolt size={10} /> Nouvel arrivage
+                          </span>
+                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2">
+                            Électronique & High-Tech
+                          </h1>
+                          <p className="text-xs sm:text-sm text-blue-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                            Les derniers smartphones et gadgets aux meilleurs prix du marché.
+                          </p>
+                          <button onClick={() => navigate('/shopping?category=Électronique')} className="bg-white hover:bg-gray-100 text-blue-900 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                            Acheter maintenant
+                          </button>
+                        </div>
+                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
+                          <img src={slide2Img} alt="Électronique" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                        </div>
+                      </div>
                     </div>
-                    <button type="submit" className="btn-home px-5 py-3 rounded-lg text-sm font-black shrink-0">
-                      Chercher
-                    </button>
-                  </form>
+
+                    {/* Slide 2 - Beauté */}
+                    <div className="outline-none">
+                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-r from-rose-900 to-pink-800 text-white p-6 sm:p-10 flex items-center justify-between">
+                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%]">
+                          <span className="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                            <FaFire size={10} /> Top Qualité
+                          </span>
+                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2">
+                            Parfums & Beauté
+                          </h1>
+                          <p className="text-xs sm:text-sm text-rose-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                            Découvrez notre collection premium de parfums et soins de luxe.
+                          </p>
+                          <button onClick={() => navigate('/shopping?category=Beauté')} className="bg-white hover:bg-gray-100 text-rose-900 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                            Découvrir
+                          </button>
+                        </div>
+                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
+                          <img src={slide3Img} alt="Beauté et Parfums" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 3 - Sourcing */}
+                    <div className="outline-none">
+                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-6 sm:p-10 flex items-center justify-between relative overflow-hidden">
+                        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#ffdc2b]/10 blur-[80px] rounded-full"></div>
+                        <div className="absolute bottom-0 right-10 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full"></div>
+                        
+                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%] relative">
+                          <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#ffdc2b] to-[#e6c600] text-[#1a202c] text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm shadow-[#ffdc2b]/20">
+                            <FaGlobeAfrica size={10} /> Import B2B
+                          </span>
+                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2 tracking-tight">
+                            Sourcing <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffdc2b] to-white">Chine</span>
+                          </h1>
+                          <p className="text-xs sm:text-sm text-gray-300 mb-5 line-clamp-2 sm:line-clamp-none">
+                            Fournisseurs vérifiés, logistique premium et douane jusqu'au Bénin & Togo.
+                          </p>
+                          <button onClick={() => setShowForm(true)} className="bg-[#ffdc2b] text-[#0f172a] hover:bg-[#e6c600] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all shadow-lg shadow-[#ffdc2b]/20">
+                            Devis gratuit
+                          </button>
+                        </div>
+                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative z-10">
+                          <img src={slide1Img} alt="Sourcing Chine Premium" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </Slider>
                 </div>
+
+                {/* Barre de recherche */}
+                <form onSubmit={handleHeroSearch} className="flex gap-2">
+                  <div className="flex-1 flex items-center bg-white rounded-xl overflow-hidden border-2 border-[#ffdc2b] shadow-sm">
+                    <FaSearch className="ml-4 text-gray-400 shrink-0" size={14} />
+                    <input
+                      type="text"
+                      placeholder="Rechercher des produits, catégories, marques..."
+                      className="flex-1 px-4 py-3 sm:py-3.5 text-sm text-gray-800 focus:outline-none"
+                      value={heroSearch}
+                      onChange={(e) => setHeroSearch(e.target.value)}
+                    />
+                  </div>
+                  <button type="submit" className="btn-home px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-sm font-black shrink-0 transition-transform active:scale-95">
+                    Chercher
+                  </button>
+                </form>
               </div>
 
               {/* Promos latérales */}
-              <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3">
+              <div className="lg:col-span-3 flex flex-row lg:flex-col gap-4">
                 <button
                   type="button"
                   onClick={() => navigate('/shopping')}
-                  className="flex-1 rounded-xl border border-[#ffdc2b]/50 bg-[#fffbeb] p-4 text-left hover:shadow-md transition-all group"
+                  className="flex-1 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 p-5 text-left text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all group flex flex-col justify-between"
                 >
-                  <FaTag className="text-[#e6c600] text-xl mb-2" />
-                  <p className="text-sm font-black text-gray-900">Produits vedettes</p>
-                  <p className="text-[11px] text-gray-500 mt-1">Sélection top qualité</p>
-                  <span className="text-[11px] font-bold text-[#e6c600] mt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Explorer <FaArrowRight size={9} />
+                  <div>
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-3">
+                      <FaTag className="text-white text-lg" />
+                    </div>
+                    <h3 className="text-lg font-bold">Produits vedettes</h3>
+                    <p className="text-indigo-100 text-xs mt-1 leading-snug">Découvrez notre sélection des meilleurs articles du moment.</p>
+                  </div>
+                  <span className="text-sm font-bold text-white mt-4 inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                    Explorer <FaArrowRight size={12} />
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
-                  className="flex-1 rounded-xl border border-gray-200 bg-white p-4 text-left hover:shadow-md transition-all group"
+                  className="flex-1 rounded-xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-5 text-left text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all group flex flex-col justify-between border border-[#334155]"
                 >
-                  <FaGlobe className="text-gray-700 text-xl mb-2" />
-                  <p className="text-sm font-black text-gray-900">Sourcing Chine</p>
-                  <p className="text-[11px] text-gray-500 mt-1">Devis import B2B gratuit</p>
-                  <span className="text-[11px] font-bold text-gray-700 mt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Demander <FaArrowRight size={9} />
+                  <div>
+                    <div className="w-10 h-10 rounded-full bg-[#ffdc2b]/10 flex items-center justify-center mb-3">
+                      <FaGlobe className="text-[#ffdc2b] text-lg" />
+                    </div>
+                    <h3 className="text-lg font-bold text-[#ffdc2b]">Sourcing Chine</h3>
+                    <p className="text-gray-300 text-xs mt-1 leading-snug">Déléguez vos imports B2B. Devis gratuit et logistique complète.</p>
+                  </div>
+                  <span className="text-sm font-bold text-white mt-4 inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                    Demander <FaArrowRight size={12} />
                   </span>
                 </button>
               </div>
@@ -407,22 +424,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* ══ TRUST STRIP ══════════════════════════════ */}
-        <section className="bg-[#fffbeb] border-b border-[#ffdc2b]/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {TRUST_BADGES.map((b, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <b.icon className="text-[#e6c600] shrink-0" size={18} />
-                  <div>
-                    <p className="text-xs font-black text-gray-900">{b.title}</p>
-                    <p className="text-[10px] text-gray-500">{b.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
         {/* ══ PRODUITS — zone principale marketplace ═══ */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
@@ -471,134 +473,13 @@ const Home = () => {
             badge="Hot"
           />
 
-          {/* Grille vedette — mise en avant large */}
-          <div className="mt-4 bg-white border border-gray-200 rounded-2xl p-5 sm:p-8">
-            <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#2d3748] bg-[#fffbeb] border border-[#ffdc2b]/40 px-3 py-1 rounded-full">
-                  Recommandé pour vous
-                </span>
-                <h2 className="text-xl sm:text-2xl font-black text-gray-900 mt-2">Explorer le catalogue</h2>
-              </div>
-              <button type="button" onClick={() => navigate('/shopping')} className="btn-home px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2">
-                Tout voir <FaArrowRight size={11} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              {(catalog.length ? catalog : featuredProducts).slice(0, 12).map((p, i) => (
-                <ProductCard
-                  key={p._id || i}
-                  product={p}
-                  onClick={() => navigate(p._id ? `/product/${p._id}` : '/shopping')}
-                />
-              ))}
-            </div>
-          </div>
+          <ProductRow
+            title="Produits recommandés pour vous"
+            products={catalog.length ? catalog : featuredProducts}
+            viewAllPath="/shopping"
+          />
         </section>
 
-        {/* ══ BANNIÈRE B2B SOURCING ═══════════════════ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-          <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-[#1e2a33] to-[#344955] text-white grid md:grid-cols-2 gap-6 p-8 sm:p-10 items-center">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#ffdc2b]">Import B2B</span>
-              <h2 className="text-2xl sm:text-3xl font-black mt-2">Sourcing depuis la Chine</h2>
-              <p className="text-gray-300 text-sm mt-3 leading-relaxed">
-                Fournisseurs vérifiés, négociation des prix, dédouanement et livraison jusqu'à vos locaux au Bénin & Togo.
-              </p>
-              <ul className="mt-4 space-y-2">
-                {['Recherche fournisseurs', 'Contrôle qualité', 'Logistique complète'].map((t) => (
-                  <li key={t} className="flex items-center gap-2 text-sm text-gray-200">
-                    <FaCheckCircle className="text-[#ffdc2b] shrink-0" size={13} /> {t}
-                  </li>
-                ))}
-              </ul>
-              <button type="button" onClick={() => setShowForm(true)} className="btn-home mt-6 px-6 py-3 rounded-xl text-sm font-black">
-                Demander un devis gratuit
-              </button>
-            </div>
-            <div className="hidden md:grid grid-cols-2 gap-3">
-              {[
-                { icon: FaShippingFast, label: 'Livraison internationale' },
-                { icon: FaHandshake, label: 'Agent dédié' },
-                { icon: FaLock, label: 'Paiement sécurisé' },
-                { icon: FaPercent, label: 'Prix négociés' },
-              ].map((item) => (
-                <div key={item.label} className="bg-white/10 rounded-xl p-4 border border-white/10">
-                  <item.icon className="text-[#ffdc2b] text-xl mb-2" />
-                  <p className="text-xs font-bold">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══ STATS ═══════════════════════════════════ */}
-        <section className="py-14 px-4 sm:px-6 bg-white border-y border-gray-100" ref={statsRef}>
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-black text-gray-900">Dango Import en chiffres</h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {STATS.map((s, i) => (
-                <AnimatedStat key={i} stat={s} visible={statsVisible} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══ TÉMOIGNAGES ═════════════════════════════ */}
-        <section className="py-14 px-4 sm:px-6 bg-[#f5f5f5]">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-black text-gray-900">Ils nous font confiance</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {TESTIMONIALS.map((t, i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-xl p-6">
-                  <FaQuoteLeft className="text-[#ffdc2b] mb-3" />
-                  <p className="text-sm text-gray-600 italic mb-4">"{t.text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-[#ffdc2b] flex items-center justify-center font-black text-sm text-gray-900">
-                      {t.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm">{t.name}</p>
-                      <p className="text-[11px] text-gray-400">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══ NEWSLETTER ══════════════════════════════ */}
-        <section className="py-14 px-4 sm:px-6 bg-gray-900">
-          <div className="max-w-xl mx-auto text-center">
-            <FaEnvelope className="text-[#ffdc2b] text-3xl mx-auto mb-4" />
-            <h3 className="text-xl font-black text-white mb-2">Newsletter Dango Import</h3>
-            <p className="text-gray-400 text-sm mb-6">Offres exclusives et nouveautés marketplace.</p>
-            {newsletterDone ? (
-              <div className="bg-green-500/20 border border-green-500/30 rounded-xl px-5 py-3 text-green-300 font-bold text-sm">
-                Merci ! Vous êtes inscrit(e) 🎉
-              </div>
-            ) : (
-              <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-2">
-                <input
-                  required
-                  type="email"
-                  placeholder="Votre e-mail"
-                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-[#ffdc2b]"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                />
-                <button disabled={newsletterLoading} type="submit" className="btn-home px-6 py-3 rounded-lg text-sm font-black disabled:opacity-50">
-                  {newsletterLoading ? "..." : "S'inscrire"}
-                </button>
-              </form>
-            )}
-          </div>
-        </section>
       </main>
 
       <Footer />

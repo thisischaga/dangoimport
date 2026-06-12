@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
-import { initiateFedapayCheckout } from '../services/fedapayCheckout';
+import { initiateFedapayDirectPay, checkFedapayTransactionStatus } from '../services/fedapayCheckout';
 import { toast } from 'react-toastify';
+
+
+
 import { 
   FaMapMarkerAlt, FaShoppingCart, FaShieldAlt, 
   FaCheckCircle, FaLocationArrow, FaSpinner,
@@ -14,6 +17,40 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+
+const FEDAPAY_COUNTRIES = [
+  { code: 'BJ', name: 'Bénin', flag: '🇧🇯', networks: [
+      { label: 'MTN', value: 'mtn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png' },
+      { label: 'Moov', value: 'moov', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
+  ]},
+  { code: 'TG', name: 'Togo', flag: '🇹🇬', networks: [
+      { label: 'T-Money', value: 'togocel', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Togocom_logo.png/200px-Togocom_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Togocom_logo.png/200px-Togocom_logo.png' },
+      { label: 'Moov', value: 'moov_tg', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
+  ]},
+  { code: 'CI', name: 'Côte d\'Ivoire', flag: '🇨🇮', networks: [
+      { label: 'MTN', value: 'mtn_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png' },
+      { label: 'Orange', value: 'orange_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
+      { label: 'Moov', value: 'moov_ci', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' },
+      { label: 'Wave', value: 'wave_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png' }
+  ]},
+  { code: 'SN', name: 'Sénégal', flag: '🇸🇳', networks: [
+      { label: 'Orange', value: 'orange_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
+      { label: 'Free', value: 'free_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Free_logo.svg/200px-Free_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Free_logo.svg/200px-Free_logo.svg.png' },
+      { label: 'Wave', value: 'wave_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png' }
+  ]},
+  { code: 'ML', name: 'Mali', flag: '🇲🇱', networks: [
+      { label: 'Orange', value: 'orange_ml', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
+      { label: 'Moov', value: 'moov_ml', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
+  ]},
+  { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫', networks: [
+      { label: 'Orange', value: 'orange_bf', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
+      { label: 'Moov', value: 'moov_bf', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
+  ]},
+  { code: 'NE', name: 'Niger', flag: '🇳🇪', networks: [
+      { label: 'Airtel', value: 'airtel_ne', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Airtel_logo.svg/200px-Airtel_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Airtel_logo.svg/200px-Airtel_logo.svg.png' },
+      { label: 'Moov', value: 'moov_ne', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
+  ]},
+];
 
 // Correction icônes Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -55,7 +92,10 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
     address: '',
     city: '',
     deliveryNotes: '',
-    quantity: 1
+    quantity: 1,
+    fedapayCountry: 'BJ',
+    fedapayNetwork: 'mtn',
+    fedapayPhone: ''
   });
 
   // Calculer le prix avec les surcoûts des options
@@ -75,20 +115,42 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
 
   const finalPrice = calculateTotalPrice();
 
-  // ─── FedaPay Live Checkout ───────────────────────────────────────────
+  // Auto-remplissage au montage
+  useEffect(() => {
+    const dangoUser = JSON.parse(localStorage.getItem('dangoUser') || '{}');
+    if (dangoUser.email || dangoUser.userEmail) {
+      const phone = dangoUser.phone || dangoUser.userNumber || '';
+      setFormData(prev => ({
+        ...prev,
+        name: dangoUser.firstname ? `${dangoUser.firstname} ${dangoUser.surname || ''}`.trim() : (dangoUser.userName || ''),
+        email: dangoUser.userEmail || dangoUser.email || '',
+        phone: phone,
+        fedapayPhone: phone
+      }));
+    }
+  }, []);
+
+  // ─── FedaPay Direct API ───────────────────────────────────────────
   const handleFedapayPayment = async () => {
-    if (!formData.phone || formData.phone.length < 8) return toast.warning('Numéro de téléphone invalide.');
+    if (!formData.fedapayPhone || formData.fedapayPhone.length < 8) return toast.warning('Numéro de téléphone Mobile Money invalide.');
+    if (!formData.fedapayNetwork) return toast.warning('Veuillez sélectionner votre opérateur.');
     if (!location) return toast.warning('Veuillez indiquer votre position sur la carte.');
 
     const grandTotal = finalPrice * formData.quantity;
     setFedapayLoading(true);
-    const toastId = toast.loading('Redirection vers FedaPay...');
+
+    const selectedCountryObj = FEDAPAY_COUNTRIES.find(c => c.code === formData.fedapayCountry);
+    const countryCode = selectedCountryObj?.code || 'BJ';
+
+    const toastId = toast.loading('Envoi de la demande sur votre téléphone...');
 
     try {
       const token = localStorage.getItem('dangoToken');
-      const data = await initiateFedapayCheckout({
+      const data = await initiateFedapayDirectPay({
         userName: formData.name,
-        userNumber: formData.phone,
+        userNumber: formData.fedapayPhone,
+        network: formData.fedapayNetwork,
+        countryCode: countryCode,
         productQuantity: formData.quantity,
         userPref: formData.deliveryNotes || formData.address,
         selectedCountry: 'Benin',
@@ -108,15 +170,59 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
       }, token);
 
       toast.update(toastId, {
-        render: 'Ouverture du paiement FedaPay...',
-        type: 'success',
-        isLoading: false,
-        autoClose: 2000,
+        render: 'Demande envoyée ! Veuillez confirmer le paiement sur votre téléphone (Saisissez votre code secret).',
+        type: 'info',
+        isLoading: true,
       });
-      clearCart();
-      setTimeout(() => { window.location.href = data.url; }, 600);
+
+      // Polling for status
+      let attempts = 0;
+      const maxAttempts = 60; // 5 mins
+      const interval = setInterval(async () => {
+          attempts++;
+          try {
+              const statusData = await checkFedapayTransactionStatus(data.transactionId);
+              if (statusData.status === 'approved') {
+                  clearInterval(interval);
+                  toast.update(toastId, {
+                      render: 'Paiement réussi ! Votre commande est validée.',
+                      type: 'success',
+                      isLoading: false,
+                      autoClose: 4000,
+                  });
+                  setOrderConfirmed(true);
+                  clearCart();
+                  setTimeout(() => {
+                      isVisibled(false);
+                      setOrderConfirmed(false);
+                  }, 2500);
+                  setFedapayLoading(false);
+              } else if (statusData.status === 'declined' || statusData.status === 'canceled') {
+                  clearInterval(interval);
+                  toast.update(toastId, {
+                      render: 'Le paiement a été refusé ou annulé.',
+                      type: 'error',
+                      isLoading: false,
+                      autoClose: 4000,
+                  });
+                  setFedapayLoading(false);
+              } else if (attempts >= maxAttempts) {
+                  clearInterval(interval);
+                  toast.update(toastId, {
+                      render: 'Délai d\'attente dépassé.',
+                      type: 'warning',
+                      isLoading: false,
+                      autoClose: 4000,
+                  });
+                  setFedapayLoading(false);
+              }
+          } catch (e) {
+               // keep polling
+          }
+      }, 5000);
+
     } catch (error) {
-      console.error('Erreur FedaPay Checkout :', error);
+      console.error('Erreur FedaPay Direct :', error);
       toast.update(toastId, {
         render: error.message || 'Impossible de démarrer le paiement FedaPay.',
         type: 'error',
@@ -126,19 +232,6 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
       setFedapayLoading(false);
     }
   };
-
-  // Auto-remplissage au montage
-  useEffect(() => {
-    const dangoUser = JSON.parse(localStorage.getItem('dangoUser') || '{}');
-    if (dangoUser.email || dangoUser.userEmail) {
-      setFormData(prev => ({
-        ...prev,
-        name: dangoUser.firstname ? `${dangoUser.firstname} ${dangoUser.surname || ''}`.trim() : (dangoUser.userName || ''),
-        email: dangoUser.userEmail || dangoUser.email || '',
-        phone: dangoUser.phone || dangoUser.userNumber || ''
-      }));
-    }
-  }, []);
 
   // Gestion de la position
   const updateLocationAndFee = useCallback((lat, lng) => {
@@ -512,6 +605,94 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                   <option value="fedapay">Paiement en ligne (FedaPay)</option>
                 </select>
               </div>
+
+              {formData.paymentMethod === 'fedapay' && (
+                <div className="col-span-full mt-2 p-4 sm:p-6 bg-white border-2 border-[#ffdc2b]/40 rounded-2xl shadow-sm space-y-5">
+                  <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">1. Sélectionnez votre pays</label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {FEDAPAY_COUNTRIES.map(country => (
+                              <button
+                                  key={country.code}
+                                  type="button"
+                                  onClick={() => {
+                                      setFormData(prev => ({
+                                          ...prev, 
+                                          fedapayCountry: country.code,
+                                          fedapayNetwork: country.networks[0].value
+                                      }));
+                                  }}
+                                  className={`py-2 px-1 rounded-xl border flex flex-col items-center justify-center transition-all ${
+                                      formData.fedapayCountry === country.code
+                                          ? 'border-gray-900 bg-gray-900 text-white shadow-md'
+                                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-400 hover:bg-white'
+                                  }`}
+                              >
+                                  <span className="text-xl sm:text-2xl mb-1">{country.flag}</span>
+                                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-center px-1 leading-tight">{country.name}</span>
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+                  <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">2. Opérateur Mobile Money *</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {FEDAPAY_COUNTRIES.find(c => c.code === formData.fedapayCountry)?.networks.map(net => (
+                              <button
+                                  key={net.value}
+                                  type="button"
+                                  onClick={() => setFormData({...formData, fedapayNetwork: net.value})}
+                                  className={`relative p-3 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${
+                                      formData.fedapayNetwork === net.value
+                                          ? 'border-gray-900 bg-[#ffdc2b]/10'
+                                          : 'border-gray-100 bg-white hover:border-gray-300'
+                                  }`}
+                              >
+                                  <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center p-1.5 overflow-hidden">
+                                      <img 
+                                          src={net.logo} 
+                                          alt={net.label} 
+                                          className="w-full h-full object-contain"
+                                          onError={(e) => {
+                                              if (e.target.src !== net.fallback) {
+                                                  e.target.src = net.fallback;
+                                              }
+                                          }}
+                                      />
+                                  </div>
+                                  <span className={`text-[11px] font-bold ${formData.fedapayNetwork === net.value ? 'text-gray-900' : 'text-gray-500'}`}>
+                                      {net.label}
+                                  </span>
+                                  {formData.fedapayNetwork === net.value && (
+                                      <div className="absolute top-2 right-2 text-gray-900">
+                                          <FaCheckCircle />
+                                      </div>
+                                  )}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+                  <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">3. Numéro Mobile Money *</label>
+                      <div className="relative">
+                          <input 
+                              type="tel"
+                              value={formData.fedapayPhone}
+                              onChange={(e) => setFormData({...formData, fedapayPhone: e.target.value})}
+                              placeholder="Ex: 61000000"
+                              className="w-full px-4 py-3 text-sm font-bold rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-2 focus:ring-[#ffdc2b]/30 outline-none transition-all pl-12 bg-gray-50 focus:bg-white"
+                          />
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                          </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1.5 font-medium">
+                          <FaCheckCircle className="text-[#ffdc2b]" /> Le message de paiement sécurisé s'affichera sur ce numéro.
+                      </p>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-gray-400 ml-1">Quantité</label>
                 <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-lg p-1">
@@ -558,7 +739,6 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                     ? 'Paiement confirmé ✓'
                     : (
                       <>
-                        <img src="https://fedapay.com/wp-content/uploads/2020/05/logo.png" alt="FedaPay" className="h-5 object-contain brightness-0 invert" />
                         Payer {grandTotal.toLocaleString()} F via FedaPay
                       </>
                     )

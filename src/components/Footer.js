@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import API_BASE_URL from '../apiConfig';
 import {
   FaFacebook, FaInstagram, FaTiktok, FaTwitter,
-  FaEnvelope, FaPhoneAlt, FaMapMarkerAlt,
+  FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaPaperPlane
 } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 
@@ -10,7 +13,27 @@ const linkClass = 'text-[13px] text-[#dddddd] hover:text-white hover:underline l
 const headingClass = 'text-white font-bold text-sm mb-4';
 
 const Footer = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterDone, setNewsletterDone] = useState(false);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const handleNewsletter = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterLoading(true);
+    try {
+      await axios.post(`${API_BASE_URL}/api/newsletter/subscribe`, { email: newsletterEmail });
+      toast.success("Merci ! Vous êtes bien inscrit à notre newsletter.");
+      setNewsletterEmail("");
+      setNewsletterDone(true);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Erreur lors de l'inscription.");
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
 
   const columns = [
     {
@@ -66,6 +89,39 @@ const Footer = () => {
       >
         Retour en haut
       </button>
+
+      {/* ══ NEWSLETTER ══════════════════════════════ */}
+      <div className="bg-[#344955] border-b border-[#4a6274]/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-center md:text-left">
+            <h3 className="text-xl font-black text-white flex items-center justify-center md:justify-start gap-2 mb-1.5">
+              <FaEnvelope className="text-[#ffdc2b]" /> Newsletter Dango Import
+            </h3>
+            <p className="text-[#999] text-sm">Recevez nos offres exclusives et nouveautés marketplace en avant-première.</p>
+          </div>
+          <div className="w-full md:w-auto min-w-[300px]">
+            {newsletterDone ? (
+              <div className="bg-green-500/20 border border-green-500/30 rounded-xl px-5 py-3 text-green-300 font-bold text-sm text-center">
+                Merci ! Vous êtes inscrit(e) 🎉
+              </div>
+            ) : (
+              <form onSubmit={handleNewsletter} className="flex gap-2">
+                <input
+                  required
+                  type="email"
+                  placeholder="Votre adresse e-mail"
+                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-[#ffdc2b] placeholder-white/40"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                />
+                <button disabled={newsletterLoading} type="submit" className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#0f172a] px-5 sm:px-6 py-3 rounded-lg text-sm font-black disabled:opacity-50 transition-colors flex items-center gap-2">
+                  {newsletterLoading ? "..." : <><span className="hidden sm:inline">S'inscrire</span><FaPaperPlane size={12} className="sm:hidden" /></>}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="bg-[#344955] text-[#e8eaed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-10 py-10 sm:py-12 grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">

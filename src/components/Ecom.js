@@ -80,58 +80,65 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
   return (
     <div
       onClick={onOpen}
-      className="product-card bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group cursor-pointer hover:shadow-lg hover:border-[#ffdc2b] hover:-translate-y-0.5 transition-all duration-200"
+      className="bg-white rounded-md border border-gray-200 overflow-hidden flex flex-col group cursor-pointer transition-all hover:shadow-sm"
     >
-      <div className="aspect-square bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden">
+      <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center p-3 relative overflow-hidden">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
+          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" />
         ) : (
           <FaTag className="text-gray-200 text-3xl" />
         )}
 
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-gray-700">
-            <FaEye size={13} />
+          <span className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md text-gray-700">
+            <FaEye size={12} />
           </span>
         </div>
 
         {product.isFeatured && (
-          <span className="absolute top-2 left-2 text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-[#ffdc2b] text-[#2d3748]">Top</span>
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">Top</span>
         )}
-        {product.isNewArrival && (
-          <span className="badge-new absolute top-2 right-10">Nouveau</span>
+        {product.isNewArrival && !product.isFeatured && (
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#007185] text-white z-10">Nouveau</span>
         )}
         {hasPromo && (
-          <span className="absolute bottom-2 left-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded flex items-center gap-0.5">
-            <FaFire size={7} /> Promo
+          <span className="absolute bottom-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 flex items-center gap-1">
+            <FaFire size={9} /> Promo
           </span>
         )}
 
         <button
           type="button"
           onClick={onToggleWish}
-          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all ${
-            isWished ? 'bg-red-500 text-white' : 'bg-white/95 text-gray-300 hover:text-red-400'
+          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            isWished ? 'bg-transparent text-[#CC0C39]' : 'bg-transparent text-gray-300 hover:text-[#CC0C39]'
           }`}
         >
-          <FaHeart size={10} />
+          <FaHeart size={16} />
         </button>
       </div>
 
-      <div className="p-3 flex flex-col flex-1 border-t border-gray-100">
+      <div className="p-3 flex flex-col flex-1">
         {product.category && (
-          <p className="text-[10px] text-gray-400 font-medium mb-0.5 line-clamp-1">{product.category}</p>
+          <p className="text-[10px] text-[#565959] mb-0.5 line-clamp-1">{product.category}</p>
         )}
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.25rem] group-hover:text-[#c9a800] transition-colors">
+        <h3 className="text-[13px] sm:text-[14px] text-[#0F1111] line-clamp-2 min-h-[2.25rem] group-hover:text-[#C45500] leading-snug">
           {product.name}
         </h3>
 
-        <div className="mt-1">
-          <StarRating value={product.rating} count={product.totalReviews} />
+        <div className="mt-1 flex items-center gap-1 text-[12px]">
+          <div className="flex text-[#FFA41C]">
+            {[...Array(5)].map((_, i) => (
+              <FaStar key={i} className={i < Math.floor(product.rating || 0) ? "text-[#FFA41C]" : "text-gray-300"} />
+            ))}
+          </div>
+          {(product.totalReviews || 0) > 0 && (
+            <span className="text-[#007185] hover:text-[#C45500] hover:underline">{product.totalReviews}</span>
+          )}
         </div>
 
-        <div className="flex items-center gap-1 text-[9px] text-gray-400 mt-1">
-          <FaUserCircle size={9} />
+        <div className="flex items-center gap-1 text-[10px] text-[#565959] mt-1">
+          <FaUserCircle size={10} />
           <span className="line-clamp-1">
             {product.vendorName || 'Vendeur'}
           </span>
@@ -139,34 +146,32 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
 
         <div className="mt-auto pt-2">
           <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-base font-black text-[#2d3748]">{fmtPrice(price)}</span>
-            <span className="text-[10px] text-gray-400 font-bold">FCFA</span>
-            {hasPromo && (
-              <span className="text-[10px] text-gray-400 line-through">{fmtPrice(product.price)}</span>
-            )}
+            <span className="text-[17px] sm:text-[21px] font-medium text-[#B12704]">{fmtPrice(price)}</span>
+            <span className="text-[12px] text-[#B12704]">FCFA</span>
           </div>
-          <p className="text-[9px] text-gray-400 mt-0.5 flex items-center gap-1">
-            <FaCheckCircle size={8} className="text-[#ffdc2b]" /> MOQ 1 · Livraison locale
-          </p>
+          {hasPromo && (
+            <span className="text-[11px] text-[#565959] line-through flex items-center gap-1">
+              Prix conseillé: {fmtPrice(product.price)} FCFA
+            </span>
+          )}
 
           {inCart ? (
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onGoCart(); }}
-              className="mt-2 w-full py-2 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"
+              className="mt-3 w-full py-1.5 rounded-full text-[12px] text-[#0F1111] bg-[#F7CA00] hover:bg-[#F2C200] border border-[#F2C200] shadow-sm"
             >
-              Voir le panier
+              Aller au panier
             </button>
           ) : (
             <button
               type="button"
               onClick={onAddCart}
-              className={`mt-2 w-full py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
-                justAdded ? 'bg-emerald-500 text-white' : 'btn-brand'
+              className={`mt-3 w-full py-1.5 rounded-full text-[12px] flex items-center justify-center gap-1.5 shadow-sm ${
+                justAdded ? 'bg-green-600 text-white border border-green-600' : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] border border-[#FCD200]'
               }`}
             >
-              <FaShoppingCart size={10} />
-              {justAdded ? '✓ Ajouté' : 'Ajouter'}
+              {justAdded ? '✓ Ajouté au panier' : 'Ajouter au panier'}
             </button>
           )}
         </div>
@@ -275,21 +280,7 @@ const Ecom = () => {
     <div className="bg-[#f5f5f5] min-h-screen font-sans">
       <Header />
 
-      {/* Bandeau marketplace */}
-      <div className="bg-[#fffbeb] border-b border-[#ffdc2b]/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-4">
-            {TRUST_BADGES.map((b, i) => (
-              <span key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2d3748]">
-                <b.icon className="text-[#e6c600]" size={12} /> {b.text}
-              </span>
-            ))}
-          </div>
-          <p className="text-[11px] text-gray-500 font-medium">
-            <span className="font-black text-[#2d3748]">{filtered.length}</span> produit{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}
-          </p>
-        </div>
-      </div>
+
 
       {/* Toolbar */}
       <div className="bg-white border-b border-gray-200 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">

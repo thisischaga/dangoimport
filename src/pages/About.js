@@ -1,6 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { FaGlobeAfrica, FaStore, FaHandshake } from 'react-icons/fa';
+
+import slide1Img from "../images/sourcing_slide.png";
+import slide2Img from "../images/slide2.png";
+import slide3Img from "../images/slide3.png";
 
 const About = () => {
   const navigate = useNavigate();
@@ -10,16 +18,101 @@ const About = () => {
       <Header />
 
       <main className="w-full block">
-        {/* HERO SECTION */}
-        <section className="py-24 px-6 xl:px-20 bg-gray-50">
-          <div className="max-w-4xl mx-auto text-center">
-            <span className="inline-block mb-4 text-[#e6c600] tracking-[0.2em] font-bold text-sm uppercase">À Propos de Dango HUB</span>
-            <h1 className="mb-6 text-4xl md:text-5xl font-bold leading-tight text-gray-900">
-              Transformer le commerce en ligne au Bénin et au Togo
-            </h1>
-            <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              Dango HUB est une entreprise béninoise fondée par Ayatoulaye Dango Nadey. À travers sa marque Dango Import, nous opérons une marketplace locale, tout en proposant un service complémentaire d’importation depuis la Chine.
-            </p>
+        {/* HERO SECTION SLIDER */}
+        <section className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="rounded-2xl overflow-hidden relative shadow-sm">
+              <Slider
+                dots={true}
+                infinite={true}
+                speed={500}
+                slidesToShow={1}
+                slidesToScroll={1}
+                autoplay={true}
+                autoplaySpeed={4500}
+                arrows={false}
+                appendDots={dots => (
+                  <div style={{ bottom: '10px' }}>
+                    <ul style={{ margin: "0px" }}> {dots} </ul>
+                  </div>
+                )}
+              >
+                {/* Slide 1 - Vision */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-6 sm:p-12 flex items-center justify-between relative overflow-hidden">
+                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#ffdc2b]/10 blur-[80px] rounded-full"></div>
+                    <div className="absolute bottom-0 right-10 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full"></div>
+                    
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%] relative">
+                      <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#ffdc2b] to-[#e6c600] text-[#1a202c] text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm shadow-[#ffdc2b]/20">
+                        <FaGlobeAfrica size={10} /> À Propos de nous
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2 tracking-tight">
+                        Transformer le commerce en ligne <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffdc2b] to-white">au Bénin & Togo</span>
+                      </h1>
+                      <p className="text-xs sm:text-base text-gray-300 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Dango HUB est une entreprise fondée par Ayatoulaye Dango Nadey, dédiée à l'accompagnement des entrepreneurs et consommateurs.
+                      </p>
+                      <div className="flex gap-3">
+                        <button onClick={() => navigate('/shopping')} className="bg-[#ffdc2b] text-[#0f172a] hover:bg-[#e6c600] px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all shadow-lg shadow-[#ffdc2b]/20">
+                          Découvrir la Marketplace
+                        </button>
+                      </div>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative z-10">
+                      <img src={slide1Img} alt="Dango Import Vision" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide 2 - Marketplace */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-12 flex items-center justify-between">
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%]">
+                      <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                        <FaStore size={10} /> Marketplace Locale
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2">
+                        Donner de la visibilité aux vendeurs
+                      </h1>
+                      <p className="text-xs sm:text-base text-blue-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Une plateforme conçue pour les réalités ouest-africaines, avec des commissions justes et un accompagnement humain.
+                      </p>
+                      <button onClick={() => navigate('/shopping')} className="bg-white hover:bg-gray-100 text-blue-900 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                        Soutenir nos vendeurs
+                      </button>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative">
+                      <img src={slide2Img} alt="Marketplace" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide 3 - Import */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-r from-rose-900 to-pink-800 text-white p-6 sm:p-12 flex items-center justify-between">
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%]">
+                      <span className="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                        <FaHandshake size={10} /> Import Chine
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2">
+                        Des achats B2B sécurisés
+                      </h1>
+                      <p className="text-xs sm:text-base text-rose-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Un service complémentaire d'importation depuis la Chine, avec un suivi de bout en bout jusqu'à la livraison.
+                      </p>
+                      <button onClick={() => navigate('/services')} className="bg-white hover:bg-gray-100 text-rose-900 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                        En savoir plus
+                      </button>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative">
+                      <img src={slide3Img} alt="Import Chine" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                    </div>
+                  </div>
+                </div>
+
+              </Slider>
+            </div>
           </div>
         </section>
 

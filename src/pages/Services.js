@@ -3,136 +3,224 @@ import { useState } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import DevisForm from '../components/DevisForm';
-import { FaTimes } from 'react-icons/fa';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { 
+  FaTimes, FaSearch, FaFileInvoiceDollar, FaCheckDouble, 
+  FaShippingFast, FaHandshake, FaChartLine, FaEnvelopeOpenText, FaStar, FaGlobeAfrica
+} from 'react-icons/fa';
 
-// Images (Utilisation des photos premium demandées)
-import sourcingImg from '../images/service_sourcing.png';
-import devisImg from '../images/service_security.png';
-import qualityImg from '../images/service_quality.png';
-import deliveryImg from '../images/service_logistics.png';
+import slide1Img from "../images/sourcing_slide.png";
+import slide2Img from "../images/slide2.png";
+import slide3Img from "../images/slide3.png";
 
 const Services = () => {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans">
+    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 font-sans">
       <Header />
 
       <main className="w-full block">
-        {/* HERO SECTION - Fidèle au design d'origine (Fond sombre) */}
-        <section className="relative min-h-[45vh] flex items-center justify-center bg-gray-900 text-white">
-          <div className="relative z-10 text-center w-full max-w-5xl px-6 py-12">
-            <span className="inline-block mb-5 text-[#ffdc2b] tracking-[0.24em] font-bold text-sm uppercase">Services sur mesure</span>
-            <h1 className="mb-4 text-4xl md:text-5xl font-black leading-tight text-white">Importer de Chine en toute confiance</h1>
-            <p className="mx-auto mb-10 max-w-3xl text-lg text-gray-300 leading-relaxed">
-              Dango Import vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée vers le Bénin, le Togo et le Ghana.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <button type="button" onClick={() => navigate('/shopping')} className="btn-brand px-8 py-3 rounded shadow-md font-bold">
-                Voir notre vitrine
-              </button>
-              <button type="button" onClick={() => setShowForm(true)} className="bg-transparent hover:bg-white/10 text-white px-8 py-3 border border-white/30 rounded font-bold transition-colors">
-                Demander un devis
-              </button>
+        {/* HERO SECTION SLIDER */}
+        <section className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="rounded-2xl overflow-hidden relative shadow-sm">
+              <Slider
+                dots={true}
+                infinite={true}
+                speed={500}
+                slidesToShow={1}
+                slidesToScroll={1}
+                autoplay={true}
+                autoplaySpeed={4000}
+                arrows={false}
+                appendDots={dots => (
+                  <div style={{ bottom: '10px' }}>
+                    <ul style={{ margin: "0px" }}> {dots} </ul>
+                  </div>
+                )}
+              >
+                {/* Slide 1 - Sourcing */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-6 sm:p-12 flex items-center justify-between relative overflow-hidden">
+                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#ffdc2b]/10 blur-[80px] rounded-full"></div>
+                    <div className="absolute bottom-0 right-10 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full"></div>
+                    
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%] relative">
+                      <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#ffdc2b] to-[#e6c600] text-[#1a202c] text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm shadow-[#ffdc2b]/20">
+                        <FaGlobeAfrica size={10} /> Import B2B
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2 tracking-tight">
+                        Services sur mesure : <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffdc2b] to-white">Sourcing Chine</span>
+                      </h1>
+                      <p className="text-xs sm:text-base text-gray-300 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Dango Import vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée.
+                      </p>
+                      <div className="flex gap-3">
+                        <button onClick={() => setShowForm(true)} className="bg-[#ffdc2b] text-[#0f172a] hover:bg-[#e6c600] px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all shadow-lg shadow-[#ffdc2b]/20">
+                          Demander un devis
+                        </button>
+                      </div>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative z-10">
+                      <img src={slide1Img} alt="Sourcing Chine Premium" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide 2 - Logistique */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-12 flex items-center justify-between">
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%]">
+                      <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                        <FaShippingFast size={10} /> Livraison
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2">
+                        Logistique & Expédition
+                      </h1>
+                      <p className="text-xs sm:text-base text-blue-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Une chaîne d'approvisionnement optimisée pour réduire vos coûts et accélérer la réception de vos marchandises.
+                      </p>
+                      <button onClick={() => setShowForm(true)} className="bg-white hover:bg-gray-100 text-blue-900 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                        Nous contacter
+                      </button>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative">
+                      <img src={slide2Img} alt="Logistique" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide 3 - Qualité */}
+                <div className="outline-none">
+                  <div className="h-[280px] sm:h-[400px] bg-gradient-to-r from-rose-900 to-pink-800 text-white p-6 sm:p-12 flex items-center justify-between">
+                    <div className="flex-1 z-10 max-w-[60%] sm:max-w-[50%]">
+                      <span className="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
+                        <FaCheckDouble size={10} /> Inspection
+                      </span>
+                      <h1 className="text-2xl sm:text-4xl font-black leading-tight mb-2">
+                        Contrôle Qualité
+                      </h1>
+                      <p className="text-xs sm:text-base text-rose-200 mb-5 line-clamp-2 sm:line-clamp-none">
+                        Ne prenez aucun risque. Nos équipes inspectent vos produits avant l'embarquement pour garantir 100% de conformité.
+                      </p>
+                      <button onClick={() => navigate('/shopping')} className="bg-white hover:bg-gray-100 text-rose-900 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
+                        Explorer nos offres
+                      </button>
+                    </div>
+                    <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative">
+                      <img src={slide3Img} alt="Contrôle qualité" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                    </div>
+                  </div>
+                </div>
+
+              </Slider>
             </div>
           </div>
         </section>
 
-        {/* SECTION BLOCK - Fidèle au design d'origine (Grille de 4) */}
-        <section className="py-20 px-6 xl:px-20 bg-white">
-          <div className="max-w-6xl mx-auto mb-10">
-            <span className="uppercase tracking-[0.24em] text-gray-500 text-sm font-bold block mb-1">Étapes clés</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Un processus simple et transparent</h2>
+        {/* PROCESS SECTION */}
+        <section className="py-24 px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Un processus simple et transparent</h2>
+            <p className="text-gray-500 mt-4 max-w-2xl mx-auto font-medium">De la recherche de l'usine jusqu'à la livraison finale, nous nous occupons de tout pour vous garantir un import réussi.</p>
           </div>
-          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-              <img src={sourcingImg} alt="Recherche fournisseur" className="w-full h-[200px] object-cover" />
-              <div className="p-6">
-                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Recherche fournisseur</h3>
-                <p className="m-0 text-gray-600 leading-relaxed text-sm">Nous identifions les usines les plus fiables et les produits les plus compétitifs selon vos besoins.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:border-[#ffdc2b]/50 hover:shadow-[0_8px_30px_rgba(255,220,43,0.1)] transition-all group">
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FaSearch size={24} />
               </div>
-            </article>
-            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-              <img src={devisImg} alt="Devis personnalisé" className="w-full h-[200px] object-cover" />
-              <div className="p-6">
-                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Devis personnalisé</h3>
-                <p className="m-0 text-gray-600 leading-relaxed text-sm">Nous envoyons un devis clair qui inclut produit, transport, douane et garanties.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">1. Sourcing</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Nous identifions les usines les plus fiables et les produits les plus compétitifs selon vos besoins spécifiques.</p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:border-[#ffdc2b]/50 hover:shadow-[0_8px_30px_rgba(255,220,43,0.1)] transition-all group">
+              <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FaFileInvoiceDollar size={24} />
               </div>
-            </article>
-            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-              <img src={qualityImg} alt="Suivi qualité" className="w-full h-[200px] object-cover" />
-              <div className="p-6">
-                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Suivi qualité</h3>
-                <p className="m-0 text-gray-600 leading-relaxed text-sm">Contrôle qualité sur place, validation des commandes et suivi permanent jusqu'à l'expédition.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">2. Devis</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Nous envoyons un devis clair et détaillé qui inclut produit, transport, douane et nos garanties.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:border-[#ffdc2b]/50 hover:shadow-[0_8px_30px_rgba(255,220,43,0.1)] transition-all group">
+              <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FaCheckDouble size={24} />
               </div>
-            </article>
-            <article className="bg-white border border-gray-200 rounded-lg text-left shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-              <img src={deliveryImg} alt="Livraison ciblée" className="w-full h-[200px] object-cover" />
-              <div className="p-6">
-                <h3 className="m-0 mb-3 text-xl font-bold text-gray-900">Livraison ciblée</h3>
-                <p className="m-0 text-gray-600 leading-relaxed text-sm">Livraison directe à domicile ou en point relais au Bénin, Togo et Ghana.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">3. Qualité</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Contrôle qualité rigoureux sur place, validation des commandes et suivi permanent jusqu'à l'expédition.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:border-[#ffdc2b]/50 hover:shadow-[0_8px_30px_rgba(255,220,43,0.1)] transition-all group">
+              <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FaShippingFast size={24} />
               </div>
-            </article>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">4. Livraison</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Livraison directe à domicile ou en point relais sécurisé au Bénin et au Togo avec suivi régulier.</p>
+            </div>
           </div>
         </section>
 
-        {/* SECTION HIGHLIGHT - Fidèle au design d'origine */}
-        <section className="bg-[#ffdc2b] py-16 px-6 xl:px-20 text-center text-gray-900">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">Plus qu’un service, un vrai partenaire</h2>
-            <p className="text-lg leading-relaxed">
-              Nous apportons une expertise concrète, une communication claire et une prise en charge complète pour que votre import soit fiable et rentable.
-            </p>
-          </div>
-        </section>
+        {/* BENTO GRID DETAILS */}
+        <section className="py-16 px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div className="md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-10 text-white relative overflow-hidden flex flex-col justify-center">
+              <div className="absolute -right-10 -bottom-10 opacity-10">
+                <FaHandshake size={200} />
+              </div>
+              <div className="relative z-10 max-w-lg">
+                <span className="bg-[#ffdc2b] text-gray-900 text-xs font-black uppercase px-3 py-1 rounded-full mb-4 inline-block">Partenaire de confiance</span>
+                <h3 className="text-3xl font-black mb-4">Plus qu’un service, <br/> un vrai partenaire</h3>
+                <p className="text-gray-300 leading-relaxed text-lg">
+                  Nous apportons une expertise concrète, une communication claire et une prise en charge complète pour que votre import soit fiable et surtout rentable.
+                </p>
+              </div>
+            </div>
 
-        {/* SECTION DETAIL - Fidèle au design d'origine (2 colonnes) */}
-        <section className="max-w-6xl mx-auto py-16 px-6 xl:px-20 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Accompagnement complet</h3>
-            <p className="text-gray-600 leading-relaxed">
-              De la recherche du fournisseur à la livraison finale, nous coordonnons toutes les étapes pour réduire les risques et les retards.
-            </p>
-          </div>
-          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Transparence et confiance</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Chaque commande est suivie avec des rapports clairs et des échanges réguliers afin que vous restiez informé en permanence.
-            </p>
-          </div>
-        </section>
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm flex flex-col justify-center">
+              <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-900 mb-5">
+                <FaChartLine size={20} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Transparence</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Chaque commande est suivie avec des rapports clairs et des échanges réguliers afin que vous restiez informé en permanence de l'avancement.
+              </p>
+            </div>
 
-        {/* SECTION BOTTOM GRID - Fidèle au design d'origine */}
-        <section className="max-w-6xl mx-auto pb-16 px-6 xl:px-20 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Études & Newsletter</h3>
-            <ul className="space-y-2 text-gray-600 list-disc list-inside">
-              <li>Offres prioritaires</li>
-              <li>Conseils sourcing</li>
-              <li>Actualités du marché chinois</li>
-              <li>Guides d’importation pratiques</li>
-            </ul>
-          </div>
-          <div className="bg-gray-50 p-10 rounded-lg border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Ce qui nous distingue</h3>
-            <ul className="space-y-2 text-gray-600 list-disc list-inside">
-              <li>Fournisseurs validés</li>
-              <li>Transport sécurisé</li>
-              <li>Suivi personnalisé</li>
-              <li>Respect des délais</li>
-            </ul>
-          </div>
-        </section>
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-[#fffbeb] text-[#d4b000] rounded-full flex items-center justify-center">
+                  <FaStar size={16} />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Ce qui nous distingue</h3>
+              </div>
+              <ul className="space-y-3">
+                {['Fournisseurs strictement validés', 'Transport 100% sécurisé', 'Suivi personnalisé WhatsApp', 'Respect scrupuleux des délais'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#ffdc2b]"></span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-        {/* CTA SECTION - Fidèle au design d'origine */}
-        <section className="bg-gray-900 text-white py-20 px-6 xl:px-20 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Prêt à lancer votre import ?</h2>
-            <p className="text-lg text-gray-300 mb-8">Contactez-nous et obtenez une solution sur mesure pour votre première commande.</p>
-            <button type="button" onClick={() => setShowForm(true)} className="btn-brand px-8 py-3 rounded shadow-md font-bold">
-              Commencer maintenant
-            </button>
+            <div className="md:col-span-2 bg-[#ffdc2b] rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 justify-between">
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 mb-2">Prêt à lancer votre import ?</h3>
+                <p className="text-gray-800 font-medium max-w-md">Contactez-nous et obtenez une solution sur mesure pour votre première commande B2B ou B2C.</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setShowForm(true)} 
+                className="bg-gray-900 text-white hover:bg-black px-8 py-4 rounded-full font-black whitespace-nowrap shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
+              >
+                <FaEnvelopeOpenText /> Commencer
+              </button>
+            </div>
+
           </div>
         </section>
       </main>
