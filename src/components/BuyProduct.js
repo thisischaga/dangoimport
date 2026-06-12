@@ -18,39 +18,7 @@ import 'react-phone-input-2/lib/style.css';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-const FEDAPAY_COUNTRIES = [
-  { code: 'BJ', name: 'Bénin', flag: '🇧🇯', networks: [
-      { label: 'MTN', value: 'mtn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png' },
-      { label: 'Moov', value: 'moov', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
-  ]},
-  { code: 'TG', name: 'Togo', flag: '🇹🇬', networks: [
-      { label: 'T-Money', value: 'togocel', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Togocom_logo.png/200px-Togocom_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Togocom_logo.png/200px-Togocom_logo.png' },
-      { label: 'Moov', value: 'moov_tg', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
-  ]},
-  { code: 'CI', name: 'Côte d\'Ivoire', flag: '🇨🇮', networks: [
-      { label: 'MTN', value: 'mtn_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/MTN_Logo.svg/200px-MTN_Logo.svg.png' },
-      { label: 'Orange', value: 'orange_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
-      { label: 'Moov', value: 'moov_ci', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' },
-      { label: 'Wave', value: 'wave_ci', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png' }
-  ]},
-  { code: 'SN', name: 'Sénégal', flag: '🇸🇳', networks: [
-      { label: 'Orange', value: 'orange_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
-      { label: 'Free', value: 'free_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Free_logo.svg/200px-Free_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Free_logo.svg/200px-Free_logo.svg.png' },
-      { label: 'Wave', value: 'wave_sn', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Wave_Mobile_Money_logo.png/200px-Wave_Mobile_Money_logo.png' }
-  ]},
-  { code: 'ML', name: 'Mali', flag: '🇲🇱', networks: [
-      { label: 'Orange', value: 'orange_ml', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
-      { label: 'Moov', value: 'moov_ml', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
-  ]},
-  { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫', networks: [
-      { label: 'Orange', value: 'orange_bf', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/200px-Orange_logo.svg.png' },
-      { label: 'Moov', value: 'moov_bf', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
-  ]},
-  { code: 'NE', name: 'Niger', flag: '🇳🇪', networks: [
-      { label: 'Airtel', value: 'airtel_ne', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Airtel_logo.svg/200px-Airtel_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Airtel_logo.svg/200px-Airtel_logo.svg.png' },
-      { label: 'Moov', value: 'moov_ne', logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png', fallback: 'https://upload.wikimedia.org/wikipedia/fr/thumb/c/ca/Moov_Africa_logo.svg/200px-Moov_Africa_logo.svg.png' }
-  ]},
-];
+import { FEDAPAY_COUNTRIES, NetworkLogo } from '../utils/fedapayConfig';
 
 // Correction icônes Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -648,17 +616,8 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
                                           : 'border-gray-100 bg-white hover:border-gray-300'
                                   }`}
                               >
-                                  <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center p-1.5 overflow-hidden">
-                                      <img 
-                                          src={net.logo} 
-                                          alt={net.label} 
-                                          className="w-full h-full object-contain"
-                                          onError={(e) => {
-                                              if (e.target.src !== net.fallback) {
-                                                  e.target.src = net.fallback;
-                                              }
-                                          }}
-                                      />
+                                  <div className="w-full h-10 rounded-lg overflow-hidden border border-gray-100 bg-white">
+                                      <NetworkLogo value={net.value} label={net.label} />
                                   </div>
                                   <span className={`text-[11px] font-bold ${formData.fedapayNetwork === net.value ? 'text-gray-900' : 'text-gray-500'}`}>
                                       {net.label}

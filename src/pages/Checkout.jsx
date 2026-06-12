@@ -15,172 +15,7 @@ import {
     submitDirectOrder,
 } from '../services/fedapayCheckout';
 
-// ─── Logos opérateurs en SVG inline (pas de dépendance externe) ──────────────
-const NETWORK_LOGOS = {
-    mtn: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FFCC00"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="#000">MTN</text>
-        </svg>
-    ),
-    moov: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    moov_tg: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    moov_ci: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    moov_ml: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    moov_bf: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    moov_ne: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#006EB8"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">MOOV</text>
-        </svg>
-    ),
-    togocel: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#E60012"/>
-            <text x="60" y="15" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="11" fill="#fff">T-MONEY</text>
-            <text x="60" y="31" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9" fill="#ffcc00">by Togocom</text>
-        </svg>
-    ),
-    mtn_ci: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FFCC00"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="#000">MTN</text>
-        </svg>
-    ),
-    orange_ci: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FF6600"/>
-            <rect x="40" y="8" width="40" height="24" rx="12" fill="#fff"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#FF6600">orange</text>
-        </svg>
-    ),
-    orange_sn: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FF6600"/>
-            <rect x="40" y="8" width="40" height="24" rx="12" fill="#fff"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#FF6600">orange</text>
-        </svg>
-    ),
-    orange_ml: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FF6600"/>
-            <rect x="40" y="8" width="40" height="24" rx="12" fill="#fff"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#FF6600">orange</text>
-        </svg>
-    ),
-    orange_bf: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#FF6600"/>
-            <rect x="40" y="8" width="40" height="24" rx="12" fill="#fff"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#FF6600">orange</text>
-        </svg>
-    ),
-    wave_ci: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#1DC8FD"/>
-            <text x="60" y="27" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">Wave</text>
-        </svg>
-    ),
-    wave_sn: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#1DC8FD"/>
-            <text x="60" y="27" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="20" fill="#fff">Wave</text>
-        </svg>
-    ),
-    free_sn: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#CC0000"/>
-            <text x="60" y="28" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="#fff">Free</text>
-        </svg>
-    ),
-    airtel_ne: (
-        <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <rect width="120" height="40" rx="4" fill="#E4003A"/>
-            <text x="60" y="27" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="18" fill="#fff">airtel</text>
-        </svg>
-    ),
-};
-
-// ─── Données pays + réseaux ───────────────────────────────────────────────────
-const FEDAPAY_COUNTRIES = [
-    {
-        code: 'BJ', name: 'Bénin', flag: '🇧🇯',
-        networks: [
-            { label: 'MTN', value: 'mtn' },
-            { label: 'Moov', value: 'moov' },
-        ],
-    },
-    {
-        code: 'TG', name: 'Togo', flag: '🇹🇬',
-        networks: [
-            { label: 'T-Money', value: 'togocel' },
-            { label: 'Moov', value: 'moov_tg' },
-        ],
-    },
-    {
-        code: 'CI', name: "Côte d'Ivoire", flag: '🇨🇮',
-        networks: [
-            { label: 'MTN', value: 'mtn_ci' },
-            { label: 'Orange', value: 'orange_ci' },
-            { label: 'Moov', value: 'moov_ci' },
-            { label: 'Wave', value: 'wave_ci' },
-        ],
-    },
-    {
-        code: 'SN', name: 'Sénégal', flag: '🇸🇳',
-        networks: [
-            { label: 'Orange', value: 'orange_sn' },
-            { label: 'Free', value: 'free_sn' },
-            { label: 'Wave', value: 'wave_sn' },
-        ],
-    },
-    {
-        code: 'ML', name: 'Mali', flag: '🇲🇱',
-        networks: [
-            { label: 'Orange', value: 'orange_ml' },
-            { label: 'Moov', value: 'moov_ml' },
-        ],
-    },
-    {
-        code: 'BF', name: 'Burkina Faso', flag: '🇧🇫',
-        networks: [
-            { label: 'Orange', value: 'orange_bf' },
-            { label: 'Moov', value: 'moov_bf' },
-        ],
-    },
-    {
-        code: 'NE', name: 'Niger', flag: '🇳🇪',
-        networks: [
-            { label: 'Airtel', value: 'airtel_ne' },
-            { label: 'Moov', value: 'moov_ne' },
-        ],
-    },
-];
+import { NETWORK_LOGOS, FEDAPAY_COUNTRIES,  } from '../utils/fedapayConfig';
 
 const getImgUrl = (img) => resolveImageUrl(img) || '';
 
@@ -259,23 +94,6 @@ const SHIPPING_OPTIONS = [
 
 const STEPS = ['Informations', 'Livraison', 'Paiement', 'Confirmation'];
 
-// ─── Composant logo opérateur ─────────────────────────────────────────────────
-function NetworkLogo({ value, label }) {
-    const logo = NETWORK_LOGOS[value];
-    if (logo) {
-        return (
-            <div className="w-full h-full flex items-center justify-center p-1">
-                {logo}
-            </div>
-        );
-    }
-    // Fallback générique si le logo n'est pas défini
-    return (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
-            <span className="text-[10px] font-bold text-gray-600 text-center leading-tight px-1">{label}</span>
-        </div>
-    );
-}
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -413,8 +231,9 @@ export default function Checkout() {
             try {
                 const payload = buildCartFedapayPayload({
                     form,
-                    cartItems: apiCart || cartItems,
-                    shippingFee, total,
+                    cartItems: apiCart?.items || cartItems,
+                    shippingFee,
+                    total,
                     network: fedapayNetwork,
                     fedapayPhone,
                     countryCode,
@@ -508,7 +327,7 @@ export default function Checkout() {
         </>
     );
 
-    if (!cartItems.length) return (
+    if (!cartItems?.length) return (
         <>
             <Header />
             <div className="min-h-[60vh] bg-[#f8f9fa] flex items-center justify-center">
@@ -744,9 +563,7 @@ export default function Checkout() {
                                                                                 : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                                                     >
                                                                         {/* Logo opérateur : SVG inline, 100% fiable */}
-                                                                        <div className="w-full h-10 rounded-lg overflow-hidden border border-gray-100 bg-white">
-                                                                            <NetworkLogo value={net.value} label={net.label} />
-                                                                        </div>
+
                                                                         <span className={`text-[11px] font-bold leading-tight text-center
                                                                             ${fedapayNetwork === net.value ? 'text-gray-900' : 'text-gray-500'}`}>
                                                                             {net.label}
@@ -820,7 +637,7 @@ export default function Checkout() {
                                         </div>
                                         <div className="flex justify-between text-gray-500">
                                             <span>Livraison — {selectedShipping?.label}</span>
-                                            <span className="font-semibold text-gray-900">À calculer</span>
+                                            <span className="font-semibold text-gray-900">{shippingFee > 0 ? `${shippingFee.toLocaleString('fr-FR')} F` : 'Gratuit'}</span>
                                         </div>
                                         <div className="flex justify-between items-center pt-2 border-t border-gray-200 font-bold text-gray-900">
                                             <span>Total à payer</span>
@@ -924,7 +741,7 @@ export default function Checkout() {
                             </h3>
 
                             <ul className="space-y-3 mb-4 pb-4 border-b border-gray-100 max-h-72 overflow-y-auto">
-                                {cartItems.map(item => (
+                                {cartItems?.map(item => (
                                     <li key={item.id} className="flex gap-3 items-start">
                                         <div className="w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 shrink-0 overflow-hidden flex items-center justify-center">
                                             {item.image
@@ -957,7 +774,7 @@ export default function Checkout() {
                                 </div>
                                 <div className="flex justify-between text-gray-500">
                                     <span>Livraison</span>
-                                    <span className="font-semibold text-gray-900">À calculer</span>
+                                    <span className="font-semibold text-gray-900">{shippingFee > 0 ? `${shippingFee.toLocaleString('fr-FR')} F` : 'Gratuit'}</span>
                                 </div>
                             </div>
 
