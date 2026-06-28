@@ -100,6 +100,11 @@ const ProductDetail = () => {
         }
     }, [product, selectedVariant]);
 
+    useEffect(() => {
+        // Réinitialiser les options personnalisées quand on change de variante
+        setSelectedCustomOptions({});
+    }, [selectedVariant?._id, selectedVariant?.id]);
+
     const error = useMemo(() => {
         if (loading) return '';
         if (productLoadError || !product) return 'Produit non trouvé.';
@@ -135,8 +140,23 @@ const ProductDetail = () => {
         return adj;
     }, [product, selectedCustomOptions]);
 
+    const variantPriceAdjustment = useMemo(() => {
+        if (!selectedVariant || !selectedVariant.parameters?.length) return 0;
+        let adj = 0;
+        selectedVariant.parameters.forEach((param) => {
+            const selected = selectedCustomOptions[param.name];
+            if (selected) {
+                const option = param.options?.find((o) => o.value === selected);
+                if (option?.priceAdjustment) adj += option.priceAdjustment;
+            }
+        });
+        return adj;
+    }, [selectedVariant, selectedCustomOptions]);
+
     const basePrice = product ? product.salePrice || product.price : 0;
-    const effectivePrice = selectedVariant ? selectedVariant.price : (basePrice + customPriceAdjustment);
+    const effectivePrice = selectedVariant 
+        ? (selectedVariant.price + variantPriceAdjustment) 
+        : (basePrice + customPriceAdjustment);
 
     const discount = useMemo(() => {
         if (!product || product.price <= 0 || selectedVariant) return 0;
@@ -274,6 +294,14 @@ const ProductDetail = () => {
             const missing = product.parameters.find((p) => !selectedCustomOptions[p.name]);
             if (missing) {
                 toast.warning(`Veuillez choisir : ${missing.name}.`);
+                return false;
+            }
+        }
+
+        if (selectedVariant?.parameters?.length > 0) {
+            const missing = selectedVariant.parameters.find((p) => !selectedCustomOptions[p.name]);
+            if (missing) {
+                toast.warning(`Veuillez choisir l'option "${missing.name}" pour ce modèle.`);
                 return false;
             }
         }
@@ -784,7 +812,7 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* Options personnalisables */}
+                        {/* Options personnalisables globales */}
                         {product.isCustomizable && product.parameters?.length > 0 && (
                             <div className="mb-5 space-y-4">
                                 {product.parameters.map((param) => (
@@ -813,6 +841,46 @@ const ProductDetail = () => {
                                                     {opt.value}
                                                     {opt.priceAdjustment > 0 && (
                                                         <span className="text-xs text-gray-500 ml-1">
+                                                            (+{opt.priceAdjustment.toLocaleString('fr-FR')} F)
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Sous-paramètres spécifiques au modèle/variante sélectionné */}
+                        {selectedVariant?.parameters?.length > 0 && (
+                            <div className="mb-5 space-y-4">
+                                {selectedVariant.parameters.map((param) => (
+                                    <div key={param.name}>
+                                        <label className="block text-sm font-semibold text-[#2d3748] mb-2">
+                                            {param.name}
+                                            <span className="text-[#2d3748] ml-0.5">*</span>
+                                        </label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {param.options?.map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setSelectedCustomOptions((prev) => ({
+                                                            ...prev,
+                                                            [param.name]: opt.value,
+                                                        }))
+                                                    }
+                                                    className={`px-3 py-2 rounded-lg text-sm transition border-2 ${
+                                                        selectedCustomOptions[param.name] === opt.value
+                                                            ? 'border-[#2d3748] bg-[#2d3748]/5 text-[#2d3748] shadow-sm'
+                                                            : 'border-gray-200 text-gray-700 hover:border-[#e6c600]/50 hover:bg-[#fffbeb]'
+                                                    }`}
+                                                >
+                                                    {opt.value}
+                                                    {opt.priceAdjustment > 0 && (
+                                                        <span className={`text-xs ml-1 font-semibold ${selectedCustomOptions[param.name] === opt.value ? 'text-[#2d3748]' : 'text-gray-500'}`}>
                                                             (+{opt.priceAdjustment.toLocaleString('fr-FR')} F)
                                                         </span>
                                                     )}

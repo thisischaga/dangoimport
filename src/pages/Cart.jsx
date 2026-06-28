@@ -151,6 +151,14 @@ const Cart = () => {
                             Modèle: <strong>{item.selectedOptions.variant}</strong>
                           </span>
                         )}
+                        {Object.entries(item.selectedOptions).map(([key, value]) => {
+                          if (!value || ['color', 'size', 'variant'].includes(key)) return null;
+                          return (
+                            <span key={key} className="bg-gray-100 px-2 py-0.5 rounded-full">
+                              {key}: <strong>{value}</strong>
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
 
