@@ -89,9 +89,16 @@ const ProductDetail = () => {
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedCustomOptions, setSelectedCustomOptions] = useState({});
+    const [selectedVariant, setSelectedVariant] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [inWishlist, setInWishlist] = useState(false);
     const [activeTab, setActiveTab] = useState('description');
+
+    useEffect(() => {
+        if (product?.variants?.length > 0 && !selectedVariant) {
+            setSelectedVariant(product.variants[0]);
+        }
+    }, [product, selectedVariant]);
 
     const error = useMemo(() => {
         if (loading) return '';
@@ -100,7 +107,20 @@ const ProductDetail = () => {
         return '';
     }, [loading, productLoadError, product]);
 
-    const gallery = useMemo(() => buildGallery(product), [product]);
+    const gallery = useMemo(() => {
+        let g = buildGallery(product);
+        if (selectedVariant?.image) {
+            const vImg = getImgUrl(selectedVariant.image);
+            const idx = g.findIndex(i => i.url === vImg);
+            if (idx === -1) {
+                g = [{ url: vImg, alt: selectedVariant.name }, ...g];
+            } else if (idx > 0) {
+                const [item] = g.splice(idx, 1);
+                g.unshift(item);
+            }
+        }
+        return g;
+    }, [product, selectedVariant]);
 
     const customPriceAdjustment = useMemo(() => {
         if (!product?.isCustomizable || !product.parameters?.length) return 0;
@@ -116,14 +136,14 @@ const ProductDetail = () => {
     }, [product, selectedCustomOptions]);
 
     const basePrice = product ? product.salePrice || product.price : 0;
-    const effectivePrice = basePrice + customPriceAdjustment;
+    const effectivePrice = selectedVariant ? selectedVariant.price : (basePrice + customPriceAdjustment);
 
     const discount = useMemo(() => {
-        if (!product || product.price <= 0) return 0;
+        if (!product || product.price <= 0 || selectedVariant) return 0;
         return Math.round(
             ((product.price - (product.salePrice || product.price)) / product.price) * 100
         );
-    }, [product]);
+    }, [product, selectedVariant]);
 
     const dimensionFields = useMemo(() => {
         if (!product) return [];
@@ -140,15 +160,15 @@ const ProductDetail = () => {
     const productSizes = useMemo(() => toOptionList(product?.size), [product?.size]);
 
     const { maxQuantity, inStock } = useMemo(() => {
-        const raw = product?.stock;
+        const raw = selectedVariant ? selectedVariant.stock : product?.stock;
         const stock = Number(raw);
         if (raw === undefined || raw === null || !Number.isFinite(stock)) {
             return { maxQuantity: 99, inStock: true };
         }
         return { maxQuantity: Math.max(0, stock), inStock: stock > 0 };
-    }, [product?.stock]);
+    }, [product?.stock, selectedVariant]);
 
-    const isLowStock = product && inStock && product.stock <= (product.minStock || 10);
+    const isLowStock = product && inStock && (selectedVariant ? selectedVariant.stock : product.stock) <= (product.minStock || 10);
 
     const infoCards = useMemo(() => {
         if (!product) return [];
@@ -208,6 +228,7 @@ const ProductDetail = () => {
         setSelectedColor('');
         setSelectedSize('');
         setSelectedCustomOptions({});
+        setSelectedVariant(null);
         setActiveTab('description');
         setSelectedImage(0);
         fetchReviews();
@@ -219,15 +240,17 @@ const ProductDetail = () => {
         return {
             ...product,
             price: effectivePrice,
-            salePrice: product.salePrice ?? product.price,
+            salePrice: selectedVariant ? selectedVariant.price : (product.salePrice ?? product.price),
             image: primaryImage,
             selectedOptions: {
                 color: selectedColor,
                 size: selectedSize,
                 ...selectedCustomOptions,
+                variant: selectedVariant ? selectedVariant.name : undefined,
             },
+            variantId: selectedVariant?._id,
         };
-    }, [product, effectivePrice, gallery, selectedColor, selectedSize, selectedCustomOptions]);
+    }, [product, effectivePrice, gallery, selectedColor, selectedSize, selectedCustomOptions, selectedVariant]);
 
     const validateBeforeCart = () => {
         if (!product) return false;
@@ -625,9 +648,9 @@ const ProductDetail = () => {
                         <div className="grid grid-cols-2 gap-3 mb-5">
                             <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
                                 <p className="text-xs text-gray-500 mb-0.5">Disponibilité</p>
-                                <p className={`font-semibold text-sm ${product.stock > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
-                                    {product.stock > 0
-                                        ? `${product.stock} en stock`
+                                <p className={`font-semibold text-sm ${inStock ? 'text-gray-900' : 'text-gray-400'}`}>
+                                    {inStock
+                                        ? `${maxQuantity} en stock`
                                         : 'Rupture de stock'}
                                 </p>
                                 {isLowStock && (
@@ -659,6 +682,45 @@ const ProductDetail = () => {
                                         {tag}
                                     </span>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Variantes indépendantes */}
+                        {product.variants?.length > 0 && (
+                            <div className="mb-5">
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                    Option / Modèle
+                                </label>
+                                <div className="flex flex-wrap gap-3">
+                                    {product.variants.map((variant) => {
+                                        const isSelected = selectedVariant?._id === variant._id || selectedVariant?.id === variant.id;
+                                        return (
+                                            <button
+                                                key={variant._id || variant.id}
+                                                type="button"
+                                                onClick={() => setSelectedVariant(variant)}
+                                                className={`flex flex-col items-center gap-2 p-2 rounded-xl border-2 transition ${
+                                                    isSelected
+                                                        ? 'border-[#2d3748] bg-[#2d3748]/5'
+                                                        : 'border-gray-200 hover:border-[#e6c600]/50'
+                                                }`}
+                                            >
+                                                {variant.image && (
+                                                    <div className="w-12 h-12 rounded-lg bg-white overflow-hidden border border-gray-100">
+                                                        <img
+                                                            src={getImgUrl(variant.image)}
+                                                            alt={variant.name}
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <span className={`text-xs font-semibold ${isSelected ? 'text-[#2d3748]' : 'text-gray-600'}`}>
+                                                    {variant.name}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 

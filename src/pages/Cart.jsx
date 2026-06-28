@@ -146,6 +146,11 @@ const Cart = () => {
                             Taille: <strong>{item.selectedOptions.size}</strong>
                           </span>
                         )}
+                        {item.selectedOptions.variant && (
+                          <span className="bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                            Modèle: <strong>{item.selectedOptions.variant}</strong>
+                          </span>
+                        )}
                       </div>
                     )}
 
