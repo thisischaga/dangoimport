@@ -34,6 +34,7 @@ import { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
+import BottomNav from './components/BottomNav';
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -117,6 +118,7 @@ function App() {
               toastClassName="dango-toast-item"
               className="dango-toast"
             />
+            <BottomNav />
         </Router>
       </NotificationProvider>
     </CartProvider>
