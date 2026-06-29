@@ -75,7 +75,7 @@ function ProductCard({ product, badge, onClick }) {
   const hasPromo = product?.salePrice && product.salePrice < product.price;
 
   return (
-    <button type="button" onClick={onClick} className="group bg-white rounded-md overflow-hidden border border-gray-200 flex flex-col text-left transition-all h-full">
+    <button type="button" onClick={onClick} className="group bg-white rounded-xl overflow-hidden border border-gray-200 flex flex-col text-left transition-all h-full shadow-sm hover:shadow-md hover:border-[#ffdc2b]">
       <div className="aspect-square w-full bg-[#f8f8f8] flex items-center justify-center p-3 relative">
         {img ? (
           <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" />
@@ -83,39 +83,39 @@ function ProductCard({ product, badge, onClick }) {
           <FaBoxOpen className="text-gray-300 text-4xl" />
         )}
         {badge && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 rounded-sm">
             {badge}
           </span>
         )}
         {hasPromo && (
-          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">
+          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 rounded-sm">
             -{Math.round((1 - product.salePrice / product.price) * 100)}%
           </span>
         )}
       </div>
-      <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-[13px] sm:text-[14px] text-[#0F1111] line-clamp-2 mb-1 group-hover:text-[#C45500] leading-snug">
+      <div className="p-2.5 flex-1 flex flex-col">
+        <h3 className="text-[12px] sm:text-[13px] text-[#0F1111] line-clamp-2 mb-1 group-hover:text-[#C45500] leading-snug">
           {product.name}
         </h3>
         {product.rating > 0 && (
           <div className="flex items-center gap-1 mb-1">
-            <div className="flex text-[#FFA41C] text-[12px]">
+            <div className="flex text-[#FFA41C] text-[10px]">
               {[...Array(5)].map((_, i) => (
                 <FaStar key={i} className={i < Math.floor(product.rating) ? "text-[#FFA41C]" : "text-gray-300"} />
               ))}
             </div>
             {product.totalReviews > 0 && (
-              <span className="text-[12px] text-[#007185] hover:text-[#C45500] hover:underline cursor-pointer">{product.totalReviews}</span>
+              <span className="text-[10px] text-[#007185]">{product.totalReviews}</span>
             )}
           </div>
         )}
         <div className="mt-auto pt-1">
           <div className="flex items-baseline gap-1">
-            <span className="text-[17px] sm:text-[21px] font-medium text-[#B12704]">{fmtPrice(product)}</span>
-            <span className="text-[12px] text-[#B12704]">FCFA</span>
+            <span className="text-[15px] sm:text-[17px] font-bold text-[#B12704]">{fmtPrice(product)}</span>
+            <span className="text-[10px] text-[#B12704] font-medium">FCFA</span>
           </div>
           {hasPromo && (
-            <span className="text-[12px] text-[#565959] line-through">Prix de base: {Number(product.price).toLocaleString('fr-FR')} FCFA</span>
+            <span className="text-[10px] text-[#565959] line-through">Prix: {Number(product.price).toLocaleString('fr-FR')} FCFA</span>
           )}
         </div>
       </div>
@@ -128,27 +128,33 @@ function ProductRow({ title, subtitle, products, viewAllPath, badge }) {
   if (!products?.length) return null;
 
   return (
-    <section className="mb-8 bg-white border-y sm:border sm:border-gray-200 sm:rounded-md pt-5 pb-6 px-4 sm:px-6">
-      <div className="flex items-baseline gap-4 mb-4">
-        <h2 className="text-[21px] font-bold text-[#0F1111] tracking-tight">{title}</h2>
+    <section className="mb-6 bg-white sm:border sm:border-gray-200 sm:rounded-md pt-5 pb-2">
+      <div className="flex items-end justify-between gap-4 mb-4 px-4 sm:px-6">
+        <div>
+          <h2 className="text-[19px] sm:text-[21px] font-black text-[#0F1111] tracking-tight leading-tight">{title}</h2>
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        </div>
         {viewAllPath && (
           <button
             type="button"
             onClick={() => navigate(viewAllPath)}
-            className="text-[14px] font-medium text-[#007185] hover:text-[#C45500] hover:underline"
+            className="text-[13px] font-bold text-[#007185] hover:text-[#C45500] hover:underline whitespace-nowrap"
           >
-            Voir plus
+            Voir tout
           </button>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {products.slice(0, 5).map((p, i) => (
-          <ProductCard
-            key={p._id || i}
-            product={p}
-            badge={badge}
-            onClick={() => navigate(p._id ? `/product/${p._id}` : '/shopping')}
-          />
+      
+      {/* Horizontal Scroll Container */}
+      <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-4 sm:px-6 pb-4 scrollbar-hide">
+        {products.slice(0, 10).map((p, i) => (
+          <div key={p._id || i} className="snap-start shrink-0 w-[140px] sm:w-[180px]">
+            <ProductCard
+              product={p}
+              badge={badge}
+              onClick={() => navigate(p._id ? `/product/${p._id}` : '/shopping')}
+            />
+          </div>
         ))}
       </div>
     </section>
@@ -427,7 +433,7 @@ const Home = () => {
 
 
         {/* ══ PRODUITS — zone principale marketplace ═══ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <section className="mx-auto pb-8 sm:pb-10 pt-2 sm:pt-4">
           {(featuredLoading || catalogLoading) && !featuredProducts.length && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
               {[1, 2, 3, 4].map((i) => (

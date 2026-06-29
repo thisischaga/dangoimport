@@ -244,6 +244,27 @@
 .home-product-card {
   @apply snap-start shrink-0 w-[168px] sm:w-[200px] bg-white border border-gray-200 rounded-lg overflow-hidden text-left transition-all duration-200 hover:shadow-lg hover:border-[#ffdc2b] hover:-translate-y-0.5;
 }
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 60px);
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+/* App layout padding for bottom nav */
+@media (max-width: 767px) {
+  #root {
+    padding-bottom: 64px;
+  }
+}
+
 .home-category-pill {
   @apply shrink-0 flex flex-col items-center gap-2 w-[76px] sm:w-[88px] p-2 sm:p-3 rounded-xl border border-gray-100 bg-white hover:border-[#ffdc2b] hover:bg-[#fffbeb] transition-all cursor-pointer;
 }
