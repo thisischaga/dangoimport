@@ -247,7 +247,7 @@
 
 @layer utilities {
   .pb-safe {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 60px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
