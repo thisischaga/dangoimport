@@ -3,12 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import {
   FaSearch, FaShoppingCart, FaUser, FaBars, FaTimes,
-  FaSignOutAlt
+  FaSignOutAlt, FaSun, FaMoon
 } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 import NotificationPanel from './NotificationPanel';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const searchRef = useRef(null);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const { getCartCount } = useCart();
 
@@ -95,9 +97,9 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 border-b border-gray-100 ${scrolled ? 'header-scrolled shadow-sm' : 'bg-white'}`}>
+    <header className={`sticky top-0 z-50 transition-all duration-300 border-b border-gray-100 dark:border-gray-800 ${scrolled ? 'header-scrolled shadow-sm dark:bg-gray-900/95' : 'bg-white dark:bg-gray-900'}`}>
       {/* Bandeau info */}
-      <div className="bg-[#131921] text-white text-center py-1.5 px-4 hidden md:block">
+      <div className="bg-[#000000] text-white text-center py-1.5 px-4 hidden md:block">
         <p className="text-[11px] font-semibold">
           Livraison J+1 à Cotonou · Mobile Money & Cash ·
           <button
@@ -122,33 +124,36 @@ const Header = () => {
               <img
                 src={logo}
                 alt="Dango Import"
-                className="h-8 w-8 md:h-9 md:w-9 rounded-lg border border-gray-200 object-cover group-hover:border-gray-300 transition-colors"
+                className="h-8 w-8 md:h-9 md:w-9 rounded-lg border border-gray-200 dark:border-gray-700 object-cover group-hover:border-gray-300 transition-colors"
               />
               <div className="text-left">
-                <p className="text-base font-black text-gray-900 leading-none tracking-tight">DANGO</p>
-                <p className="text-[10px] font-bold text-gray-500 tracking-widest">IMPORT</p>
+                <p className="text-base font-black text-gray-900 dark:text-white leading-none tracking-tight">DANGO</p>
+                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-widest">IMPORT</p>
               </div>
             </button>
 
-            {/* Mobile Actions (Cart, Login/User) - Desktop will have them on the right */}
+            {/* Mobile Actions */}
             <div className="flex items-center gap-3 md:hidden">
+              <button type="button" onClick={toggleTheme} className="text-gray-700 dark:text-gray-300">
+                {isDarkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+              </button>
               {user ? (
-                <button type="button" onClick={() => navigate('/mes-commandes')} className="text-gray-700">
+                <button type="button" onClick={() => navigate('/mes-commandes')} className="text-gray-700 dark:text-gray-300">
                   <FaUser size={18} />
                 </button>
               ) : (
-                <button type="button" onClick={() => navigate('/login')} className="text-gray-700 text-[12px] font-bold">
+                <button type="button" onClick={() => navigate('/login')} className="text-gray-700 dark:text-gray-300 text-[12px] font-bold">
                   Connexion
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => navigate('/cart')}
-                className="relative flex items-center text-[#2d3748] px-2 py-1"
+                className="relative flex items-center text-[#2d3748] dark:text-gray-300 px-2 py-1"
               >
                 <FaShoppingCart size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#CC0C39] text-white text-[10px] font-bold w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center rounded-full ring-2 ring-white">
+                  <span className="absolute -top-1 -right-1 bg-[#ffdc2b] text-white text-[10px] font-bold w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center rounded-full ring-2 ring-white">
                     {cartCount}
                   </span>
                 )}
@@ -159,14 +164,14 @@ const Header = () => {
           {/* Recherche (toujours visible, prend 100% sur mobile) */}
           <form onSubmit={handleSearch} className="flex-1 w-full max-w-2xl mx-auto">
             <div className={`w-full flex items-center rounded-md border-2 transition-all duration-200 ${
-              searchFocused ? 'border-[#ffdc2b] bg-white shadow-sm ring-1 ring-[#ffdc2b]/20' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+              searchFocused ? 'border-[#ffdc2b] bg-white dark:bg-gray-800 shadow-sm ring-1 ring-[#ffdc2b]/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-gray-300'
             }`}>
               <FaSearch className={`ml-3.5 text-sm ${searchFocused ? 'text-gray-700' : 'text-gray-400'}`} />
               <input
                 ref={searchRef}
                 type="text"
                 placeholder="Rechercher des produits..."
-                className="w-full bg-transparent border-none py-2 px-3 focus:outline-none text-sm text-gray-800 placeholder:text-gray-400"
+                className="w-full bg-transparent border-none py-2 px-3 focus:outline-none text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
@@ -177,9 +182,12 @@ const Header = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
+            <button type="button" onClick={toggleTheme} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors" title="Changer le thème">
+              {isDarkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+            </button>
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 max-w-[100px] truncate">
                   {user.firstname || user.userFirstname}
                 </span>
                 <button
@@ -195,7 +203,7 @@ const Header = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="flex items-center gap-1.5 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
               >
                 <FaUser size={13} /> Connexion
               </button>
@@ -206,12 +214,12 @@ const Header = () => {
             <button
               type="button"
               onClick={() => navigate('/cart')}
-              className="relative flex items-center gap-1.5 border border-gray-200 hover:border-[#ffdc2b]/60 hover:bg-[#fffbeb] text-[#2d3748] px-4 py-2 rounded-lg transition-colors text-sm font-bold"
+              className="relative flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#ffdc2b]/60 hover:bg-[#fffbeb] dark:hover:bg-gray-800 text-[#2d3748] dark:text-gray-200 px-4 py-2 rounded-lg transition-colors text-sm font-bold"
             >
               <FaShoppingCart size={16} />
               <span>Panier</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#CC0C39] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full ring-2 ring-white">
+                <span className="absolute -top-1.5 -right-1.5 bg-[#ffdc2b] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full ring-2 ring-white">
                   {cartCount}
                 </span>
               )}
@@ -221,7 +229,7 @@ const Header = () => {
       </div>
 
       {/* Navigation (Desktop) */}
-      <div className="bg-[#232f3e] hidden md:block text-white">
+      <div className="bg-[#111111] hidden md:block text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-4 h-10">
             {mainLinks.map((link) => (

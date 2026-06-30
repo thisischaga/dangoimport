@@ -85,13 +85,13 @@ const Footer = () => {
       <button
         type="button"
         onClick={scrollToTop}
-        className="w-full bg-[#4a6274] hover:bg-[#5a7284] text-white text-sm py-3.5 transition-colors"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-3.5 transition-colors"
       >
         Retour en haut
       </button>
 
       {/* ══ NEWSLETTER ══════════════════════════════ */}
-      <div className="bg-[#344955] border-b border-[#4a6274]/50">
+      <div className="bg-black border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-black text-white flex items-center justify-center md:justify-start gap-2 mb-1.5">
@@ -123,7 +123,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="bg-[#344955] text-[#e8eaed]">
+      <div className="bg-black text-[#e8eaed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-10 py-10 sm:py-12 grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
           {columns.map((col) => (
             <div key={col.title}>
@@ -151,7 +151,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="bg-[#344955] border-t border-[#4a6274]/60">
+      <div className="bg-black border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-10 py-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-center gap-3">
             <img src={logo} alt="Dango Import" className="h-9 w-9 rounded object-cover" />
@@ -193,7 +193,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="bg-[#2a3640] py-5">
+      <div className="bg-[#111111] py-5">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-[11px] text-[#999]">
           <Link to="/" className="hover:text-white transition-colors">Accueil</Link>
           <Link to="/shopping" className="hover:text-white transition-colors">Marketplace</Link>

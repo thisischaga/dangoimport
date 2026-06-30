@@ -61,7 +61,7 @@ const StarRating = ({ value = 0, count }) => {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="aspect-square skeleton" />
       <div className="p-3 space-y-2">
         <div className="skeleton h-3 rounded w-3/4" />
@@ -80,11 +80,11 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
   return (
     <div
       onClick={onOpen}
-      className="bg-white rounded-md border border-gray-200 overflow-hidden flex flex-col group cursor-pointer transition-all hover:shadow-sm"
+      className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col group cursor-pointer transition-all hover:shadow-sm"
     >
-      <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center p-3 relative overflow-hidden">
+      <div className="aspect-square product-img-container flex items-center justify-center p-3 relative overflow-hidden">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" />
+          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
         ) : (
           <FaTag className="text-gray-200 text-3xl" />
         )}
@@ -96,13 +96,13 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
         </div>
 
         {product.isFeatured && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10">Top</span>
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10">Top</span>
         )}
         {product.isNewArrival && !product.isFeatured && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#007185] text-white z-10">Nouveau</span>
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#2563EB] text-white z-10">Nouveau</span>
         )}
         {hasPromo && (
-          <span className="absolute bottom-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 flex items-center gap-1">
+          <span className="absolute bottom-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 flex items-center gap-1">
             <FaFire size={9} /> Promo
           </span>
         )}
@@ -111,7 +111,7 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
           type="button"
           onClick={onToggleWish}
           className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-            isWished ? 'bg-transparent text-[#CC0C39]' : 'bg-transparent text-gray-300 hover:text-[#CC0C39]'
+            isWished ? 'bg-transparent text-[#ffdc2b]' : 'bg-transparent text-gray-300 hover:text-[#ffdc2b]'
           }`}
         >
           <FaHeart size={16} />
@@ -120,9 +120,9 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
 
       <div className="p-3 flex flex-col flex-1">
         {product.category && (
-          <p className="text-[10px] text-[#565959] mb-0.5 line-clamp-1">{product.category}</p>
+          <p className="text-[10px] text-[#565959] dark:text-gray-400 mb-0.5 line-clamp-1">{product.category}</p>
         )}
-        <h3 className="text-[13px] sm:text-[14px] text-[#0F1111] line-clamp-2 min-h-[2.25rem] group-hover:text-[#C45500] leading-snug">
+        <h3 className="text-[13px] sm:text-[14px] text-[#000000] dark:text-gray-100 line-clamp-2 min-h-[2.25rem] group-hover:text-[#1D4ED8] dark:group-hover:text-blue-400 leading-snug">
           {product.name}
         </h3>
 
@@ -133,7 +133,7 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
             ))}
           </div>
           {(product.totalReviews || 0) > 0 && (
-            <span className="text-[#007185] hover:text-[#C45500] hover:underline">{product.totalReviews}</span>
+            <span className="text-[#2563EB] hover:text-[#1D4ED8] hover:underline">{product.totalReviews}</span>
           )}
         </div>
 
@@ -159,7 +159,7 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onGoCart(); }}
-              className="mt-3 w-full py-1.5 rounded-full text-[12px] text-[#0F1111] bg-[#F7CA00] hover:bg-[#F2C200] border border-[#F2C200] shadow-sm"
+              className="mt-3 w-full py-1.5 rounded-full text-[12px] text-[#000000] bg-[#ffdc2b] hover:bg-[#e6c627] border border-[#e6c627] shadow-sm"
             >
               Aller au panier
             </button>
@@ -168,7 +168,7 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
               type="button"
               onClick={onAddCart}
               className={`mt-3 w-full py-1.5 rounded-full text-[12px] flex items-center justify-center gap-1.5 shadow-sm ${
-                justAdded ? 'bg-green-600 text-white border border-green-600' : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] border border-[#FCD200]'
+                justAdded ? 'bg-green-600 text-white border border-green-600' : 'bg-[#ffdc2b] hover:bg-[#ffdc2b] text-[#000000] border border-[#ffdc2b]'
               }`}
             >
               {justAdded ? '✓ Ajouté au panier' : 'Ajouter au panier'}
@@ -277,20 +277,20 @@ const Ecom = () => {
   };
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen font-sans">
+    <div className="bg-[#f5f5f5] dark:bg-[#0f1115] min-h-screen font-sans">
       <Header />
 
 
 
       {/* Toolbar */}
-      <div className="bg-white border-b border-gray-200 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-lg sm:text-xl font-black text-gray-900">
+              <h1 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
                 {query ? `« ${query} »` : 'Marketplace'}
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {activeCategory !== 'Tous' && <span className="text-[#c9a800] font-bold">{activeCategory} · </span>}
                 Achetez auprès de vendeurs locaux vérifiés
               </p>
@@ -308,7 +308,7 @@ const Ecom = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] cursor-pointer"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#ffdc2b] cursor-pointer"
                 >
                   {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -337,7 +337,7 @@ const Ecom = () => {
       </div>
 
       {/* Catégories mobile */}
-      <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-2.5 home-hide-scrollbar overflow-x-auto">
+      <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-2.5 home-hide-scrollbar overflow-x-auto">
         <div className="flex gap-2 w-max">
           {categories.map((cat) => (
             <button
@@ -361,8 +361,8 @@ const Ecom = () => {
 
           {/* Sidebar */}
           <aside className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block lg:w-56 shrink-0 space-y-5`}>
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
                 <FaFilter size={9} /> Catégories
               </p>
               <div className="flex flex-col gap-0.5 max-h-64 overflow-y-auto">
@@ -373,8 +373,8 @@ const Ecom = () => {
                     onClick={() => setCategory(cat)}
                     className={`text-left px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
                       activeCategory === cat
-                        ? 'bg-[#fffbeb] text-[#2d3748] border-l-2 border-[#ffdc2b]'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#fffbeb] dark:bg-gray-800 text-[#2d3748] dark:text-white border-l-2 border-[#ffdc2b]'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                   >
                     {cat}

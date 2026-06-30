@@ -69,7 +69,7 @@ const VendorProfile = () => {
                 
                 {/* Title */}
                 <h3 
-                  className="text-[14px] leading-tight font-medium mb-1 cursor-pointer text-[#007185] hover:text-[#C7511F] line-clamp-2"
+                  className="text-[14px] leading-tight font-medium mb-1 cursor-pointer text-[#2563EB] hover:text-[#1D4ED8] line-clamp-2"
                   onClick={() => { setProductDetail(p); setShowForm(true); }}
                 >
                   {p.name}
@@ -95,7 +95,7 @@ const VendorProfile = () => {
                 {/* Button */}
                 <button 
                   onClick={() => addToCart(p)}
-                  className="mt-auto bg-[#FFD814] hover:bg-[#F7CA00] transition-colors py-1.5 rounded-full text-xs font-medium border border-[#FCD200] text-gray-900 w-full"
+                  className="mt-auto bg-[#ffdc2b] hover:bg-[#ffdc2b] transition-colors py-1.5 rounded-full text-xs font-medium border border-[#ffdc2b] text-gray-900 w-full"
                 >
                   Ajouter au panier
                 </button>

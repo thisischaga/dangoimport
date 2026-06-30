@@ -76,25 +76,25 @@ function ProductCard({ product, badge, onClick }) {
 
   return (
     <button type="button" onClick={onClick} className="group bg-white rounded-xl overflow-hidden border border-gray-200 flex flex-col text-left transition-all h-full shadow-sm hover:shadow-md hover:border-[#ffdc2b]">
-      <div className="aspect-square w-full bg-[#f8f8f8] flex items-center justify-center p-3 relative">
+      <div className="aspect-square w-full product-img-container flex items-center justify-center p-3 relative">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" />
+          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
         ) : (
           <FaBoxOpen className="text-gray-300 text-4xl" />
         )}
         {badge && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 rounded-sm">
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 rounded-sm">
             {badge}
           </span>
         )}
         {hasPromo && (
-          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#CC0C39] text-white z-10 rounded-sm">
+          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 rounded-sm">
             -{Math.round((1 - product.salePrice / product.price) * 100)}%
           </span>
         )}
       </div>
       <div className="p-2.5 flex-1 flex flex-col">
-        <h3 className="text-[12px] sm:text-[13px] text-[#0F1111] line-clamp-2 mb-1 group-hover:text-[#C45500] leading-snug">
+        <h3 className="text-[12px] sm:text-[13px] text-[#000000] dark:text-white line-clamp-2 mb-1 group-hover:text-[#1D4ED8] dark:group-hover:text-blue-400 leading-snug">
           {product.name}
         </h3>
         {product.rating > 0 && (
@@ -105,7 +105,7 @@ function ProductCard({ product, badge, onClick }) {
               ))}
             </div>
             {product.totalReviews > 0 && (
-              <span className="text-[10px] text-[#007185]">{product.totalReviews}</span>
+              <span className="text-[10px] text-[#2563EB]">{product.totalReviews}</span>
             )}
           </div>
         )}
@@ -131,14 +131,14 @@ function ProductRow({ title, subtitle, products, viewAllPath, badge }) {
     <section className="mb-6 bg-white sm:border sm:border-gray-200 sm:rounded-md pt-5 pb-2">
       <div className="flex items-end justify-between gap-4 mb-4 px-4 sm:px-6">
         <div>
-          <h2 className="text-[19px] sm:text-[21px] font-black text-[#0F1111] tracking-tight leading-tight">{title}</h2>
-          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+          <h2 className="text-[19px] sm:text-[21px] font-black text-[#000000] dark:text-white tracking-tight leading-tight">{title}</h2>
+          {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
         </div>
         {viewAllPath && (
           <button
             type="button"
             onClick={() => navigate(viewAllPath)}
-            className="text-[13px] font-bold text-[#007185] hover:text-[#C45500] hover:underline whitespace-nowrap"
+            className="text-[13px] font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
           >
             Voir tout
           </button>
@@ -231,20 +231,20 @@ const Home = () => {
   }, [location.state, location.search, location.pathname]);
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen text-gray-900 flex flex-col overflow-x-hidden">
+    <div className="bg-[#f5f5f5] dark:bg-[#0f1115] min-h-screen text-gray-900 dark:text-gray-100 flex flex-col overflow-x-hidden">
       <Header />
 
       <main className="flex-1 w-full">
 
         {/* ══ MARKETPLACE HERO (style Alibaba) ══════════ */}
-        <section className="bg-white border-b border-gray-200">
+        <section className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
               {/* Catégories — sidebar desktop */}
               <div className="hidden lg:block lg:col-span-2">
-                <div className="bg-[#fafafa] border border-gray-200 rounded-xl overflow-hidden h-full min-h-[280px]">
-                  <p className="px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-500 border-b border-gray-200 bg-white">
+                <div className="bg-[#fafafa] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden h-full min-h-[280px]">
+                  <p className="px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                     Catégories
                   </p>
                   <ul className="py-1">
@@ -253,7 +253,7 @@ const Home = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/shopping?category=${encodeURIComponent(cat.name)}`)}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#fffbeb] hover:text-[#e6c600] transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-[#fffbeb] dark:hover:bg-gray-700 hover:text-[#e6c600] dark:hover:text-white transition-colors text-left"
                         >
                           <cat.icon size={14} className="text-gray-400 shrink-0" />
                           {cat.name}
@@ -300,7 +300,7 @@ const Home = () => {
                           </button>
                         </div>
                         <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
-                          <img src={slide2Img} alt="Électronique" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                          <img src={featuredProducts.length > 0 ? getProductImage(featuredProducts[0]) : slide2Img} alt="Électronique" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
                         </div>
                       </div>
                     </div>
@@ -323,7 +323,7 @@ const Home = () => {
                           </button>
                         </div>
                         <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
-                          <img src={slide3Img} alt="Beauté et Parfums" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
+                          <img src={featuredProducts.length > 1 ? getProductImage(featuredProducts[1]) : slide3Img} alt="Beauté et Parfums" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
                         </div>
                       </div>
                     </div>
@@ -349,7 +349,7 @@ const Home = () => {
                           </button>
                         </div>
                         <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative z-10">
-                          <img src={slide1Img} alt="Sourcing Chine Premium" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                          <img src={featuredProducts.length > 2 ? getProductImage(featuredProducts[2]) : slide1Img} alt="Sourcing Chine Premium" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
                         </div>
                       </div>
                     </div>
@@ -358,12 +358,12 @@ const Home = () => {
 
                 {/* Barre de recherche */}
                 <form onSubmit={handleHeroSearch} className="flex gap-2">
-                  <div className="flex-1 flex items-center bg-white rounded-xl overflow-hidden border-2 border-[#ffdc2b] shadow-sm">
+                  <div className="flex-1 flex items-center bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-[#ffdc2b] shadow-sm">
                     <FaSearch className="ml-4 text-gray-400 shrink-0" size={14} />
                     <input
                       type="text"
                       placeholder="Rechercher des produits, catégories, marques..."
-                      className="flex-1 px-4 py-3 sm:py-3.5 text-sm text-gray-800 focus:outline-none"
+                      className="flex-1 px-4 py-3 sm:py-3.5 text-sm text-gray-800 dark:text-gray-100 bg-transparent focus:outline-none"
                       value={heroSearch}
                       onChange={(e) => setHeroSearch(e.target.value)}
                     />

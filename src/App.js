@@ -35,6 +35,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import BottomNav from './components/BottomNav';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -72,6 +73,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
     <CartProvider>
       <NotificationProvider recipientType="user" userId={user?.email || user?.userEmail}>
         <Router>
@@ -122,6 +124,7 @@ function App() {
         </Router>
       </NotificationProvider>
     </CartProvider>
+    </ThemeProvider>
     </QueryClientProvider>
   );
 }
