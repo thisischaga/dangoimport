@@ -16,6 +16,10 @@ import {
 } from '../services/fedapayCheckout';
 
 import { NETWORK_LOGOS, FEDAPAY_COUNTRIES,  } from '../utils/fedapayConfig';
+import { calculateDeliveryFee } from '../utils/deliveryPricing';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 const getImgUrl = (img) => resolveImageUrl(img) || '';
 
@@ -93,7 +97,23 @@ const SHIPPING_OPTIONS = [
 ];
 
 const STEPS = ['Informations', 'Livraison', 'Paiement', 'Confirmation'];
+const DEFAULT_CENTER = { lat: 6.3703, lng: 2.4336 };
 
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+function MapEvents({ onSelect }) {
+    useMapEvents({
+        click(e) {
+            onSelect(e.latlng.lat, e.latlng.lng);
+        },
+    });
+    return null;
+}
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -109,6 +129,9 @@ export default function Checkout() {
     const [fedapayNetwork, setFedapayNetwork] = useState('mtn');
     const [fedapayPhone, setFedapayPhone] = useState('');
     const [errors, setErrors] = useState([]);
+    const [deliveryLocation, setDeliveryLocation] = useState(DEFAULT_CENTER);
+    const [showTaxModal, setShowTaxModal] = useState(false);
+    const [taxAgreement, setTaxAgreement] = useState(false);
 
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '', phone: '',
@@ -188,7 +211,12 @@ export default function Checkout() {
     );
 
     const selectedShipping = SHIPPING_OPTIONS.find(o => o.value === shippingMethod);
-    const shippingFee = selectedShipping?.fee ?? 0;
+    const shippingFee = useMemo(() => calculateDeliveryFee({
+        country: form.country,
+        city: form.city,
+        neighborhood: form.neighborhood,
+        shippingMethod,
+    }), [form.country, form.city, form.neighborhood, shippingMethod]);
     const total = subtotal + shippingFee;
 
     // ─── Validation étape 1 ───────────────────────────────────────────────────
@@ -211,6 +239,12 @@ export default function Checkout() {
 
         if (!form.phone || form.phone.replace(/\D/g, '').length < 8) {
             toast.warning('Veuillez renseigner un numéro de téléphone valide.');
+            return;
+        }
+
+        if (!taxAgreement) {
+            setShowTaxModal(true);
+            toast.warning('Veuillez confirmer la fiche de taxe et les frais avant de continuer.');
             return;
         }
 
@@ -296,6 +330,11 @@ export default function Checkout() {
     };
 
     // ─── Helper champ formulaire ──────────────────────────────────────────────
+    const handleSelectLocation = (lat, lng) => {
+        setDeliveryLocation({ lat, lng });
+        setForm(prev => ({ ...prev, lat, lng }));
+    };
+
     const field = (name, placeholder, type = 'text', cls = '') => (
         <div className={`relative ${cls}`}>
             <input
@@ -376,6 +415,37 @@ export default function Checkout() {
             </div>
 
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+                {showTaxModal && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4">
+                        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-black text-gray-900">Fiche de taxe / frais</h3>
+                                <button type="button" onClick={() => setShowTaxModal(false)} className="text-gray-400 hover:text-gray-700">✕</button>
+                            </div>
+                            <div className="space-y-3 text-sm text-gray-600">
+                                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                    <p className="font-semibold text-gray-900">Résumé</p>
+                                    <p>Sous-total : {subtotal.toLocaleString('fr-FR')} F</p>
+                                    <p>Livraison : {shippingFee.toLocaleString('fr-FR')} F</p>
+                                    <p>Total estimé : {total.toLocaleString('fr-FR')} F</p>
+                                </div>
+                                <div className="rounded-xl border border-gray-200 bg-[#fffbeb] p-3">
+                                    <p className="font-semibold text-gray-900">Taxes et frais</p>
+                                    <p>Les frais de livraison varient selon votre pays, votre ville et le type d’expédition.</p>
+                                    <p>Une petite commission de traitement peut être appliquée selon le mode de paiement choisi.</p>
+                                </div>
+                                <label className="flex items-start gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4" />
+                                    <span>Je confirme avoir lu la fiche de taxe et accepte les frais estimés avant le paiement.</span>
+                                </label>
+                            </div>
+                            <div className="mt-5 flex justify-end gap-3">
+                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700">Fermer</button>
+                                <button type="button" onClick={() => { setTaxAgreement(true); setShowTaxModal(false); }} className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900">Continuer</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Stepper ─────────────────────────────────────────────────── */}
                 <div className="flex items-center justify-center mb-8 sm:mb-10">
@@ -456,7 +526,20 @@ export default function Checkout() {
                             {step === 2 && (
                                 <div className="p-6 sm:p-8">
                                     <h2 className="text-lg font-bold text-gray-900 mb-6">Mode de livraison</h2>
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
+                                        <div className="rounded-2xl border border-gray-200 overflow-hidden bg-gray-50">
+                                            <div className="h-48 w-full">
+                                                <MapContainer center={[deliveryLocation.lat, deliveryLocation.lng]} zoom={12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                                    <MapEvents onSelect={handleSelectLocation} />
+                                                    <Marker position={[deliveryLocation.lat, deliveryLocation.lng]} />
+                                                </MapContainer>
+                                            </div>
+                                            <div className="p-4">
+                                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">Choisissez l’adresse de livraison</p>
+                                                <p className="text-sm text-gray-600">Cliquez sur la carte pour placer votre adresse. Le prix de livraison sera recalculé automatiquement.</p>
+                                            </div>
+                                        </div>
                                         {SHIPPING_OPTIONS.map(opt => (
                                             <label
                                                 key={opt.value}
@@ -471,7 +554,7 @@ export default function Checkout() {
                                                     <p className="text-xs text-gray-500 mt-0.5">{opt.delay}</p>
                                                 </div>
                                                 <p className={`font-bold text-sm shrink-0 ${shippingMethod === opt.value ? 'text-gray-900' : 'text-gray-700'}`}>
-                                                    À calculer
+                                                    {opt.value === 'pickup' ? 'Gratuit' : `${shippingFee.toLocaleString('fr-FR')} F`}
                                                 </p>
                                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
                                                     ${shippingMethod === opt.value ? 'border-gray-900' : 'border-gray-300'}`}>
