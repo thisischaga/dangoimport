@@ -92,93 +92,93 @@ const ClientActivity = () => {
               else if (cmd.status?.toLowerCase().includes('livr')) statusColor = "bg-blue-50 text-blue-700 border border-blue-200";
 
               return (
-                <div key={cmd._id} className="bg-white dark:bg-[#1a1d24] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-colors flex flex-col sm:flex-row gap-6 sm:items-center shadow-sm">
-                  
-                  {/* Image Placeholder or Actual Image */}
-                  <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-800">
-                    {imgUrl ? (
-                      <img src={imgUrl} alt="Produit" className="w-full h-full object-contain p-2" />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 dark:bg-gray-800" />
-                    )}
-                  </div>
-                  
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full ${statusColor}`}>
-                        {cmd.status || 'En attente'}
-                      </span>
-                      <span className="text-[12px] text-gray-500 font-medium">{date}</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-[16px] line-clamp-1 mb-1">{title}</h3>
-                    <div className="flex items-center gap-4 text-[13px] text-gray-500">
-                      <p>N° <span className="font-medium text-gray-900 dark:text-gray-300">{cmd._id?.slice(-8).toUpperCase()}</span></p>
-                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                      <p>{qty} article{qty > 1 ? 's' : ''}</p>
-                    </div>
-                  </div>
-
-                  {/* Price & Actions */}
-                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-gray-800 pt-4 sm:pt-0 sm:pl-6">
-                    <div className="text-left sm:text-right">
-                      <p className="text-[11px] text-gray-400 font-medium mb-1">Total</p>
-                      <span className="text-[18px] font-black text-gray-900 dark:text-white leading-none">
-                        {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">FCFA</span>
-                      </span>
-                    </div>
-                    <button 
-                      onClick={() => setExpandedOrder(expandedOrder === cmd._id ? null : cmd._id)}
-                      className="text-[13px] font-bold text-gray-900 dark:text-white underline hover:text-[#ffdc2b] transition-colors"
-                    >
-                      {expandedOrder === cmd._id ? 'Fermer' : 'Détails'}
-                    </button>
-                  </div>
-
-                </div>
-                
-                {expandedOrder === cmd._id && (
-                  <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-gray-100 dark:border-gray-800">
-                    <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Détails de la commande</h4>
+                <>
+                  <div key={cmd._id} className="bg-white dark:bg-[#1a1d24] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-colors flex flex-col sm:flex-row gap-6 sm:items-center shadow-sm">
                     
-                    {/* Products List */}
-                    {cmd.products && cmd.products.length > 0 ? (
-                      <div className="space-y-3 mb-6">
-                        {cmd.products.map((p, idx) => (
-                          <div key={idx} className="flex justify-between items-center bg-white dark:bg-[#1a1d24] p-3 rounded-lg border border-gray-100 dark:border-gray-800">
-                            <div className="flex items-center gap-3">
-                              <span className="font-medium text-sm text-gray-900 dark:text-white line-clamp-1 max-w-[200px] sm:max-w-sm">{p.name || p.productName || 'Produit sans nom'}</span>
-                              <span className="text-xs text-gray-500 font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">x{p.quantity || 1}</span>
-                            </div>
-                            <span className="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">{(p.price || 0).toLocaleString('fr-FR')} FCFA</span>
-                          </div>
-                        ))}
+                    {/* Image Placeholder or Actual Image */}
+                    <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-800">
+                      {imgUrl ? (
+                        <img src={imgUrl} alt="Produit" className="w-full h-full object-contain p-2" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 dark:bg-gray-800" />
+                      )}
+                    </div>
+                    
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full ${statusColor}`}>
+                          {cmd.status || 'En attente'}
+                        </span>
+                        <span className="text-[12px] text-gray-500 font-medium">{date}</span>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">Achat direct - Aucun détail de produit disponible</p>
-                    )}
+                      <h3 className="font-bold text-gray-900 dark:text-white text-[16px] line-clamp-1 mb-1">{title}</h3>
+                      <div className="flex items-center gap-4 text-[13px] text-gray-500">
+                        <p>N° <span className="font-medium text-gray-900 dark:text-gray-300">{cmd._id?.slice(-8).toUpperCase()}</span></p>
+                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                        <p>{qty} article{qty > 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
 
-                    {/* Shipping Info */}
-                    {(cmd.firstName || cmd.address || cmd.phone) && (
-                      <div className="bg-white dark:bg-[#1a1d24] p-4 rounded-xl border border-gray-100 dark:border-gray-800 text-sm">
-                        <p className="font-bold text-gray-900 dark:text-white mb-2">Informations de livraison</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Destinataire</p>
-                            <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.firstName} {cmd.lastName}</p>
-                            <p className="text-gray-900 dark:text-gray-300">{cmd.phone}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Adresse</p>
-                            <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.address}</p>
-                            <p className="text-gray-900 dark:text-gray-300">{cmd.city}, {cmd.country}</p>
+                    {/* Price & Actions */}
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-gray-800 pt-4 sm:pt-0 sm:pl-6">
+                      <div className="text-left sm:text-right">
+                        <p className="text-[11px] text-gray-400 font-medium mb-1">Total</p>
+                        <span className="text-[18px] font-black text-gray-900 dark:text-white leading-none">
+                          {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">FCFA</span>
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => setExpandedOrder(expandedOrder === cmd._id ? null : cmd._id)}
+                        className="text-[13px] font-bold text-gray-900 dark:text-white underline hover:text-[#ffdc2b] transition-colors"
+                      >
+                        {expandedOrder === cmd._id ? 'Fermer' : 'Détails'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {expandedOrder === cmd._id && (
+                    <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-gray-100 dark:border-gray-800">
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Détails de la commande</h4>
+                      
+                      {/* Products List */}
+                      {cmd.products && cmd.products.length > 0 ? (
+                        <div className="space-y-3 mb-6">
+                          {cmd.products.map((p, idx) => (
+                            <div key={idx} className="flex justify-between items-center bg-white dark:bg-[#1a1d24] p-3 rounded-lg border border-gray-100 dark:border-gray-800">
+                              <div className="flex items-center gap-3">
+                                <span className="font-medium text-sm text-gray-900 dark:text-white line-clamp-1 max-w-[200px] sm:max-w-sm">{p.name || p.productName || 'Produit sans nom'}</span>
+                                <span className="text-xs text-gray-500 font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">x{p.quantity || 1}</span>
+                              </div>
+                              <span className="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">{(p.price || 0).toLocaleString('fr-FR')} FCFA</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">Achat direct - Aucun détail de produit disponible</p>
+                      )}
+
+                      {/* Shipping Info */}
+                      {(cmd.firstName || cmd.address || cmd.phone) && (
+                        <div className="bg-white dark:bg-[#1a1d24] p-4 rounded-xl border border-gray-100 dark:border-gray-800 text-sm">
+                          <p className="font-bold text-gray-900 dark:text-white mb-2">Informations de livraison</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Destinataire</p>
+                              <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.firstName} {cmd.lastName}</p>
+                              <p className="text-gray-900 dark:text-gray-300">{cmd.phone}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Adresse</p>
+                              <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.address}</p>
+                              <p className="text-gray-900 dark:text-gray-300">{cmd.city}, {cmd.country}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                      )}
+                    </div>
+                  )}
+                </>
               );
             })}
           </div>
