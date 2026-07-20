@@ -264,23 +264,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* ─── 3. Dark Bottom Nav Bar (Alibaba-style) ─── */}
-      <div className="hidden md:block bg-[#1a1a1a] dark:bg-[#0d0f12]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
-          <nav className="flex items-center justify-between h-10">
-            <div className="flex items-center gap-7 text-[13px] font-semibold text-gray-300">
-              <button type="button" onClick={() => navigate('/toutes-les-categories')} className="flex items-center gap-1.5 hover:text-white transition-colors">
-                <FaBars size={12} /> All categories
-              </button>
-              <button type="button" onClick={() => navigate('/selection-vedette')} className="hover:text-white transition-colors">Featured selection</button>
-            </div>
-            <div className="flex items-center gap-7 text-[12px] font-medium text-gray-400">
-              <button type="button" onClick={() => navigate('/centre-aide')} className="hover:text-white transition-colors">Help center</button>
-            </div>
-          </nav>
-        </div>
-      </div>
-
       {/* ─── Mobile Search ─── */}
       <div className="md:hidden px-4 pb-3">
         <form onSubmit={handleSearch} className="flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full overflow-hidden">
