@@ -93,7 +93,7 @@ const SHIPPING_OPTIONS = [
     { value: 'pickup',   label: 'Retrait en magasin', delay: 'Disponible sous 24h', fee: 0, icon: <StoreIcon /> },
 ];
 
-const STEPS = ['Informations', 'Livraison', 'Paiement', 'Confirmation'];
+const STEPS = ['Informations', 'Paiement', 'Confirmation'];
 const DEFAULT_CENTER = { lat: 6.3703, lng: 2.4336 };
 
 export default function Checkout() {
@@ -264,16 +264,16 @@ export default function Checkout() {
             return;
         }
 
-        if (!taxAgreement) {
-            setShowTaxModal(true);
-            toast.warning('Veuillez confirmer la fiche de taxe et les frais avant de continuer.');
-            return;
-        }
-
         const token = localStorage.getItem('dangoToken');
         setSubmitting(true);
 
         if (paymentMethod === 'fedapay') {
+            if (!taxAgreement) {
+                setShowTaxModal(true);
+                toast.warning('Veuillez confirmer la fiche de taxe et les frais avant de continuer.');
+                setSubmitting(false);
+                return;
+            }
             if (!fedapayPhone || !fedapayNetwork) {
                 toast.warning('Veuillez renseigner votre réseau et numéro Mobile Money.');
                 setSubmitting(false);
@@ -491,52 +491,59 @@ export default function Checkout() {
 
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 {showTaxModal && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/70 px-4 py-6">
-                        <div className="w-full max-w-xl overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-2xl">
-                            <div className="bg-gradient-to-r from-[#111827] via-[#1f2937] to-[#374151] px-6 py-5 text-white">
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4 py-6">
+                        <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-xl">
+                            <div className="border-b border-gray-200 px-5 py-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffdc2b]">Avant paiement</p>
-                                        <h3 className="mt-1 text-lg font-black">Fiche de taxe et frais</h3>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Avant paiement</p>
+                                        <h3 className="mt-1 text-lg font-black text-gray-900">Fiche de taxe et frais</h3>
                                     </div>
-                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full bg-white/10 p-2 text-white/80 transition hover:bg-white/20 hover:text-white">✕</button>
+                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">✕</button>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 p-6 text-sm text-gray-600">
-                                <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
+                            <div className="space-y-4 p-5 text-sm text-gray-600">
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Sous-total</p>
                                         <p className="mt-1 font-black text-gray-900">{subtotal.toLocaleString('fr-FR')} F</p>
                                     </div>
-                                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Livraison</p>
-                                        <p className="mt-1 font-black text-gray-900">{shippingFee.toLocaleString('fr-FR')} F</p>
-                                    </div>
-                                    <div className="rounded-2xl border border-gray-200 bg-[#fffbeb] p-3">
+                                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Total estimé</p>
                                         <p className="mt-1 font-black text-gray-900">{total.toLocaleString('fr-FR')} F</p>
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-[#ffe08a] bg-[#fff9e5] p-4">
-                                    <p className="font-black text-gray-900">Ce que vous devez savoir</p>
-                                    <ul className="mt-2 space-y-2 text-sm text-gray-600">
-                                        <li>• Les frais de livraison varient selon votre pays, votre ville et votre quartier.</li>
-                                        <li>• Une petite commission de traitement peut s’appliquer selon le mode de paiement choisi.</li>
-                                        <li>• Le montant affiché est une estimation et peut être ajusté selon la destination exacte.</li>
+                                <div className="rounded-xl border border-gray-200 bg-[#f9fafb] p-4">
+                                    <p className="font-semibold text-gray-900">À savoir</p>
+                                    <ul className="mt-2 space-y-1.5 text-sm text-gray-600">
+                                        <li>• Les frais de livraison et les commissions peuvent varier selon la destination.</li>
+                                        <li>• Le montant affiché est une estimation avant validation du paiement.</li>
                                     </ul>
                                 </div>
 
-                                <label className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-sm">
+                                <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
                                     <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4 rounded border-gray-300 text-[#ffdc2b] focus:ring-[#ffdc2b]" />
-                                    <span>Je confirme avoir lu la fiche de taxe et accepte les frais estimés avant de poursuivre le paiement.</span>
+                                    <span>Je confirme avoir pris connaissance de la fiche de taxe et accepte les frais estimés.</span>
                                 </label>
                             </div>
 
-                            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
-                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-white">Fermer</button>
-                                <button type="button" onClick={() => { setTaxAgreement(true); setShowTaxModal(false); }} className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900 transition hover:bg-[#e6c600]">Continuer</button>
+                            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4">
+                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-white">Fermer</button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setTaxAgreement(true);
+                                        setShowTaxModal(false);
+                                        if (paymentMethod === 'fedapay') {
+                                            document.getElementById('checkout-pay-button')?.click();
+                                        }
+                                    }}
+                                    className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900 transition hover:bg-[#e6c600]"
+                                >
+                                    Confirmer et envoyer l’USSD
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -619,58 +626,8 @@ export default function Checkout() {
                                 </div>
                             )}
 
-                            {/* ── ÉTAPE 2 — Livraison ──────────────────────────── */}
+                            {/* ── ÉTAPE 2 — Paiement ───────────────────────────── */}
                             {step === 2 && (
-                                <div className="p-6 sm:p-8">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-6">Mode de livraison</h2>
-                                    <div className="space-y-4">
-                                        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                                            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                                                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Adresse de livraison</p>
-                                                <div className="mt-3">
-                                                    <AddressSearchField />
-                                                </div>
-                                                <p className="mt-3 text-sm text-gray-600">
-                                                    Saisissez une adresse ou un quartier, puis choisissez un résultat pour mettre à jour votre livraison automatiquement.
-                                                </p>
-                                                {(form.city || form.neighborhood || form.country) && (
-                                                    <div className="mt-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
-                                                        <p className="font-semibold text-gray-900">Adresse sélectionnée</p>
-                                                        <p className="mt-1">{[form.address, form.city, form.neighborhood, form.country].filter(Boolean).join(' • ')}</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {SHIPPING_OPTIONS.map(opt => (
-                                            <label
-                                                key={opt.value}
-                                                onClick={() => setShippingMethod(opt.value)}
-                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
-                                                    ${shippingMethod === opt.value
-                                                        ? 'border-gray-900 bg-[#ffdc2b]/10'
-                                                        : 'border-gray-200 hover:border-gray-400 bg-white'}`}
-                                            >
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-semibold text-gray-900 text-sm">{opt.label}</p>
-                                                    <p className="text-xs text-gray-500 mt-0.5">{opt.delay}</p>
-                                                </div>
-                                                <p className={`font-bold text-sm shrink-0 ${shippingMethod === opt.value ? 'text-gray-900' : 'text-gray-700'}`}>
-                                                    {opt.value === 'pickup' ? 'Gratuit' : `${shippingFee.toLocaleString('fr-FR')} F`}
-                                                </p>
-                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
-                                                    ${shippingMethod === opt.value ? 'border-gray-900' : 'border-gray-300'}`}>
-                                                    {shippingMethod === opt.value && (
-                                                        <div className="w-2 h-2 rounded-full bg-gray-900" />
-                                                    )}
-                                                </div>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── ÉTAPE 3 — Paiement ───────────────────────────── */}
-                            {step === 3 && (
                                 <div className="p-6 sm:p-8">
                                     <h2 className="text-lg font-bold text-gray-900 mb-1">Paiement</h2>
                                     <p className="text-sm text-gray-500 mb-5">Choisissez votre mode de règlement.</p>
@@ -839,7 +796,7 @@ export default function Checkout() {
                             )}
 
                             {/* ── ÉTAPE 4 — Confirmation ───────────────────────── */}
-                            {step === 4 && order && (
+                            {step === 3 && order && (
                                 <div className="p-8 sm:p-12 text-center">
                                     <div className="w-20 h-20 bg-[#ffdc2b] rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -865,7 +822,7 @@ export default function Checkout() {
                             )}
 
                             {/* ── Boutons navigation ───────────────────────────── */}
-                            {step < 4 && (
+                            {step < 3 && (
                                 <div className="px-6 sm:px-8 pb-6 sm:pb-8 flex gap-3">
                                     {step > 1 && (
                                         <button
@@ -876,7 +833,7 @@ export default function Checkout() {
                                             ← Retour
                                         </button>
                                     )}
-                                    {step < 3 ? (
+                                    {step < 2 ? (
                                         <button
                                             type="button"
                                             onClick={handleNext}
@@ -886,6 +843,7 @@ export default function Checkout() {
                                         </button>
                                     ) : (
                                         <button
+                                            id="checkout-pay-button"
                                             type="button"
                                             onClick={handlePlaceOrder}
                                             disabled={submitting}
@@ -968,7 +926,7 @@ export default function Checkout() {
                             </div>
 
                             <div className="mt-4 space-y-2">
-                                {['Paiement en ligne FedaPay', 'Paiement à la livraison', 'Livraison suivie'].map(label => (
+                                {['Paiement en ligne FedaPay', 'Paiement à la livraison', 'Adresse enregistrée'].map(label => (
                                     <div key={label} className="flex items-center gap-2 text-xs text-gray-500">
                                         <span className="w-1 h-1 rounded-full bg-[#ffdc2b] shrink-0" />
                                         <span>{label}</span>
