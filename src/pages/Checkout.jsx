@@ -17,9 +17,6 @@ import {
 
 import { NETWORK_LOGOS, FEDAPAY_COUNTRIES,  } from '../utils/fedapayConfig';
 import { calculateDeliveryFee } from '../utils/deliveryPricing';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
 const getImgUrl = (img) => resolveImageUrl(img) || '';
 
@@ -99,22 +96,6 @@ const SHIPPING_OPTIONS = [
 const STEPS = ['Informations', 'Livraison', 'Paiement', 'Confirmation'];
 const DEFAULT_CENTER = { lat: 6.3703, lng: 2.4336 };
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-function MapEvents({ onSelect }) {
-    useMapEvents({
-        click(e) {
-            onSelect(e.latlng.lat, e.latlng.lng);
-        },
-    });
-    return null;
-}
-
 export default function Checkout() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -132,6 +113,8 @@ export default function Checkout() {
     const [deliveryLocation, setDeliveryLocation] = useState(DEFAULT_CENTER);
     const [showTaxModal, setShowTaxModal] = useState(false);
     const [taxAgreement, setTaxAgreement] = useState(false);
+    const [addressSuggestions, setAddressSuggestions] = useState([]);
+    const [addressSearching, setAddressSearching] = useState(false);
 
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '', phone: '',
@@ -189,6 +172,45 @@ export default function Checkout() {
             setFedapayPhone(form.phone);
         }
     }, [form.phone]);
+
+    useEffect(() => {
+        const searchQuery = form.address?.trim();
+        if (!searchQuery || searchQuery.length < 3) {
+            setAddressSuggestions([]);
+            return;
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
+            try {
+                setAddressSearching(true);
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&accept-language=fr&q=${encodeURIComponent(searchQuery)}`,
+                    {
+                        signal: controller.signal,
+                        headers: { Accept: 'application/json' },
+                    }
+                );
+                const data = await response.json();
+                setAddressSuggestions(data.map(item => ({
+                    id: item.place_id,
+                    label: item.display_name,
+                    lat: Number(item.lat),
+                    lng: Number(item.lon),
+                    address: item.address || {},
+                })));
+            } catch {
+                setAddressSuggestions([]);
+            } finally {
+                setAddressSearching(false);
+            }
+        }, 400);
+
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [form.address]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -335,6 +357,26 @@ export default function Checkout() {
         setForm(prev => ({ ...prev, lat, lng }));
     };
 
+    const handleSelectAddressSuggestion = (suggestion) => {
+        const city = suggestion.address.city || suggestion.address.town || suggestion.address.village || '';
+        const neighborhood = suggestion.address.suburb || suggestion.address.neighbourhood || suggestion.address.quarter || '';
+        const country = suggestion.address.country || '';
+        const postalCode = suggestion.address.postcode || '';
+
+        setForm(prev => ({
+            ...prev,
+            address: suggestion.label,
+            city,
+            neighborhood,
+            country,
+            postalCode,
+            lat: suggestion.lat,
+            lng: suggestion.lng,
+        }));
+        setDeliveryLocation({ lat: suggestion.lat, lng: suggestion.lng });
+        setAddressSuggestions([]);
+    };
+
     const field = (name, placeholder, type = 'text', cls = '') => (
         <div className={`relative ${cls}`}>
             <input
@@ -352,6 +394,39 @@ export default function Checkout() {
                         : 'border-gray-200 focus:border-gray-900 focus:ring-2 focus:ring-[#ffdc2b]/30'}
                     placeholder:text-gray-400`}
             />
+        </div>
+    );
+
+    const AddressSearchField = ({ className = '' }) => (
+        <div className={`relative ${className}`}>
+            <input
+                type="text"
+                value={form.address}
+                onChange={(e) => {
+                    setForm(prev => ({ ...prev, address: e.target.value }));
+                    if (errors.includes('address')) setErrors(prev => prev.filter(k => k !== 'address'));
+                }}
+                placeholder="Rechercher une adresse, un quartier ou une ville"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition-all focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ffdc2b]/30"
+            />
+            {addressSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">Recherche…</div>
+            )}
+            {addressSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
+                    {addressSuggestions.map((suggestion) => (
+                        <button
+                            key={suggestion.id}
+                            type="button"
+                            onClick={() => handleSelectAddressSuggestion(suggestion)}
+                            className="block w-full border-b border-gray-100 px-3 py-3 text-left transition hover:bg-gray-50 last:border-b-0"
+                        >
+                            <p className="text-sm font-semibold text-gray-900">{suggestion.label}</p>
+                            <p className="mt-1 text-[11px] text-gray-500">Cliquez pour utiliser cette adresse</p>
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 
@@ -416,32 +491,52 @@ export default function Checkout() {
 
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 {showTaxModal && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4">
-                        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-black text-gray-900">Fiche de taxe / frais</h3>
-                                <button type="button" onClick={() => setShowTaxModal(false)} className="text-gray-400 hover:text-gray-700">✕</button>
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/70 px-4 py-6">
+                        <div className="w-full max-w-xl overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-2xl">
+                            <div className="bg-gradient-to-r from-[#111827] via-[#1f2937] to-[#374151] px-6 py-5 text-white">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffdc2b]">Avant paiement</p>
+                                        <h3 className="mt-1 text-lg font-black">Fiche de taxe et frais</h3>
+                                    </div>
+                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full bg-white/10 p-2 text-white/80 transition hover:bg-white/20 hover:text-white">✕</button>
+                                </div>
                             </div>
-                            <div className="space-y-3 text-sm text-gray-600">
-                                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
-                                    <p className="font-semibold text-gray-900">Résumé</p>
-                                    <p>Sous-total : {subtotal.toLocaleString('fr-FR')} F</p>
-                                    <p>Livraison : {shippingFee.toLocaleString('fr-FR')} F</p>
-                                    <p>Total estimé : {total.toLocaleString('fr-FR')} F</p>
+
+                            <div className="space-y-4 p-6 text-sm text-gray-600">
+                                <div className="grid gap-3 sm:grid-cols-3">
+                                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Sous-total</p>
+                                        <p className="mt-1 font-black text-gray-900">{subtotal.toLocaleString('fr-FR')} F</p>
+                                    </div>
+                                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Livraison</p>
+                                        <p className="mt-1 font-black text-gray-900">{shippingFee.toLocaleString('fr-FR')} F</p>
+                                    </div>
+                                    <div className="rounded-2xl border border-gray-200 bg-[#fffbeb] p-3">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Total estimé</p>
+                                        <p className="mt-1 font-black text-gray-900">{total.toLocaleString('fr-FR')} F</p>
+                                    </div>
                                 </div>
-                                <div className="rounded-xl border border-gray-200 bg-[#fffbeb] p-3">
-                                    <p className="font-semibold text-gray-900">Taxes et frais</p>
-                                    <p>Les frais de livraison varient selon votre pays, votre ville et le type d’expédition.</p>
-                                    <p>Une petite commission de traitement peut être appliquée selon le mode de paiement choisi.</p>
+
+                                <div className="rounded-2xl border border-[#ffe08a] bg-[#fff9e5] p-4">
+                                    <p className="font-black text-gray-900">Ce que vous devez savoir</p>
+                                    <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                                        <li>• Les frais de livraison varient selon votre pays, votre ville et votre quartier.</li>
+                                        <li>• Une petite commission de traitement peut s’appliquer selon le mode de paiement choisi.</li>
+                                        <li>• Le montant affiché est une estimation et peut être ajusté selon la destination exacte.</li>
+                                    </ul>
                                 </div>
-                                <label className="flex items-start gap-2 text-sm text-gray-700">
-                                    <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4" />
-                                    <span>Je confirme avoir lu la fiche de taxe et accepte les frais estimés avant le paiement.</span>
+
+                                <label className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-sm">
+                                    <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4 rounded border-gray-300 text-[#ffdc2b] focus:ring-[#ffdc2b]" />
+                                    <span>Je confirme avoir lu la fiche de taxe et accepte les frais estimés avant de poursuivre le paiement.</span>
                                 </label>
                             </div>
-                            <div className="mt-5 flex justify-end gap-3">
-                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700">Fermer</button>
-                                <button type="button" onClick={() => { setTaxAgreement(true); setShowTaxModal(false); }} className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900">Continuer</button>
+
+                            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-white">Fermer</button>
+                                <button type="button" onClick={() => { setTaxAgreement(true); setShowTaxModal(false); }} className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900 transition hover:bg-[#e6c600]">Continuer</button>
                             </div>
                         </div>
                     </div>
@@ -504,7 +599,9 @@ export default function Checkout() {
                                             {field('neighborhood', 'Quartier')}
                                             {field('postalCode',   'Code postal')}
                                         </div>
-                                        {field('address', 'Adresse complète *', 'text', 'col-span-full')}
+                                        <div className="col-span-full">
+                                            <AddressSearchField />
+                                        </div>
                                         <textarea
                                             name="instructions"
                                             placeholder="Instructions de livraison (optionnel)"
@@ -527,17 +624,21 @@ export default function Checkout() {
                                 <div className="p-6 sm:p-8">
                                     <h2 className="text-lg font-bold text-gray-900 mb-6">Mode de livraison</h2>
                                     <div className="space-y-4">
-                                        <div className="rounded-2xl border border-gray-200 overflow-hidden bg-gray-50">
-                                            <div className="h-48 w-full">
-                                                <MapContainer center={[deliveryLocation.lat, deliveryLocation.lng]} zoom={12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
-                                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                                    <MapEvents onSelect={handleSelectLocation} />
-                                                    <Marker position={[deliveryLocation.lat, deliveryLocation.lng]} />
-                                                </MapContainer>
-                                            </div>
-                                            <div className="p-4">
-                                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">Choisissez l’adresse de livraison</p>
-                                                <p className="text-sm text-gray-600">Cliquez sur la carte pour placer votre adresse. Le prix de livraison sera recalculé automatiquement.</p>
+                                        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                                            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Adresse de livraison</p>
+                                                <div className="mt-3">
+                                                    <AddressSearchField />
+                                                </div>
+                                                <p className="mt-3 text-sm text-gray-600">
+                                                    Saisissez une adresse ou un quartier, puis choisissez un résultat pour mettre à jour votre livraison automatiquement.
+                                                </p>
+                                                {(form.city || form.neighborhood || form.country) && (
+                                                    <div className="mt-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+                                                        <p className="font-semibold text-gray-900">Adresse sélectionnée</p>
+                                                        <p className="mt-1">{[form.address, form.city, form.neighborhood, form.country].filter(Boolean).join(' • ')}</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         {SHIPPING_OPTIONS.map(opt => (
