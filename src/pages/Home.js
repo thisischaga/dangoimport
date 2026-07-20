@@ -64,8 +64,20 @@ const TESTIMONIALS = [
   { name: "Fatou D.", role: "Entrepreneuse", text: "Le sourcing depuis la Chine est excellent. Stock arrivé rapidement.", rating: 5 },
 ];
 
+function getDisplayPrice(product) {
+  if (!product) return 0;
+  const basePrice = Number(product.price ?? 0);
+  const promoPrice = Number(product.salePrice ?? 0);
+
+  if (product.isPromo && promoPrice > 0 && promoPrice < basePrice) {
+    return promoPrice;
+  }
+
+  return basePrice;
+}
+
 function fmtPrice(p) {
-  const n = Number(p?.salePrice ?? p?.price ?? 0);
+  const n = Number(getDisplayPrice(p));
   return n.toLocaleString('fr-FR');
 }
 
@@ -74,7 +86,7 @@ function fmtPrice(p) {
    ────────────────────────────────────────────── */
 function ProductCard({ product, badge, onClick }) {
   const img = getProductImage(product);
-  const displayPrice = product?.salePrice ?? product?.price;
+  const displayPrice = getDisplayPrice(product);
 
   return (
     <button
@@ -188,13 +200,13 @@ const Home = () => {
   const [showForm, setShowForm] = useState(false);
   const [heroSearch, setHeroSearch] = useState("");
 
-  const { data: featuredFromApi = [], isLoading: featuredLoading } = useFeaturedProducts();
-  const { data: catalog = [], isLoading: catalogLoading } = useProductsCatalog({ limit: 48 });
+  const { data: featuredFromApi = [], isLoading: featuredLoading, isError: featuredError } = useFeaturedProducts();
+  const { data: catalog = [], isLoading: catalogLoading, isError: catalogError } = useProductsCatalog({ limit: 48 });
 
   const featuredProducts = useMemo(() => {
     if (featuredFromApi.length > 0) return featuredFromApi.slice(0, 12);
     if (catalog.length > 0) return catalog.filter((p) => p.isFeatured).slice(0, 12);
-    return FALLBACK_FEATURED;
+    return [];
   }, [featuredFromApi, catalog]);
 
   const newArrivals = useMemo(() => {
@@ -210,8 +222,11 @@ const Home = () => {
   }, [catalog]);
 
   const deals = useMemo(() => {
-    return catalog.filter((p) => p.salePrice && p.salePrice < p.price).slice(0, 10);
+    return catalog.filter((p) => p.isPromo && p.salePrice != null && Number(p.salePrice) > 0 && Number(p.salePrice) < Number(p.price || Infinity)).slice(0, 10);
   }, [catalog]);
+
+  const shouldShowLoadingState = (featuredLoading || catalogLoading) && featuredProducts.length === 0 && catalog.length === 0;
+  const shouldShowEmptyState = !shouldShowLoadingState && !featuredError && !catalogError && featuredProducts.length === 0 && catalog.length === 0;
 
   const handleHeroSearch = (e) => {
     e?.preventDefault();
@@ -259,7 +274,7 @@ const Home = () => {
 
         {/* ══ PRODUITS — Grille style Alibaba ═══════════ */}
         <section className="max-w-[var(--floorWrapperWidth)] mx-auto px-4 sm:px-6 lg:px-8 pb-10 pt-8">
-          {(featuredLoading || catalogLoading) && !featuredProducts.length && (
+          {shouldShowLoadingState && (
             <div className="mb-8">
               <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-4 animate-pulse" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
@@ -277,16 +292,18 @@ const Home = () => {
             </div>
           )}
 
-          <ProductSection
-            title="Produits vedettes"
-            subtitle="Notre sélection premium — qualité garantie"
-            icon={<FaFire size={13} />}
-            products={featuredProducts}
-            viewAllPath="/shopping"
-            badge="Top"
-          />
+          {!shouldShowLoadingState && !shouldShowEmptyState && (
+            <ProductSection
+              title="Produits vedettes"
+              subtitle="Notre sélection premium — qualité garantie"
+              icon={<FaFire size={13} />}
+              products={featuredProducts}
+              viewAllPath="/shopping"
+              badge="Top"
+            />
+          )}
 
-          {deals.length > 0 && (
+          {!shouldShowLoadingState && !shouldShowEmptyState && deals.length > 0 && (
             <ProductSection
               title="Promos & bonnes affaires"
               subtitle="Prix réduits — quantités limitées"
@@ -297,28 +314,34 @@ const Home = () => {
             />
           )}
 
-          <ProductSection
-            title="Nouveautés"
-            subtitle="Derniers produits ajoutés"
-            icon={<FaClock size={13} />}
-            products={newArrivals}
-            viewAllPath="/shopping"
-          />
+          {!shouldShowLoadingState && !shouldShowEmptyState && (
+            <ProductSection
+              title="Nouveautés"
+              subtitle="Derniers produits ajoutés"
+              icon={<FaClock size={13} />}
+              products={newArrivals}
+              viewAllPath="/shopping"
+            />
+          )}
 
-          <ProductSection
-            title="Meilleures ventes"
-            subtitle="Les plus populaires auprès de nos acheteurs"
-            icon={<FaMedal size={13} />}
-            products={bestSellers}
-            viewAllPath="/shopping"
-            badge="Hot"
-          />
+          {!shouldShowLoadingState && !shouldShowEmptyState && (
+            <ProductSection
+              title="Meilleures ventes"
+              subtitle="Les plus populaires auprès de nos acheteurs"
+              icon={<FaMedal size={13} />}
+              products={bestSellers}
+              viewAllPath="/shopping"
+              badge="Hot"
+            />
+          )}
 
-          <ProductSection
-            title="Recommandés pour vous"
-            products={catalog.length ? catalog : featuredProducts}
-            viewAllPath="/shopping"
-          />
+          {!shouldShowLoadingState && !shouldShowEmptyState && (
+            <ProductSection
+              title="Recommandés pour vous"
+              products={catalog.length ? catalog : featuredProducts}
+              viewAllPath="/shopping"
+            />
+          )}
         </section>
 
       </main>

@@ -153,17 +153,24 @@ const ProductDetail = () => {
         return adj;
     }, [selectedVariant, selectedCustomOptions]);
 
-    const basePrice = product ? product.salePrice || product.price : 0;
+    const hasActivePromo = Boolean(
+        product?.isPromo &&
+        product?.salePrice != null &&
+        Number(product.salePrice) > 0 &&
+        Number(product.salePrice) < Number(product.price || Infinity)
+    );
+
+    const basePrice = product ? (hasActivePromo ? Number(product.salePrice) : Number(product.price)) : 0;
     const effectivePrice = selectedVariant 
         ? (selectedVariant.price + variantPriceAdjustment) 
         : (basePrice + customPriceAdjustment);
 
     const discount = useMemo(() => {
-        if (!product || product.price <= 0 || selectedVariant) return 0;
+        if (!product || !hasActivePromo || product.price <= 0 || selectedVariant) return 0;
         return Math.round(
-            ((product.price - (product.salePrice || product.price)) / product.price) * 100
+            ((product.price - Number(product.salePrice)) / product.price) * 100
         );
-    }, [product, selectedVariant]);
+    }, [product, selectedVariant, hasActivePromo]);
 
     const dimensionFields = useMemo(() => {
         if (!product) return [];
@@ -260,7 +267,7 @@ const ProductDetail = () => {
         return {
             ...product,
             price: effectivePrice,
-            salePrice: selectedVariant ? selectedVariant.price : (product.salePrice ?? product.price),
+            salePrice: selectedVariant ? selectedVariant.price : (hasActivePromo ? (product.salePrice ?? product.price) : (product.price ?? 0)),
             image: primaryImage,
             selectedOptions: {
                 color: selectedColor,
