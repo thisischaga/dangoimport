@@ -61,12 +61,12 @@ const StarRating = ({ value = 0, count }) => {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="aspect-square skeleton" />
-      <div className="p-3 space-y-2">
-        <div className="skeleton h-3 rounded w-3/4" />
-        <div className="skeleton h-4 rounded w-1/2" />
-        <div className="skeleton h-8 rounded-lg w-full" />
+    <div className="bg-white dark:bg-[#1e2130] rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-gray-200 dark:bg-gray-800 animate-pulse w-full aspect-square" />
+      <div className="p-3 sm:p-4 space-y-3">
+        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 animate-pulse" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 animate-pulse" />
+        <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mt-4 animate-pulse" />
       </div>
     </div>
   );
@@ -74,109 +74,79 @@ function SkeletonCard() {
 
 function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCart, onAddCart, onToggleWish }) {
   const img = getProductImage(product);
-  const hasPromo = product.salePrice > 0 && product.salePrice < product.price;
-  const price = hasPromo ? product.salePrice : getPrice(product);
+  const displayPrice = product?.salePrice ?? product?.price;
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onOpen}
-      className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col group cursor-pointer transition-all hover:shadow-sm"
+      className="group flex flex-col text-left w-full h-full bg-white dark:bg-[#1e2130] rounded-xl overflow-hidden hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:hover:shadow-black/50 transition-shadow duration-300 relative border border-transparent hover:border-gray-100 dark:hover:border-gray-700"
     >
-      <div className="aspect-square product-img-container flex items-center justify-center p-3 relative overflow-hidden">
+      {/* Image Container */}
+      <div className="w-full aspect-square relative bg-[#f7f8fa] dark:bg-[#14161f] flex items-center justify-center p-4">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
+          <img
+            src={img}
+            alt={product.name}
+            className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
         ) : (
-          <FaTag className="text-gray-200 text-3xl" />
+          <FaTag className="text-gray-300 dark:text-gray-700 text-5xl" />
         )}
-
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md text-gray-700">
-            <FaEye size={12} />
-          </span>
-        </div>
-
-        {product.isFeatured && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10">Top</span>
-        )}
-        {product.isNewArrival && !product.isFeatured && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#2563EB] text-white z-10">Nouveau</span>
-        )}
-        {hasPromo && (
-          <span className="absolute bottom-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 flex items-center gap-1">
-            <FaFire size={9} /> Promo
-          </span>
-        )}
-
-        <button
-          type="button"
-          onClick={onToggleWish}
-          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-            isWished ? 'bg-transparent text-[#ffdc2b]' : 'bg-transparent text-gray-300 hover:text-[#ffdc2b]'
+        
+        <div
+          onClick={(e) => { e.stopPropagation(); onToggleWish(e); }}
+          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-white/80 backdrop-blur shadow-sm cursor-pointer z-20 hover:scale-110 ${
+            isWished ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-red-500'
           }`}
         >
-          <FaHeart size={16} />
-        </button>
+          <FaHeart size={14} />
+        </div>
       </div>
 
-      <div className="p-3 flex flex-col flex-1">
-        {product.category && (
-          <p className="text-[10px] text-[#565959] dark:text-gray-400 mb-0.5 line-clamp-1">{product.category}</p>
-        )}
-        <h3 className="text-[13px] sm:text-[14px] text-[#000000] dark:text-gray-100 line-clamp-2 min-h-[2.25rem] group-hover:text-[#1D4ED8] dark:group-hover:text-blue-400 leading-snug">
+      {/* Info Container */}
+      <div className="p-3 sm:p-4 flex-1 flex flex-col w-full text-left bg-white dark:bg-[#1e2130]">
+        <p className="text-[13px] sm:text-[14px] leading-[1.3] text-[#222] dark:text-gray-200 line-clamp-2 mb-2 group-hover:text-[var(--color-accent-primary)] transition-colors min-h-[2.6em] font-normal">
           {product.name}
-        </h3>
+        </p>
 
-        <div className="mt-1 flex items-center gap-1 text-[12px]">
-          <div className="flex text-[#FFA41C]">
-            {[...Array(5)].map((_, i) => (
-              <FaStar key={i} className={i < Math.floor(product.rating || 0) ? "text-[#FFA41C]" : "text-gray-300"} />
-            ))}
-          </div>
-          {(product.totalReviews || 0) > 0 && (
-            <span className="text-[#2563EB] hover:text-[#1D4ED8] hover:underline">{product.totalReviews}</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 text-[10px] text-[#565959] mt-1">
-          <FaUserCircle size={10} />
-          <span className="line-clamp-1">
-            {product.vendorName || 'Vendeur'}
-          </span>
-        </div>
-
-        <div className="mt-auto pt-2">
-          <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-[17px] sm:text-[21px] font-medium text-[#B12704]">{fmtPrice(price)}</span>
-            <span className="text-[12px] text-[#B12704]">FCFA</span>
-          </div>
-          {hasPromo && (
-            <span className="text-[11px] text-[#565959] line-through flex items-center gap-1">
-              Prix conseillé: {fmtPrice(product.price)} FCFA
+        <div className="mt-auto">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[16px] sm:text-[18px] font-bold text-[#222] dark:text-white leading-none">
+              {Number(displayPrice).toLocaleString('fr-FR')}
             </span>
-          )}
+            <span className="text-[12px] font-semibold text-[#222] dark:text-white">FCFA</span>
+          </div>
+          
+          <p className="text-[12px] text-[#666] dark:text-gray-400 mt-1 mb-3">
+            1 pièce <span className="text-[#999]">(Min. order)</span>
+          </p>
 
-          {inCart ? (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onGoCart(); }}
-              className="mt-3 w-full py-1.5 rounded-full text-[12px] text-[#000000] bg-[#ffdc2b] hover:bg-[#e6c627] border border-[#e6c627] shadow-sm"
-            >
-              Aller au panier
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onAddCart}
-              className={`mt-3 w-full py-1.5 rounded-full text-[12px] flex items-center justify-center gap-1.5 shadow-sm ${
-                justAdded ? 'bg-green-600 text-white border border-green-600' : 'bg-[#ffdc2b] hover:bg-[#ffdc2b] text-[#000000] border border-[#ffdc2b]'
-              }`}
-            >
-              {justAdded ? '✓ Ajouté au panier' : 'Ajouter au panier'}
-            </button>
-          )}
+          <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-800">
+            {inCart ? (
+              <div
+                onClick={(e) => { e.stopPropagation(); onGoCart(); }}
+                className="w-full py-2 text-center rounded-lg text-[13px] font-bold text-[var(--color-accent-primary)] hover:bg-orange-50 transition-colors"
+              >
+                Aller au panier
+              </div>
+            ) : (
+              <div
+                onClick={(e) => { e.stopPropagation(); onAddCart(e); }}
+                className={`w-full py-2 text-center rounded-lg text-[13px] font-bold transition-colors ${
+                  justAdded 
+                    ? 'text-green-500' 
+                    : 'text-[var(--color-on-layer-on-layer-primary)] dark:text-gray-200 hover:text-[var(--color-accent-primary)] hover:bg-orange-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                {justAdded ? '✓ Ajouté' : 'Ajouter au panier'}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -212,14 +182,39 @@ const Ecom = () => {
   }, [isError]);
 
   const categories = useMemo(() => {
-    const cats = [...new Set(products.map((p) => p.category).filter(Boolean))];
-    return ['Tous', ...cats];
+    const baseCategories = [
+      'Électronique', 'Beauté & Parfums', 'Maison & Déco', 'Mode & Textile',
+      'Sport & Loisirs', 'Livres & Culture', 'Alimentation', 'Enfants & Jouets',
+      'Sacs & Maroquinerie', 'Agriculture', 'Jeux Vidéo', 'Auto & Moto',
+      'Bijoux & Montres', 'TV & Électroménager', 'Logistique & Transport', 'Événements'
+    ];
+    
+    // Normalize string to ignore accents, case, trailing spaces, and trailing 's' (plural/singular)
+    const normalize = (str) => (str || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/s$/, "");
+    
+    const baseNormalized = new Map(baseCategories.map(cat => [normalize(cat), cat]));
+    const productsCats = products.map((p) => p.category).filter(Boolean);
+    
+    const allCatsMap = new Map(baseNormalized);
+    
+    productsCats.forEach(cat => {
+      const norm = normalize(cat);
+      if (!allCatsMap.has(norm)) {
+        allCatsMap.set(norm, cat); // Keep the DB version if it's completely new
+      }
+    });
+
+    return ['Tous', ...Array.from(allCatsMap.values())];
   }, [products]);
 
   const maxPrice = useMemo(() => Math.max(0, ...products.map(getPrice)), [products]);
 
   const filtered = useMemo(() => {
-    let list = activeCategory === 'Tous' ? products : products.filter((p) => p.category === activeCategory);
+    const normalize = (str) => (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/s$/, "");
+    
+    let list = activeCategory === 'Tous' 
+      ? products 
+      : products.filter((p) => normalize(p.category) === normalize(activeCategory));
 
     if (quickFilter === 'featured') list = list.filter((p) => p.isFeatured);
     if (quickFilter === 'new') list = list.filter((p) => p.isNewArrival);
@@ -284,7 +279,7 @@ const Ecom = () => {
 
       {/* Toolbar */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 space-y-3">
+        <div className="max-w-[var(--floorWrapperWidth)] mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
@@ -356,7 +351,7 @@ const Ecom = () => {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="max-w-[var(--floorWrapperWidth)] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="flex flex-col lg:flex-row gap-6">
 
           {/* Sidebar */}
@@ -439,8 +434,8 @@ const Ecom = () => {
           {/* Grille produits */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                {Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+                {Array(10).fill(0).map((_, i) => <SkeletonCard key={i} />)}
               </div>
             ) : displayed.length === 0 ? (
               <div className="text-center py-24 bg-white rounded-2xl border border-gray-200">
@@ -457,7 +452,7 @@ const Ecom = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 animate-fade-in-up">
                   {displayed.map((p) => (
                     <MarketplaceCard
                       key={p._id}

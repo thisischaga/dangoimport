@@ -64,13 +64,6 @@ const Footer = () => {
         { label: 'Mes commandes', to: '/mes-commandes' },
       ],
     },
-    {
-      title: 'Vendeurs',
-      links: [
-        { label: 'Créer un compte vendeur', to: '/devenir-vendeur', highlight: true },
-        { label: 'CGU vendeurs', to: '/cgu-vendeur' },
-      ],
-    },
   ];
 
   const socials = [

@@ -69,94 +69,114 @@ function fmtPrice(p) {
   return n.toLocaleString('fr-FR');
 }
 
+/* ──────────────────────────────────────────────
+   Alibaba-style product grid components
+   ────────────────────────────────────────────── */
 function ProductCard({ product, badge, onClick }) {
   const img = getProductImage(product);
-  const price = product?.salePrice ?? product?.price;
-  const hasPromo = product?.salePrice && product.salePrice < product.price;
+  const displayPrice = product?.salePrice ?? product?.price;
 
   return (
-    <button type="button" onClick={onClick} className="group bg-white rounded-xl overflow-hidden border border-gray-200 flex flex-col text-left transition-all h-full shadow-sm hover:shadow-md hover:border-[#ffdc2b]">
-      <div className="aspect-square w-full product-img-container flex items-center justify-center p-3 relative">
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex flex-col text-left w-full h-full bg-white dark:bg-[#1e2130] rounded-xl overflow-hidden hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:hover:shadow-black/50 transition-shadow duration-300 relative border border-transparent hover:border-gray-100 dark:hover:border-gray-700"
+    >
+      {/* Image Container */}
+      <div className="w-full aspect-square relative bg-[#f7f8fa] dark:bg-[#14161f] flex items-center justify-center p-4">
         {img ? (
-          <img src={img} alt={product.name} className="product-img max-w-full max-h-full object-contain" loading="lazy" />
+          <img
+            src={img}
+            alt={product.name}
+            className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
         ) : (
-          <FaBoxOpen className="text-gray-300 text-4xl" />
+          <FaBoxOpen className="text-gray-300 dark:text-gray-700 text-5xl" />
         )}
+        
+        {/* Optional Badge */}
         {badge && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 rounded-sm">
+          <div className="absolute top-2 left-2 bg-[var(--color-accent-primary)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
             {badge}
-          </span>
-        )}
-        {hasPromo && (
-          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 bg-[#ffdc2b] text-white z-10 rounded-sm">
-            -{Math.round((1 - product.salePrice / product.price) * 100)}%
-          </span>
+          </div>
         )}
       </div>
-      <div className="p-2.5 flex-1 flex flex-col">
-        <h3 className="text-[12px] sm:text-[13px] text-[#000000] dark:text-white line-clamp-2 mb-1 group-hover:text-[#1D4ED8] dark:group-hover:text-blue-400 leading-snug">
+
+      {/* Info Container */}
+      <div className="p-3 sm:p-4 flex-1 flex flex-col w-full text-left bg-white dark:bg-[#1e2130]">
+        {/* Title */}
+        <p className="text-[13px] sm:text-[14px] leading-[1.3] text-[#222] dark:text-gray-200 line-clamp-2 mb-2 group-hover:text-[var(--color-accent-primary)] transition-colors min-h-[2.6em] font-normal">
           {product.name}
-        </h3>
-        {product.rating > 0 && (
-          <div className="flex items-center gap-1 mb-1">
-            <div className="flex text-[#FFA41C] text-[10px]">
-              {[...Array(5)].map((_, i) => (
-                <FaStar key={i} className={i < Math.floor(product.rating) ? "text-[#FFA41C]" : "text-gray-300"} />
-              ))}
-            </div>
-            {product.totalReviews > 0 && (
-              <span className="text-[10px] text-[#2563EB]">{product.totalReviews}</span>
-            )}
-          </div>
-        )}
-        <div className="mt-auto pt-1">
+        </p>
+
+        {/* Price & MOQ */}
+        <div className="mt-auto">
           <div className="flex items-baseline gap-1">
-            <span className="text-[15px] sm:text-[17px] font-bold text-[#B12704]">{fmtPrice(product)}</span>
-            <span className="text-[10px] text-[#B12704] font-medium">FCFA</span>
+            <span className="text-[16px] sm:text-[18px] font-bold text-[#222] dark:text-white leading-none">
+              {Number(displayPrice).toLocaleString('fr-FR')}
+            </span>
+            <span className="text-[12px] font-semibold text-[#222] dark:text-white">FCFA</span>
           </div>
-          {hasPromo && (
-            <span className="text-[10px] text-[#565959] line-through">Prix: {Number(product.price).toLocaleString('fr-FR')} FCFA</span>
-          )}
+          
+          <p className="text-[12px] text-[#666] dark:text-gray-400 mt-1">
+            1 pièce <span className="text-[#999]">(Min. order)</span>
+          </p>
         </div>
       </div>
     </button>
   );
 }
 
-function ProductRow({ title, subtitle, products, viewAllPath, badge }) {
+function ProductSection({ title, subtitle, products, viewAllPath, badge, icon }) {
   const navigate = useNavigate();
   if (!products?.length) return null;
 
+  const shown = products.slice(0, 10);
+
   return (
-    <section className="mb-6 bg-white sm:border sm:border-gray-200 sm:rounded-md pt-5 pb-2">
-      <div className="flex items-end justify-between gap-4 mb-4 px-4 sm:px-6">
+    <section className="mb-8">
+      {/* Section header (Alibaba Style) */}
+      <div className="flex items-end justify-between mb-4 px-1">
         <div>
-          <h2 className="text-[19px] sm:text-[21px] font-black text-[#000000] dark:text-white tracking-tight leading-tight">{title}</h2>
-          {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
+          <h2 className="text-[20px] sm:text-[24px] font-bold text-[#222] dark:text-white leading-tight flex items-center gap-2">
+            {title}
+          </h2>
+          {subtitle && <p className="text-[14px] text-[#666] dark:text-gray-400 mt-1">{subtitle}</p>}
         </div>
         {viewAllPath && (
           <button
             type="button"
             onClick={() => navigate(viewAllPath)}
-            className="text-[13px] font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+            className="hidden sm:flex items-center gap-1 text-[14px] text-[#666] hover:text-[var(--color-accent-primary)] transition-colors font-medium"
           >
-            Voir tout
+            Voir plus <FaChevronRight size={10} className="mt-0.5" />
           </button>
         )}
       </div>
-      
-      {/* Horizontal Scroll Container */}
-      <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-4 sm:px-6 pb-4 scrollbar-hide">
-        {products.slice(0, 10).map((p, i) => (
-          <div key={p._id || i} className="snap-start shrink-0 w-[140px] sm:w-[180px]">
-            <ProductCard
-              product={p}
-              badge={badge}
-              onClick={() => navigate(p._id ? `/product/${p._id}` : '/shopping')}
-            />
-          </div>
+
+      {/* Product grid with gaps */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+        {shown.map((p, i) => (
+          <ProductCard
+            key={p._id || i}
+            product={p}
+            badge={badge}
+            onClick={() => navigate(p._id ? `/product/${p._id}` : '/shopping')}
+          />
         ))}
       </div>
+      
+      {/* Mobile view all button */}
+      {viewAllPath && (
+        <button
+          type="button"
+          onClick={() => navigate(viewAllPath)}
+          className="w-full mt-4 sm:hidden py-3 bg-white dark:bg-[#1e2130] rounded-xl text-[14px] font-medium border border-gray-200 dark:border-gray-800 text-[#222] dark:text-white"
+        >
+          Voir plus
+        </button>
+      )}
     </section>
   );
 }
@@ -236,251 +256,66 @@ const Home = () => {
 
       <main className="flex-1 w-full">
 
-        {/* ══ MARKETPLACE HERO (style Alibaba) ══════════ */}
-        <section className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-              {/* Catégories — sidebar desktop */}
-              <div className="hidden lg:block lg:col-span-2">
-                <div className="bg-[#fafafa] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden h-full min-h-[280px]">
-                  <p className="px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                    Catégories
-                  </p>
-                  <ul className="py-1">
-                    {CATEGORIES.map((cat) => (
-                      <li key={cat.name}>
-                        <button
-                          type="button"
-                          onClick={() => navigate(`/shopping?category=${encodeURIComponent(cat.name)}`)}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-[#fffbeb] dark:hover:bg-gray-700 hover:text-[#e6c600] dark:hover:text-white transition-colors text-left"
-                        >
-                          <cat.icon size={14} className="text-gray-400 shrink-0" />
-                          {cat.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Bannière principale (Slider) */}
-              <div className="lg:col-span-7 flex flex-col gap-4">
-                <div className="rounded-2xl overflow-hidden relative shadow-sm">
-                  <Slider
-                    dots={true}
-                    infinite={true}
-                    speed={500}
-                    slidesToShow={1}
-                    slidesToScroll={1}
-                    autoplay={true}
-                    autoplaySpeed={4000}
-                    arrows={false}
-                    appendDots={dots => (
-                      <div style={{ bottom: '10px' }}>
-                        <ul style={{ margin: "0px" }}> {dots} </ul>
-                      </div>
-                    )}
-                  >
-                    {/* Slide 1 - Électronique */}
-                    <div className="outline-none">
-                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-10 flex items-center justify-between">
-                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%]">
-                          <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
-                            <FaBolt size={10} /> Nouvel arrivage
-                          </span>
-                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2">
-                            Électronique & High-Tech
-                          </h1>
-                          <p className="text-xs sm:text-sm text-blue-200 mb-5 line-clamp-2 sm:line-clamp-none">
-                            Les derniers smartphones et gadgets aux meilleurs prix du marché.
-                          </p>
-                          <button onClick={() => navigate('/shopping?category=Électronique')} className="bg-white hover:bg-gray-100 text-blue-900 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
-                            Acheter maintenant
-                          </button>
-                        </div>
-                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
-                          <img src={featuredProducts.length > 0 ? getProductImage(featuredProducts[0]) : slide2Img} alt="Électronique" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Slide 2 - Beauté */}
-                    <div className="outline-none">
-                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-r from-rose-900 to-pink-800 text-white p-6 sm:p-10 flex items-center justify-between">
-                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%]">
-                          <span className="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm">
-                            <FaFire size={10} /> Top Qualité
-                          </span>
-                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2">
-                            Parfums & Beauté
-                          </h1>
-                          <p className="text-xs sm:text-sm text-rose-200 mb-5 line-clamp-2 sm:line-clamp-none">
-                            Découvrez notre collection premium de parfums et soins de luxe.
-                          </p>
-                          <button onClick={() => navigate('/shopping?category=Beauté')} className="bg-white hover:bg-gray-100 text-rose-900 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-colors shadow-lg">
-                            Découvrir
-                          </button>
-                        </div>
-                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative">
-                          <img src={featuredProducts.length > 1 ? getProductImage(featuredProducts[1]) : slide3Img} alt="Beauté et Parfums" className="max-h-[110%] object-contain origin-right drop-shadow-2xl" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Slide 3 - Sourcing */}
-                    <div className="outline-none">
-                      <div className="h-[280px] sm:h-[320px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-6 sm:p-10 flex items-center justify-between relative overflow-hidden">
-                        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#ffdc2b]/10 blur-[80px] rounded-full"></div>
-                        <div className="absolute bottom-0 right-10 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full"></div>
-                        
-                        <div className="flex-1 z-10 max-w-[55%] sm:max-w-[50%] relative">
-                          <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#ffdc2b] to-[#e6c600] text-[#1a202c] text-[10px] font-black uppercase px-3 py-1 rounded-full w-fit mb-3 shadow-sm shadow-[#ffdc2b]/20">
-                            <FaGlobeAfrica size={10} /> Import B2B
-                          </span>
-                          <h1 className="text-xl sm:text-3xl font-black leading-tight mb-2 tracking-tight">
-                            Sourcing <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffdc2b] to-white">Chine</span>
-                          </h1>
-                          <p className="text-xs sm:text-sm text-gray-300 mb-5 line-clamp-2 sm:line-clamp-none">
-                            Fournisseurs vérifiés, logistique premium et douane jusqu'au Bénin & Togo.
-                          </p>
-                          <button onClick={() => setShowForm(true)} className="bg-[#ffdc2b] text-[#0f172a] hover:bg-[#e6c600] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all shadow-lg shadow-[#ffdc2b]/20">
-                            Devis gratuit
-                          </button>
-                        </div>
-                        <div className="w-[45%] sm:w-[40%] h-full flex items-center justify-end relative z-10">
-                          <img src={featuredProducts.length > 2 ? getProductImage(featuredProducts[2]) : slide1Img} alt="Sourcing Chine Premium" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
-                        </div>
-                      </div>
-                    </div>
-                  </Slider>
-                </div>
-
-                {/* Barre de recherche */}
-                <form onSubmit={handleHeroSearch} className="flex gap-2">
-                  <div className="flex-1 flex items-center bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-[#ffdc2b] shadow-sm">
-                    <FaSearch className="ml-4 text-gray-400 shrink-0" size={14} />
-                    <input
-                      type="text"
-                      placeholder="Rechercher des produits, catégories, marques..."
-                      className="flex-1 px-4 py-3 sm:py-3.5 text-sm text-gray-800 dark:text-gray-100 bg-transparent focus:outline-none"
-                      value={heroSearch}
-                      onChange={(e) => setHeroSearch(e.target.value)}
-                    />
-                  </div>
-                  <button type="submit" className="btn-home px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-sm font-black shrink-0 transition-transform active:scale-95">
-                    Chercher
-                  </button>
-                </form>
-              </div>
-
-              {/* Promos latérales */}
-              <div className="lg:col-span-3 flex flex-row lg:flex-col gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate('/shopping')}
-                  className="flex-1 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 p-5 text-left text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all group flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-3">
-                      <FaTag className="text-white text-lg" />
-                    </div>
-                    <h3 className="text-lg font-bold">Produits vedettes</h3>
-                    <p className="text-indigo-100 text-xs mt-1 leading-snug">Découvrez notre sélection des meilleurs articles du moment.</p>
-                  </div>
-                  <span className="text-sm font-bold text-white mt-4 inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                    Explorer <FaArrowRight size={12} />
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(true)}
-                  className="flex-1 rounded-xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-5 text-left text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all group flex flex-col justify-between border border-[#334155]"
-                >
-                  <div>
-                    <div className="w-10 h-10 rounded-full bg-[#ffdc2b]/10 flex items-center justify-center mb-3">
-                      <FaGlobe className="text-[#ffdc2b] text-lg" />
-                    </div>
-                    <h3 className="text-lg font-bold text-[#ffdc2b]">Sourcing Chine</h3>
-                    <p className="text-gray-300 text-xs mt-1 leading-snug">Déléguez vos imports B2B. Devis gratuit et logistique complète.</p>
-                  </div>
-                  <span className="text-sm font-bold text-white mt-4 inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                    Demander <FaArrowRight size={12} />
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Catégories mobile — scroll horizontal */}
-            <div className="mt-4 lg:hidden home-product-row py-1">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => navigate(`/shopping?category=${encodeURIComponent(cat.name)}`)}
-                  className="home-category-pill"
-                >
-                  <span className={`w-10 h-10 rounded-full flex items-center justify-center ${cat.color}`}>
-                    <cat.icon size={16} />
-                  </span>
-                  <span className="text-[10px] font-bold text-gray-700 text-center leading-tight">{cat.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-
-
-        {/* ══ PRODUITS — zone principale marketplace ═══ */}
-        <section className="mx-auto pb-8 sm:pb-10 pt-2 sm:pt-4">
+        {/* ══ PRODUITS — Grille style Alibaba ═══════════ */}
+        <section className="max-w-[var(--floorWrapperWidth)] mx-auto px-4 sm:px-6 lg:px-8 pb-10 pt-8">
           {(featuredLoading || catalogLoading) && !featuredProducts.length && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="skeleton h-56 rounded-lg" />
-              ))}
+            <div className="mb-8">
+              <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-4 animate-pulse" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+                {[1,2,3,4,5,6,7,8,9,10].map((i) => (
+                  <div key={i} className="bg-white dark:bg-[#1e2130] rounded-xl overflow-hidden shadow-sm">
+                    <div className="bg-gray-200 dark:bg-gray-800 animate-pulse w-full aspect-square" />
+                    <div className="p-3 sm:p-4 space-y-3">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 animate-pulse" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 animate-pulse" />
+                      <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mt-4 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          <ProductRow
+          <ProductSection
             title="Produits vedettes"
             subtitle="Notre sélection premium — qualité garantie"
-            icon={<FaFire size={16} />}
+            icon={<FaFire size={13} />}
             products={featuredProducts}
             viewAllPath="/shopping"
             badge="Top"
           />
 
           {deals.length > 0 && (
-            <ProductRow
+            <ProductSection
               title="Promos & bonnes affaires"
               subtitle="Prix réduits — quantités limitées"
-              icon={<FaPercent size={16} />}
+              icon={<FaPercent size={13} />}
               products={deals}
               viewAllPath="/shopping"
               badge="Promo"
             />
           )}
 
-          <ProductRow
+          <ProductSection
             title="Nouveautés"
-            subtitle="Derniers produits ajoutés sur la marketplace"
-            icon={<FaClock size={16} />}
+            subtitle="Derniers produits ajoutés"
+            icon={<FaClock size={13} />}
             products={newArrivals}
             viewAllPath="/shopping"
           />
 
-          <ProductRow
+          <ProductSection
             title="Meilleures ventes"
             subtitle="Les plus populaires auprès de nos acheteurs"
-            icon={<FaMedal size={16} />}
+            icon={<FaMedal size={13} />}
             products={bestSellers}
             viewAllPath="/shopping"
             badge="Hot"
           />
 
-          <ProductRow
-            title="Produits recommandés pour vous"
+          <ProductSection
+            title="Recommandés pour vous"
             products={catalog.length ? catalog : featuredProducts}
             viewAllPath="/shopping"
           />

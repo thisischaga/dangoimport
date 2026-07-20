@@ -4,16 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';
-import {
-  FaBoxOpen, FaSpinner, FaShoppingBag, FaUserCircle,
-  FaCog, FaBell, FaSignOutAlt, FaChevronRight, FaMapMarkerAlt
-} from 'react-icons/fa';
+import { getProductImage } from '../utils/imageUrl';
 
 const ClientActivity = () => {
   const [achats, setAchats] = useState([]);
   const [commandes, setCommandes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,138 +35,154 @@ const ClientActivity = () => {
     fetchActivities();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('dangoUser');
-    localStorage.removeItem('dangoToken');
-    window.dispatchEvent(new Event('authChange'));
-    navigate('/login');
-  };
-
   const allOrders = [...commandes, ...achats].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-    <div className="bg-[#f8f9fa] min-h-screen font-sans flex flex-col">
+    <div className="bg-[#f5f5f5] dark:bg-[#0f1115] min-h-screen font-sans flex flex-col">
       <Header />
       
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col lg:flex-row gap-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12">
         
-        {/* Sidebar Dashboard */}
-        <aside className="lg:w-72 shrink-0">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 bg-gradient-to-br from-gray-900 to-slate-800 text-center">
-              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm border border-white/20">
-                <FaUserCircle className="text-white/80 text-5xl" />
-              </div>
-              <h2 className="text-lg font-bold text-white line-clamp-1">{user?.nom || user?.name || 'Mon Compte'}</h2>
-              <p className="text-sm text-gray-300 line-clamp-1">{user?.email}</p>
-            </div>
-            <nav className="p-3 space-y-1">
-              <button className="w-full flex items-center justify-between px-4 py-3 bg-[#fffbeb] text-[#d4b000] rounded-xl font-bold transition-colors">
-                <span className="flex items-center gap-3"><FaShoppingBag /> Mes commandes</span>
-                <FaChevronRight size={10} />
-              </button>
-              <button onClick={() => navigate('/cart')} className="w-full flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
-                <span className="flex items-center gap-3"><FaBoxOpen /> Mon panier</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
-                <span className="flex items-center gap-3"><FaMapMarkerAlt /> Adresses</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
-                <span className="flex items-center gap-3"><FaCog /> Paramètres</span>
-              </button>
-              <div className="h-px bg-gray-100 my-2 mx-4"></div>
-              <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition-colors">
-                <span className="flex items-center gap-3"><FaSignOutAlt /> Déconnexion</span>
-              </button>
-            </nav>
-          </div>
-        </aside>
-
         {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Historique de commandes</h1>
-            <p className="text-gray-500 text-sm mt-1">Consultez et suivez l'état de vos achats sur Dango Import.</p>
-          </div>
-          
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-white rounded-2xl border border-gray-100">
-              <FaSpinner className="animate-spin text-3xl mb-4 text-[#ffdc2b]" />
-              <p className="text-gray-500 text-sm font-medium">Chargement de vos commandes...</p>
-            </div>
-          ) : allOrders.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center flex flex-col items-center justify-center">
-              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 text-4xl mb-6">
-                <FaShoppingBag />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Aucune commande trouvée</h2>
-              <p className="text-gray-500 mb-8 max-w-md text-sm">Vous n'avez pas encore passé de commandes. Parcourez la boutique pour découvrir nos offres exclusives.</p>
-              <button 
-                onClick={() => navigate('/shopping')}
-                className="btn-brand px-6 py-2.5 rounded-xl font-bold text-sm shadow-sm"
-              >
-                Découvrir la boutique
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {allOrders.map((cmd) => {
-                const isPanier = cmd.products !== undefined;
-                const date = new Date(cmd.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-                const title = isPanier ? 'Commande Groupée (Panier)' : (cmd.userPref || 'Achat Direct');
-                const qty = cmd.productQuantity || (cmd.products ? cmd.products.reduce((acc, p) => acc + (p.quantity || 1), 0) : 1);
-                
-                let statusColor = "bg-gray-100 text-gray-600";
-                if (cmd.status === 'Payé') statusColor = "bg-green-100 text-green-700";
-                else if (cmd.status?.toLowerCase().includes('en attente')) statusColor = "bg-[#fffbeb] text-[#d4b000] border border-[#ffdc2b]/50";
-                else if (cmd.status?.toLowerCase().includes('livr')) statusColor = "bg-blue-100 text-blue-700";
-
-                return (
-                  <div key={cmd._id} className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-[#ffdc2b]/50 transition-colors flex flex-col sm:flex-row gap-5 sm:items-center">
-                    
-                    {/* Image / Icon */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-gray-100">
-                      {cmd.picture ? (
-                        <img src={cmd.picture} alt="Produit" className="max-h-full max-w-full object-contain mix-blend-multiply p-2" />
-                      ) : (
-                        <FaBoxOpen className="text-gray-300 text-2xl" />
-                      )}
-                    </div>
-                    
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1.5">
-                        <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${statusColor}`}>
-                          {cmd.status || 'En attente'}
-                        </span>
-                        <span className="text-[11px] text-gray-400 font-medium">Commandé le {date}</span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-1">{title}</h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Numéro de commande : <span className="font-mono text-gray-400">#{cmd._id?.slice(-8).toUpperCase()}</span>
-                      </p>
-                      <p className="text-xs font-medium text-gray-600 mt-2">
-                        {qty} article{qty > 1 ? 's' : ''}
-                      </p>
-                    </div>
-
-                    {/* Price & Actions */}
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 border-t sm:border-t-0 sm:border-l border-gray-100 pt-4 sm:pt-0 sm:pl-6">
-                      <div className="text-left sm:text-right">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Total</p>
-                        <span className="text-xl font-black text-gray-900">{cmd.totalPrice} <span className="text-sm font-bold text-gray-500">FCFA</span></span>
-                      </div>
-                      <button className="text-xs font-bold text-[#d4b000] hover:text-[#c9a800] hover:underline flex items-center gap-1">
-                        Détails <FaChevronRight size={8} />
-                      </button>
-                    </div>
-
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <div className="mb-8 text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">
+            Mes commandes
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-[14px]">
+            Suivez l'état de vos achats et gérez vos commandes en cours.
+          </p>
         </div>
+        
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mb-4" />
+            <p className="text-gray-500 text-sm font-medium">Chargement...</p>
+          </div>
+        ) : allOrders.length === 0 ? (
+          <div className="bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-100 dark:border-gray-800 p-12 text-center flex flex-col items-center justify-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Aucune commande</h2>
+            <p className="text-gray-500 mb-8 max-w-sm text-[14px]">Vous n'avez pas encore passé de commandes. Parcourez la boutique pour découvrir nos offres.</p>
+            <button 
+              onClick={() => navigate('/shopping')}
+              className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-full font-bold text-[13px] shadow-sm hover:bg-gray-800 transition-colors"
+            >
+              Découvrir la boutique
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {allOrders.map((cmd) => {
+              const isPanier = cmd.products !== undefined;
+              const date = new Date(cmd.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+              
+              // Define title intelligently based on product details or fallbacks
+              let title = 'Achat Direct';
+              if (isPanier) title = 'Commande Groupée';
+              else if (cmd.productName || cmd.name) title = cmd.productName || cmd.name;
+              else if (cmd.userPref && cmd.userPref.length < 30) title = `Produit (${cmd.userPref})`;
+              
+              const qty = cmd.productQuantity || (cmd.products ? cmd.products.reduce((acc, p) => acc + (p.quantity || 1), 0) : 1);
+              
+              // Fix image rendering
+              const imgUrl = getProductImage(cmd) || cmd.picture;
+              
+              let statusColor = "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300";
+              if (cmd.status === 'Payé') statusColor = "bg-green-50 text-green-700 border border-green-200";
+              else if (cmd.status?.toLowerCase().includes('en attente')) statusColor = "bg-yellow-50 text-yellow-700 border border-yellow-200";
+              else if (cmd.status?.toLowerCase().includes('livr')) statusColor = "bg-blue-50 text-blue-700 border border-blue-200";
+
+              return (
+                <div key={cmd._id} className="bg-white dark:bg-[#1a1d24] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-colors flex flex-col sm:flex-row gap-6 sm:items-center shadow-sm">
+                  
+                  {/* Image Placeholder or Actual Image */}
+                  <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-800">
+                    {imgUrl ? (
+                      <img src={imgUrl} alt="Produit" className="w-full h-full object-contain p-2" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 dark:bg-gray-800" />
+                    )}
+                  </div>
+                  
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full ${statusColor}`}>
+                        {cmd.status || 'En attente'}
+                      </span>
+                      <span className="text-[12px] text-gray-500 font-medium">{date}</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-[16px] line-clamp-1 mb-1">{title}</h3>
+                    <div className="flex items-center gap-4 text-[13px] text-gray-500">
+                      <p>N° <span className="font-medium text-gray-900 dark:text-gray-300">{cmd._id?.slice(-8).toUpperCase()}</span></p>
+                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                      <p>{qty} article{qty > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Price & Actions */}
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-gray-800 pt-4 sm:pt-0 sm:pl-6">
+                    <div className="text-left sm:text-right">
+                      <p className="text-[11px] text-gray-400 font-medium mb-1">Total</p>
+                      <span className="text-[18px] font-black text-gray-900 dark:text-white leading-none">
+                        {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">FCFA</span>
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => setExpandedOrder(expandedOrder === cmd._id ? null : cmd._id)}
+                      className="text-[13px] font-bold text-gray-900 dark:text-white underline hover:text-[#ffdc2b] transition-colors"
+                    >
+                      {expandedOrder === cmd._id ? 'Fermer' : 'Détails'}
+                    </button>
+                  </div>
+
+                </div>
+                
+                {expandedOrder === cmd._id && (
+                  <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-gray-100 dark:border-gray-800">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Détails de la commande</h4>
+                    
+                    {/* Products List */}
+                    {cmd.products && cmd.products.length > 0 ? (
+                      <div className="space-y-3 mb-6">
+                        {cmd.products.map((p, idx) => (
+                          <div key={idx} className="flex justify-between items-center bg-white dark:bg-[#1a1d24] p-3 rounded-lg border border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-sm text-gray-900 dark:text-white line-clamp-1 max-w-[200px] sm:max-w-sm">{p.name || p.productName || 'Produit sans nom'}</span>
+                              <span className="text-xs text-gray-500 font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">x{p.quantity || 1}</span>
+                            </div>
+                            <span className="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">{(p.price || 0).toLocaleString('fr-FR')} FCFA</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">Achat direct - Aucun détail de produit disponible</p>
+                    )}
+
+                    {/* Shipping Info */}
+                    {(cmd.firstName || cmd.address || cmd.phone) && (
+                      <div className="bg-white dark:bg-[#1a1d24] p-4 rounded-xl border border-gray-100 dark:border-gray-800 text-sm">
+                        <p className="font-bold text-gray-900 dark:text-white mb-2">Informations de livraison</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Destinataire</p>
+                            <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.firstName} {cmd.lastName}</p>
+                            <p className="text-gray-900 dark:text-gray-300">{cmd.phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Adresse</p>
+                            <p className="text-gray-900 dark:text-gray-300 font-medium">{cmd.address}</p>
+                            <p className="text-gray-900 dark:text-gray-300">{cmd.city}, {cmd.country}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              );
+            })}
+          </div>
+        )}
       </main>
       <Footer />
     </div>

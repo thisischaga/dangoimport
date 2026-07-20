@@ -320,8 +320,11 @@ export default function Checkout() {
     if (loading) return (
         <>
             <Header />
-            <div className="min-h-[60vh] flex items-center justify-center bg-[#f8f9fa]">
-                <div className="w-10 h-10 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+            <div className="min-h-[60vh] flex items-center justify-center bg-[#f5f5f5]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-3 border-gray-200 border-t-[#ffdc2b] rounded-full animate-spin" />
+                    <p className="text-[13px] text-gray-400 font-medium">Chargement de votre panier…</p>
+                </div>
             </div>
             <Footer />
         </>
@@ -330,14 +333,15 @@ export default function Checkout() {
     if (!cartItems?.length) return (
         <>
             <Header />
-            <div className="min-h-[60vh] bg-[#f8f9fa] flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto text-gray-400">
+            <div className="min-h-[60vh] bg-[#f5f5f5] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-24 h-24 bg-[#ffdc2b]/15 border-4 border-[#ffdc2b]/30 rounded-full flex items-center justify-center mx-auto mb-5 text-gray-400">
                         <PackageIcon />
                     </div>
-                    <p className="font-semibold text-gray-700">Votre panier est vide</p>
-                    <button type="button" onClick={() => navigate('/shopping')} className="btn-brand px-6 py-2.5 rounded-xl text-sm">
-                        Continuer mes achats
+                    <p className="font-black text-gray-900 text-[18px] mb-2">Votre panier est vide</p>
+                    <p className="text-gray-500 text-[13px] mb-6">Ajoutez des produits avant de finaliser votre commande.</p>
+                    <button type="button" onClick={() => navigate('/shopping')} className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black px-8 py-3.5 rounded-full transition-all">
+                        Explorer le catalogue
                     </button>
                 </div>
             </div>
@@ -349,21 +353,24 @@ export default function Checkout() {
     const activeCountry = FEDAPAY_COUNTRIES.find(c => c.code === fedapayCountry);
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] flex flex-col" style={{ fontFamily: "'Outfit', sans-serif" }}>
+        <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0f1115] flex flex-col" style={{ fontFamily: "'Outfit', sans-serif" }}>
             <Header />
 
             {/* ── Barre checkout ──────────────────────────────────────────────── */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div className="bg-white dark:bg-[#1a1d24] border-b border-gray-200 dark:border-gray-800">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
                     <button
                         type="button"
                         onClick={() => (step > 1 ? setStep(s => s - 1) : navigate('/cart'))}
-                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition text-sm font-medium"
+                        className="flex items-center gap-2 text-gray-500 hover:text-[#b8a000] transition text-[13px] font-semibold"
                     >
                         <ArrowLeft />
                         <span className="hidden sm:inline">{step > 1 ? 'Étape précédente' : 'Retour au panier'}</span>
                     </button>
-                    <span className="font-bold text-gray-900 text-sm sm:text-base">Finaliser la commande</span>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[#ffdc2b]" />
+                        <span className="font-black text-gray-900 dark:text-white text-[14px] sm:text-[15px]">Finaliser la commande</span>
+                    </div>
                     <div className="w-20 sm:w-28" />
                 </div>
             </div>
@@ -379,20 +386,20 @@ export default function Checkout() {
                         return (
                             <React.Fragment key={num}>
                                 <div className="flex flex-col items-center gap-1.5">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-                                        ${done   ? 'bg-[#2d3748] text-[#ffdc2b]'
-                                               : active ? 'bg-[#fffbeb] text-[#2d3748] ring-4 ring-[#ffdc2b]/20 border border-[#ffdc2b]/40'
-                                               : 'bg-gray-200 text-gray-400'}`}>
+                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-black transition-all duration-300
+                                        ${done   ? 'bg-[#ffdc2b] text-[#111] shadow-md'
+                                               : active ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white ring-4 ring-gray-100 dark:ring-gray-800 shadow-md'
+                                               : 'bg-gray-50 dark:bg-gray-900 text-gray-400'}`}>
                                         {done ? <CheckIcon /> : num}
                                     </div>
-                                    <span className={`text-xs font-medium hidden sm:block transition-colors
-                                        ${active ? 'text-gray-900' : done ? 'text-gray-600' : 'text-gray-400'}`}>
+                                    <span className={`text-[11px] font-bold hidden sm:block transition-colors mt-1
+                                        ${active ? 'text-gray-900 dark:text-white' : done ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400'}`}>
                                         {label}
                                     </span>
                                 </div>
                                 {i < STEPS.length - 1 && (
-                                    <div className={`flex-1 h-0.5 mx-2 sm:mx-3 mb-4 transition-colors duration-500 max-w-[60px]
-                                        ${step > num ? 'bg-[#ffdc2b]' : 'bg-gray-200'}`} />
+                                    <div className={`flex-1 h-0.5 mx-3 mb-5 transition-colors duration-500 max-w-[80px] rounded-full
+                                        ${step > num ? 'bg-[#ffdc2b]' : 'bg-gray-200 dark:bg-gray-700'}`} />
                                 )}
                             </React.Fragment>
                         );
@@ -404,7 +411,7 @@ export default function Checkout() {
 
                     {/* ── Colonne formulaire ───────────────────────────────────── */}
                     <div className="lg:col-span-3">
-                        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                        <div className="bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
 
                             {/* ── ÉTAPE 1 — Informations ───────────────────────── */}
                             {step === 1 && (
@@ -459,10 +466,6 @@ export default function Checkout() {
                                                         ? 'border-gray-900 bg-[#ffdc2b]/10'
                                                         : 'border-gray-200 hover:border-gray-400 bg-white'}`}
                                             >
-                                                <div className={`p-2 rounded-xl transition-colors
-                                                    ${shippingMethod === opt.value ? 'bg-[#2d3748] text-white' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {opt.icon}
-                                                </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-semibold text-gray-900 text-sm">{opt.label}</p>
                                                     <p className="text-xs text-gray-500 mt-0.5">{opt.delay}</p>
@@ -498,11 +501,6 @@ export default function Checkout() {
                                         >
                                             {/* En-tête option */}
                                             <div className="flex items-center gap-3 p-4">
-                                                <div className="w-10 h-10 rounded-xl bg-[#2d3748] flex items-center justify-center shrink-0">
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffdc2b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                                                        <rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
-                                                    </svg>
-                                                </div>
                                                 <div className="flex-1">
                                                     <p className="font-semibold text-gray-900 text-sm">Mobile Money via FedaPay</p>
                                                     <p className="text-xs text-gray-500 mt-0.5">MTN, Moov, Orange, Wave, T-Money…</p>
@@ -612,9 +610,6 @@ export default function Checkout() {
                                                     : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                             onClick={() => setPaymentMethod('cash')}
                                         >
-                                            <div className="w-10 h-10 rounded-xl bg-[#2d3748] text-[#ffdc2b] flex items-center justify-center shrink-0">
-                                                <TruckIcon />
-                                            </div>
                                             <div className="flex-1">
                                                 <p className="font-semibold text-gray-900 text-sm">Paiement à la livraison</p>
                                                 <p className="text-xs text-gray-500 mt-1">
@@ -641,7 +636,7 @@ export default function Checkout() {
                                         </div>
                                         <div className="flex justify-between items-center pt-2 border-t border-gray-200 font-bold text-gray-900">
                                             <span>Total à payer</span>
-                                            <span className="bg-[#fff0a0] border border-[#f5dc7a] px-2.5 py-0.5 rounded-lg text-sm">
+                                            <span className="text-lg">
                                                 {total.toLocaleString('fr-FR')} F
                                             </span>
                                         </div>
@@ -656,24 +651,24 @@ export default function Checkout() {
 
                             {/* ── ÉTAPE 4 — Confirmation ───────────────────────── */}
                             {step === 4 && order && (
-                                <div className="p-8 text-center">
-                                    <div className="w-16 h-16 bg-[#fffbeb] border border-[#ffdc2b]/35 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2d3748" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <div className="p-8 sm:p-12 text-center">
+                                    <div className="w-20 h-20 bg-[#ffdc2b] rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                             <polyline points="20 6 9 18 4 13" />
                                         </svg>
                                     </div>
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">Commande confirmée !</h2>
-                                    <p className="text-gray-500 text-sm mb-1">Numéro de commande</p>
-                                    <p className="text-gray-900 font-bold text-lg mb-5">{order.orderNumber}</p>
-                                    <p className="text-sm text-gray-500 mb-6">
+                                    <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Commande confirmée ! 🎉</h2>
+                                    <p className="text-gray-500 text-[13px] mb-1">Numéro de commande</p>
+                                    <p className="text-[#111] dark:text-white font-black text-[20px] bg-[#ffdc2b]/20 border border-[#ffdc2b]/40 px-4 py-2 rounded-xl inline-block mb-5">{order.orderNumber}</p>
+                                    <p className="text-[14px] text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
                                         {paymentMethod === 'cash'
-                                            ? <>Nous vous contacterons au <strong>{form.phone}</strong> pour confirmer la livraison.</>
-                                            : <>Un email de confirmation a été envoyé à <strong>{form.email}</strong>.</>}
+                                            ? <>Nous vous contacterons au <strong className="text-gray-900 dark:text-white">{form.phone}</strong> pour confirmer la livraison.</>
+                                            : <>Un email de confirmation a été envoyé à <strong className="text-gray-900 dark:text-white">{form.email}</strong>.</> }
                                     </p>
                                     <button
                                         type="button"
                                         onClick={() => navigate('/mes-commandes')}
-                                        className="btn-brand px-8 py-3 rounded-xl text-sm"
+                                        className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black px-10 py-4 rounded-full transition-all hover:-translate-y-0.5 hover:shadow-lg text-[15px]"
                                     >
                                         Suivre mes commandes
                                     </button>
@@ -687,40 +682,40 @@ export default function Checkout() {
                                         <button
                                             type="button"
                                             onClick={() => setStep(s => s - 1)}
-                                            className="flex-1 btn-brand-outline py-3 rounded-xl text-sm"
+                                            className="flex-1 border-2 border-gray-200 dark:border-gray-700 hover:border-[#ffdc2b] text-gray-700 dark:text-gray-300 font-bold py-3.5 rounded-full transition-all text-[14px]"
                                         >
-                                            Retour
+                                            ← Retour
                                         </button>
                                     )}
                                     {step < 3 ? (
                                         <button
                                             type="button"
                                             onClick={handleNext}
-                                            className="flex-1 btn-brand py-3 rounded-xl text-sm"
+                                            className="flex-1 bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black py-3.5 rounded-full transition-all hover:shadow-lg text-[14px]"
                                         >
-                                            Continuer
+                                            Continuer →
                                         </button>
                                     ) : (
                                         <button
                                             type="button"
                                             onClick={handlePlaceOrder}
                                             disabled={submitting}
-                                            className="flex-1 btn-brand disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed py-3 rounded-xl text-sm flex items-center justify-center gap-2"
+                                            className="flex-1 bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-black py-3.5 rounded-full transition-all hover:shadow-lg text-[14px] flex items-center justify-center gap-2"
                                         >
                                             {submitting ? (
                                                 <>
-                                                    <div className="w-4 h-4 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
+                                                    <div className="w-4 h-4 border-2 border-[#111]/30 border-t-[#111] rounded-full animate-spin" />
                                                     {paymentMethod === 'fedapay' ? 'Envoi du Push USSD…' : 'Enregistrement…'}
                                                 </>
                                             ) : paymentMethod === 'fedapay' ? (
                                                 <>
                                                     <LockIcon />
-                                                    Payer {total.toLocaleString('fr-FR')} F
+                                                    Payer {total.toLocaleString('fr-FR')} FCFA
                                                 </>
                                             ) : (
                                                 <>
                                                     <CheckIcon />
-                                                    Confirmer — {total.toLocaleString('fr-FR')} F à la livraison
+                                                    Confirmer la commande
                                                 </>
                                             )}
                                         </button>
@@ -732,9 +727,9 @@ export default function Checkout() {
 
                     {/* ── Sidebar résumé commande ──────────────────────────────── */}
                     <aside className="lg:col-span-2">
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5 sticky top-28">
-                            <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 pb-3 border-b border-gray-100">
-                                <span className="w-7 h-7 rounded-lg bg-[#2d3748] flex items-center justify-center text-[#ffdc2b]">
+                        <div className="bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sticky top-28 shadow-sm">
+                            <h3 className="font-black text-gray-900 dark:text-white text-[15px] mb-4 flex items-center gap-2.5 pb-3.5 border-b border-gray-100 dark:border-gray-800">
+                                <span className="w-8 h-8 rounded-xl bg-[#ffdc2b] flex items-center justify-center text-[#111]">
                                     <PackageIcon />
                                 </span>
                                 Votre commande

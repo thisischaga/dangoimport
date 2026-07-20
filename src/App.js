@@ -4,7 +4,9 @@ import About from "./pages/About";
 import Home from "./pages/Home";
 import CguVendeur from "./pages/CguVendeur";
 import Services from "./pages/Services";
-import DevenirVendeur from "./pages/DevenirVendeur";
+import AllCategories from "./pages/AllCategories";
+import FeaturedSelection from "./pages/FeaturedSelection";
+import HelpCenter from "./pages/HelpCenter";
 import './App.css';
 import Cgu from './pages/Cgu';
 import Politique from './pages/Politique';
@@ -92,7 +94,9 @@ function App() {
               <Route path='/vendor/:vendorName' element={<VendorProfile/>}/>
               <Route path='/dashboard-vendeur' element={<VendorDashboard/>}/>
               <Route path='/mes-commandes' element={<ClientActivity/>}/>
-              <Route path='/devenir-vendeur' element={<DevenirVendeur/>}/>
+              <Route path='/toutes-les-categories' element={<AllCategories/>}/>
+              <Route path='/selection-vedette' element={<FeaturedSelection/>}/>
+              <Route path='/centre-aide' element={<HelpCenter/>}/>
               
               {/* New E-commerce routes */}
               <Route path='/product/:id' element={<ProductDetail/>}/>
