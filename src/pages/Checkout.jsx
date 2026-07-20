@@ -492,45 +492,45 @@ export default function Checkout() {
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 {showTaxModal && (
                     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4 py-6">
-                        <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-xl">
-                            <div className="border-b border-gray-200 px-5 py-4">
+                        <div className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1d24] shadow-xl">
+                            <div className="border-b border-gray-200 dark:border-gray-700 px-5 py-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Avant paiement</p>
-                                        <h3 className="mt-1 text-lg font-black text-gray-900">Fiche de taxe et frais</h3>
+                                        <h3 className="mt-1 text-lg font-black text-gray-900 dark:text-white">Fiche de taxe et frais</h3>
                                     </div>
-                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">✕</button>
+                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200">✕</button>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 p-5 text-sm text-gray-600">
+                            <div className="space-y-4 p-5 text-sm text-gray-600 dark:text-gray-300">
                                 <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 p-3">
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Sous-total</p>
-                                        <p className="mt-1 font-black text-gray-900">{subtotal.toLocaleString('fr-FR')} F</p>
+                                        <p className="mt-1 font-black text-gray-900 dark:text-white">{subtotal.toLocaleString('fr-FR')} F</p>
                                     </div>
-                                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 p-3">
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Total estimé</p>
-                                        <p className="mt-1 font-black text-gray-900">{total.toLocaleString('fr-FR')} F</p>
+                                        <p className="mt-1 font-black text-gray-900 dark:text-white">{total.toLocaleString('fr-FR')} F</p>
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border border-gray-200 bg-[#f9fafb] p-4">
-                                    <p className="font-semibold text-gray-900">À savoir</p>
-                                    <ul className="mt-2 space-y-1.5 text-sm text-gray-600">
+                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-[#f9fafb] dark:bg-gray-800/70 p-4">
+                                    <p className="font-semibold text-gray-900 dark:text-white">À savoir</p>
+                                    <ul className="mt-2 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
                                         <li>• Les frais de livraison et les commissions peuvent varier selon la destination.</li>
                                         <li>• Le montant affiché est une estimation avant validation du paiement.</li>
                                     </ul>
                                 </div>
 
-                                <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
+                                <label className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/70 p-3 text-sm text-gray-700 dark:text-gray-200">
                                     <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4 rounded border-gray-300 text-[#ffdc2b] focus:ring-[#ffdc2b]" />
                                     <span>Je confirme avoir pris connaissance de la fiche de taxe et accepte les frais estimés.</span>
                                 </label>
                             </div>
 
-                            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4">
-                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-white">Fermer</button>
+                            <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/70 px-5 py-4">
+                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 transition hover:bg-white dark:hover:bg-gray-800">Fermer</button>
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -750,7 +750,7 @@ export default function Checkout() {
 
                                         {/* ── Option paiement à la livraison ────── */}
                                         <div
-                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
+                                            className={`hidden sm:hidden sm:flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
                                                 ${paymentMethod === 'cash'
                                                     ? 'border-gray-900 bg-[#fffbeb]'
                                                     : 'border-gray-200 bg-white hover:border-gray-300'}`}
