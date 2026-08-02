@@ -144,14 +144,11 @@ function HomeNew({ cartCount: cartCountProp }) {
               backgroundPosition: 'center',
             }}
           >
-            <div className="relative z-10 h-80 max-w-2xl ">
-
-              <h1 className=" text-[#fff] leading-tight lg:text-4xl pt-20 pl-10">
-                Achetez malin, <br />
-                <span className=" lg:text-8xl font-bold text-white mb-8">livrez vite</span>
+            <div className="relative z-10 min-h-[320px] px-4 py-12 sm:px-6 sm:py-16 lg:py-20 max-w-2xl">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                Achetez malin,
+                <span className="block text-4xl sm:text-6xl lg:text-7xl font-black mt-3">livrez vite</span>
               </h1>
-
-                    
             </div>
           </div>     
         </section>

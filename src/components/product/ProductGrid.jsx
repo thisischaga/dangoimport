@@ -159,16 +159,19 @@ function ProductGrid({ products = [], loading = false, onAddToCart }) {
         <div id="product-grid-main" style={{ display: 'grid', gap: '10px' }}>
           <style>{`
             #product-grid-main {
-              grid-template-columns: repeat(2, 1fr);
+              grid-template-columns: repeat(1, 1fr);
             }
             @media (min-width: 640px) {
+              #product-grid-main { grid-template-columns: repeat(2, 1fr); }
+            }
+            @media (min-width: 768px) {
               #product-grid-main { grid-template-columns: repeat(3, 1fr); }
             }
             @media (min-width: 1024px) {
-              #product-grid-main { grid-template-columns: repeat(5, 1fr); }
+              #product-grid-main { grid-template-columns: repeat(4, 1fr); }
             }
             @media (min-width: 1280px) {
-              #product-grid-main { grid-template-columns: repeat(6, 1fr); }
+              #product-grid-main { grid-template-columns: repeat(5, 1fr); }
             }
           `}</style>
 

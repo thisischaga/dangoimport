@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BellRing, Search, ShoppingCart, Store, UserCircle2, X } from 'lucide-react';
+import { Search, ShoppingCart, Store, UserCircle2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+
+const navItems = [
+  { label: 'Accueil', to: '/' },
+  { label: 'Boutique', to: '/shopping' },
+  { label: 'Mes commandes', to: '/mes-commandes' },
+  { label: 'Contact', to: '/contact' },
+  { label: 'FAQ', to: '/faq' },
+];
 
 const Header = () => {
   const navigate = useNavigate();
@@ -63,6 +71,18 @@ const Header = () => {
               <h1 className="text-lg font-black text-[#111827]">Dangoimport.com</h1>
             </div>
           </button>
+
+          <div className="hidden lg:flex items-center gap-3 ml-4">
+            {navItems.map((item) => (
+              <button
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                className="text-sm font-semibold text-slate-700 hover:text-[#FF6B00] transition"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Mobile compact actions */}
@@ -90,8 +110,8 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button  className="hidden rounded-full border border-[#FF6B00] px-3 py-2 text-sm font-semibold text-[#FF6B00] md:inline-flex">
-            Ouvrir ma boutique
+          <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600">
+            <Search size={18} />
           </button>
 
           <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white">
@@ -129,6 +149,54 @@ const Header = () => {
                 </div>
                 <button aria-label="Fermer" onClick={() => setDrawerOpen(false)} className="p-2">
                   <X size={18} />
+                </button>
+              </div>
+
+              <nav className="px-4 py-6 space-y-3">
+                {navItems.map((item) => (
+                  <button
+                    key={item.to}
+                    onClick={() => {
+                      navigate(item.to);
+                      setDrawerOpen(false);
+                    }}
+                    className="w-full text-left rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="mt-auto border-t px-4 py-5 space-y-3">
+                {user ? (
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setDrawerOpen(false);
+                    }}
+                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-sm font-semibold text-[#FF6B00]"
+                  >
+                    Déconnexion
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      navigate('/login');
+                      setDrawerOpen(false);
+                    }}
+                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-sm font-semibold text-[#FF6B00]"
+                  >
+                    Se connecter
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    navigate('/cart');
+                    setDrawerOpen(false);
+                  }}
+                  className="w-full rounded-full bg-[#FF6B00] px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Voir mon panier ({cartCount > 99 ? '99+' : cartCount})
                 </button>
               </div>
             </motion.aside>
