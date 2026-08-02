@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import API_BASE_URL from '../apiConfig';
 import { Mail, PhoneCall, MapPin, Clock } from 'lucide-react';
-import { FaFacebookF, FaInstagram, FaTiktok, FaTwitter, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTiktok, FaTwitter, FaLinkedinIn } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
 import logo from '../images/logo.jpeg';
@@ -110,48 +110,50 @@ const Footer = () => {
         </motion.div>
 
         {/* Contact + Newsletter + Socials */}
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 }} className="mt-10 border-t pt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <h4 className="text-sm font-bold mb-3">Contact</h4>
-            <div className="text-sm text-[#374151] space-y-2">
-              <div className="flex items-center gap-2"><MapPin size={16} className="text-[#6b7280]" /> ABOMEY-CALAVI, Bénin</div>
-              <div className="flex items-center gap-2"><PhoneCall size={16} className="text-[#6b7280]" /> <a href="tel:+2290158266342" className="hover:text-[#F68B1E]">+229 0158266342</a></div>
-              <div className="flex items-center gap-2"><Mail size={16} className="text-[#6b7280]" /> <a href="mailto:contact@dangoimport.com" className="hover:text-[#F68B1E]">contact@dangoimport.com</a></div>
-              <div className="flex items-center gap-2"><Clock size={16} className="text-[#6b7280]" /> Lun–Sam 09:00–18:00</div>
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 }} className="mt-10 border-t pt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-sm font-bold mb-3">Contact</h4>
+              <div className="text-sm text-[#374151] space-y-2">
+                <div className="flex flex-wrap items-center gap-2"><MapPin size={16} className="text-[#6b7280]" /> ABOMEY-CALAVI, Bénin</div>
+                <div className="flex flex-wrap items-center gap-2"><PhoneCall size={16} className="text-[#6b7280]" /> <a href="tel:+2290158266342" className="hover:text-[#F68B1E]">+229 0158266342</a></div>
+                <div className="flex flex-wrap items-center gap-2"><Mail size={16} className="text-[#6b7280]" /> <a href="mailto:contact@dangoimport.com" className="hover:text-[#F68B1E]">contact@dangoimport.com</a></div>
+                <div className="flex flex-wrap items-center gap-2"><Clock size={16} className="text-[#6b7280]" /> Lun–Sam 09:00–18:00</div>
+              </div>
             </div>
 
-            <div className="mt-4">
+            <div>
               <h4 className="text-sm font-bold mb-2">Moyens de paiement</h4>
               <PaymentsGrid />
             </div>
           </div>
 
-          <div className="md:col-span-2">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="flex-1">
-                <h4 className="text-sm font-bold mb-3">Recevez nos meilleures offres</h4>
-                <p className="text-sm text-[#6b7280] mb-3">Inscrivez-vous à la newsletter pour recevoir les promos et nouveautés.</p>
+          <div className="lg:col-span-2">
+            <div className="flex flex-col gap-6">
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold">Recevez nos meilleures offres</h4>
+                <p className="text-sm text-[#6b7280]">Inscrivez-vous à la newsletter pour recevoir les promos et nouveautés.</p>
                 {done ? (
                   <div className="bg-green-50 border border-green-200 rounded px-4 py-2 text-sm text-green-700">Merci ! Vous êtes inscrit(e).</div>
                 ) : (
-                  <form onSubmit={handleNewsletter} className="flex gap-2">
-                    <input aria-label="Votre adresse e-mail" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} placeholder="Votre adresse e-mail" className="flex-1 px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#F68B1E]" />
-                    <button type="submit" disabled={loading} className="bg-[#F68B1E] hover:bg-[#d36f14] text-white px-4 py-2 rounded-md text-sm font-bold">{loading ? '...' : 'S\'abonner'}</button>
+                  <form onSubmit={handleNewsletter} className="flex flex-col gap-3 md:flex-row md:items-center">
+                    <input aria-label="Votre adresse e-mail" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} placeholder="Votre adresse e-mail" className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#F68B1E]" />
+                    <button type="submit" disabled={loading} className="w-full md:w-auto bg-[#F68B1E] hover:bg-[#d36f14] text-white px-4 py-2 rounded-md text-sm font-bold">{loading ? '...' : 'S\'abonner'}</button>
                   </form>
                 )}
               </div>
 
-              <div className="flex flex-col items-start sm:items-end gap-3">
-                <h4 className="text-sm font-bold">Suivez‑nous</h4>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h4 className="text-sm font-bold">Suivez‑nous</h4>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <motion.a whileHover={{ scale: 1.08 }} className={socialBtn} href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noreferrer"><FaFacebookF /></motion.a>
                   <motion.a whileHover={{ scale: 1.08 }} className={socialBtn} href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noreferrer"><FaInstagram /></motion.a>
                   <motion.a whileHover={{ scale: 1.08 }} className={socialBtn} href="https://twitter.com" aria-label="X" target="_blank" rel="noreferrer"><FaTwitter /></motion.a>
                   <motion.a whileHover={{ scale: 1.08 }} className={socialBtn} href="https://tiktok.com" aria-label="TikTok" target="_blank" rel="noreferrer"><FaTiktok /></motion.a>
                   <motion.a whileHover={{ scale: 1.08 }} className={socialBtn} href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noreferrer"><FaLinkedinIn /></motion.a>
                 </div>
-
-
               </div>
             </div>
           </div>
