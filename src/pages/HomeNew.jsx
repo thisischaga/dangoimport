@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   BadgeCheck,
@@ -54,6 +54,7 @@ function FlashTimer() {
 }
 
 function HomeNew({ cartCount: cartCountProp }) {
+  const navigate = useNavigate();
   const { addToCart, cartCount: contextCount } = useCart();
   const cartCount = cartCountProp ?? contextCount;
   const [products, setProducts] = useState([]);
@@ -136,7 +137,7 @@ function HomeNew({ cartCount: cartCountProp }) {
             {error} — affichage du contenu de secours.
           </div>
         ) */}
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <section className="hidden lg:block mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
           <div className="overflow-hidden rounded-[28px] bg-cover bg-center" style={{ backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.15)), url(${bannerImage})` }}>
             <div className="relative z-10 min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20">
               <h1 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">

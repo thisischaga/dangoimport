@@ -199,7 +199,7 @@ const Header = () => {
             <motion.div initial={{ y: -20 }} animate={{ y: 0 }} exit={{ y: -20 }} className="relative w-full max-w-2xl mx-auto z-50">
               <form onSubmit={(e) => { handleSearch(e); setMobileSearchOpen(false); }} className="flex items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow">
                 <Search size={16} className="text-slate-500" />
-                <input autoFocus className="ml-2 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" placeholder="Cherchez un produit, une marque ou une catégorie" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <input autoFocus className="ml-2 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0" placeholder="Cherchez un produit, une marque ou une catégorie" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <button className="rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
               </form>
             </motion.div>
