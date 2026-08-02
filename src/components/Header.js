@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Store, UserCircle2, X } from 'lucide-react';
+import { Search, ShoppingCart, Store, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 
@@ -98,25 +98,17 @@ const Header = () => {
             <button className="rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
           </form>
 
-          <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
-            <Search size={18} />
-          </button>
-
-          <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white flex-shrink-0">
-            <ShoppingCart size={16} />
-            <span className="hidden sm:inline">Panier</span>
-            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>
-          </button>
-
-          {user ? (
-            <button onClick={handleLogout} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
-              <UserCircle2 size={18} />
+          <div className="flex items-center gap-2">
+            <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
+              <Search size={18} />
             </button>
-          ) : (
-            <button onClick={() => navigate('/login')} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
-              <UserCircle2 size={18} />
+
+            <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white flex-shrink-0 whitespace-nowrap">
+              <ShoppingCart size={16} />
+              <span className="hidden sm:inline">Panier</span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>
             </button>
-          )}
+          </div>
         </div>
       </div>
 
