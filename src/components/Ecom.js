@@ -279,13 +279,13 @@ const Ecom = () => {
 
       {/* Toolbar */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset,104px)] z-40 shadow-sm">
-        <div className="max-w-[var(--floorWrapperWidth)] mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="max-w-[var(--floorWrapperWidth)] mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 space-y-2.5 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
-              <h1 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
+              <h1 className="text-base sm:text-xl font-black text-gray-900 dark:text-white">
                 {query ? `« ${query} »` : 'Marketplace'}
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {activeCategory !== 'Tous' && <span className="text-[#c9a800] font-bold">{activeCategory} · </span>}
                 Achetez auprès de vendeurs locaux vérifiés
               </p>
@@ -312,13 +312,13 @@ const Ecom = () => {
           </div>
 
           {/* Filtres rapides */}
-          <div className="home-hide-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+          <div className="home-hide-scrollbar flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
             {QUICK_FILTERS.map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => { setQuickFilter(f.id); setPage(1); }}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                   quickFilter === f.id
                     ? 'bg-[#ffdc2b] text-[#2d3748] border border-[#e6c600]'
                     : 'bg-gray-100 text-gray-600 hover:bg-[#fffbeb] border border-transparent'
@@ -332,14 +332,14 @@ const Ecom = () => {
       </div>
 
       {/* Catégories mobile */}
-      <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-2.5 home-hide-scrollbar overflow-x-auto">
-        <div className="flex gap-2 w-max">
+      <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-3 py-2.5 home-hide-scrollbar overflow-x-auto">
+        <div className="flex gap-2 w-max snap-x snap-mandatory">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => setCategory(cat)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              className={`shrink-0 snap-start px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                 activeCategory === cat
                   ? 'bg-[#ffdc2b] text-[#2d3748]'
                   : 'bg-gray-100 text-gray-500'

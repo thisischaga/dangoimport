@@ -17,9 +17,9 @@ const PublishProduct = () => {
     price: '',
     category: 'Électronique',
     description: '',
-    image: ''
+    images: []
   });
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem('dangoUser');
@@ -32,19 +32,34 @@ const PublishProduct = () => {
   }, [navigate]);
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("L'image est trop volumineuse (max 5MB)");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const validFiles = files.filter((file) => file.size <= 5 * 1024 * 1024);
+    if (validFiles.length !== files.length) {
+      toast.error("Certaines images dépassent 5MB et ont été ignorées.");
     }
+
+    const readers = validFiles.map(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        })
+    );
+
+    Promise.all(readers)
+      .then((results) => {
+        const nextPreviews = [...imagePreviews, ...results];
+        setImagePreviews(nextPreviews);
+        setFormData((prev) => ({ ...prev, images: nextPreviews }));
+      })
+      .catch((error) => {
+        console.error('Erreur de lecture des images :', error);
+        toast.error('Impossible de charger certaines images.');
+      });
   };
 
   const handleSubmit = async (e) => {
@@ -160,31 +175,36 @@ const PublishProduct = () => {
                 
                 <div className="mt-2 flex justify-center rounded-xl border border-dashed border-gray-300 px-6 py-10 hover:bg-gray-50 transition-colors">
                   <div className="text-center">
-                    {imagePreview ? (
-                      <div className="mb-4 relative inline-block">
-                        <img src={imagePreview} alt="Aperçu" className="max-h-48 rounded-lg shadow-sm" />
-                        <button 
-                          type="button" 
-                          onClick={() => { setImagePreview(null); setFormData({...formData, image: ''}) }}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold hover:bg-red-600 shadow-md"
-                        >
-                          &times;
-                        </button>
+                    {imagePreviews.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                        {imagePreviews.map((preview, index) => (
+                          <div key={index} className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                            <img src={preview} alt={`Preview ${index + 1}`} className="h-32 w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = imagePreviews.filter((_, idx) => idx !== index);
+                                setImagePreviews(next);
+                                setFormData((prev) => ({ ...prev, images: next }));
+                              }}
+                              className="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-600"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <FaUpload className="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
                     )}
                     
-                    {!imagePreview && (
-                      <div className="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                        <label className="relative cursor-pointer rounded-md bg-white font-semibold text-[#e6c600] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#e6c600] focus-within:ring-offset-2 hover:text-[#e6c600]">
-                          <span>Télécharger un fichier</span>
-                          <input required type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
-                        </label>
-                        <p className="pl-1">ou glisser-déposer</p>
-                      </div>
-                    )}
-                    <p className="text-xs leading-5 text-gray-500 mt-2">PNG, JPG, GIF jusqu'à 5MB</p>
+                    <div className="mt-4 flex flex-col items-center gap-2 text-sm leading-6 text-gray-600">
+                      <label className="relative cursor-pointer rounded-md bg-white font-semibold text-[#e6c600] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#e6c600] focus-within:ring-offset-2 hover:text-[#e6c600] px-4 py-2 border border-gray-200 shadow-sm">
+                        <span>{imagePreviews.length > 0 ? 'Ajouter d’autres images' : 'Télécharger des images'}</span>
+                        <input required={imagePreviews.length === 0} multiple type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
+                      </label>
+                      <p className="text-xs text-gray-500">Vous pouvez télécharger plusieurs images sans limite stricte.</p>
+                    </div>
                   </div>
                 </div>
               </div>

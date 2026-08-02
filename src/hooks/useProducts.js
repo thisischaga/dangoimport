@@ -20,12 +20,27 @@ function normalizeSingleProduct(payload) {
   return payload;
 }
 
+function isApprovedStatus(product) {
+  const raw = String(product?.validationStatus || product?.status || '') || '';
+  const normalized = raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  return (
+    normalized === 'approved' ||
+    normalized === 'approuve' ||
+    normalized === 'approuvee' ||
+    normalized.includes('approve') ||
+    normalized.includes('appr')
+  );
+}
+
 export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['products', 'featured'],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/featured`, { timeout: 15000 });
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false);
+      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
@@ -40,7 +55,7 @@ export function useProductsCatalog({ search, limit = 200 } = {}) {
       const params = new URLSearchParams({ limit: String(limit), page: '1' });
       if (search) params.set('search', search);
       const res = await axios.get(`${API}/api/products?${params}`, { timeout: 15000 });
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false);
+      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
@@ -53,7 +68,11 @@ export function useProduct(id) {
     queryKey: ['products', id],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/${id}`, { timeout: 15000 });
-      return normalizeSingleProduct(res.data);
+      const product = normalizeSingleProduct(res.data);
+      if (!product) return null;
+      if (product.isPublished === false) return null;
+      if (String(product.validationStatus || '').toLowerCase() !== 'approved') return null;
+      return product;
     },
     enabled: !!id,
     staleTime: 0,
@@ -67,7 +86,7 @@ export function useSimilarProducts(id) {
     queryKey: ['products', 'similar', id],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/similar/${id}`);
-      return normalizeProducts(res.data);
+      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     enabled: !!id,
   });
@@ -78,7 +97,7 @@ export function useVendorProducts(vendorName) {
     queryKey: ['products', 'vendor', vendorName],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/vendor/${encodeURIComponent(vendorName)}`);
-      return normalizeProducts(res.data);
+      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     enabled: !!vendorName,
   });

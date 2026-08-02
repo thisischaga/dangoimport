@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
-import { toast } from 'react-toastify';
+import { toast } from '../utils/toast';
 
 const NotificationContext = createContext();
 
@@ -14,19 +14,9 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // 1. Initialiser le socket
-    const newSocket = io(API_BASE_URL, {
-      transports: ['websocket', 'polling']
-    });
-    setSocket(newSocket);
+    const shouldConnect = Boolean(userId) || recipientType === 'admin';
 
-    // 2. Rejoindre la salle appropriée
-    const room = recipientType === 'admin' ? 'admin' : `user_${userId}`;
-    if (userId || recipientType === 'admin') {
-        newSocket.emit('join', room);
-    }
-
-    // 3. Charger les notifications existantes si utilisateur connecté
+    // Charger les notifications existantes (HTTP) — indépendant du socket
     const fetchNotifications = async () => {
       try {
         const id = recipientType === 'admin' ? 'admin' : userId;
@@ -36,21 +26,44 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
         setNotifications(res.data);
         setUnreadCount(res.data.filter(n => !n.isRead).length);
       } catch (error) {
-        console.error("Erreur chargement notifications", error);
+        // Silencieux : pas critique pour la navigation
       }
     };
     fetchNotifications();
 
-    // 4. Écouter les nouvelles notifications
-    newSocket.on('new_notification', (notif) => {
-      setNotifications(prev => [notif, ...prev]);
-      setUnreadCount(prev => prev + 1);
-      
-      // Petit feedback sonore ou toast
-      toast.info(`🔔 ${notif.title}: ${notif.message}`);
+    if (!shouldConnect) return undefined;
+
+    // Polling d'abord : plus fiable derrière le proxy Render que le websocket pur
+    const newSocket = io(API_BASE_URL, {
+      transports: ['polling', 'websocket'],
+      upgrade: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
+      timeout: 10000,
+      withCredentials: true,
+    });
+    setSocket(newSocket);
+
+    const room = recipientType === 'admin' ? 'admin' : `user_${userId}`;
+    newSocket.on('connect', () => {
+      newSocket.emit('join', room);
     });
 
-    return () => newSocket.close();
+    newSocket.on('connect_error', () => {
+      // Évite le spam console : Render free coupe souvent le WS
+    });
+
+    newSocket.on('new_notification', (notif) => {
+      setNotifications((prev) => [notif, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+      toast.info(`${notif.title}: ${notif.message}`);
+    });
+
+    return () => {
+      newSocket.removeAllListeners();
+      newSocket.close();
+      setSocket(null);
+    };
   }, [recipientType, userId]);
 
   const markAsRead = async (id) => {

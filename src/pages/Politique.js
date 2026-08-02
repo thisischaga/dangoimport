@@ -84,25 +84,14 @@ export default function Politique() {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-      <Header />
-
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-20 px-6 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="w-16 h-16 bg-blue-400/10 border border-blue-400/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FaShieldAlt className="text-blue-400 text-2xl" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">Politique de Confidentialité</h1>
-          <p className="text-gray-400 text-sm md:text-base">
-            Dernière mise à jour : <span className="text-blue-400 font-bold">07 mai 2026</span>
-          </p>
-        </div>
-      </section>
 
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-2xl">
           <p className="text-sm text-blue-900 leading-relaxed font-medium">
             <strong>Votre vie privée compte.</strong> Dango Import s'engage à protéger vos données personnelles avec le plus grand soin. Cette politique vous explique de manière transparente comment nous les utilisons.
+          </p>
+          <p className="text-gray-400 text-sm md:text-base">
+            Dernière mise à jour : <span className="text-blue-400 font-bold">07 mai 2026</span>
           </p>
         </div>
 

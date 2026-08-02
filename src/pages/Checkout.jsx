@@ -1,944 +1,620 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import API_BASE_URL from '../apiConfig';
-import { resolveImageUrl } from '../utils/imageUrl';
-import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import FedapayCard from '../components/FedapayCard';
-import {
-    initiateFedapayDirectPay,
-    checkFedapayTransactionStatus,
-    buildCartFedapayPayload,
-    buildCartOrderPayload,
-    submitDirectOrder,
-} from '../services/fedapayCheckout';
+import API_BASE_URL from '../apiConfig';
+import { useCart } from '../context/CartContext';
 
-import { NETWORK_LOGOS, FEDAPAY_COUNTRIES,  } from '../utils/fedapayConfig';
-import { calculateDeliveryFee } from '../utils/deliveryPricing';
-
-const getImgUrl = (img) => resolveImageUrl(img) || '';
-
-const normalizeCartItems = (raw) => {
-    if (!raw) return [];
-    const list = Array.isArray(raw) ? raw : (raw.items || []);
-    return list.map((item, index) => {
-        const id = item._id || item.productId?._id || item.productId || `item-${index}`;
-        const name = item.name || item.productName || item.productId?.name || 'Produit';
-        const image = item.image || item.productImage || item.productId?.image || item.images?.[0]?.url || '';
-        const price = Number(item.price ?? item.productId?.salePrice ?? item.productId?.price ?? 0);
-        const quantity = Number(item.quantity || 1);
-        return {
-            id,
-            name,
-            image: getImgUrl(image),
-            price,
-            quantity,
-            lineTotal: price * quantity,
-            selectedOptions: item.selectedOptions || {},
-            vendorName: item.vendorName || item.productId?.vendorName || '',
-        };
-    });
-};
-
-// ─── Icons inline ─────────────────────────────────────────────────────────────
-const ArrowLeft = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 12H5M12 5l-7 7 7 7" />
-    </svg>
-);
-const CheckIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 18 4 13" />
-    </svg>
-);
-const TruckIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 5v4h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-);
-const StoreIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l1-6h16l1 6" /><path d="M21 9H3v11a1 1 0 001 1h16a1 1 0 001-1V9z" /><path d="M9 21v-6a3 3 0 016 0v6" />
-    </svg>
-);
-const ZapIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-);
-const PackageIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-        <line x1="12" y1="22.08" x2="12" y2="12" />
-    </svg>
-);
-const LockIcon = () => (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
-    </svg>
-);
-const PhoneIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-);
-
-// ─── Options livraison ────────────────────────────────────────────────────────
-const SHIPPING_OPTIONS = [
-    { value: 'standard', label: 'Livraison standard', delay: '5 – 7 jours ouvrés', fee: 0, icon: <TruckIcon /> },
-    { value: 'express',  label: 'Livraison express',  delay: '2 – 3 jours ouvrés', fee: 0, icon: <ZapIcon />   },
-    { value: 'pickup',   label: 'Retrait en magasin', delay: 'Disponible sous 24h', fee: 0, icon: <StoreIcon /> },
-];
-
-const STEPS = ['Informations', 'Paiement', 'Confirmation'];
-const DEFAULT_CENTER = { lat: 6.3703, lng: 2.4336 };
+// ─── Icons ──────────────────────────────────────────────────────────────────
+const MapPin = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+const CreditCard = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" /></svg>;
+const ShoppingBag = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>;
+const ChevronRight = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>;
+const Check = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 18 4 13" /></svg>;
+const ArrowLeft = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>;
 
 export default function Checkout() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { cart: localCart, clearCart } = useCart();
-    const [step, setStep] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [apiCart, setApiCart] = useState(null);
-    const [order, setOrder] = useState(null);
-    const [paymentMethod, setPaymentMethod] = useState('fedapay');
-    const [fedapayCountry, setFedapayCountry] = useState('BJ');
-    const [fedapayNetwork, setFedapayNetwork] = useState('mtn');
-    const [fedapayPhone, setFedapayPhone] = useState('');
-    const [errors, setErrors] = useState([]);
-    const [deliveryLocation, setDeliveryLocation] = useState(DEFAULT_CENTER);
-    const [showTaxModal, setShowTaxModal] = useState(false);
-    const [taxAgreement, setTaxAgreement] = useState(false);
-    const [addressSuggestions, setAddressSuggestions] = useState([]);
-    const [addressSearching, setAddressSearching] = useState(false);
+  const navigate = useNavigate();
+  const { cart: cartItems = [], clearCart, getCartTotal } = useCart();
+  
+  // ─── État ───────────────────────────────────────────────────────────────
+  const [step, setStep] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Formulaire
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: 'Togo',
+    city: '',
+    address: '',
+  });
 
-    const [form, setForm] = useState({
-        firstName: '', lastName: '', email: '', phone: '',
-        country: 'Togo', city: '', neighborhood: '', address: '', postalCode: '', instructions: '',
-    });
-    const [shippingMethod, setShippingMethod] = useState('standard');
+  // Paiement
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  
+  // Validation
+  const [errors, setErrors] = useState({});
+  
+  // CGV Modal
+  const [acceptCGV, setAcceptCGV] = useState(false);
 
-    // ─── Chargement panier + utilisateur ─────────────────────────────────────
-    useEffect(() => {
-        const token = localStorage.getItem('dangoToken');
-        if (!token) { navigate('/login'); return; }
+  // ─── Chargement données utilisateur ──────────────────────────────────────
+  useEffect(() => {
+    const token = localStorage.getItem('dangoToken');
+    if (!token) {
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
+    }
 
-        const load = async () => {
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/cart`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (res.status === 401) {
-                    toast.warning('Session expirée. Connectez-vous à nouveau.');
-                    navigate('/login', { state: { from: '/checkout' } });
-                    return;
-                }
-                const data = await res.json();
-                if (data.success && data.data?.items?.length > 0) {
-                    setApiCart(data.data);
-                }
-            } catch (e) {
-                console.error('Erreur chargement panier API :', e);
-            }
-
-            try {
-                const userData = localStorage.getItem('dangoUser');
-                if (userData) {
-                    const u = JSON.parse(userData);
-                    setForm(prev => ({
-                        ...prev,
-                        firstName: u.firstName || u.firstname || u.userFirstname || '',
-                        lastName:  u.lastName  || u.surname  || '',
-                        email:     u.email     || u.userEmail || '',
-                        phone:     u.userPhone || u.phone    || '',
-                    }));
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        load();
-    }, [navigate]);
-
-    useEffect(() => {
-        if (!fedapayPhone && form.phone) {
-            setFedapayPhone(form.phone);
-        }
-    }, [form.phone]);
-
-    useEffect(() => {
-        const searchQuery = form.address?.trim();
-        if (!searchQuery || searchQuery.length < 3) {
-            setAddressSuggestions([]);
-            return;
-        }
-
-        const controller = new AbortController();
-        const timer = setTimeout(async () => {
-            try {
-                setAddressSearching(true);
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&accept-language=fr&q=${encodeURIComponent(searchQuery)}`,
-                    {
-                        signal: controller.signal,
-                        headers: { Accept: 'application/json' },
-                    }
-                );
-                const data = await response.json();
-                setAddressSuggestions(data.map(item => ({
-                    id: item.place_id,
-                    label: item.display_name,
-                    lat: Number(item.lat),
-                    lng: Number(item.lon),
-                    address: item.address || {},
-                })));
-            } catch {
-                setAddressSuggestions([]);
-            } finally {
-                setAddressSearching(false);
-            }
-        }, 400);
-
-        return () => {
-            clearTimeout(timer);
-            controller.abort();
-        };
-    }, [form.address]);
-
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        if (params.get('token') || params.get('status') === 'approved') {
-            clearCart?.();
-            toast.success('Paiement FedaPay réussi ! Votre commande est en cours de traitement.');
-            window.history.replaceState({}, document.title, '/checkout');
-        }
-    }, [location.search, clearCart]);
-
-    const cartItems = useMemo(() => {
-        const apiItems = normalizeCartItems(apiCart);
-        if (apiItems.length > 0) return apiItems;
-        return normalizeCartItems(localCart);
-    }, [apiCart, localCart]);
-
-    const subtotal = useMemo(
-        () => cartItems.reduce((sum, item) => sum + item.lineTotal, 0),
-        [cartItems]
-    );
-
-    const selectedShipping = SHIPPING_OPTIONS.find(o => o.value === shippingMethod);
-    const shippingFee = useMemo(() => calculateDeliveryFee({
-        country: form.country,
-        city: form.city,
-        neighborhood: form.neighborhood,
-        shippingMethod,
-    }), [form.country, form.city, form.neighborhood, shippingMethod]);
-    const total = subtotal + shippingFee;
-
-    // ─── Validation étape 1 ───────────────────────────────────────────────────
-    const validateStep1 = () => {
-        const required = ['firstName', 'email', 'phone', 'country', 'city', 'address'];
-        const missing = required.filter(k => !form[k]?.trim());
-        if (missing.length) { setErrors(missing); return false; }
-        setErrors([]);
-        return true;
-    };
-
-    const handleNext = () => {
-        if (step === 1 && !validateStep1()) return;
-        setStep(s => s + 1);
-    };
-
-    // ─── Passer la commande ───────────────────────────────────────────────────
-    const handlePlaceOrder = async () => {
-        if (!cartItems.length) return;
-
-        if (!form.phone || form.phone.replace(/\D/g, '').length < 8) {
-            toast.warning('Veuillez renseigner un numéro de téléphone valide.');
-            return;
-        }
-
-        const token = localStorage.getItem('dangoToken');
-        setSubmitting(true);
-
-        if (paymentMethod === 'fedapay') {
-            if (!taxAgreement) {
-                setShowTaxModal(true);
-                toast.warning('Veuillez confirmer la fiche de taxe et les frais avant de continuer.');
-                setSubmitting(false);
-                return;
-            }
-            if (!fedapayPhone || !fedapayNetwork) {
-                toast.warning('Veuillez renseigner votre réseau et numéro Mobile Money.');
-                setSubmitting(false);
-                return;
-            }
-
-            const selectedCountryObj = FEDAPAY_COUNTRIES.find(c => c.code === fedapayCountry);
-            const countryCode = selectedCountryObj?.code || 'BJ';
-            const toastId = toast.loading('Veuillez patienter... Envoi de la demande sur votre téléphone.');
-
-            try {
-                const payload = buildCartFedapayPayload({
-                    form,
-                    cartItems: apiCart?.items || cartItems,
-                    shippingFee,
-                    total,
-                    network: fedapayNetwork,
-                    fedapayPhone,
-                    countryCode,
-                });
-
-                const data = await initiateFedapayDirectPay(payload, token);
-
-                toast.update(toastId, {
-                    render: 'Demande envoyée ! Confirmez le paiement sur votre téléphone (saisissez votre code secret).',
-                    type: 'info',
-                    isLoading: true,
-                });
-
-                let attempts = 0;
-                const maxAttempts = 60;
-                const interval = setInterval(async () => {
-                    attempts++;
-                    try {
-                        const statusData = await checkFedapayTransactionStatus(data.transactionId);
-                        if (statusData.status === 'approved') {
-                            clearInterval(interval);
-                            toast.update(toastId, { render: 'Paiement réussi ! Votre commande est validée.', type: 'success', isLoading: false, autoClose: 4000 });
-                            clearCart?.();
-                            setOrder({ orderNumber: data.orderId ? `#${String(data.orderId).slice(-8).toUpperCase()}` : 'Confirmée' });
-                            setStep(4);
-                            setSubmitting(false);
-                        } else if (statusData.status === 'declined' || statusData.status === 'canceled') {
-                            clearInterval(interval);
-                            toast.update(toastId, { render: 'Le paiement a été refusé ou annulé.', type: 'error', isLoading: false, autoClose: 4000 });
-                            setSubmitting(false);
-                        } else if (attempts >= maxAttempts) {
-                            clearInterval(interval);
-                            toast.update(toastId, { render: "Délai d'attente dépassé.", type: 'warning', isLoading: false, autoClose: 4000 });
-                            setSubmitting(false);
-                        }
-                    } catch (e) { /* keep polling */ }
-                }, 5000);
-            } catch (err) {
-                console.error(err);
-                toast.update(toastId, { render: err.message || 'Impossible de démarrer le paiement FedaPay.', type: 'error', isLoading: false, autoClose: 4000 });
-                setSubmitting(false);
-            }
-            return;
-        }
-
-        const toastId = toast.loading('Enregistrement de votre commande...');
-        try {
-            const payload = buildCartOrderPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel: selectedShipping?.label });
-            const data = await submitDirectOrder(payload, token);
-            clearCart?.();
-            setOrder({ orderNumber: data.achatId ? `#${String(data.achatId).slice(-8).toUpperCase()}` : 'Confirmée' });
-            setStep(4);
-            toast.update(toastId, { render: 'Commande enregistrée ! Notre équipe vous contactera pour la livraison.', type: 'success', isLoading: false, autoClose: 4000 });
-        } catch (err) {
-            console.error(err);
-            toast.update(toastId, { render: err.message || 'Impossible de finaliser la commande.', type: 'error', isLoading: false, autoClose: 4000 });
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    // ─── Helper champ formulaire ──────────────────────────────────────────────
-    const handleSelectLocation = (lat, lng) => {
-        setDeliveryLocation({ lat, lng });
-        setForm(prev => ({ ...prev, lat, lng }));
-    };
-
-    const handleSelectAddressSuggestion = (suggestion) => {
-        const city = suggestion.address.city || suggestion.address.town || suggestion.address.village || '';
-        const neighborhood = suggestion.address.suburb || suggestion.address.neighbourhood || suggestion.address.quarter || '';
-        const country = suggestion.address.country || '';
-        const postalCode = suggestion.address.postcode || '';
-
+    try {
+      const userData = JSON.parse(localStorage.getItem('dangoUser') || '{}');
+      if (userData.userFirstname || userData.firstname) {
         setForm(prev => ({
-            ...prev,
-            address: suggestion.label,
-            city,
-            neighborhood,
-            country,
-            postalCode,
-            lat: suggestion.lat,
-            lng: suggestion.lng,
+          ...prev,
+          firstName: userData.userFirstname || userData.firstname || '',
+          lastName: userData.surname || userData.lastName || '',
+          email: userData.userEmail || userData.email || '',
+          phone: userData.userPhone || userData.phone || '',
         }));
-        setDeliveryLocation({ lat: suggestion.lat, lng: suggestion.lng });
-        setAddressSuggestions([]);
-    };
+      }
+    } catch (e) {
+      console.error('Erreur chargement utilisateur:', e);
+    }
+  }, [navigate]);
 
-    const field = (name, placeholder, type = 'text', cls = '') => (
-        <div className={`relative ${cls}`}>
-            <input
-                type={type}
-                name={name}
-                placeholder={placeholder}
-                value={form[name]}
-                onChange={e => {
-                    setForm(prev => ({ ...prev, [name]: e.target.value }));
-                    if (errors.includes(name)) setErrors(prev => prev.filter(k => k !== name));
-                }}
-                className={`w-full px-4 py-3 text-sm rounded-xl border bg-white outline-none transition-all
-                    ${errors.includes(name)
-                        ? 'border-red-400 ring-1 ring-red-200'
-                        : 'border-gray-200 focus:border-gray-900 focus:ring-2 focus:ring-[#ffdc2b]/30'}
-                    placeholder:text-gray-400`}
-            />
-        </div>
-    );
+  // ─── Validation ─────────────────────────────────────────────────────────
+  const validateStep1 = () => {
+    const newErrors = {};
+    if (!form.firstName.trim()) newErrors.firstName = 'Prénom requis';
+    if (!form.email.trim()) newErrors.email = 'Email requis';
+    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) newErrors.phone = 'Téléphone valide requis';
+    if (!form.city.trim()) newErrors.city = 'Ville requise';
+    if (!form.address.trim()) newErrors.address = 'Adresse requise';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    const AddressSearchField = ({ className = '' }) => (
-        <div className={`relative ${className}`}>
-            <input
-                type="text"
-                value={form.address}
-                onChange={(e) => {
-                    setForm(prev => ({ ...prev, address: e.target.value }));
-                    if (errors.includes('address')) setErrors(prev => prev.filter(k => k !== 'address'));
-                }}
-                placeholder="Rechercher une adresse, un quartier ou une ville"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition-all focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ffdc2b]/30"
-            />
-            {addressSearching && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">Recherche…</div>
-            )}
-            {addressSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
-                    {addressSuggestions.map((suggestion) => (
-                        <button
-                            key={suggestion.id}
-                            type="button"
-                            onClick={() => handleSelectAddressSuggestion(suggestion)}
-                            className="block w-full border-b border-gray-100 px-3 py-3 text-left transition hover:bg-gray-50 last:border-b-0"
-                        >
-                            <p className="text-sm font-semibold text-gray-900">{suggestion.label}</p>
-                            <p className="mt-1 text-[11px] text-gray-500">Cliquez pour utiliser cette adresse</p>
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+  const validateStep2 = () => {
+    return paymentMethod === 'cash' || paymentMethod === 'online';
+  };
 
-    // ─── Guards ───────────────────────────────────────────────────────────────
-    if (loading) return (
-        <>
-            <Header />
-            <div className="min-h-[60vh] flex items-center justify-center bg-[#f5f5f5]">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-3 border-gray-200 border-t-[#ffdc2b] rounded-full animate-spin" />
-                    <p className="text-[13px] text-gray-400 font-medium">Chargement de votre panier…</p>
-                </div>
-            </div>
-            <Footer />
-        </>
-    );
+  // ─── Soumettre commande ──────────────────────────────────────────────────
+  const handleSubmitOrder = async () => {
+    if (!acceptCGV) {
+      toast.error('Acceptez les conditions avant de continuer');
+      return;
+    }
 
-    if (!cartItems?.length) return (
-        <>
-            <Header />
-            <div className="min-h-[60vh] bg-[#f5f5f5] flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-24 h-24 bg-[#ffdc2b]/15 border-4 border-[#ffdc2b]/30 rounded-full flex items-center justify-center mx-auto mb-5 text-gray-400">
-                        <PackageIcon />
-                    </div>
-                    <p className="font-black text-gray-900 text-[18px] mb-2">Votre panier est vide</p>
-                    <p className="text-gray-500 text-[13px] mb-6">Ajoutez des produits avant de finaliser votre commande.</p>
-                    <button type="button" onClick={() => navigate('/shopping')} className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black px-8 py-3.5 rounded-full transition-all">
-                        Explorer le catalogue
-                    </button>
-                </div>
-            </div>
-            <Footer />
-        </>
-    );
+    setSubmitting(true);
+    const toastId = toast.loading('Traitement de votre commande...');
+    const token = localStorage.getItem('dangoToken');
 
-    // ─── Pays actif ───────────────────────────────────────────────────────────
-    const activeCountry = FEDAPAY_COUNTRIES.find(c => c.code === fedapayCountry);
+    try {
+      const totalAmount = getCartTotal?.();
+      
+      if (paymentMethod === 'cash') {
+        // Créer commande directe (paiement à la livraison)
+        const orderPayload = {
+          items: cartItems.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            selectedOptions: {},
+          })),
+          shippingAddress: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            phone: form.phone,
+            country: form.country,
+            city: form.city,
+            address: form.address,
+          },
+          shippingMethod: 'standard',
+          paymentMethod: 'cash',
+        };
 
+        const res = await fetch(`${API_BASE_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(orderPayload),
+        });
+
+        if (!res.ok) throw new Error('Impossible de créer la commande');
+        
+        clearCart?.();
+        toast.update(toastId, { 
+          render: '✅ Commande confirmée ! Vous serez contacté sous peu.', 
+          type: 'success', 
+          isLoading: false, 
+          autoClose: 3000 
+        });
+        setTimeout(() => navigate('/mes-commandes'), 3000);
+      } else {
+        // Paiement en ligne via FedaPay
+        const paymentPayload = {
+          amount: Math.round(totalAmount),
+          currency: 'XOF',
+          description: `Commande DangoImport - ${form.country}`,
+          callback_url: `${window.location.origin}/checkout`,
+          customer: {
+            firstname: form.firstName,
+            lastname: form.lastName,
+            email: form.email,
+            phone: form.phone,
+          },
+          deliveryCountry: form.country,
+        };
+
+        const res = await fetch(`${API_BASE_URL}/api/payment/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(paymentPayload),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Erreur paiement FedaPay');
+        }
+
+        const data = await res.json();
+        if (data.payment_url) {
+          toast.update(toastId, { 
+            render: 'Redirection vers FedaPay...', 
+            type: 'info', 
+            isLoading: false, 
+            autoClose: 1500 
+          });
+          setTimeout(() => {
+            window.location.href = data.payment_url;
+          }, 1500);
+        } else {
+          throw new Error('URL paiement indisponible');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast.update(toastId, { 
+        render: `❌ ${err.message}`, 
+        type: 'error', 
+        isLoading: false, 
+        autoClose: 3000 
+      });
+      setSubmitting(false);
+    }
+  };
+
+  // ─── Render panier ───────────────────────────────────────────────────────
+  const cartTotal = getCartTotal?.() || 0;
+
+  if (!cartItems.length) {
     return (
-        <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0f1115] flex flex-col" style={{ fontFamily: "'Outfit', sans-serif" }}>
-            <Header />
+      <>
+        <Header />
+        <div className="min-h-[70vh] bg-[#f5f5f5] flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto mb-4 text-gray-300">
+              <ShoppingBag />
+            </div>
+            <h2 className="text-xl font-black text-gray-900 mb-2">Panier vide</h2>
+            <p className="text-gray-500 text-sm mb-6">Ajoutez des produits avant de finaliser</p>
+            <button onClick={() => navigate('/shopping')} className="bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black px-8 py-3 rounded-lg transition">
+              Continuer le shopping
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
-            {/* ── Barre checkout ──────────────────────────────────────────────── */}
-            <div className="bg-white dark:bg-[#1a1d24] border-b border-gray-200 dark:border-gray-800">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={() => (step > 1 ? setStep(s => s - 1) : navigate('/cart'))}
-                        className="flex items-center gap-2 text-gray-500 hover:text-[#b8a000] transition text-[13px] font-semibold"
-                    >
-                        <ArrowLeft />
-                        <span className="hidden sm:inline">{step > 1 ? 'Étape précédente' : 'Retour au panier'}</span>
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#ffdc2b]" />
-                        <span className="font-black text-gray-900 dark:text-white text-[14px] sm:text-[15px]">Finaliser la commande</span>
-                    </div>
-                    <div className="w-20 sm:w-28" />
+  return (
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <Header />
+
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-2">
+          <button 
+            onClick={() => navigate('/cart')} 
+            className="flex items-center gap-1 text-[#282828] hover:text-[#F68B1E] transition text-sm font-semibold"
+          >
+            <ArrowLeft /> Retour au panier
+          </button>
+        </div>
+      </div>
+
+      {/* Titre */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#282828]">Finaliser la commande</h1>
+        </div>
+      </div>
+
+      {/* Stepper */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex justify-center">
+          <div className="flex items-center justify-center gap-0 w-full max-w-md">
+            {[
+              { num: 1, label: 'Informations' },
+              { num: 2, label: 'Paiement' },
+              { num: 3, label: 'Confirmation' },
+            ].map((s, i) => (
+              <React.Fragment key={s.num}>
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm transition-all ${
+                    step > s.num ? 'bg-[#F68B1E] text-white' :
+                    step === s.num ? 'bg-[#F68B1E] text-white ring-4 ring-[#F68B1E]/20' :
+                    'bg-gray-200 text-gray-600'
+                  }`}>
+                    {step > s.num ? <Check /> : s.num}
+                  </div>
+                  <span className={`text-xs font-bold hidden sm:block transition ${step >= s.num ? 'text-[#282828]' : 'text-gray-400'}`}>
+                    {s.label}
+                  </span>
                 </div>
+                {i < 2 && (
+                  <div className={`flex-1 h-0.5 mx-2 mb-5 transition max-w-[60px] ${step > s.num ? 'bg-[#F68B1E]' : 'bg-gray-200'}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Contenu Principal */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Colonne Gauche - Formulaire */}
+          <div className="lg:col-span-2">
+            
+            {/* ────── ÉTAPE 1: INFORMATIONS DE LIVRAISON ──────── */}
+            {step === 1 && (
+              <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <MapPin />
+                  <h2 className="text-xl font-black text-[#282828]">Informations de livraison</h2>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-2">Nom complet *</label>
+                    <input
+                      type="text"
+                      placeholder="Jean Dupont"
+                      value={`${form.firstName} ${form.lastName}`.trim()}
+                      onChange={(e) => {
+                        const [first, last] = e.target.value.trim().split(' ');
+                        setForm(prev => ({ ...prev, firstName: first || '', lastName: last || '' }));
+                        if (errors.firstName) setErrors(prev => ({ ...prev, firstName: null }));
+                      }}
+                      className={`w-full px-3 py-2.5 border rounded-md outline-none transition text-sm font-medium ${
+                        errors.firstName ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#F68B1E]'
+                      }`}
+                    />
+                    {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-2">Téléphone *</label>
+                    <input
+                      type="tel"
+                      placeholder="+228 97 XXXXXX"
+                      value={form.phone}
+                      onChange={(e) => {
+                        setForm(prev => ({ ...prev, phone: e.target.value }));
+                        if (errors.phone) setErrors(prev => ({ ...prev, phone: null }));
+                      }}
+                      className={`w-full px-3 py-2.5 border rounded-md outline-none transition text-sm font-medium ${
+                        errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#F68B1E]'
+                      }`}
+                    />
+                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-2">Email *</label>
+                    <input
+                      type="email"
+                      placeholder="jean@example.com"
+                      value={form.email}
+                      onChange={(e) => {
+                        setForm(prev => ({ ...prev, email: e.target.value }));
+                        if (errors.email) setErrors(prev => ({ ...prev, email: null }));
+                      }}
+                      className={`w-full px-3 py-2.5 border rounded-md outline-none transition text-sm font-medium ${
+                        errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#F68B1E]'
+                      }`}
+                    />
+                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-2">Pays *</label>
+                      <select
+                        value={form.country}
+                        onChange={(e) => setForm(prev => ({ ...prev, country: e.target.value }))}
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-md outline-none transition text-sm font-medium focus:border-[#F68B1E] bg-white"
+                      >
+                        <option>Togo</option>
+                        <option>Bénin</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-2">Ville *</label>
+                      <input
+                        type="text"
+                        placeholder="Lomé"
+                        value={form.city}
+                        onChange={(e) => {
+                          setForm(prev => ({ ...prev, city: e.target.value }));
+                          if (errors.city) setErrors(prev => ({ ...prev, city: null }));
+                        }}
+                        className={`w-full px-3 py-2.5 border rounded-md outline-none transition text-sm font-medium ${
+                          errors.city ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#F68B1E]'
+                        }`}
+                      />
+                      {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-2">Adresse *</label>
+                    <input
+                      type="text"
+                      placeholder="Rue / Quartier"
+                      value={form.address}
+                      onChange={(e) => {
+                        setForm(prev => ({ ...prev, address: e.target.value }));
+                        if (errors.address) setErrors(prev => ({ ...prev, address: null }));
+                      }}
+                      className={`w-full px-3 py-2.5 border rounded-md outline-none transition text-sm font-medium ${
+                        errors.address ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#F68B1E]'
+                      }`}
+                    />
+                    {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (validateStep1()) setStep(2);
+                    }}
+                    className="w-full bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition"
+                  >
+                    Continuer
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ────── ÉTAPE 2: MÉTHODE DE PAIEMENT ──────── */}
+            {step === 2 && (
+              <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <CreditCard />
+                  <h2 className="text-xl font-black text-[#282828]">Méthode de paiement</h2>
+                </div>
+                <p className="text-gray-600 text-sm mb-6">Comment souhaitez-vous payer ?</p>
+
+                <div className="space-y-4">
+                  
+                  {/* Option 1: Paiement à la livraison */}
+                  <button
+                    onClick={() => setPaymentMethod('cash')}
+                    className={`w-full p-4 rounded-md border-2 transition text-left ${
+                      paymentMethod === 'cash' ? 'border-[#F68B1E] bg-orange-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${
+                        paymentMethod === 'cash' ? 'border-[#F68B1E]' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 rounded-full bg-[#F68B1E]" />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#282828]">Paiement à la livraison</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Payez en espèces au livreur</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Paiement en ligne */}
+                  <button
+                    onClick={() => setPaymentMethod('online')}
+                    className={`w-full p-4 rounded-md border-2 transition text-left ${
+                      paymentMethod === 'online' ? 'border-[#F68B1E] bg-orange-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${
+                        paymentMethod === 'online' ? 'border-[#F68B1E]' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'online' && <div className="w-2.5 h-2.5 rounded-full bg-[#F68B1E]" />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#282828]">Paiement en ligne</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Carte, TMoney, Flooz, MTN, Moov via FedaPay</p>
+                      </div>
+                    </div>
+                  </button>
+
+                </div>
+
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition"
+                  >
+                    ← Retour
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (validateStep2()) setStep(3);
+                    }}
+                    className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition flex items-center justify-center gap-2"
+                  >
+                    Continuer <ChevronRight />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ────── ÉTAPE 3: PLACEHOLDER (Modal appear dans overlay) ──────── */}
+            {step === 3 && (
+              <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-black text-[#282828] mb-6">Prêt à confirmer ?</h2>
+                <p className="text-gray-600 mb-6">Cliquez sur le bouton ci-dessous pour afficher le récapitulatif et valider votre commande.</p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="w-full bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-4 rounded-md transition"
+                >
+                  Afficher le récapitulatif
+                </button>
+                <button
+                  onClick={() => setStep(2)}
+                  className="w-full mt-3 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition"
+                >
+                  ← Retour
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Colonne Droite - Commande (Sticky) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 bg-white rounded-md shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+                <ShoppingBag />
+                <h3 className="text-lg font-black text-[#282828]">Votre commande</h3>
+              </div>
+
+              {/* Liste produits */}
+              <div className="space-y-4 mb-6 max-h-72 overflow-y-auto">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 rounded-md object-cover bg-gray-100"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[#282828] line-clamp-1">{item.name}</p>
+                      <p className="text-xs text-gray-500 mt-1">Qté: {item.quantity}</p>
+                      <p className="text-sm font-bold text-[#282828] mt-1">{item.price.toLocaleString('fr-FR')} F</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Totaux */}
+              <div className="space-y-3 pt-6 border-t border-gray-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Sous-total</span>
+                  <span className="font-bold text-[#282828]">{cartTotal.toLocaleString('fr-FR')} F</span>
+                </div>
+                <div className="flex justify-between text-lg font-black text-[#282828] pt-3 border-t border-gray-100">
+                  <span>Total</span>
+                  <span className="text-[#F68B1E]">{cartTotal.toLocaleString('fr-FR')} F</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ────── MODAL DE CONFIRMATION ──────── */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-md shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            
+            {/* Header Modal */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <h2 className="text-xl font-black text-[#282828]">Confirmer votre commande</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition text-2xl font-bold leading-none"
+              >
+                ✕
+              </button>
             </div>
 
-            <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-                {showTaxModal && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4 py-6">
-                        <div className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1d24] shadow-xl">
-                            <div className="border-b border-gray-200 dark:border-gray-700 px-5 py-4">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Avant paiement</p>
-                                        <h3 className="mt-1 text-lg font-black text-gray-900 dark:text-white">Fiche de taxe et frais</h3>
-                                    </div>
-                                    <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200">✕</button>
-                                </div>
-                            </div>
+            {/* Contenu Modal */}
+            <div className="p-6 space-y-6">
+              
+              {/* Récap Adresse */}
+              <div className="pb-6 border-b border-gray-200">
+                <p className="text-xs font-black text-gray-500 mb-3">ADRESSE DE LIVRAISON</p>
+                <p className="font-bold text-[#282828]">{form.firstName} {form.lastName}</p>
+                <p className="text-sm text-gray-600 mt-2">{form.address}</p>
+                <p className="text-sm text-gray-600">{form.city}, {form.country}</p>
+              </div>
 
-                            <div className="space-y-4 p-5 text-sm text-gray-600 dark:text-gray-300">
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 p-3">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Sous-total</p>
-                                        <p className="mt-1 font-black text-gray-900 dark:text-white">{subtotal.toLocaleString('fr-FR')} F</p>
-                                    </div>
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 p-3">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Total estimé</p>
-                                        <p className="mt-1 font-black text-gray-900 dark:text-white">{total.toLocaleString('fr-FR')} F</p>
-                                    </div>
-                                </div>
+              {/* Récap Paiement */}
+              <div className="pb-6 border-b border-gray-200">
+                <p className="text-xs font-black text-gray-500 mb-3">MÉTHODE DE PAIEMENT</p>
+                <p className="font-bold text-[#282828]">
+                  {paymentMethod === 'cash' ? 'Paiement à la livraison' : 'Paiement en ligne (FedaPay)'}
+                </p>
+              </div>
 
-                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-[#f9fafb] dark:bg-gray-800/70 p-4">
-                                    <p className="font-semibold text-gray-900 dark:text-white">À savoir</p>
-                                    <ul className="mt-2 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
-                                        <li>• Les frais de livraison et les commissions peuvent varier selon la destination.</li>
-                                        <li>• Le montant affiché est une estimation avant validation du paiement.</li>
-                                    </ul>
-                                </div>
+              {/* Total */}
+              <div className="pb-6 border-b border-gray-200">
+                <p className="text-xs font-black text-gray-500 mb-3">MONTANT TOTAL</p>
+                <p className="text-2xl font-black text-[#F68B1E]">{cartTotal.toLocaleString('fr-FR')} FCFA</p>
+              </div>
 
-                                <label className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/70 p-3 text-sm text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" checked={taxAgreement} onChange={(e) => setTaxAgreement(e.target.checked)} className="mt-1 h-4 w-4 rounded border-gray-300 text-[#ffdc2b] focus:ring-[#ffdc2b]" />
-                                    <span>Je confirme avoir pris connaissance de la fiche de taxe et accepte les frais estimés.</span>
-                                </label>
-                            </div>
+              {/* Checkbox CGV */}
+              <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-md border border-gray-200">
+                <input
+                  type="checkbox"
+                  checked={acceptCGV}
+                  onChange={(e) => setAcceptCGV(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-[#F68B1E] outline-none cursor-pointer"
+                />
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  Je confirme les informations et j'accepte les CGV et la politique de confidentialité
+                </span>
+              </label>
 
-                            <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/70 px-5 py-4">
-                                <button type="button" onClick={() => setShowTaxModal(false)} className="rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 transition hover:bg-white dark:hover:bg-gray-800">Fermer</button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setTaxAgreement(true);
-                                        setShowTaxModal(false);
-                                        if (paymentMethod === 'fedapay') {
-                                            document.getElementById('checkout-pay-button')?.click();
-                                        }
-                                    }}
-                                    className="rounded-full bg-[#ffdc2b] px-4 py-2 text-sm font-black text-gray-900 transition hover:bg-[#e6c600]"
-                                >
-                                    Confirmer et envoyer l’USSD
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* ── Stepper ─────────────────────────────────────────────────── */}
-                <div className="flex items-center justify-center mb-8 sm:mb-10">
-                    {STEPS.map((label, i) => {
-                        const num = i + 1;
-                        const done   = step > num;
-                        const active = step === num;
-                        return (
-                            <React.Fragment key={num}>
-                                <div className="flex flex-col items-center gap-1.5">
-                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-black transition-all duration-300
-                                        ${done   ? 'bg-[#ffdc2b] text-[#111] shadow-md'
-                                               : active ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white ring-4 ring-gray-100 dark:ring-gray-800 shadow-md'
-                                               : 'bg-gray-50 dark:bg-gray-900 text-gray-400'}`}>
-                                        {done ? <CheckIcon /> : num}
-                                    </div>
-                                    <span className={`text-[11px] font-bold hidden sm:block transition-colors mt-1
-                                        ${active ? 'text-gray-900 dark:text-white' : done ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400'}`}>
-                                        {label}
-                                    </span>
-                                </div>
-                                {i < STEPS.length - 1 && (
-                                    <div className={`flex-1 h-0.5 mx-3 mb-5 transition-colors duration-500 max-w-[80px] rounded-full
-                                        ${step > num ? 'bg-[#ffdc2b]' : 'bg-gray-200 dark:bg-gray-700'}`} />
-                                )}
-                            </React.Fragment>
-                        );
-                    })}
-                </div>
-
-                {/* ── Grid principal ───────────────────────────────────────────── */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-start">
-
-                    {/* ── Colonne formulaire ───────────────────────────────────── */}
-                    <div className="lg:col-span-3">
-                        <div className="bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-
-                            {/* ── ÉTAPE 1 — Informations ───────────────────────── */}
-                            {step === 1 && (
-                                <div className="p-6 sm:p-8">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-6">Vos informations</h2>
-                                    <div className="space-y-3.5">
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {field('firstName', 'Prénom *')}
-                                            {field('lastName',  'Nom')}
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {field('email', 'Email *', 'email')}
-                                            {field('phone', 'Téléphone *', 'tel')}
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {field('country', 'Pays *')}
-                                            {field('city',    'Ville *')}
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {field('neighborhood', 'Quartier')}
-                                            {field('postalCode',   'Code postal')}
-                                        </div>
-                                        <div className="col-span-full">
-                                            <AddressSearchField />
-                                        </div>
-                                        <textarea
-                                            name="instructions"
-                                            placeholder="Instructions de livraison (optionnel)"
-                                            value={form.instructions}
-                                            onChange={e => setForm(prev => ({ ...prev, instructions: e.target.value }))}
-                                            rows={3}
-                                            className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white outline-none focus:border-gray-900 focus:ring-2 focus:ring-[#ffdc2b]/30 placeholder:text-gray-400 resize-none transition-all"
-                                        />
-                                    </div>
-                                    {errors.length > 0 && (
-                                        <p className="mt-4 text-xs text-red-600 font-medium">
-                                            Veuillez remplir tous les champs obligatoires (*).
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* ── ÉTAPE 2 — Paiement ───────────────────────────── */}
-                            {step === 2 && (
-                                <div className="p-6 sm:p-8">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-1">Paiement</h2>
-                                    <p className="text-sm text-gray-500 mb-5">Choisissez votre mode de règlement.</p>
-
-                                    <div className="space-y-3">
-
-                                        {/* ── Option FedaPay / Mobile Money ─────── */}
-                                        <div
-                                            className={`rounded-xl border-2 overflow-hidden transition-all cursor-pointer
-                                                ${paymentMethod === 'fedapay' ? 'border-gray-900' : 'border-gray-200 hover:border-gray-300'}`}
-                                            onClick={() => setPaymentMethod('fedapay')}
-                                        >
-                                            {/* En-tête option */}
-                                            <div className="flex items-center gap-3 p-4">
-                                                <div className="flex-1">
-                                                    <p className="font-semibold text-gray-900 text-sm">Mobile Money via FedaPay</p>
-                                                    <p className="text-xs text-gray-500 mt-0.5">MTN, Moov, Orange, Wave, T-Money…</p>
-                                                </div>
-                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
-                                                    ${paymentMethod === 'fedapay' ? 'border-gray-900' : 'border-gray-300'}`}>
-                                                    {paymentMethod === 'fedapay' && <div className="w-2 h-2 rounded-full bg-gray-900" />}
-                                                </div>
-                                            </div>
-
-                                            {/* Formulaire FedaPay (visible si sélectionné) */}
-                                            {paymentMethod === 'fedapay' && (
-                                                <div
-                                                    className="px-4 pb-4"
-                                                    onClick={e => e.stopPropagation()}
-                                                >
-                                                    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-5">
-
-                                                        {/* Sélection pays */}
-                                                        <div>
-                                                            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 mb-3">
-                                                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">All categories</p>
-                                                                <p className="text-[11px] text-gray-500">Featured selection</p>
-                                                                <p className="text-[11px] text-gray-500">Help center</p>
-                                                            </div>
-                                                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2.5">1 — Votre pays</p>
-                                                            <div className="grid grid-cols-4 gap-1.5">
-                                                                {FEDAPAY_COUNTRIES.map(country => (
-                                                                    <button
-                                                                        key={country.code}
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setFedapayCountry(country.code);
-                                                                            setFedapayNetwork(country.networks[0].value);
-                                                                        }}
-                                                                        className={`py-2 px-1 rounded-lg border-2 flex flex-col items-center justify-center gap-1 transition-all
-                                                                            ${fedapayCountry === country.code
-                                                                                ? 'border-gray-900 bg-gray-900'
-                                                                                : 'border-gray-200 bg-white hover:border-gray-400'}`}
-                                                                    >
-                                                                        <span className="text-base leading-none">{country.flag}</span>
-                                                                        <span className={`text-[9px] font-bold uppercase tracking-wide text-center leading-tight
-                                                                            ${fedapayCountry === country.code ? 'text-[#ffdc2b]' : 'text-gray-500'}`}>
-                                                                            {country.name.split(' ')[0]}
-                                                                        </span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Sélection opérateur */}
-                                                        <div>
-                                                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2.5">2 — Opérateur Mobile Money</p>
-                                                            <div className={`grid gap-2 ${activeCountry?.networks.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                                                                {activeCountry?.networks.map(net => (
-                                                                    <button
-                                                                        key={net.value}
-                                                                        type="button"
-                                                                        onClick={() => setFedapayNetwork(net.value)}
-                                                                        className={`relative flex flex-col items-center gap-2 p-2.5 rounded-xl border-2 transition-all
-                                                                            ${fedapayNetwork === net.value
-                                                                                ? 'border-[#ffdc2b] bg-[#ffdc2b]/8 shadow-sm'
-                                                                                : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                                    >
-                                                                        {/* Logo opérateur : SVG inline, 100% fiable */}
-
-                                                                        <span className={`text-[11px] font-bold leading-tight text-center
-                                                                            ${fedapayNetwork === net.value ? 'text-gray-900' : 'text-gray-500'}`}>
-                                                                            {net.label}
-                                                                        </span>
-                                                                        {fedapayNetwork === net.value && (
-                                                                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#ffdc2b] rounded-full flex items-center justify-center shadow">
-                                                                                <CheckIcon />
-                                                                            </div>
-                                                                        )}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Numéro téléphone */}
-                                                        <div>
-                                                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">3 — Numéro Mobile Money</p>
-                                                            <div className="relative">
-                                                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                                                                    <PhoneIcon />
-                                                                </span>
-                                                                <input
-                                                                    type="tel"
-                                                                    value={fedapayPhone}
-                                                                    onChange={e => setFedapayPhone(e.target.value)}
-                                                                    placeholder="Ex : 61 00 00 00"
-                                                                    className="w-full pl-11 pr-4 py-3 text-sm font-semibold rounded-xl border-2 border-gray-200 focus:border-gray-900 focus:ring-2 focus:ring-[#ffdc2b]/30 outline-none transition-all bg-white"
-                                                                />
-                                                            </div>
-                                                            <p className="text-[11px] text-gray-400 mt-2 flex items-center gap-1.5">
-                                                                <ZapIcon />
-                                                                Une demande USSD sera envoyée à ce numéro via FedaPay.
-                                                            </p>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* ── Option paiement à la livraison ────── */}
-                                        <div
-                                            className={`hidden sm:hidden sm:flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
-                                                ${paymentMethod === 'cash'
-                                                    ? 'border-gray-900 bg-[#fffbeb]'
-                                                    : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                            onClick={() => setPaymentMethod('cash')}
-                                        >
-                                            <div className="flex-1">
-                                                <p className="font-semibold text-gray-900 text-sm">Paiement à la livraison</p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Réglez en espèces ou Mobile Money à la réception. La commande est enregistrée sans paiement en ligne.
-                                                </p>
-                                            </div>
-                                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all
-                                                ${paymentMethod === 'cash' ? 'border-gray-900' : 'border-gray-300'}`}>
-                                                {paymentMethod === 'cash' && <div className="w-2 h-2 rounded-full bg-gray-900" />}
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    {/* Récap totaux */}
-                                    <div className="mt-5 p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5 text-sm">
-                                        <div className="flex justify-between text-gray-500">
-                                            <span>Sous-total</span>
-                                            <span className="font-semibold text-gray-900">{subtotal.toLocaleString('fr-FR')} F</span>
-                                        </div>
-                                        <div className="flex justify-between text-gray-500">
-                                            <span>Livraison — {selectedShipping?.label}</span>
-                                            <span className="font-semibold text-gray-900">{shippingFee > 0 ? `${shippingFee.toLocaleString('fr-FR')} F` : 'Gratuit'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center pt-2 border-t border-gray-200 font-bold text-gray-900">
-                                            <span>Total à payer</span>
-                                            <span className="text-lg">
-                                                {total.toLocaleString('fr-FR')} F
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <p className="text-xs text-gray-400 mt-3 flex items-center gap-1.5">
-                                        <LockIcon />
-                                        Commande sécurisée — vos données sont protégées
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* ── ÉTAPE 4 — Confirmation ───────────────────────── */}
-                            {step === 3 && order && (
-                                <div className="p-8 sm:p-12 text-center">
-                                    <div className="w-20 h-20 bg-[#ffdc2b] rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 18 4 13" />
-                                        </svg>
-                                    </div>
-                                    <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Commande confirmée ! 🎉</h2>
-                                    <p className="text-gray-500 text-[13px] mb-1">Numéro de commande</p>
-                                    <p className="text-[#111] dark:text-white font-black text-[20px] bg-[#ffdc2b]/20 border border-[#ffdc2b]/40 px-4 py-2 rounded-xl inline-block mb-5">{order.orderNumber}</p>
-                                    <p className="text-[14px] text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
-                                        {paymentMethod === 'cash'
-                                            ? <>Nous vous contacterons au <strong className="text-gray-900 dark:text-white">{form.phone}</strong> pour confirmer la livraison.</>
-                                            : <>Un email de confirmation a été envoyé à <strong className="text-gray-900 dark:text-white">{form.email}</strong>.</> }
-                                    </p>
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate('/mes-commandes')}
-                                        className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black px-10 py-4 rounded-full transition-all hover:-translate-y-0.5 hover:shadow-lg text-[15px]"
-                                    >
-                                        Suivre mes commandes
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* ── Boutons navigation ───────────────────────────── */}
-                            {step < 3 && (
-                                <div className="px-6 sm:px-8 pb-6 sm:pb-8 flex gap-3">
-                                    {step > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setStep(s => s - 1)}
-                                            className="flex-1 border-2 border-gray-200 dark:border-gray-700 hover:border-[#ffdc2b] text-gray-700 dark:text-gray-300 font-bold py-3.5 rounded-full transition-all text-[14px]"
-                                        >
-                                            ← Retour
-                                        </button>
-                                    )}
-                                    {step < 2 ? (
-                                        <button
-                                            type="button"
-                                            onClick={handleNext}
-                                            className="flex-1 bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] font-black py-3.5 rounded-full transition-all hover:shadow-lg text-[14px]"
-                                        >
-                                            Continuer →
-                                        </button>
-                                    ) : (
-                                        <button
-                                            id="checkout-pay-button"
-                                            type="button"
-                                            onClick={handlePlaceOrder}
-                                            disabled={submitting}
-                                            className="flex-1 bg-[#ffdc2b] hover:bg-[#e6c600] text-[#111] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-black py-3.5 rounded-full transition-all hover:shadow-lg text-[14px] flex items-center justify-center gap-2"
-                                        >
-                                            {submitting ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-[#111]/30 border-t-[#111] rounded-full animate-spin" />
-                                                    {paymentMethod === 'fedapay' ? 'Envoi du Push USSD…' : 'Enregistrement…'}
-                                                </>
-                                            ) : paymentMethod === 'fedapay' ? (
-                                                <>
-                                                    <LockIcon />
-                                                    Payer {total.toLocaleString('fr-FR')} FCFA
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <CheckIcon />
-                                                    Confirmer la commande
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ── Sidebar résumé commande ──────────────────────────────── */}
-                    <aside className="lg:col-span-2">
-                        <div className="bg-white dark:bg-[#1a1d24] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sticky top-28 shadow-sm">
-                            <h3 className="font-black text-gray-900 dark:text-white text-[15px] mb-4 flex items-center gap-2.5 pb-3.5 border-b border-gray-100 dark:border-gray-800">
-                                <span className="w-8 h-8 rounded-xl bg-[#ffdc2b] flex items-center justify-center text-[#111]">
-                                    <PackageIcon />
-                                </span>
-                                Votre commande
-                            </h3>
-
-                            <ul className="space-y-3 mb-4 pb-4 border-b border-gray-100 max-h-72 overflow-y-auto">
-                                {cartItems?.map(item => (
-                                    <li key={item.id} className="flex gap-3 items-start">
-                                        <div className="w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 shrink-0 overflow-hidden flex items-center justify-center">
-                                            {item.image
-                                                ? <img src={item.image} alt={item.name} className="w-full h-full object-contain" onError={e => { e.target.style.display = 'none'; }} />
-                                                : <PackageIcon />}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-800 line-clamp-2">{item.name}</p>
-                                            <p className="text-xs text-gray-400 mt-0.5">
-                                                Qté : {item.quantity}
-                                                {item.selectedOptions?.color && ` · ${item.selectedOptions.color}`}
-                                                {item.selectedOptions?.size  && ` · ${item.selectedOptions.size}`}
-                                            </p>
-                                        </div>
-                                        <p className="text-xs font-semibold text-gray-800 shrink-0">
-                                            {item.lineTotal.toLocaleString('fr-FR')} F
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <p className="text-[11px] text-gray-400 mb-4">
-                                {cartItems.length} article{cartItems.length > 1 ? 's' : ''}
-                            </p>
-
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between text-gray-500">
-                                    <span>Sous-total</span>
-                                    <span className="font-semibold text-gray-800">{subtotal.toLocaleString('fr-FR')} F</span>
-                                </div>
-                                <div className="flex justify-between text-gray-500">
-                                    <span>Livraison</span>
-                                    <span className="font-semibold text-gray-900">{shippingFee > 0 ? `${shippingFee.toLocaleString('fr-FR')} F` : 'Gratuit'}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 bg-gray-50 -mx-5 px-5 py-3 rounded-b-2xl">
-                                <span className="font-bold text-gray-900">Total</span>
-                                <span className="font-bold text-gray-900 text-lg">{total.toLocaleString('fr-FR')} F</span>
-                            </div>
-
-                            <div className="mt-4 space-y-2">
-                                {['Paiement en ligne FedaPay', 'Paiement à la livraison', 'Adresse enregistrée'].map(label => (
-                                    <div key={label} className="flex items-center gap-2 text-xs text-gray-500">
-                                        <span className="w-1 h-1 rounded-full bg-[#ffdc2b] shrink-0" />
-                                        <span>{label}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </aside>
-
-                </div>
-            </main>
-            <Footer />
+              {/* Boutons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSubmitOrder}
+                  disabled={submitting || !acceptCGV}
+                  className={`flex-1 font-black py-3 rounded-md transition ${
+                    submitting || !acceptCGV
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white'
+                  }`}
+                >
+                  {submitting ? 'Traitement...' : 'Confirmer'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      )}
+
+      <Footer />
+    </div>
+  );
 }

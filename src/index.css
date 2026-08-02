@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   /* ── Light theme tokens ─────────────────────── */
@@ -174,7 +174,13 @@
     background-color: var(--bg-page);
     color: var(--text-primary);
     @apply antialiased transition-colors duration-300;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -639,4 +645,49 @@ select:focus-visible {
 .dango-toast .Toastify__close-button {
   color: inherit;
   opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TIKTOK STYLE TOAST NOTIFICATIONS (Client)
+═══════════════════════════════════════════════════════════════════ */
+.tiktok-toast-wrapper {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.tiktok-toast-item {
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  letter-spacing: -0.1px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: tiktokToastAnim 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+@keyframes tiktokToastAnim {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

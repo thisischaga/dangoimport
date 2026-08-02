@@ -66,7 +66,7 @@ export async function checkFedapayTransactionStatus(transactionId) {
     return data;
 }
 
-function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel }) {
+function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type }) {
     const productNames = cartItems.map((i) => i.name).join(', ');
     const vendorName = [...new Set(cartItems.map((i) => i.vendorName).filter(Boolean))].join(', ') || 'Dango Import';
     const totalQty = cartItems.reduce((sum, i) => sum + i.quantity, 0);
@@ -88,16 +88,16 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
         city: form.city || 'Non précisé',
         totalPrice: total,
         productPrice: subtotal,
-        description: `Commande — ${productNames}`.slice(0, 200),
-        type: 'cart',
+        description: description ? description.slice(0, 200) : `Commande — ${productNames}`.slice(0, 200),
+        type: type || 'cart',
         vendorName,
         shippingMethod: shippingLabel,
         productSummary: cartItems.map((i) => `${i.name} x${i.quantity}`).join(', '),
     };
 }
 
-export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode }) {
-    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel });
+export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode, description, type }) {
+    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type });
     return {
         ...base,
         userNumber: fedapayPhone || form.phone,
@@ -110,8 +110,8 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
 /**
  * Commande directe sans redirection FedaPay (paiement à la livraison).
  */
-export function buildCartOrderPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel }) {
-    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel });
+export function buildCartOrderPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type }) {
+    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type });
     return {
         userName: base.userName,
         userNumber: base.userNumber,

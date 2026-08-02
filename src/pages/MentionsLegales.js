@@ -68,25 +68,15 @@ export default function MentionsLegales() {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-      <Header />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 py-20 px-6 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="w-16 h-16 bg-[#ffdc2b]/10 border border-[#ffdc2b]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FaGavel className="text-[#ffdc2b] text-2xl" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">Mentions Légales – Dango Hub</h1>
-          <p className="text-gray-400 text-sm md:text-base">
-            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">21 mai 2026</span>
-          </p>
-        </div>
-      </section>
 
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
             <strong>Mentions légales de Dango HUB</strong> – Toutes les informations obligatoires concernant la société, l’hébergement, les responsabilités et les contacts.
+          </p>
+          <p className="text-gray-400 text-sm md:text-base">
+            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">21 mai 2026</span>
           </p>
         </div>
         

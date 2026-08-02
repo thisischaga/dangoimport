@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -101,26 +101,16 @@ export default function Cgu() {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-      <Header />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 py-20 px-6 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="w-16 h-16 bg-[#ffdc2b]/10 border border-[#ffdc2b]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FaFileContract className="text-[#ffdc2b] text-2xl" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">Conditions Générales d'Utilisation</h1>
-          <p className="text-gray-400 text-sm md:text-base">
-            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">21 mai 2026</span>
-          </p>
-        </div>
-      </section>
 
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
             <strong>Important :</strong> En utilisant la plateforme Dango Import, vous acceptez les présentes CGU dans leur intégralité. Nous vous encourageons à les lire attentivement. Pour toute question, contactez-nous à{" "}
             <a href="mailto:contact@dangoimport.com" className="underline font-bold text-[#2d3748]">contact@dangoimport.com</a>.
+          </p>
+          <p className="text-gray-400 text-sm md:text-base">
+            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">21 mai 2026</span>
           </p>
         </div>
 
