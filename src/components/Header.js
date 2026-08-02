@@ -71,17 +71,6 @@ const Header = () => {
             </div>
           </button>
 
-          <div className="hidden lg:flex flex-wrap items-center gap-3 ml-2 overflow-x-auto">
-            {navItems.map((item) => (
-              <button
-                key={item.to}
-                onClick={() => navigate(item.to)}
-                className="text-sm whitespace-nowrap font-semibold text-slate-700 hover:text-[#FF6B00] transition"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Search + actions */}
@@ -110,21 +99,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-
-      <div className="lg:hidden border-t border-slate-200 bg-[#FFF7F1] px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {navItems.map((item) => (
-            <button
-              key={item.to}
-              onClick={() => navigate(item.to)}
-              className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:border-[#FF6B00] hover:text-[#FF6B00] transition"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
 
       {/* Drawer + mobile search overlays */}
       <AnimatePresence>
