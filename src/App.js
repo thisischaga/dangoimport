@@ -40,7 +40,6 @@ import { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
-import { ThemeProvider } from './context/ThemeContext';
 import Politique from './pages/Politique';
 
 function App() {
@@ -84,9 +83,8 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ToastProvider>
-          <CartProvider>
+      <ToastProvider>
+        <CartProvider>
             <NotificationProvider recipientType="user" userId={user?.email || user?.userEmail}>
               <Router>
                 <ScrollToTop />
@@ -137,7 +135,6 @@ function App() {
             </NotificationProvider>
           </CartProvider>
         </ToastProvider>
-      </ThemeProvider>
     </QueryClientProvider>
   );
 }
