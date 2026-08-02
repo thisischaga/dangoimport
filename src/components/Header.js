@@ -55,29 +55,29 @@ const Header = () => {
 
   return (
     <header className="border-b border-slate-200 bg-[#FFF7F1]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
-        {/* Mobile: hamburger + logo */}
-        <div className="flex items-center gap-3">
-          <button aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700">
+      <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
+        {/* Logo and nav */}
+        <div className="flex flex-1 min-w-0 items-center gap-3">
+          <button aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
 
-          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
+          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-3 text-left flex-shrink-0">
             <div className="rounded-2xl bg-[#FF6B00] p-2 text-white shadow-sm">
               <Store size={18} />
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">Marketplace</p>
-              <h1 className="text-lg font-black text-[#111827]">Dangoimport.com</h1>
+              <h1 className="text-lg font-black text-[#111827] truncate">Dangoimport.com</h1>
             </div>
           </button>
 
-          <div className="hidden lg:flex items-center gap-3 ml-4">
+          <div className="hidden lg:flex flex-wrap items-center gap-3 ml-2 overflow-x-auto">
             {navItems.map((item) => (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
-                className="text-sm font-semibold text-slate-700 hover:text-[#FF6B00] transition"
+                className="text-sm whitespace-nowrap font-semibold text-slate-700 hover:text-[#FF6B00] transition"
               >
                 {item.label}
               </button>
@@ -85,47 +85,35 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile compact actions */}
-        <div className="flex-1 flex items-center justify-center md:justify-start">
-          <form onSubmit={handleSearch} className="w-full md:hidden flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 shadow-sm max-w-xl">
-            <Search size={14} className="text-slate-500" />
-            <input
-              className="ml-2 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              placeholder="Rechercher"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
-
-          <form onSubmit={handleSearch} className="hidden flex-1 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm md:flex md:max-w-2xl md:mx-6">
+        {/* Search + actions */}
+        <div className="flex flex-1 min-w-0 items-center gap-2 justify-end flex-wrap">
+          <form onSubmit={handleSearch} className="hidden md:flex min-w-0 flex-1 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm max-w-full">
             <Search size={16} className="text-slate-500" />
             <input
-              className="ml-2 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
               placeholder="Cherchez un produit, une marque ou une catégorie"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button className="rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
           </form>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600">
+          <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
             <Search size={18} />
           </button>
 
-          <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white">
+          <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white flex-shrink-0">
             <ShoppingCart size={16} />
             <span className="hidden sm:inline">Panier</span>
             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>
           </button>
 
           {user ? (
-            <button onClick={handleLogout} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600">
+            <button onClick={handleLogout} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
               <UserCircle2 size={18} />
             </button>
           ) : (
-            <button onClick={() => navigate('/login')} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600">
+            <button onClick={() => navigate('/login')} className="rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
               <UserCircle2 size={18} />
             </button>
           )}

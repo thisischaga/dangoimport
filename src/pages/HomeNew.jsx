@@ -136,21 +136,26 @@ function HomeNew({ cartCount: cartCountProp }) {
             {error} — affichage du contenu de secours.
           </div>
         ) */}
-        <section className="mx-auto max-w-7xl  px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-          <div
-            style={{
-              backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.03)), url(${bannerImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <div className="relative z-10 min-h-[320px] px-4 py-12 sm:px-6 sm:py-16 lg:py-20 max-w-2xl">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <div className="overflow-hidden rounded-[28px] bg-cover bg-center" style={{ backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.15)), url(${bannerImage})` }}>
+            <div className="relative z-10 min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20">
+              <h1 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
                 Achetez malin,
-                <span className="block text-4xl sm:text-6xl lg:text-7xl font-black mt-3">livrez vite</span>
+                <span className="block text-4xl sm:text-5xl lg:text-6xl font-black mt-3">livrez vite</span>
               </h1>
+              <p className="mt-6 max-w-2xl text-sm sm:text-base text-white/85 leading-relaxed">
+                Découvrez des produits vérifiés et livrés rapidement par des vendeurs fiables à travers l’Afrique.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
+                <button onClick={() => navigate('/shopping')} className="inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-200/30 transition hover:bg-[#e06500]">
+                  Parcourir la boutique
+                </button>
+                <button onClick={() => navigate('/contact')} className="inline-flex items-center justify-center rounded-full border border-white/50 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/15">
+                  Nous contacter
+                </button>
+              </div>
             </div>
-          </div>     
+          </div>
         </section>
         
 
