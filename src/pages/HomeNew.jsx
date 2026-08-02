@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   BadgeCheck,
@@ -55,11 +55,13 @@ function FlashTimer() {
 
 function HomeNew({ cartCount: cartCountProp }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart, cartCount: contextCount } = useCart();
   const cartCount = cartCountProp ?? contextCount;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const searchQuery = new URLSearchParams(location.search).get('q')?.trim() || '';
 
   useEffect(() => {
     let isMounted = true;
@@ -67,18 +69,23 @@ function HomeNew({ cartCount: cartCountProp }) {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const [catalogResponse, featuredResponse] = await Promise.all([
-          client.get('/products?limit=12'),
-          client.get('/products/featured'),
-        ]);
+        const params = new URLSearchParams({ limit: '20', page: '1' });
+        if (searchQuery) params.set('search', searchQuery);
 
+        const catalogResponse = await client.get(`/products?${params.toString()}`);
         const catalog = Array.isArray(catalogResponse?.data?.data) ? catalogResponse.data.data : [];
-        const featured = Array.isArray(featuredResponse?.data?.data) ? featuredResponse.data.data : [];
-        const merged = [...featured, ...catalog];
-        const unique = Array.from(new Map(merged.map((product) => [product._id || product.id, product])).values());
+
+        let uniqueProducts = catalog;
+
+        if (!searchQuery) {
+          const featuredResponse = await client.get('/products/featured');
+          const featured = Array.isArray(featuredResponse?.data?.data) ? featuredResponse.data.data : [];
+          const merged = [...featured, ...catalog];
+          uniqueProducts = Array.from(new Map(merged.map((product) => [product._id || product.id, product])).values());
+        }
 
         if (isMounted) {
-          setProducts(unique.map(normalizeProduct));
+          setProducts(uniqueProducts.map(normalizeProduct));
           setError('');
         }
       } catch (err) {
@@ -96,7 +103,7 @@ function HomeNew({ cartCount: cartCountProp }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [searchQuery]);
 
   const allProducts = useMemo(() => {
     return [...products].sort((a, b) => {
@@ -137,29 +144,42 @@ function HomeNew({ cartCount: cartCountProp }) {
             {error} — affichage du contenu de secours.
           </div>
         ) */}
-        <section className="hidden lg:block mx-auto max-w-7xl h-[300px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-          <div className="overflow-hidden  bg-cover bg-center" style={{ backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.15)), url(${bannerImage})` }}>
-            <div className="relative z-10 min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20">
-              <h1 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Achetez malin,
-                <span className="block text-4xl sm:text-5xl lg:text-6xl font-black mt-3">livrez vite</span>
-              </h1>
-              
+        {!searchQuery && (
+          <section className="hidden lg:block mx-auto max-w-7xl h-[300px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+            <div className="overflow-hidden  bg-cover bg-center" style={{ backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.15)), url(${bannerImage})` }}>
+              <div className="relative z-10 min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20">
+                <h1 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                  Achetez malin,
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl font-black mt-3">livrez vite</span>
+                </h1>
+              </div>
             </div>
-          </div>
-        </section>
-        
+          </section>
+        )}
 
-        
-        {/* Categories section removed per request */}
-
-        {/* ── PRODUITS — grille complète avec filtres + infinite scroll ── */}
+        {searchQuery && (
+          <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#FF6B00]">Résultats de recherche</p>
+              <h2 className="mt-3 text-3xl font-bold text-slate-900">Produits pour «{searchQuery}»</h2>
+              <p className="mt-2 text-sm text-slate-500">
+                {loading
+                  ? 'Recherche en cours...'
+                  : allProducts.length > 0
+                    ? `${allProducts.length} produit${allProducts.length !== 1 ? 's' : ''} trouvé${allProducts.length !== 1 ? 's' : ''}`
+                    : `Aucun produit trouvé pour «${searchQuery}»`}
+              </p>
+            </div>
+          </section>
+        )}
         <section style={{ background: '#f6f6f7', paddingBottom: '0' }}>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" style={{ paddingTop: '32px', paddingBottom: '0' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
               <div>
-                <p style={{ color: '#FF6B00', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>Sélection</p>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f0f0f', margin: 0 }}>Produits tendance</h2>
+                <p style={{ color: '#FF6B00', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>{searchQuery ? 'Résultats' : 'Sélection'}</p>
+                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f0f0f', margin: 0 }}>
+                  {searchQuery ? `Produits pour «${searchQuery}»` : 'Produits tendance'}
+                </h2>
               </div>
             </div>
           </div>

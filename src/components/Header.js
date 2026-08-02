@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Store, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import client from '../apiClient';
 
 const navItems = [
   { label: 'Accueil', to: '/' },
@@ -12,11 +13,47 @@ const navItems = [
   { label: 'FAQ', to: '/faq' },
 ];
 
+const SEARCH_FALLBACK_TERMS = [
+  'T-shirt',
+  'Chaussures',
+  'Sac à dos',
+  'Smartphone',
+  'Parfum',
+  'Montre',
+  'Chargeur',
+  'Écouteurs',
+];
+
+function buildSearchSuggestions(items, query) {
+  const normalizedQuery = String(query || '').toLowerCase().trim();
+  const unique = new Set();
+
+  for (const item of items) {
+    const name = item?.name;
+    if (typeof name !== 'string') continue;
+    const trimmedName = name.trim();
+    if (!trimmedName) continue;
+    const normalizedName = trimmedName.toLowerCase();
+
+    if (normalizedName === normalizedQuery) continue;
+    if (normalizedName.includes(normalizedQuery)) {
+      unique.add(trimmedName);
+    }
+  }
+
+  return Array.from(unique).slice(0, 6).map((value) => String(value));
+}
+
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { getCartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const suggestionTimer = useRef(null);
 
 
   useEffect(() => {
@@ -32,6 +69,49 @@ const Header = () => {
     window.addEventListener('authChange', loadUser);
     return () => window.removeEventListener('authChange', loadUser);
   }, []);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search).get('q') || '';
+    setSearchQuery(query);
+  }, [location.search]);
+
+  useEffect(() => {
+    if (suggestionTimer.current) {
+      clearTimeout(suggestionTimer.current);
+    }
+
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setSuggestions([]);
+      setSuggestionLoading(false);
+      return;
+    }
+
+    setSuggestionLoading(true);
+    suggestionTimer.current = window.setTimeout(async () => {
+      try {
+        const response = await client.get(`/products?limit=10&search=${encodeURIComponent(trimmed)}`);
+        const items = Array.isArray(response?.data?.data)
+          ? response.data.data
+          : [];
+        const terms = buildSearchSuggestions(items, trimmed).filter((term) => typeof term === 'string');
+        setSuggestions(terms.length > 0
+          ? terms
+          : SEARCH_FALLBACK_TERMS.filter((term) => term.toLowerCase().includes(trimmed.toLowerCase()) && term.toLowerCase() !== trimmed.toLowerCase())
+        );
+      } catch {
+        setSuggestions(SEARCH_FALLBACK_TERMS.filter((term) => term.toLowerCase().includes(trimmed.toLowerCase()) && term.toLowerCase() !== trimmed.toLowerCase()));
+      } finally {
+        setSuggestionLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      if (suggestionTimer.current) {
+        clearTimeout(suggestionTimer.current);
+      }
+    };
+  }, [searchQuery]);
 
   const handleLogout = () => {
     localStorage.removeItem('dangoToken');
@@ -74,24 +154,83 @@ const Header = () => {
         </div>
 
         {/* Search + actions */}
-        <div className="flex flex-1 min-w-0 items-center gap-2 justify-end flex-wrap">
-          <form onSubmit={handleSearch} className="hidden md:flex min-w-0 flex-1 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm max-w-full">
-            <Search size={16} className="text-slate-500" />
-            <input
-              className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              placeholder="Cherchez un produit, une marque ou une catégorie"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
-          </form>
+        <div className="flex flex-1 min-w-0 items-center gap-2">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <button aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+          </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 flex-shrink-0">
+          <div className="hidden md:flex flex-1 justify-center min-w-0 relative">
+            <form onSubmit={handleSearch} className="w-full max-w-[950px] min-w-0 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex">
+              <Search size={16} className="text-slate-500" />
+              <input
+                className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
+                placeholder="Cherchez un produit, une marque ou une catégorie"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
+              />
+              <button className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
+            </form>
+
+            {showSuggestions && (
+              <div className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Suggestions de recherche
+                </div>
+
+                {suggestionLoading ? (
+                  <div className="px-4 py-3 text-sm text-slate-500">Recherche...</div>
+                ) : suggestions.length > 0 ? (
+                  suggestions.map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setShowSuggestions(false);
+                        setSearchQuery(term);
+                        navigate(`/shopping?q=${encodeURIComponent(term)}`);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <div className="font-medium">{term}</div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="space-y-2 px-4 py-3">
+                    <p className="text-sm text-slate-500">Pas de terme exact, essayez :</p>
+                    <div className="flex flex-wrap gap-2">
+                      {SEARCH_FALLBACK_TERMS.filter((term) => term.toLowerCase() !== searchQuery.toLowerCase()).map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setSearchQuery(term);
+                            setShowSuggestions(false);
+                            navigate(`/shopping?q=${encodeURIComponent(term)}`);
+                          }}
+                          className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600">
               <Search size={18} />
             </button>
 
-            <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white flex-shrink-0 whitespace-nowrap">
+            <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white whitespace-nowrap">
               <ShoppingCart size={16} />
               <span className="hidden sm:inline">Panier</span>
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>

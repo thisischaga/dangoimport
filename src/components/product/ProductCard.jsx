@@ -55,6 +55,9 @@ function ProductCard({ product, onAddToCart }) {
         filter: isOutOfStock ? 'grayscale(0.2)' : 'none',
         transition: 'box-shadow 0.25s, opacity 0.25s',
         cursor: 'pointer',
+        minWidth: 0,
+        width: '100%',
+        maxWidth: '100%',
       }}
     >
       {/* ── IMAGE ── */}
@@ -92,11 +95,14 @@ function ProductCard({ product, onAddToCart }) {
         </div>
 
         {/* Product name */}
-        <Link to={`/product/${productId}`} style={{ textDecoration: 'none' }}>
+        <Link to={`/product/${productId}`} style={{ textDecoration: 'none', width: '100%' }}>
           <h3 style={{
             fontSize: '13px', fontWeight: 600, color: '#1a1a1a', margin: 0,
             lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '36px',
+            wordBreak: 'break-word', overflowWrap: 'anywhere',
+            maxWidth: '100%',
+            width: '100%',
           }}>
             {product?.name || 'Produit premium'}
           </h3>
