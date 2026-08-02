@@ -52,7 +52,6 @@ const Header = () => {
 
   const cartCount = getCartCount();
 
-
   return (
     <header className="border-b border-slate-200 bg-[#FFF7F1]">
       <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
@@ -109,6 +108,20 @@ const Header = () => {
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="lg:hidden border-t border-slate-200 bg-[#FFF7F1] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {navItems.map((item) => (
+            <button
+              key={item.to}
+              onClick={() => navigate(item.to)}
+              className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:border-[#FF6B00] hover:text-[#FF6B00] transition"
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </div>
 

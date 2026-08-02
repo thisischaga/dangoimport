@@ -90,10 +90,10 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           {/* Presentation */}
-          <div className="sm:col-span-2 lg:col-span-2">
-            <div className="flex items-start gap-3">
-              <img src={logo} alt="DangoImport" className="h-12 w-12 rounded object-cover shadow-sm" loading="lazy" />
-              <div>
+          <div className="sm:col-span-2 md:col-span-3 lg:col-span-2">
+            <div className="flex flex-col sm:flex-row items-start gap-3">
+              <img src={logo} alt="DangoImport" className="h-12 w-12 rounded object-cover shadow-sm flex-shrink-0" loading="lazy" />
+              <div className="min-w-0">
                 <h3 className="text-lg font-bold">DangoImport</h3>
                 <p className="text-sm text-[#6b7280] mt-1">Achetez et vendez en toute confiance auprès de milliers de vendeurs vérifiés. Achetez malin, livrez vite.</p>
                 <p className="text-xs text-[#94a3b8] mt-3">Marketplace · Bénin & Togo</p>
