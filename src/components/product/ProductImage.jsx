@@ -18,6 +18,9 @@ function ProductImage({ src, alt, isOutOfStock = false }) {
         aspectRatio: '1 / 1',
         overflow: 'hidden',
         background: '#f5f5f5',
+        minWidth: 0,
+        minHeight: 0,
+        boxSizing: 'border-box',
       }}
     >
       {/* Shimmer skeleton while loading */}

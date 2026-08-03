@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BadgeCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
-import ProductRating from './ProductRating';
 import ProductPrice from './ProductPrice';
 import ProductActions from './ProductActions';
 import { DiscountBadge, LabelBadge } from './ProductBadge';
@@ -28,10 +27,13 @@ function ProductCard({ product, onAddToCart }) {
   const stock = Number(product?.stock ?? 1);
   const isOutOfStock = stock <= 0;
   const isLowStock = !isOutOfStock && stock <= 10;
-
-  const rating = product?.rating ?? 4.2;
-  const reviewCount = product?.reviewCount ?? Math.floor(Math.random() * 800 + 20);
-  const soldCount = product?.soldCount ?? Math.floor(Math.random() * 3000 + 50);
+  const deliverySummary = Array.isArray(product?.deliveryZones)
+    ? product.deliveryZones
+        .map((zone) => zone?.locality || zone?.area || zone?.country)
+        .filter(Boolean)
+        .slice(0, 2)
+        .join(' · ')
+    : '';
 
   const label = getLabel(product);
 
@@ -58,6 +60,7 @@ function ProductCard({ product, onAddToCart }) {
         minWidth: 0,
         width: '100%',
         maxWidth: '100%',
+        boxSizing: 'border-box',
       }}
     >
       {/* ── IMAGE ── */}
@@ -71,7 +74,7 @@ function ProductCard({ product, onAddToCart }) {
           position: 'absolute', top: '8px', left: '8px', zIndex: 2,
           display: 'flex', flexDirection: 'column', gap: '4px',
         }}>
-          {discount > 0 && <DiscountBadge discount={discount} />}
+          
           {label && !isOutOfStock && <LabelBadge type={label.type} label={label.label} />}
           {isOutOfStock && <LabelBadge type="rupture" label="Rupture" />}
         </div>
@@ -87,7 +90,7 @@ function ProductCard({ product, onAddToCart }) {
         {/*Seller*/}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#9a9a9a', overflow: 'hidden' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
-            Dangoimport
+            {sellerName}
           </span>
           {product?.sellerVerified && (
             <BadgeCheck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
@@ -108,26 +111,34 @@ function ProductCard({ product, onAddToCart }) {
           </h3>
         </Link>
 
-        {/* Rating 
-        <ProductRating
-          rating={Number(rating.toFixed ? rating.toFixed(1) : rating)}
-          reviewCount={reviewCount}
-        />
-
         {/* Price */}
         <ProductPrice
           price={price}
           promoPrice={hasPromo ? promoPrice : null}
-          freeShipping={product?.freeShipping ?? true}
-          deliveryDays={product?.deliveryDays ?? '2-5'}
+          freeShipping={product?.freeShipping ?? false}
+          shippingInfo={product?.shippingInfo}
+          deliveryZones={product?.deliveryZones}
         />
 
-        {/* Stock restant */}
-        {!isOutOfStock && (
-          <p style={{ fontSize: '11px', color: isLowStock ? '#FF4747' : '#9a9a9a', margin: 0, fontWeight: isLowStock ? 600 : 400 }}>
-            {isLowStock ? `⚠ Plus que ${stock} en stock` : `Stock restant : ${stock}`}
-          </p>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '2px' }}>
+          {product?.category && (
+            <p style={{ fontSize: '10px', color: '#9a9a9a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              {product.category}
+            </p>
+          )}
+
+          {deliverySummary && (
+            <p style={{ fontSize: '10px', color: '#7a7a7a', margin: 0, fontWeight: 600 }}>
+              Livraison: {deliverySummary}
+            </p>
+          )}
+
+          {!isOutOfStock && (
+            <p style={{ fontSize: '11px', color: isLowStock ? '#FF4747' : '#9a9a9a', margin: 0, fontWeight: isLowStock ? 600 : 400 }}>
+              {isLowStock ? `Plus que ${stock} en stock` : `Stock restant : ${stock}`}
+            </p>
+          )}
+        </div>
 
         {/* Actions — hover only */}
         <div style={{ marginTop: '4px', minHeight: hovered ? 'auto' : '0' }}>

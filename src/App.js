@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/HomeNew";
@@ -31,7 +31,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ClientActivity from './pages/ClientActivity';
 import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
+import Shop from './pages/Shop';
+import CategoryPage from './pages/CategoryPage';
+import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -41,6 +43,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
+
+function StoreRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/shop/${slug}`} replace />;
+}
 
 function App() {
   const launchDate = new Date("2025-10-01T00:00:00").getTime();
@@ -117,7 +124,11 @@ function App() {
                   
                   {/* New E-commerce routes */}
                   <Route path='/product/:id' element={<ProductDetail/>}/>
-                  <Route path='/cart' element={<Cart/>}/>
+                  <Route path='/category/:slug' element={<CategoryPage/>}/>
+                  <Route path='/shop/:slug' element={<Shop/>}/>
+                  {/* Backwards compatibility: redirect old /store/:slug links to /shop/:slug */}
+                  <Route path='/store/:slug' element={<StoreRedirect />} />
+                  <Route path='/cart' element={<CartPage/>}/>
                   <Route path='/checkout' element={<Checkout/>}/>
                   <Route path='/checkout-sourcing' element={<SourcingForm/>}/>
 

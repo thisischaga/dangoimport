@@ -50,6 +50,9 @@ function ImageGallery({ images, name }) {
           cursor: zoom ? 'zoom-out' : 'zoom-in',
           aspectRatio: '1/1',
           width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          minHeight: 0,
         }}
         onMouseEnter={() => setZoom(true)}
         onMouseLeave={() => setZoom(false)}
@@ -61,6 +64,8 @@ function ImageGallery({ images, name }) {
           style={{
             width: '100%',
             height: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
             objectFit: 'contain',
             transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
             transform: zoom ? 'scale(2)' : 'scale(1)',
@@ -86,19 +91,26 @@ function ImageGallery({ images, name }) {
 
       {/* Thumbnails */}
       {validImages.length > 1 && (
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', overflowX: 'hidden', paddingBottom: '4px', minWidth: 0 }}>
           {validImages.map((img, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}
               style={{
-                flexShrink: 0, width: 60, height: 60,
+                flexShrink: 0,
+                minWidth: 68,
+                minHeight: 68,
+                width: 68,
+                height: 68,
                 border: i === active ? '2px solid #FF6B00' : '2px solid #e5e5e5',
-                background: '#f8f8f8', cursor: 'pointer', padding: 0,
+                background: '#f8f8f8',
+                cursor: 'pointer',
+                padding: 0,
                 overflow: 'hidden',
+                boxSizing: 'border-box',
               }}
             >
-              <img src={img} alt={`${name} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={img} alt={`${name} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             </button>
           ))}
         </div>
@@ -218,6 +230,17 @@ const ProductDetail = () => {
   const rating = Number(product?.rating ?? 4.3);
   const reviewCount = Number(product?.totalReviews ?? product?.reviews?.length ?? 128);
   const soldCount = Number(product?.soldCount ?? 1240);
+  const deliveryZones = Array.isArray(product?.deliveryZones) ? product.deliveryZones : [];
+  const deliverySummary = useMemo(() => {
+    if (!deliveryZones.length) return 'Livraison disponible selon votre localité';
+    return deliveryZones
+      .map((zone) => {
+        const locality = zone?.locality || zone?.area || zone?.country || 'Votre localité';
+        const time = zone?.deliveryTime || 'Délai à confirmer';
+        return `${locality} • ${time}`;
+      })
+      .join(' · ');
+  }, [deliveryZones]);
 
   // Build images array
   const images = useMemo(() => {
@@ -293,7 +316,7 @@ const ProductDetail = () => {
 
   // ── Page ─────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#f6f6f7', fontFamily: 'inherit' }}>
+    <div style={{ minHeight: '100vh', background: '#f6f6f7', fontFamily: 'inherit', overflowX: 'hidden' }}>
       <Header />
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 16px 0' }}>
@@ -352,11 +375,17 @@ const ProductDetail = () => {
               {product.name}
             </h1>
 
+            {product.category && (
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9a9a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                {product.category}
+              </p>
+            )}
+
             {/* Seller */}
-            {product.vendorName && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#7a7a7a' }}>
+            {(product.vendorName || product.sellerName) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#7a7a7a', flexWrap: 'wrap' }}>
                 Vendu par
-                <span style={{ fontWeight: 700, color: '#1a1a1a' }}>Dangoimport</span>
+                <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{product.vendorName || product.sellerName || 'Vendeur indépendant'}</span>
                 {product.sellerVerified && <BadgeCheck size={13} style={{ color: '#FF6B00' }} />}
               </div>
             )}
@@ -484,8 +513,9 @@ const ProductDetail = () => {
             <p style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Livraison & Garanties
             </p>
-            <InfoRow icon={Zap} label="Livraison " value="1-2 jours" />
-            <InfoRow icon={Shield} label="Paiement sécurisé" value="Mobile Money, paiement à la livraison" />
+            <InfoRow icon={Zap} label="Localités de livraison" value={deliverySummary} />
+            <InfoRow icon={Package} label="Disponibilité" value={inStock ? `${stock} en stock` : 'Rupture de stock'} />
+            <InfoRow icon={Shield} label="Paiement sécurisé" value="Mobile Money sécurisé" />
             <InfoRow icon={RotateCcw} label="Retours faciles" value="Retour gratuit sous 7 jours si produit non conforme" />
 
             <div style={{ marginTop: 16, padding: '12px', background: '#FFF3EA', border: '1px solid #FFD9BE' }}>
@@ -569,11 +599,11 @@ const ProductDetail = () => {
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1a1a1a', marginBottom: 20, marginTop: 0 }}>
               Produits similaires
             </h2>
-            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(2,1fr)' }} className="sm:grid-cols-similar">
+            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', minWidth: 0 }} className="sm:grid-cols-similar">
               <style>{`
-                @media(min-width:640px){.sm\\:grid-cols-similar{grid-template-columns:repeat(3,1fr)}}
-                @media(min-width:1024px){.sm\\:grid-cols-similar{grid-template-columns:repeat(5,1fr)}}
-                @media(min-width:1280px){.sm\\:grid-cols-similar{grid-template-columns:repeat(6,1fr)}}
+                @media(min-width:640px){.sm\\:grid-cols-similar{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+                @media(min-width:1024px){.sm\\:grid-cols-similar{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+                @media(min-width:1280px){.sm\\:grid-cols-similar{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
               `}</style>
               {similar.slice(0, 6).map((p) => {
                 const pId = p._id || p.id;

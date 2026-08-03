@@ -11,12 +11,14 @@ import {
 } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import ProductGrid from '../components/product/ProductGrid';
+import ProductFilters from '../components/product/ProductFilters';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import { mockProducts } from '../data/mockData';
 import bannerImage from '../images/baniere.jfif';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CategoriesSection from '../components/categories/CategoriesSection';
 
 // HOME_CATEGORIES removed — categories block intentionally omitted
 
@@ -173,6 +175,7 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         )}
         <section style={{ background: '#f6f6f7', paddingBottom: '0' }}>
+          
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" style={{ paddingTop: '32px', paddingBottom: '0' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
               <div>
@@ -191,14 +194,14 @@ function HomeNew({ cartCount: cartCountProp }) {
         </section>
 
 
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/**<section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FF6B00]">Vendeurs</p>
             <h2 className="text-2xl font-bold text-slate-900">Boutiques populaires</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {popularStores.map((store) => (
-              <Link to={`/store/${store.sellerName}`} key={store.sellerName} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#FF6B00]">
+              <Link to={`/shop/${encodeURIComponent(store.sellerName)}`} key={store.sellerName} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#FF6B00]">
                 <img src={store.sellerLogo} alt={store.sellerName} className="h-12 w-12 rounded-full object-cover" />
                 <div>
                   <h3 className="font-semibold text-slate-900">{store.sellerName}</h3>
@@ -210,7 +213,7 @@ function HomeNew({ cartCount: cartCountProp }) {
               </Link>
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="rounded-[28px] border border-[#FFD9BE] bg-[#FFF3EA] p-8 lg:p-10">
