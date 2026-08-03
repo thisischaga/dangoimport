@@ -92,7 +92,7 @@ const Footer = () => {
           {/* Presentation */}
           <div className="sm:col-span-2 md:col-span-3 lg:col-span-2">
             <div className="flex flex-col sm:flex-row items-start gap-3">
-              <img src={logo} alt="DangoImport" className="h-12 w-12 rounded object-cover shadow-sm flex-shrink-0" loading="lazy" />
+            
               <div className="min-w-0">
                 <h3 className="text-lg font-bold">DangoImport</h3>
                 <p className="text-sm text-[#6b7280] mt-1">Achetez et vendez en toute confiance auprès de milliers de vendeurs vérifiés. Achetez malin, livrez vite.</p>
