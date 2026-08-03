@@ -146,8 +146,6 @@ export default function Shop() {
     }
     if (typeof window !== 'undefined' && window.dangoToast?.info) {
       window.dangoToast.info('Coordonnées du vendeur indisponibles pour le moment.');
-    } else {
-      alert('Coordonnées du vendeur indisponibles pour le moment.');
     }
   }, [store, seller]);
 
@@ -163,8 +161,6 @@ export default function Shop() {
       await navigator.clipboard.writeText(url);
       if (window.dangoToast?.success) {
         window.dangoToast.success('Lien de la boutique copié');
-      } else {
-        alert('Lien de la boutique copié');
       }
     } catch (err) {
       if (err?.name === 'AbortError') return;

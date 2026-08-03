@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Store, BadgeCheck, ChevronRight, Ticket, Truck, ShieldCheck } from 'lucide-react';
+import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Store, BadgeCheck, ChevronRight, Ticket, Truck, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -218,7 +218,7 @@ const CartPage = () => {
         <Header />
         <main className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 lg:px-8">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200">
-            <ShoppingBag className="h-10 w-10" />
+            <ShoppingCart className="h-10 w-10" />
           </div>
           <h1 className="mt-6 text-3xl font-black text-slate-900">Votre panier est vide</h1>
           <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Ajoutez des produits pour créer votre commande et poursuivre votre achat.</p>

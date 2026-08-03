@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
@@ -29,6 +29,16 @@ const shippingMethods = [
 export default function Checkout() {
   const navigate = useNavigate();
   const { cart: cartItems = [], clearCart } = useCart();
+
+  const clearSession = useCallback(() => {
+    localStorage.removeItem('dangoToken');
+    localStorage.removeItem('dangoUser');
+  }, []);
+
+  const redirectToLogin = useCallback(() => {
+    clearSession();
+    navigate('/login', { state: { from: '/checkout' } });
+  }, [clearSession, navigate]);
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +95,7 @@ export default function Checkout() {
   useEffect(() => {
     const token = localStorage.getItem('dangoToken');
     if (!token) {
-      navigate('/login', { state: { from: '/checkout' } });
+      redirectToLogin();
       return;
     }
 
@@ -121,7 +131,7 @@ export default function Checkout() {
     } catch (error) {
       console.error('Erreur chargement utilisateur:', error);
     }
-  }, [navigate]);
+  }, [navigate, redirectToLogin]);
 
   useEffect(() => {
     const loadPreview = async () => {
@@ -148,6 +158,11 @@ export default function Checkout() {
         });
 
         const data = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          redirectToLogin();
+          throw new Error(data.message || 'Session expirée, veuillez vous reconnecter.');
+        }
+
         if (!response.ok) {
           throw new Error(data.message || 'Impossible de calculer le total');
         }
@@ -232,6 +247,11 @@ export default function Checkout() {
       });
 
       const data = await response.json();
+      if (response.status === 401 || response.status === 403) {
+        redirectToLogin();
+        throw new Error(data.message || 'Session expirée, veuillez vous reconnecter.');
+      }
+
       if (!response.ok) {
         throw new Error(data.message || 'Impossible de créer la commande');
       }

@@ -38,6 +38,7 @@ import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToastProvider } from './components/ui/ToastProvider';
+import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
@@ -91,6 +92,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
+        <ConfirmProvider>
         <CartProvider>
             <NotificationProvider recipientType="user" userId={user?.email || user?.userEmail}>
               <Router>
@@ -105,13 +107,13 @@ function App() {
                   <Route path='/politique-confidentialite' element={<Politique />}/>
                   <Route path='/politique-retour' element={<PolitiqueRetour/>}/>
                   <Route path='/mentions-legales' element={<MentionsLegales />} />
-                  {/**<Route path='/a-propos' element={<APropos />} /> */}
+                  <Route path='/a-propos' element={<APropos />} />
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
                   <Route path='/mes-commandes' element={<ClientActivity/>}/>
-                  {/**<Route path='/toutes-les-categories' element={<AllCategories/>}/>
+                  <Route path='/toutes-les-categories' element={<AllCategories/>}/>
                   <Route path='/selection-vedette' element={<FeaturedSelection/>}/>
-                  <Route path='/centre-aide' element={<HelpCenter/>}/>*/}
+                  <Route path='/centre-aide' element={<HelpCenter/>}/>
                   <Route path='/promotions' element={<Promotions/>}/>
                   <Route path='/nouveautes' element={<NewArrivals/>}/>
                   <Route path='/best-sellers' element={<TopSellers/>}/> 
