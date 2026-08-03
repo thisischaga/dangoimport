@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useConfirm } from '../../components/ui/ConfirmDialog';
 import VendorLayout from '../../components/vendor/VendorLayout';
 import VendorRoute from '../../components/vendor/VendorRoute';
 import API_BASE_URL from '../../apiConfig';
@@ -36,8 +37,10 @@ const VendorProducts = () => {
     loadProducts();
   }, []);
 
+  const confirm = useConfirm();
+
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Supprimer « ${name} » ?`)) return;
+    if (!await confirm({ title: 'Supprimer le produit', message: `Supprimer « ${name} » ? Cette action est irréversible.`, confirmText: 'Supprimer', danger: true })) return;
     try {
       const res = await fetch(`${API_BASE_URL}/api/vendor/products/${id}`, {
         method: 'DELETE',

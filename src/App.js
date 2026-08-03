@@ -147,6 +147,7 @@ function App() {
               </Router>
             </NotificationProvider>
           </CartProvider>
+        </ConfirmProvider>
         </ToastProvider>
     </QueryClientProvider>
   );

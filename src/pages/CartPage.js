@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Store, BadgeCheck, ChevronRight, Ticket, Truck, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useConfirm } from '../components/ui/ConfirmDialog';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
@@ -135,8 +136,16 @@ const CartPage = () => {
     navigate('/checkout');
   };
 
-  const handleDelete = (item) => {
-    const confirmed = window.confirm(`Retirer ${item.name} du panier ?`);
+  const confirm = useConfirm();
+
+  const handleDelete = async (item) => {
+    const confirmed = await confirm({
+      title: 'Retirer du panier',
+      message: `Voulez-vous retirer « ${item.name} » de votre panier ?`,
+      confirmText: 'Retirer',
+      cancelText: 'Annuler',
+      danger: true,
+    });
     if (!confirmed) return;
     removeFromCart(item._id || item.id);
     toast.info('Produit retiré du panier');
