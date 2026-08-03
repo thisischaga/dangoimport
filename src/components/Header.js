@@ -364,7 +364,7 @@ const Header = () => {
                       navigate(item.to);
                       setDrawerOpen(false);
                     }}
-                    className="w-full rounded-2xl px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                    className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                   >
                     {item.label}
                   </button>
