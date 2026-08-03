@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/HomeNew";
@@ -18,7 +18,6 @@ import Retours from './pages/Retours';
 import Cookies from './pages/Policies/Cookies';
 import './App.css';
 import Cgu from './pages/Cgu';
-
 import PolitiqueRetour from './pages/PolitiqueRetour';
 import MentionsLegales from './pages/MentionsLegales';
 import APropos from './pages/APropos';
@@ -44,6 +43,54 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
+
+function getPageTitle(pathname) {
+  const routeTitles = [
+    { regex: /^\/$/, title: 'Marketplace' },
+    { regex: /^\/shopping$/, title: 'Boutique' },
+    { regex: /^\/mes-commandes$/, title: 'Mes commandes' },
+    { regex: /^\/toutes-les-categories$/, title: 'Toutes les catégories' },
+    { regex: /^\/selection-vedette$/, title: 'Sélection vedette' },
+    { regex: /^\/centre-aide$/, title: 'Centre d’aide' },
+    { regex: /^\/promotions$/, title: 'Promotions' },
+    { regex: /^\/nouveautes$/, title: 'Nouveautés' },
+    { regex: /^\/best-sellers$/, title: 'Meilleures ventes' },
+    { regex: /^\/faq$/, title: 'FAQ' },
+    { regex: /^\/contact$/, title: 'Contact' },
+    { regex: /^\/livraison$/, title: 'Livraison' },
+    { regex: /^\/retours$/, title: 'Retours' },
+    { regex: /^\/cgu$/, title: 'Conditions générales' },
+    { regex: /^\/politique-confidentialite$/, title: 'Politique de confidentialité' },
+    { regex: /^\/politique-retour$/, title: 'Politique de retour' },
+    { regex: /^\/mentions-legales$/, title: 'Mentions légales' },
+    { regex: /^\/a-propos$/, title: 'À propos' },
+    { regex: /^\/services$/, title: 'Services' },
+    { regex: /^\/sourcing$/, title: 'Sourcing' },
+    { regex: /^\/sourcing\/form$/, title: 'Formulaire de sourcing' },
+    { regex: /^\/cart$/, title: 'Panier' },
+    { regex: /^\/checkout$/, title: 'Paiement' },
+    { regex: /^\/checkout-sourcing$/, title: 'Checkout sourcing' },
+    { regex: /^\/login$/, title: 'Connexion' },
+    { regex: /^\/register$/, title: 'Inscription' },
+    { regex: /^\/product\/[A-Za-z0-9_-]+$/, title: 'Produit' },
+    { regex: /^\/category\/[A-Za-z0-9_-]+$/, title: 'Catégorie' },
+    { regex: /^\/shop\/[A-Za-z0-9_-]+$/, title: 'Boutique vendeur' },
+    { regex: /^\/store\/[A-Za-z0-9_-]+$/, title: 'Boutique vendeur' },
+  ];
+
+  const route = routeTitles.find((item) => item.regex.test(pathname));
+  return route ? route.title : 'Marketplace';
+}
+
+function PageTitleUpdater() {
+  const location = useLocation();
+
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+  }, [location.pathname]);
+
+  return null;
+}
 
 function StoreRedirect() {
   const { slug } = useParams();
@@ -96,6 +143,7 @@ function App() {
         <CartProvider>
             <NotificationProvider recipientType="user" userId={user?.email || user?.userEmail}>
               <Router>
+                <PageTitleUpdater />
                 <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Home />} />

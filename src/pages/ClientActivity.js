@@ -17,13 +17,14 @@ const ClientActivity = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       const userData = JSON.parse(localStorage.getItem('dangoUser'));
-      if (!userData || !userData.email) {
+      const email = userData?.userEmail || userData?.email || '';
+      if (!email) {
         navigate('/login');
         return;
       }
       setUser(userData);
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/user-activities/${userData.email}`);
+        const response = await axios.get(`${API_BASE_URL}/api/user-activities/${encodeURIComponent(email)}`);
         setAchats(response.data.achats || []);
         setCommandes(response.data.commandes || []);
       } catch (error) {

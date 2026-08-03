@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Store, X } from 'lucide-react';
+import { Search, ShoppingCart, Store, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
@@ -124,11 +124,39 @@ const Header = () => {
   const handleSearch = (e) => {
     if (e) e.preventDefault();
     const q = searchQuery.trim();
+    setShowSuggestions(false);
     navigate(q ? `/shopping?q=${encodeURIComponent(q)}` : '/shopping');
+  };
+
+  const handleSuggestionSelect = (term) => {
+    const normalizedTerm = String(term || '').trim();
+    if (!normalizedTerm) return;
+    setSearchQuery(normalizedTerm);
+    setShowSuggestions(false);
+    navigate(`/shopping?q=${encodeURIComponent(normalizedTerm)}`);
   };
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef(null);
+
+  const userDisplayName = user?.userFirstname || user?.firstname || user?.userName || user?.name || 'Compte';
+  const userEmail = user?.userEmail || user?.email || '';
+  const userSurname = user?.userSurname || user?.surname || '';
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setAccountOpen(false);
+      }
+    };
+
+    window.addEventListener('pointerdown', handleClickOutside);
+    return () => {
+      window.removeEventListener('pointerdown', handleClickOutside);
+    };
+  }, []);
 
   const cartCount = getCartCount();
 
@@ -137,7 +165,7 @@ const Header = () => {
       <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
         {/* Logo and nav */}
         <div className="flex flex-1 min-w-0 items-center gap-3">
-          <button aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0">
+          <button type="button" aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0 cursor-pointer">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
 
@@ -154,13 +182,7 @@ const Header = () => {
         </div>
 
         {/* Search + actions */}
-        <div className="flex flex-1 min-w-0 items-center gap-2">
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <button aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
-          </div>
-
+        <div className="flex flex-1 min-w-0 items-center gap-2 justify-end">
           <div className="hidden md:flex flex-1 justify-center min-w-0 relative">
             <form onSubmit={handleSearch} className="w-full max-w-[950px] min-w-0 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex">
               <Search size={16} className="text-slate-500" />
@@ -189,11 +211,7 @@ const Header = () => {
                       key={term}
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setShowSuggestions(false);
-                        setSearchQuery(term);
-                        navigate(`/shopping?q=${encodeURIComponent(term)}`);
-                      }}
+                      onClick={() => handleSuggestionSelect(term)}
                       className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition"
                     >
                       <div className="font-medium">{term}</div>
@@ -208,11 +226,7 @@ const Header = () => {
                           key={term}
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setSearchQuery(term);
-                            setShowSuggestions(false);
-                            navigate(`/shopping?q=${encodeURIComponent(term)}`);
-                          }}
+                          onClick={() => handleSuggestionSelect(term)}
                           className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                         >
                           {term}
@@ -225,16 +239,92 @@ const Header = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <button onClick={() => setMobileSearchOpen(true)} className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600">
               <Search size={18} />
             </button>
 
-            <button onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white whitespace-nowrap">
+            <button type="button" onClick={() => navigate('/cart')} className="flex items-center gap-2 rounded-full bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white whitespace-nowrap cursor-pointer">
               <ShoppingCart size={16} />
               <span className="hidden sm:inline">Panier</span>
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#111827]">{cartCount > 99 ? '99+' : cartCount}</span>
             </button>
+
+            <div className="hidden md:flex relative" ref={accountRef}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setAccountOpen((prev) => !prev)}
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 cursor-pointer"
+              >
+                <span>{user?.userFirstname ? `${user.userFirstname}` : 'Compte'}</span>
+                <ChevronDown size={16} />
+              </button>
+
+              <AnimatePresence>
+                {accountOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 mt-2 w-72 z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
+                  >
+                    <div className="px-4 py-4">
+                      {user ? (
+                        <>
+                          <p className="text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
+                          <p className="text-sm text-slate-500">{userEmail}</p>
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <p className="text-sm text-slate-500 text-center">Aucun utilisateur connecté</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-slate-100 px-4 py-3 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate('/mes-commandes');
+                          setAccountOpen(false);
+                        }}
+                        className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
+                      >
+                        Mes commandes
+                      </button>
+                      {user ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleLogout();
+                            setAccountOpen(false);
+                          }}
+                          className="w-full rounded-2xl bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] hover:bg-[#FEF1E6] cursor-pointer flex justify-center items-center"
+                        >
+                          Déconnexion
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigate('/login');
+                            setAccountOpen(false);
+                          }}
+                          className="w-full rounded-2xl bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] hover:bg-[#FEF1E6] cursor-pointer flex justify-center items-center"
+                        >
+                          Se connecter
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -244,16 +334,23 @@ const Header = () => {
         {drawerOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40">
             <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
-            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 20 }} className="relative w-80 max-w-full h-full bg-white shadow-xl">
-              <div className="p-4 flex items-center justify-between border-b">
-                <div className="flex items-center gap-3">
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 20 }}
+              className="relative z-10 w-80 max-w-full h-full bg-white shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative p-4 border-b text-center">
+                <div className="flex items-center justify-center gap-3">
                   <div className="rounded-2xl bg-[#FF6B00] p-2 text-white"><Store size={18} /></div>
                   <div>
                     <p className="text-xs font-semibold uppercase text-[#FF6B00]">Marketplace</p>
                     <h2 className="font-black">Dangoimport</h2>
                   </div>
                 </div>
-                <button aria-label="Fermer" onClick={() => setDrawerOpen(false)} className="p-2">
+                <button type="button" aria-label="Fermer" onClick={() => setDrawerOpen(false)} className="absolute right-4 top-4 p-2 cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -262,11 +359,12 @@ const Header = () => {
                 {navItems.map((item) => (
                   <button
                     key={item.to}
+                    type="button"
                     onClick={() => {
                       navigate(item.to);
                       setDrawerOpen(false);
                     }}
-                    className="w-full text-left rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    className="w-full rounded-2xl px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                   >
                     {item.label}
                   </button>
@@ -276,31 +374,34 @@ const Header = () => {
               <div className="mt-auto border-t px-4 py-5 space-y-3">
                 {user ? (
                   <button
+                    type="button"
                     onClick={() => {
                       handleLogout();
                       setDrawerOpen(false);
                     }}
-                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-sm font-semibold text-[#FF6B00]"
+                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] cursor-pointer flex justify-center items-center"
                   >
                     Déconnexion
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={() => {
                       navigate('/login');
                       setDrawerOpen(false);
                     }}
-                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-sm font-semibold text-[#FF6B00]"
+                    className="w-full rounded-full border border-slate-200 bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] cursor-pointer flex justify-center items-center"
                   >
                     Se connecter
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => {
                     navigate('/cart');
                     setDrawerOpen(false);
                   }}
-                  className="w-full rounded-full bg-[#FF6B00] px-4 py-3 text-sm font-semibold text-white"
+                  className="w-full rounded-full bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white cursor-pointer flex justify-center items-center"
                 >
                   Voir mon panier ({cartCount > 99 ? '99+' : cartCount})
                 </button>

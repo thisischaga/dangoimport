@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';
 import { useCart } from '../context/CartContext';
+import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
 
 const MapPin = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
 const CreditCard = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" /></svg>;
@@ -16,8 +17,7 @@ const Truck = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 
 const paymentOptions = [
   { id: 'mobile_money', label: 'Mobile Money', helper: 'TMoney, Moov, MTN' },
-  { id: 'credit_card', label: 'Carte bancaire', helper: 'Visa / Mastercard / International' },
-  { id: 'bank_transfer', label: 'Virement bancaire', helper: 'Paiement sécurisé par transfert' },
+  { id: 'fedapay', label: 'FedaPay', helper: 'Paiement en ligne via FedaPay' },
 ];
 
 const shippingMethods = [
@@ -47,7 +47,7 @@ export default function Checkout() {
   const [acceptCGV, setAcceptCGV] = useState(false);
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(null);
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('mobile_money');
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -167,9 +167,17 @@ export default function Checkout() {
           throw new Error(data.message || 'Impossible de calculer le total');
         }
         setPreview(data.data || null);
+        if (promoCode?.trim()) {
+          localStorage.setItem('dangoPromoCode', promoCode.trim().toUpperCase());
+        } else {
+          localStorage.removeItem('dangoPromoCode');
+        }
       } catch (error) {
         console.error('Erreur preview:', error);
         toast.error(error.message || 'Erreur de calcul du total');
+        if (!promoCode?.trim()) {
+          localStorage.removeItem('dangoPromoCode');
+        }
       } finally {
         setPreviewLoading(false);
       }
@@ -217,9 +225,37 @@ export default function Checkout() {
 
     setSubmitting(true);
     const token = localStorage.getItem('dangoToken');
-    const toastId = toast.loading('Création de la commande...');
+    const toastId = toast.loading('Préparation du paiement...');
 
     try {
+      if (paymentMethod === 'fedapay') {
+        const payload = buildCartFedapayPayload({
+          form,
+          cartItems,
+          subtotal,
+          shippingFee: Number(preview?.shippingCost || 0),
+          total: Number(preview?.total || subtotal),
+          shippingLabel: getShippingLabel(),
+          description: 'Commande Dango Import',
+          type: 'cart',
+        });
+
+        const data = await initiateFedapayCheckout(payload, token);
+        if (!data?.url) {
+          throw new Error('URL de paiement FedaPay introuvable.');
+        }
+
+        toast.update(toastId, {
+          render: 'Redirection vers FedaPay...',
+          type: 'info',
+          isLoading: false,
+          autoClose: 2000,
+        });
+
+        window.location.href = data.url;
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: {
@@ -243,6 +279,8 @@ export default function Checkout() {
           shippingMethod,
           paymentMethod,
           promoCode,
+          customerEmail: form.email,
+          customerPhone: form.phone,
         }),
       });
 
@@ -567,7 +605,7 @@ export default function Checkout() {
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Livraison</span><span className="font-bold">{previewLoading ? '...' : `${Number(preview?.shippingCost || 0).toLocaleString('fr-FR')} F`}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Taxes</span><span className="font-bold">{previewLoading ? '...' : `${Number(preview?.tax || 0).toLocaleString('fr-FR')} F`}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Réduction</span><span className="font-bold text-green-600">-{previewLoading ? '...' : `${Number(preview?.discount || 0).toLocaleString('fr-FR')} F`}</span></div>
-                <div className="flex justify-between text-lg font-black text-[#282828] border-t border-gray-100 pt-3"><span>Total</span><span className="text-[#F68B1E]">{previewLoading ? '...' : `${Number(preview?.total || subtotal).toLocaleString('fr-FR')} F`}</span></div>
+                <div className="flex justify-between text-lg font-black text-[#282828] border-t border-gray-100 pt-3"><span>Total</span><span className="text-[#F68B1E]">{previewLoading ? '...' : `${Number(preview?.total ?? subtotal).toLocaleString('fr-FR')} F`}</span></div>
               </div>
             </div>
           </aside>

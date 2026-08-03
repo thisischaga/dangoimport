@@ -17,7 +17,7 @@ const quantitySelectorButton = 'h-9 w-9 rounded-lg border border-slate-200 bg-wh
 const CartPage = () => {
   const navigate = useNavigate();
   const { cart, removeFromCart, updateQuantity, subtotal, shipping, total, getCartCount } = useCart();
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [promoState, setPromoState] = useState({ loading: false, success: false, message: '' });
   const [promoPreview, setPromoPreview] = useState(null);
   const [recommended, setRecommended] = useState([]);
@@ -53,8 +53,8 @@ const CartPage = () => {
   }, [cart]);
 
   const estimatedDelivery = useMemo(() => {
-    if (subtotal >= 50000) return 'Livraison gratuite · 2 à 4 jours';
-    return 'Livraison estimée · 2 à 4 jours';
+    if (subtotal >= 50000) return 'Livraison gratuite · 1 à 4 jours';
+    return 'Livraison estimée · 1 à 4 jours';
   }, [subtotal]);
 
   const cartCount = getCartCount();
@@ -86,6 +86,11 @@ const CartPage = () => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Calcul impossible');
         setPromoPreview(data.data || null);
+        if (promoCode?.trim()) {
+          localStorage.setItem('dangoPromoCode', promoCode.trim().toUpperCase());
+        } else {
+          localStorage.removeItem('dangoPromoCode');
+        }
       } catch (error) {
         setPromoPreview(null);
         console.error('Promo preview error:', error);
@@ -196,6 +201,7 @@ const CartPage = () => {
       }
 
       setPromoPreview(data.data || null);
+      localStorage.setItem('dangoPromoCode', promoCode.trim().toUpperCase());
       setPromoState({
         loading: false,
         success: true,
@@ -203,6 +209,7 @@ const CartPage = () => {
       });
     } catch (error) {
       setPromoPreview(null);
+      localStorage.removeItem('dangoPromoCode');
       setPromoState({ loading: false, success: false, message: error.message || 'Le code promo est invalide.' });
     }
   };
@@ -313,7 +320,7 @@ const CartPage = () => {
                               </div>
                               <div className="text-right">
                                 <p className="text-lg font-black text-slate-900">{formatMoney(lineTotal)}</p>
-                                <p className="text-xs text-slate-500 line-through">{formatMoney(Number(item.price || 0) * Number(item.quantity || 1))}</p>
+                                
                               </div>
                             </div>
 
@@ -385,7 +392,7 @@ const CartPage = () => {
               </div>
 
               {promoState.message && (
-                <div className={`mt-3 rounded-xl border px-3 py-2 text-sm ${promoState.success ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+                <div className={`mt-3 rounded-xl border px-3 py-2 text-sm ${promoState.success ? ' bg-emerald-50 text-emerald-700' : ' bg-rose-50 text-rose-700'}`}>
                   {promoState.message}
                 </div>
               )}
@@ -461,9 +468,7 @@ const CartPage = () => {
               </div>
             </div>
 
-            <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:hidden">
-              <button onClick={handleCheckout} className="w-full rounded-2xl bg-[#FF6B00] px-4 py-3 text-sm font-black text-white shadow-sm">Passer au paiement</button>
-            </div>
+            
           </aside>
         </div>
       </main>

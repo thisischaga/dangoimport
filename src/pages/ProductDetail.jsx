@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -211,6 +211,14 @@ const ProductDetail = () => {
 
   const { data: product, isLoading, isError } = useProduct(id);
   const { data: similar = [] } = useSimilarProducts(id);
+
+  useEffect(() => {
+    if (product?.name) {
+      document.title = product.name;
+    } else if (!isLoading && !product) {
+      document.title = 'Produit introuvable';
+    }
+  }, [product?.name, isLoading]);
 
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
