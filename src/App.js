@@ -29,6 +29,7 @@ import ArticleFour from './blog/ArticleFour';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ClientActivity from './pages/ClientActivity';
+import Orders from './pages/Orders';
 import ProductDetail from './pages/ProductDetail';
 import Shop from './pages/Shop';
 import CategoryPage from './pages/CategoryPage';
@@ -158,7 +159,7 @@ function App() {
                   <Route path='/a-propos' element={<APropos />} />
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
-                  <Route path='/mes-commandes' element={<ClientActivity/>}/>
+                  <Route path='/mes-commandes' element={<Orders/>}/>
                   <Route path='/toutes-les-categories' element={<AllCategories/>}/>
                   <Route path='/selection-vedette' element={<FeaturedSelection/>}/>
                   <Route path='/centre-aide' element={<HelpCenter/>}/>

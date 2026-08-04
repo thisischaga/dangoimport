@@ -97,6 +97,39 @@ export default function Checkout() {
   const getShippingLabel = () => shippingMethods.find((method) => method.value === shippingMethod)?.label || 'Livraison standard';
 
   useEffect(() => {
+    // If we returned from FedaPay with a pending transaction, poll its status
+    let pollId;
+    const pendingRaw = localStorage.getItem('pendingFedapay');
+    if (pendingRaw) {
+      try {
+        const pending = JSON.parse(pendingRaw);
+        if (pending && pending.transactionId) {
+          const check = async () => {
+            try {
+              const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`);
+              const data = await res.json();
+              if (res.ok && (data.status === 'approved' || data.status === 'completed' || data.status === 'paid')) {
+                // Payment confirmed: clear client cart and remove pending
+                clearCart();
+                localStorage.removeItem('pendingFedapay');
+                toast.success('Paiement confirmé — votre commande est en cours de traitement.');
+                navigate('/mes-commandes');
+                if (pollId) clearInterval(pollId);
+              }
+            } catch (err) {
+              console.error('Error checking Fedapay transaction status', err);
+            }
+          };
+          // Run immediately then every 3s for up to ~20 times
+          check();
+          pollId = setInterval(check, 3000);
+          // stop after 2 minutes
+          setTimeout(() => { if (pollId) clearInterval(pollId); }, 2 * 60 * 1000);
+        }
+      } catch (e) {
+        console.error('pendingFedapay parse error', e);
+      }
+    }
     const token = localStorage.getItem('dangoToken');
     if (!token) {
       redirectToLogin();
@@ -256,6 +289,8 @@ export default function Checkout() {
           autoClose: 2000,
         });
 
+        // Persist pending transaction so we can resume after redirect
+        try { localStorage.setItem('pendingFedapay', JSON.stringify({ transactionId: data.transactionId, localTransactionId: data.localTransactionId })); } catch(e) { /* ignore */ }
         window.location.href = data.url;
         return;
       }

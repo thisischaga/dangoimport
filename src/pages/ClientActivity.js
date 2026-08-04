@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import QRCode from 'qrcode';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -12,6 +13,8 @@ const ClientActivity = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [qrCache, setQrCache] = useState({}); // { orderId: { tokens: [], images: [] } }
+  const [qrLoading, setQrLoading] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +38,43 @@ const ClientActivity = () => {
     };
     fetchActivities();
   }, [navigate]);
+
+  const fetchOrderQr = async (orderId) => {
+    if (!orderId) return;
+    if (qrCache[orderId]) return; // already fetched
+    setQrLoading((s) => ({ ...s, [orderId]: true }));
+    try {
+      const token = localStorage.getItem('dangoToken');
+      if (!token) throw new Error('Utilisateur non connecté');
+      const res = await fetch(`${API_BASE_URL}/api/qr/generate/${orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Erreur récupération QR');
+
+      const qrTokens = (data.data && data.data.qrTokens) || [];
+      const images = {};
+      await Promise.all(qrTokens.map(async (t) => {
+        try {
+          const url = await QRCode.toDataURL(String(t.token), { width: 280, margin: 2 });
+          images[t.token] = url;
+        } catch (err) {
+          console.error('QRCode generation failed:', err);
+        }
+      }));
+
+      setQrCache((s) => ({ ...s, [orderId]: { tokens: qrTokens, images } }));
+    } catch (error) {
+      console.error('fetchOrderQr error:', error);
+      setQrCache((s) => ({ ...s, [orderId]: { tokens: [], images: {}, error: error.message } }));
+    } finally {
+      setQrLoading((s) => ({ ...s, [orderId]: false }));
+    }
+  };
 
   const allOrders = [...commandes, ...achats].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -129,8 +169,12 @@ const ClientActivity = () => {
                           {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">FCFA</span>
                         </span>
                       </div>
-                      <button 
-                        onClick={() => setExpandedOrder(expandedOrder === cmd._id ? null : cmd._id)}
+                      <button
+                        onClick={async () => {
+                          const next = expandedOrder === cmd._id ? null : cmd._id;
+                          if (next) await fetchOrderQr(cmd._id);
+                          setExpandedOrder(next);
+                        }}
                         className="text-[13px] font-bold text-gray-900 dark:text-white underline hover:text-[#ffdc2b] transition-colors"
                       >
                         {expandedOrder === cmd._id ? 'Fermer' : 'Détails'}
@@ -177,6 +221,38 @@ const ClientActivity = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* QR Codes Section */}
+                      <div className="mt-4">
+                        <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Codes QR</h5>
+                        {qrLoading[cmd._id] ? (
+                          <p className="text-sm text-gray-500">Chargement des QR codes…</p>
+                        ) : qrCache[cmd._id] && qrCache[cmd._id].error ? (
+                          <p className="text-sm text-red-500">Erreur: {qrCache[cmd._id].error}</p>
+                        ) : qrCache[cmd._id] && qrCache[cmd._id].tokens && qrCache[cmd._id].tokens.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {qrCache[cmd._id].tokens.map((t) => (
+                              <div key={t.token} className="bg-white dark:bg-[#1a1d24] p-3 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                                <div className="w-36 h-36 bg-white rounded-md flex items-center justify-center border">
+                                  {qrCache[cmd._id].images && qrCache[cmd._id].images[t.token] ? (
+                                    <img src={qrCache[cmd._id].images[t.token]} alt={`QR ${t.vendorName}`} className="w-full h-full object-contain p-2" />
+                                  ) : (
+                                    <div className="text-xs text-gray-500">Aperçu indisponible</div>
+                                  )}
+                                </div>
+                                <div className="flex-1 text-sm">
+                                  <div className="font-medium text-gray-900 dark:text-white">{t.vendorName || 'Vendeur'}</div>
+                                  <div className="text-xs text-gray-500">Montant: {(t.vendorTotal || 0).toLocaleString('fr-FR')} FCFA</div>
+                                  <div className="text-xs text-gray-400">Statut: {t.status}</div>
+                                  <div className="text-xs text-gray-400">Valide jusqu'au: {new Date(t.expiresAt).toLocaleString('fr-FR')}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500">Aucun QR disponible pour cette commande.</p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </>

@@ -98,12 +98,25 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
 
 export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode, description, type }) {
     const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type });
+    // Ensure items are included so backend can validate and build order
+    const mappedItems = Array.isArray(cartItems) ? cartItems.map((i) => ({
+        productId: i._id || i.id,
+        quantity: Number(i.quantity || 1),
+        price: Number(i.price || i.salePrice || i.promoPrice || 0),
+        selectedOptions: i.selectedOptions || {},
+        vendorName: i.vendorName || i.vendor || null,
+        subtotal: (Number(i.price || i.salePrice || i.promoPrice || 0) * Number(i.quantity || 1)),
+    })) : [];
+
     return {
         ...base,
         userNumber: fedapayPhone || form.phone,
         network: network,
         countryCode: countryCode || 'BJ',
         paymentMethod: 'FedaPay',
+        // Backwards-compatible fields expected by server
+        cartItems: mappedItems,
+        items: mappedItems,
     };
 }
 
