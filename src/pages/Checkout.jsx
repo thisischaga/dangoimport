@@ -18,7 +18,6 @@ const ArrowLeft = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="no
 const Truck = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h11v10H3z" /><path d="M14 9h3l4 4v4h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></svg>;
 
 const paymentOptions = [
-  { id: 'mobile_money', label: 'Mobile Money', helper: 'TMoney, Moov, MTN' },
   { id: 'fedapay', label: 'FedaPay', helper: 'Paiement en ligne via FedaPay' },
 ];
 
@@ -234,48 +233,6 @@ export default function Checkout() {
 
     try {
       if (paymentMethod === 'fedapay') {
-        const orderResponse = await fetch(`${API_BASE_URL}/api/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            items: cartItems.map((item) => ({
-              productId: item._id || item.id,
-              quantity: item.quantity || 1,
-              selectedOptions: {},
-            })),
-            shippingAddress: {
-              country: form.country,
-              city: form.city,
-              neighborhood: form.neighborhood,
-              fullAddress: form.fullAddress,
-              postalCode: form.postalCode,
-              instructions: form.instructions,
-            },
-            shippingMethod,
-            paymentMethod,
-            promoCode,
-            customerEmail: form.email,
-            customerPhone: form.phone,
-          }),
-        });
-
-        const orderData = await orderResponse.json();
-        if (orderResponse.status === 401 || orderResponse.status === 403) {
-          redirectToLogin();
-          throw new Error(orderData.message || 'Session expirée, veuillez vous reconnecter.');
-        }
-        if (!orderResponse.ok) {
-          throw new Error(orderData.message || 'Impossible de créer la commande avant le paiement FedaPay.');
-        }
-
-        const orderId = orderData.data?._id || orderData.data?.orderId || orderData.data?.id;
-        if (!orderId) {
-          throw new Error('Impossible de récupérer l’ID de commande pour FedaPay.');
-        }
-
         const payload = buildCartFedapayPayload({
           form,
           cartItems,
@@ -285,7 +242,6 @@ export default function Checkout() {
           shippingLabel: getShippingLabel(),
           description: 'Commande Dango Import',
           type: 'cart',
-          orderId,
         });
 
         const data = await initiateFedapayCheckout(payload, token);
@@ -303,71 +259,15 @@ export default function Checkout() {
         window.location.href = data.url;
         return;
       }
-
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            productId: item._id || item.id,
-            quantity: item.quantity || 1,
-            selectedOptions: {},
-          })),
-          shippingAddress: {
-            country: form.country,
-            city: form.city,
-            neighborhood: form.neighborhood,
-            fullAddress: form.fullAddress,
-            postalCode: form.postalCode,
-            instructions: form.instructions,
-          },
-          shippingMethod,
-          paymentMethod,
-          promoCode,
-          customerEmail: form.email,
-          customerPhone: form.phone,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.status === 401 || response.status === 403) {
-        redirectToLogin();
-        throw new Error(data.message || 'Session expirée, veuillez vous reconnecter.');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Impossible de créer la commande');
-      }
-
-      const orderId = data.data?._id || data.data?.orderId || data.data?.id;
-      let qrResult = null;
-
-      if (orderId) {
-        try {
-          qrResult = await fetchOrderQrTokens(orderId, token);
-          const tokens = qrResult?.data?.qrTokens || [];
-          setQrTokens(tokens);
-          setShowQrPanel(tokens.length > 0);
-        } catch (qrError) {
-          console.error('Erreur génération QR:', qrError);
-          toast.error(qrError.message || 'Erreur lors de la génération du QR code.');
-        }
-      }
-
-      clearCart?.();
+      // Only FedaPay is supported for online payments. Other flows are deprecated.
       toast.update(toastId, {
-        render: '✅ Commande créée avec succès !',
-        type: 'success',
+        render: 'Seul FedaPay est supporté pour le paiement en ligne.',
+        type: 'error',
         isLoading: false,
-        autoClose: 2500,
+        autoClose: 3000,
       });
-
-      if (!qrResult?.data?.qrTokens?.length) {
-        setTimeout(() => navigate('/mes-commandes'), 1200);
-      }
+      setSubmitting(false);
+      return;
     } catch (error) {
       console.error('Erreur création commande:', error);
       toast.update(toastId, {
