@@ -7,9 +7,26 @@ import QRCode from 'qrcode';
 import API_BASE_URL from '../apiConfig';
 
 const fetchMyOrders = async () => {
-  const token = localStorage.getItem('dangoToken');
-  const res = await apiClient.get('/shop-orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-  return res.data.data || [];
+  try {
+    const token = localStorage.getItem('dangoToken');
+    const res = await apiClient.get('/shop-orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    // debug
+    console.debug('[Orders] fetched my-orders response', res?.data);
+    return res.data.data || [];
+  } catch (err) {
+    console.error('[Orders] fetchMyOrders error', err?.response?.data || err.message || err);
+    // Try fallback to legacy orders endpoint for diagnostics
+    try {
+      console.warn('[Orders] attempting fallback to /orders/my-orders');
+      const token = localStorage.getItem('dangoToken');
+      const fallback = await apiClient.get('/orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      console.warn('[Orders] fallback succeeded, returning legacy orders');
+      return fallback.data.data || [];
+    } catch (fbErr) {
+      console.error('[Orders] fallback error', fbErr?.response?.data || fbErr.message || fbErr);
+    }
+    throw err;
+  }
 };
 
 function formatCurrency(x = 0) {
@@ -85,6 +102,11 @@ const Orders = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       <main className="max-w-6xl mx-auto p-4">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            Erreur chargement commandes: {String(error?.message || error)}. Vérifiez la console réseau et que vous êtes connecté.
+          </div>
+        )}
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Mes commandes</h1>
           <p className="text-sm text-gray-500">Retrouvez toutes vos commandes et leur statut.</p>
