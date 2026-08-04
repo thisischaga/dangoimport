@@ -6,22 +6,43 @@ import Footer from '../components/Footer';
 import QRCode from 'qrcode';
 import API_BASE_URL from '../apiConfig';
 
+const normalizeOrdersResponse = (responseData) => {
+  if (!responseData) return [];
+  if (Array.isArray(responseData)) return responseData;
+  if (Array.isArray(responseData.data)) return responseData.data;
+  if (Array.isArray(responseData.data?.data)) return responseData.data.data;
+  if (Array.isArray(responseData.data?.orders)) return responseData.data.orders;
+  if (Array.isArray(responseData.orders)) return responseData.orders;
+  return [];
+};
+
 const fetchMyOrders = async () => {
   try {
     const token = localStorage.getItem('dangoToken');
     const res = await apiClient.get('/shop-orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-    // debug
-    console.debug('[Orders] fetched my-orders response', res?.data);
-    return res.data.data || [];
+    const responseData = res?.data;
+    console.log('[Orders] fetched my-orders response', responseData);
+    const orders = normalizeOrdersResponse(responseData);
+    console.log('[Orders] parsed orders count', orders.length);
+
+    if (orders.length === 0) {
+      console.warn('[Orders] shop-orders returned empty, falling back to legacy orders');
+      const fallback = await apiClient.get('/orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const fallbackOrders = normalizeOrdersResponse(fallback.data);
+      console.log('[Orders] fallback orders count', fallbackOrders.length);
+      return fallbackOrders;
+    }
+    return orders;
   } catch (err) {
     console.error('[Orders] fetchMyOrders error', err?.response?.data || err.message || err);
-    // Try fallback to legacy orders endpoint for diagnostics
     try {
       console.warn('[Orders] attempting fallback to /orders/my-orders');
       const token = localStorage.getItem('dangoToken');
       const fallback = await apiClient.get('/orders/my-orders', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       console.warn('[Orders] fallback succeeded, returning legacy orders');
-      return fallback.data.data || [];
+      const fallbackOrders = normalizeOrdersResponse(fallback.data);
+      console.log('[Orders] fallback orders count (error path)', fallbackOrders.length);
+      return fallbackOrders;
     } catch (fbErr) {
       console.error('[Orders] fallback error', fbErr?.response?.data || fbErr.message || fbErr);
     }
@@ -181,7 +202,6 @@ const Orders = () => {
                       <div className="font-medium">{g.vendorName}</div>
                       <div className="flex gap-2">
                         <button onClick={()=> window.location.href = `/shop/${g.vendorName}` } className="text-sm text-blue-600">Voir la boutique</button>
-                        <button onClick={()=> alert('Contact vendeur: utilisez la messagerie ou email')} className="text-sm text-gray-600">Contacter</button>
                       </div>
                     </div>
                     <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
