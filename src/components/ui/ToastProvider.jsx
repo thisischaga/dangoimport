@@ -5,16 +5,21 @@ const ToastContext = createContext(null);
 
 const DEFAULT_DURATION = 3800;
 const STATUS_STYLES = {
-  success: { background: '#111827', color: '#fef3c7', border: '1px solid #f59e0b' },
-  error: { background: '#111827', color: '#fecaca', border: '1px solid #f87171' },
-  warning: { background: '#111827', color: '#fde68a', border: '1px solid #facc15' },
-  info: { background: '#111827', color: '#d1d5db', border: '1px solid #93c5fd' },
+  success: { background: '#111827', color: '#fef3c7', border: 'none' },
+  error: { background: '#111827', color: '#fecaca', border: 'none' },
+  warning: { background: '#111827', color: '#fde68a', border: 'none' },
+  info: { background: '#111827', color: '#d1d5db', border: 'none' },
+};
+
+const cleanMessage = (msg) => {
+  if (typeof msg !== 'string') return msg;
+  return msg.replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}✓✔]\s*/u, '');
 };
 
 const createToast = (type, message, duration = DEFAULT_DURATION) => ({
   id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   type,
-  message,
+  message: cleanMessage(message),
   duration,
 });
 
@@ -73,12 +78,15 @@ export const ToastProvider = ({ children }) => {
         <div style={{
           position: 'fixed',
           top: 16,
-          right: 16,
-          zIndex: 9999,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 99999,
           display: 'flex',
           flexDirection: 'column',
-          gap: 12,
-          minWidth: 280,
+          alignItems: 'center',
+          gap: 10,
+          maxWidth: '90vw',
+          width: 'max-content',
           pointerEvents: 'none',
         }}>
           {toasts.map(({ id, type, message }) => (
@@ -91,13 +99,15 @@ export const ToastProvider = ({ children }) => {
                 justifyContent: 'space-between',
                 gap: 12,
                 borderRadius: 16,
-                padding: '14px 16px',
+                padding: '14px 20px',
                 boxShadow: '0 20px 60px rgba(15, 23, 42, 0.16)',
-                minHeight: 60,
+                minHeight: 50,
+                border: 'none',
+                outline: 'none',
                 ...STATUS_STYLES[type],
               }}
             >
-              <div style={{ flex: 1, fontSize: 14, lineHeight: 1.5 }}>
+              <div style={{ flex: 1, fontSize: 14, lineHeight: 1.5, textAlign: 'center' }}>
                 {message}
               </div>
               <button

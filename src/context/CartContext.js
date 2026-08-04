@@ -68,7 +68,7 @@ export const CartProvider = ({ children }) => {
 
       // Nouveau produit
       const addQty = Math.min(quantityToAdd, stock);
-      toast.success(`✓ ${product.name} ajouté au panier`);
+      toast.success(`${product.name} ajouté au panier`);
       return [...prevCart, { ...product, _id: productId, quantity: addQty }];
     });
   }, []);

@@ -603,6 +603,9 @@ select:focus-visible {
 .dango-toast.Toastify__toast-container {
   width: auto;
   max-width: 420px;
+  top: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 }
 
 .dango-toast .Toastify__toast {
@@ -613,29 +616,31 @@ select:focus-visible {
   min-height: 52px;
   font-size: 14px;
   font-weight: 500;
+  border: none !important;
 }
 
 .dango-toast .Toastify__toast--success {
-  background: #fffbeb;
-  color: #2d3748;
-  border-left: 4px solid var(--brand);
+  background: #111827;
+  color: #fef3c7;
+  border: none !important;
 }
 
 .dango-toast .Toastify__toast--error {
-  background: #1f2937;
-  color: #fca5a5;
+  background: #111827;
+  color: #fecaca;
+  border: none !important;
 }
 
 .dango-toast .Toastify__toast--warning {
-  background: #fffbeb;
-  color: #2d3748;
-  border-left: 4px solid var(--brand-hover);
+  background: #111827;
+  color: #fde68a;
+  border: none !important;
 }
 
 .dango-toast .Toastify__toast--info {
-  background: #f3f4f6;
-  color: #111827;
-  border: 1px solid #e5e7eb;
+  background: #111827;
+  color: #d1d5db;
+  border: none !important;
 }
 
 .dango-toast .Toastify__progress-bar {

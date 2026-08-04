@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import QRCode from 'qrcode';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';
 import { useCart } from '../context/CartContext';
 import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
+import { fetchOrderQrTokens } from '../services/qrService';
 
 const MapPin = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
 const CreditCard = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" /></svg>;
@@ -52,6 +54,9 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('mobile_money');
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [qrTokens, setQrTokens] = useState([]);
+  const [qrImages, setQrImages] = useState({});
+  const [showQrPanel, setShowQrPanel] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -229,6 +234,48 @@ export default function Checkout() {
 
     try {
       if (paymentMethod === 'fedapay') {
+        const orderResponse = await fetch(`${API_BASE_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            items: cartItems.map((item) => ({
+              productId: item._id || item.id,
+              quantity: item.quantity || 1,
+              selectedOptions: {},
+            })),
+            shippingAddress: {
+              country: form.country,
+              city: form.city,
+              neighborhood: form.neighborhood,
+              fullAddress: form.fullAddress,
+              postalCode: form.postalCode,
+              instructions: form.instructions,
+            },
+            shippingMethod,
+            paymentMethod,
+            promoCode,
+            customerEmail: form.email,
+            customerPhone: form.phone,
+          }),
+        });
+
+        const orderData = await orderResponse.json();
+        if (orderResponse.status === 401 || orderResponse.status === 403) {
+          redirectToLogin();
+          throw new Error(orderData.message || 'Session expirée, veuillez vous reconnecter.');
+        }
+        if (!orderResponse.ok) {
+          throw new Error(orderData.message || 'Impossible de créer la commande avant le paiement FedaPay.');
+        }
+
+        const orderId = orderData.data?._id || orderData.data?.orderId || orderData.data?.id;
+        if (!orderId) {
+          throw new Error('Impossible de récupérer l’ID de commande pour FedaPay.');
+        }
+
         const payload = buildCartFedapayPayload({
           form,
           cartItems,
@@ -238,6 +285,7 @@ export default function Checkout() {
           shippingLabel: getShippingLabel(),
           description: 'Commande Dango Import',
           type: 'cart',
+          orderId,
         });
 
         const data = await initiateFedapayCheckout(payload, token);
@@ -294,6 +342,21 @@ export default function Checkout() {
         throw new Error(data.message || 'Impossible de créer la commande');
       }
 
+      const orderId = data.data?._id || data.data?.orderId || data.data?.id;
+      let qrResult = null;
+
+      if (orderId) {
+        try {
+          qrResult = await fetchOrderQrTokens(orderId, token);
+          const tokens = qrResult?.data?.qrTokens || [];
+          setQrTokens(tokens);
+          setShowQrPanel(tokens.length > 0);
+        } catch (qrError) {
+          console.error('Erreur génération QR:', qrError);
+          toast.error(qrError.message || 'Erreur lors de la génération du QR code.');
+        }
+      }
+
       clearCart?.();
       toast.update(toastId, {
         render: '✅ Commande créée avec succès !',
@@ -302,7 +365,9 @@ export default function Checkout() {
         autoClose: 2500,
       });
 
-      setTimeout(() => navigate('/mes-commandes'), 1200);
+      if (!qrResult?.data?.qrTokens?.length) {
+        setTimeout(() => navigate('/mes-commandes'), 1200);
+      }
     } catch (error) {
       console.error('Erreur création commande:', error);
       toast.update(toastId, {
@@ -315,6 +380,24 @@ export default function Checkout() {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!qrTokens.length) {
+      setQrImages({});
+      return;
+    }
+
+    qrTokens.forEach((tokenData) => {
+      const key = tokenData.vendorId || tokenData.vendorName || tokenData.token;
+      QRCode.toDataURL(tokenData.token, { width: 280, margin: 2 })
+        .then((url) => {
+          setQrImages((prev) => ({ ...prev, [key]: url }));
+        })
+        .catch((err) => {
+          console.error('QRCode generation failed:', err);
+        });
+    });
+  }, [qrTokens]);
 
   if (!cartItems.length) {
     return (
@@ -564,6 +647,48 @@ export default function Checkout() {
                     {submitting ? 'Traitement...' : 'Confirmer la commande'}
                   </button>
                 </div>
+
+                {showQrPanel && qrTokens.length > 0 && (
+                  <div className="mt-6 rounded-2xl border border-[#F68B1E]/30 bg-[#fff7ed] p-5">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div>
+                        <h3 className="text-lg font-black text-[#b45309]">QR de validation</h3>
+                        <p className="text-sm text-[#92400e] mt-1">Montrez ce code au vendeur pour qu’il puisse valider votre commande.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/mes-commandes')}
+                        className="rounded-full bg-[#F68B1E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e67a0c] transition"
+                      >
+                        Voir mes commandes
+                      </button>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {qrTokens.map((tokenData) => {
+                        const key = tokenData.vendorId || tokenData.vendorName || tokenData.token;
+                        return (
+                          <div key={key} className="rounded-2xl border border-[#fcd9b6] bg-white p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-3 gap-2">
+                              <div>
+                                <p className="text-sm font-semibold text-[#92400e]">{tokenData.vendorName || 'Vendeur'}</p>
+                                <p className="text-xs text-[#7c2d12]">Montant vendeur : {Number(tokenData.vendorTotal || 0).toLocaleString('fr-FR')} F</p>
+                              </div>
+                            </div>
+                            {qrImages[key] ? (
+                              <img src={qrImages[key]} alt={`QR ${tokenData.vendorName}`} className="mx-auto h-48 w-48 object-contain" />
+                            ) : (
+                              <div className="flex h-48 items-center justify-center rounded-xl bg-[#fef3c7] text-sm text-[#92400e]">Génération du QR…</div>
+                            )}
+                            <div className="mt-3 rounded-xl bg-[#fefce8] p-3 text-xs text-[#92400e] break-all">
+                              {tokenData.token}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-md border border-gray-200 mt-4">
                   <input type="checkbox" checked={acceptCGV} onChange={(e) => setAcceptCGV(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-[#F68B1E]" />
