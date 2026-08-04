@@ -97,6 +97,18 @@ export default function Checkout() {
   const getShippingLabel = () => shippingMethods.find((method) => method.value === shippingMethod)?.label || 'Livraison standard';
 
   useEffect(() => {
+    // Check URL parameters if redirected back from FedaPay return_url
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlStatus = (urlParams.get('status') || '').toLowerCase();
+    if (['approved', 'completed', 'paid', 'successful', 'success'].includes(urlStatus)) {
+      clearCart();
+      localStorage.removeItem('pendingFedapay');
+      localStorage.removeItem('dangoPromoCode');
+      toast.success('Paiement réussi ! Votre commande a été enregistrée.');
+      navigate('/', { replace: true });
+      return;
+    }
+
     // If we returned from FedaPay with a pending transaction, poll its status
     let pollId;
     const pendingRaw = localStorage.getItem('pendingFedapay');
@@ -108,22 +120,22 @@ export default function Checkout() {
             try {
               const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`);
               const data = await res.json();
-              if (res.ok && (data.status === 'approved' || data.status === 'completed' || data.status === 'paid')) {
-                // Payment confirmed: clear client cart and remove pending
+              const txStatus = (data.status || data.data?.status || '').toLowerCase();
+              if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(txStatus)) {
+                // Payment confirmed: clear cart, promo, pending transaction & redirect to home
                 clearCart();
                 localStorage.removeItem('pendingFedapay');
-                toast.success('Paiement confirmé — votre commande est en cours de traitement.');
-                navigate('/mes-commandes');
+                localStorage.removeItem('dangoPromoCode');
+                toast.success('Paiement réussi ! Votre commande a été enregistrée.');
+                navigate('/', { replace: true });
                 if (pollId) clearInterval(pollId);
               }
             } catch (err) {
               console.error('Error checking Fedapay transaction status', err);
             }
           };
-          // Run immediately then every 3s for up to ~20 times
           check();
           pollId = setInterval(check, 3000);
-          // stop after 2 minutes
           setTimeout(() => { if (pollId) clearInterval(pollId); }, 2 * 60 * 1000);
         }
       } catch (e) {

@@ -43,7 +43,8 @@ const Orders = () => {
   const [periodFilter, setPeriodFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [expanded, setExpanded] = useState(null);
-  const [qrModal, setQrModal] = useState({ open: false, images: [], tokens: [], orderId: null });
+  const [qrData, setQrData] = useState({});
+  const [qrLoading, setQrLoading] = useState({});
 
   const filtered = useMemo(() => {
     let list = Array.isArray(orders) ? orders.slice() : [];
@@ -64,6 +65,8 @@ const Orders = () => {
   }, [orders, statusFilter, query, sortBy]);
 
   const loadQrForOrder = async (orderId) => {
+    if (qrData[orderId]) return; // already loaded
+    setQrLoading((s) => ({ ...s, [orderId]: true }));
     try {
       const token = localStorage.getItem('dangoToken');
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
@@ -76,10 +79,12 @@ const Orders = () => {
         try { images.push({ token: t.token, img: await QRCode.toDataURL(String(t.token), { width: 300 }) }); }
         catch (e) { console.error('QR gen', e); }
       }));
-      setQrModal({ open: true, images, tokens: qrTokens, orderId });
+      setQrData((s) => ({ ...s, [orderId]: { images, tokens: qrTokens } }));
     } catch (err) {
       console.error('loadQrForOrder', err);
-      setQrModal({ open: true, images: [], tokens: [], orderId, error: err.message });
+      setQrData((s) => ({ ...s, [orderId]: { images: [], tokens: [], error: err.message } }));
+    } finally {
+      setQrLoading((s) => ({ ...s, [orderId]: false }));
     }
   };
 
@@ -199,26 +204,56 @@ const Orders = () => {
 
               {/* Actions */}
               <div className="mt-3 flex items-center gap-3">
-                <button onClick={()=> setExpanded(expanded===order._id?null:order._id)} className="px-3 py-1 bg-gray-100 rounded">Voir les détails</button>
-                <button onClick={()=> downloadInvoice(order._id)} className="px-3 py-1 bg-gray-100 rounded">Télécharger la facture</button>
-                <button onClick={()=> loadQrForOrder(order._id)} className="px-3 py-1 bg-gray-100 rounded">Afficher le QR Code</button>
-                <button onClick={()=> alert('Contacter le support via centre d\'aide')} className="px-3 py-1 bg-gray-100 rounded">Contacter le support</button>
+                <button
+                  onClick={() => {
+                    const next = expanded === order._id ? null : order._id;
+                    setExpanded(next);
+                    if (next) loadQrForOrder(order._id);
+                  }}
+                  className="px-4 py-2 bg-[#FF6B00] text-white font-bold text-xs rounded-lg shadow-sm hover:bg-[#e05e00] transition"
+                >
+                  {expanded === order._id ? 'Fermer' : 'Détails & QR Code'}
+                </button>
+                <button onClick={() => downloadInvoice(order._id)} className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs rounded-lg hover:bg-gray-200">
+                  Télécharger la facture
+                </button>
               </div>
 
               {expanded === order._id && (
-                <div className="mt-4 bg-gray-50 p-3 rounded">
-                  <h4 className="font-semibold">Timeline</h4>
-                  <ul className="text-sm text-gray-600 mt-2 space-y-2">
-                    <li>Commande créée — {new Date(order.createdAt).toLocaleString('fr-FR')}</li>
-                    {order.paymentDate && <li>Paiement confirmé — {new Date(order.paymentDate).toLocaleString('fr-FR')}</li>}
-                    {order.updatedAt && <li>Dernière mise à jour — {new Date(order.updatedAt).toLocaleString('fr-FR')}</li>}
-                  </ul>
-                  <div className="mt-3 text-sm">
-                    <div>Sous-total: {formatCurrency(order.subtotal||0)} FCFA</div>
-                    <div>Livraison: {formatCurrency(order.shippingCost||0)} FCFA</div>
-                    <div>Réduction: {formatCurrency(order.discount||0)} FCFA</div>
-                    <div className="font-bold">Montant payé: {formatCurrency(order.total||order.totalPrice||0)} FCFA</div>
-                    <div>Référence FedaPay: {order.paymentReference || order.transactionId || '-'}</div>
+                <div className="mt-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl space-y-4">
+                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">Détails de la commande</h4>
+                  
+                  <div className="text-sm space-y-1 text-gray-600 dark:text-gray-300">
+                    <div><strong>Date de création :</strong> {new Date(order.createdAt || order.date).toLocaleString('fr-FR')}</div>
+                    {order.paymentDate && <div><strong>Paiement confirmé :</strong> {new Date(order.paymentDate).toLocaleString('fr-FR')}</div>}
+                    <div><strong>Sous-total :</strong> {formatCurrency(order.subtotal || 0)} FCFA</div>
+                    <div><strong>Livraison :</strong> {formatCurrency(order.shippingCost || 0)} FCFA</div>
+                    <div><strong>Réduction :</strong> {formatCurrency(order.discount || 0)} FCFA</div>
+                    <div className="font-bold text-gray-900 dark:text-white"><strong>Montant total :</strong> {formatCurrency(order.total || order.totalPrice || 0)} FCFA</div>
+                  </div>
+
+                  {/* Integrated QR Code Section */}
+                  <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <h5 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Code QR de livraison / retrait</h5>
+                    {qrLoading[order._id] ? (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        Chargement du QR code...
+                      </div>
+                    ) : qrData[order._id]?.images?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {qrData[order._id].images.map((q, i) => (
+                          <div key={i} className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col items-center text-center">
+                            <img src={q.img} alt={`QR Code ${i}`} className="w-48 h-48 object-contain mb-2" />
+                            <p className="text-xs text-emerald-600 font-bold mt-1">Présentez ce QR code au vendeur lors du retrait</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : qrData[order._id]?.error ? (
+                      <p className="text-xs text-red-500">{qrData[order._id].error}</p>
+                    ) : (
+                      <p className="text-xs text-gray-400">Aucun QR code disponible pour cette commande.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -226,25 +261,7 @@ const Orders = () => {
           ))) }
         </div>
 
-        {/* QR Modal */}
-        {qrModal.open && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 p-4 rounded max-w-2xl w-full">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-bold">QR Codes</h3>
-                <button onClick={()=>setQrModal({open:false,images:[],tokens:[],orderId:null})}>Fermer</button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {qrModal.images.length ? qrModal.images.map((q, i)=> (
-                  <div key={i} className="p-2 bg-gray-50 rounded text-center">
-                    <img src={q.img} alt={`qr-${i}`} className="mx-auto" />
-                    <div className="text-xs text-gray-500 mt-2">Token: {q.token}</div>
-                  </div>
-                )) : (<div>Aucun QR disponible</div>)}
-              </div>
-            </div>
-          </div>
-        )}
+
 
       </main>
       <Footer />
