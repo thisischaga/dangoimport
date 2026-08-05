@@ -50,12 +50,15 @@ export default function Checkout() {
   const [preview, setPreview] = useState(null);
   const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [shippingMethod, setShippingMethod] = useState('standard');
-  const [paymentMethod, setPaymentMethod] = useState('mobile_money');
+  const [paymentMethod, setPaymentMethod] = useState('fedapay');
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [qrTokens, setQrTokens] = useState([]);
   const [qrImages, setQrImages] = useState({});
   const [showQrPanel, setShowQrPanel] = useState(false);
+  const [pendingFedapay, setPendingFedapay] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrError, setQrError] = useState(null);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -100,35 +103,63 @@ export default function Checkout() {
     // Check URL parameters if redirected back from FedaPay return_url
     const urlParams = new URLSearchParams(window.location.search);
     const urlStatus = (urlParams.get('status') || '').toLowerCase();
+    const pendingRawFromStorage = localStorage.getItem('pendingFedapay');
     if (['approved', 'completed', 'paid', 'successful', 'success'].includes(urlStatus)) {
-      clearCart();
-      localStorage.removeItem('pendingFedapay');
-      localStorage.removeItem('dangoPromoCode');
-      toast.success('Paiement réussi ! Votre commande a été enregistrée.');
-      navigate('/', { replace: true });
-      return;
+      if (!pendingRawFromStorage) {
+        clearCart();
+        localStorage.removeItem('dangoPromoCode');
+        toast.success('Paiement réussi ! Votre commande a été enregistrée.');
+        navigate('/', { replace: true });
+        return;
+      }
+      toast.success('Paiement reçu, validation en cours...');
     }
 
     // If we returned from FedaPay with a pending transaction, poll its status
     let pollId;
-    const pendingRaw = localStorage.getItem('pendingFedapay');
-    if (pendingRaw) {
+    if (pendingRawFromStorage) {
       try {
-        const pending = JSON.parse(pendingRaw);
+        const pending = JSON.parse(pendingRawFromStorage);
         if (pending && pending.transactionId) {
           const check = async () => {
             try {
-              const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`);
+              const token = localStorage.getItem('dangoToken');
+              const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
               const data = await res.json();
               const txStatus = (data.status || data.data?.status || '').toLowerCase();
+              const orderId = data.data?.orderId || data.data?.order_id || null;
               if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(txStatus)) {
-                // Payment confirmed: clear cart, promo, pending transaction & redirect to home
-                clearCart();
-                localStorage.removeItem('pendingFedapay');
-                localStorage.removeItem('dangoPromoCode');
-                toast.success('Paiement réussi ! Votre commande a été enregistrée.');
-                navigate('/', { replace: true });
-                if (pollId) clearInterval(pollId);
+                if (orderId) {
+                  let tokens = [];
+                  try {
+                    setQrLoading(true);
+                    setQrError(null);
+                    const qrResponse = await fetchOrderQrTokens(orderId, token);
+                    tokens = qrResponse.data?.qrTokens || [];
+                    setQrTokens(tokens);
+                    if (tokens.length) {
+                      setShowQrPanel(true);
+                      setStep(5);
+                    }
+                  } catch (qrErr) {
+                    console.error('Unable to fetch QR tokens after payment', qrErr);
+                    setQrError(qrErr.message || 'Erreur lors de la récupération du QR.');
+                  } finally {
+                    setQrLoading(false);
+                  }
+
+                  clearCart();
+                  localStorage.removeItem('pendingFedapay');
+                  localStorage.removeItem('dangoPromoCode');
+                  if (tokens.length === 0) {
+                    toast.error('Paiement reçu, mais aucun code QR n’a pu être généré pour le moment.');
+                  }
+                  if (pollId) clearInterval(pollId);
+                } else {
+                  console.log('FedaPay approved, waiting for order creation/webhook to attach orderId');
+                }
               }
             } catch (err) {
               console.error('Error checking Fedapay transaction status', err);
@@ -143,6 +174,18 @@ export default function Checkout() {
       }
     }
     const token = localStorage.getItem('dangoToken');
+    const pendingRaw = localStorage.getItem('pendingFedapay');
+    if (pendingRaw) {
+      try {
+        const pending = JSON.parse(pendingRaw);
+        if (pending && pending.transactionId) {
+          setPendingFedapay(pending);
+        }
+      } catch (e) {
+        console.error('pendingFedapay parse error', e);
+      }
+    }
+
     if (!token) {
       redirectToLogin();
       return;
