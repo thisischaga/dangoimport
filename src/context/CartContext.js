@@ -95,6 +95,12 @@ export const CartProvider = ({ children }) => {
     toast.info('Panier vidé');
   }, []);
 
+  const restoreCart = useCallback((items) => {
+    setCart(items || []);
+    localStorage.setItem('dangoCart', JSON.stringify(items || []));
+    toast.info('Panier restauré');
+  }, []);
+
   const cartCount = useMemo(
     () => cart.reduce((n, item) => n + (item.quantity || 1), 0),
     [cart]
@@ -144,6 +150,7 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       updateQuantity,
       clearCart,
+      restoreCart,
       cartCount,
       subtotal,
       savings,

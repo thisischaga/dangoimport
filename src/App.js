@@ -35,6 +35,7 @@ import Shop from './pages/Shop';
 import CategoryPage from './pages/CategoryPage';
 import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
+import PaymentResult from './pages/PaymentResult';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToastProvider } from './components/ui/ToastProvider';
@@ -70,6 +71,7 @@ function getPageTitle(pathname) {
     { regex: /^\/sourcing\/form$/, title: 'Formulaire de sourcing' },
     { regex: /^\/cart$/, title: 'Panier' },
     { regex: /^\/checkout$/, title: 'Paiement' },
+    { regex: /^\/checkout\/result$/, title: 'Résultat de paiement' },
     { regex: /^\/checkout-sourcing$/, title: 'Checkout sourcing' },
     { regex: /^\/login$/, title: 'Connexion' },
     { regex: /^\/register$/, title: 'Inscription' },
@@ -181,6 +183,7 @@ function App() {
                   <Route path='/store/:slug' element={<StoreRedirect />} />
                   <Route path='/cart' element={<CartPage/>}/>
                   <Route path='/checkout' element={<Checkout/>}/>
+                  <Route path='/checkout/result' element={<PaymentResult/>}/>
                   <Route path='/checkout-sourcing' element={<SourcingForm/>}/>
 
                   <Route path='/login' element={<Login/>}/>

@@ -103,14 +103,17 @@ export default function Checkout() {
     const urlStatus = (urlParams.get('status') || '').toLowerCase();
     const pendingRawFromStorage = localStorage.getItem('pendingFedapay');
     if (['approved', 'completed', 'paid', 'successful', 'success'].includes(urlStatus)) {
-      if (!pendingRawFromStorage) {
-        clearCart();
-        localStorage.removeItem('dangoPromoCode');
-        toast.success('Paiement réussi ! Votre commande a été enregistrée.');
-        navigate('/', { replace: true });
-        return;
-      }
-      toast.success('Paiement reçu, validation en cours...');
+      const pending = pendingRawFromStorage ? JSON.parse(pendingRawFromStorage) : null;
+      const txId = pending?.transactionId || urlParams.get('transactionId');
+      navigate(`/checkout/result?status=success${txId ? `&transactionId=${encodeURIComponent(txId)}` : ''}`, { replace: true });
+      return;
+    }
+
+    if (['failed', 'cancelled', 'error'].includes(urlStatus)) {
+      const pending = pendingRawFromStorage ? JSON.parse(pendingRawFromStorage) : null;
+      const txId = pending?.transactionId || urlParams.get('transactionId');
+      navigate(`/checkout/result?status=failed${txId ? `&transactionId=${encodeURIComponent(txId)}` : ''}`, { replace: true });
+      return;
     }
 
     // If we returned from FedaPay with a pending transaction, poll its status
@@ -341,8 +344,13 @@ export default function Checkout() {
           autoClose: 2000,
         });
 
-        // Persist pending transaction so we can resume after redirect
-        try { localStorage.setItem('pendingFedapay', JSON.stringify({ transactionId: data.transactionId, localTransactionId: data.localTransactionId })); } catch(e) { /* ignore */ }
+        try {
+          localStorage.setItem('pendingFedapay', JSON.stringify({ transactionId: data.transactionId, localTransactionId: data.localTransactionId }));
+          localStorage.setItem('pendingFedapayCartBackup', JSON.stringify(cartItems));
+        } catch (e) {
+          console.warn('Impossible de sauvegarder le panier de secours', e);
+        }
+
         window.location.href = data.url;
         return;
       }
