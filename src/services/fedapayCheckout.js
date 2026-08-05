@@ -96,8 +96,8 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
     };
 }
 
-export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode, description, type }) {
-    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type });
+export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, network, fedapayPhone, countryCode, description, type, promoCode }) {
+    const base = buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type, promoCode });
     // Ensure items are included so backend can validate and build order
     const mappedItems = Array.isArray(cartItems) ? cartItems.map((i) => ({
         productId: i._id || i.id,
@@ -127,7 +127,7 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
         callback_url: window.location.origin + '/checkout',
         amount: total,
         currency: 'XOF',
-        description: description || `Commande Dango Import - ${productNames}`,
+        description: description || `Commande Dango Import - ${base.productSummary}`,
         shippingMethod: shippingLabel || 'standard',
         promoCode: promoCode || '',
         total,
