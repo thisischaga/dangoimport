@@ -119,8 +119,8 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
     return {
         ...base,
         customer: {
-          firstname: form.firstName || 'Client',
-          lastname: form.lastName || 'Dango',
+          firstname: (form.firstName || 'Client').trim(),
+          lastname: (form.lastName || 'Dango').trim(),
           email: form.email,
           phone: fedapayPhone || form.phone,
         },

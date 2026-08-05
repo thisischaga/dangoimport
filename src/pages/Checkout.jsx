@@ -521,7 +521,13 @@ export default function Checkout() {
 
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => navigate('/cart')} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour au panier</button>
-                  <button onClick={handlePlaceOrder} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
+                  <button
+                    onClick={handlePlaceOrder}
+                    disabled={submitting}
+                    className={`flex-1 font-black py-3 rounded-md transition ${submitting ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white'}`}
+                  >
+                    {submitting ? 'Redirection...' : 'Suivant'}
+                  </button>
                 </div>
               </section>
           </div>
