@@ -66,12 +66,20 @@ export async function checkFedapayTransactionStatus(transactionId) {
     return data;
 }
 
+const normalizeCountryName = (value) => {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (['togo', 'tg'].includes(normalized)) return 'Togo';
+    if (['benin', 'bénin', 'bj'].includes(normalized)) return 'Bénin';
+    return 'Bénin';
+};
+
 function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type }) {
     const productNames = cartItems.map((i) => i.name).join(', ');
     const vendorName = [...new Set(cartItems.map((i) => i.vendorName).filter(Boolean))].join(', ') || 'Dango Import';
     const totalQty = cartItems.reduce((sum, i) => sum + i.quantity, 0);
     const phoneDigits = String(form.phone || '').replace(/\D/g, '');
     const phoneAsNumber = parseInt(phoneDigits.slice(-8), 10) || 97000000;
+    const selectedCountry = normalizeCountryName(form.country);
 
     return {
         userName: `${form.firstName} ${form.lastName}`.trim(),
@@ -80,7 +88,7 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
         productQuantity: totalQty,
         picture: cartItems.find((i) => i.image)?.image || 'https://www.dangoimport.com/logo.png',
         userPref: form.instructions || form.address,
-        selectedCountry: form.country || 'Benin',
+        selectedCountry,
         lat: form.lat || 6.37,
         lng: form.lng || 2.43,
         deliveryFee: shippingFee,
@@ -117,7 +125,7 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
           phone: fedapayPhone || form.phone,
         },
         shippingAddress: {
-          country: form.country || 'Togo',
+          country: normalizeCountryName(form.country),
           city: form.city || '',
           neighborhood: form.neighborhood || '',
           fullAddress: form.fullAddress || '',

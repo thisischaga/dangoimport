@@ -481,7 +481,6 @@ export default function Checkout() {
                     <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm bg-white">
                       <option>Togo</option>
                       <option>Bénin</option>
-                      <option>Côte d’Ivoire</option>
                     </select>
                     {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
                   </div>
