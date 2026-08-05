@@ -7,7 +7,7 @@ export async function initiateFedapayCheckout(payload, token) {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await fetch(`${API_BASE_URL}/api/fedapay/checkout`, {
+    const response = await fetch(`${API_BASE_URL}/api/payments/create`, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -110,10 +110,33 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
 
     return {
         ...base,
-        userNumber: fedapayPhone || form.phone,
-        network: network,
-        countryCode: countryCode || 'BJ',
+        customer: {
+          firstname: form.firstName || 'Client',
+          lastname: form.lastName || 'Dango',
+          email: form.email,
+          phone: fedapayPhone || form.phone,
+        },
+        shippingAddress: {
+          country: form.country || 'Togo',
+          city: form.city || '',
+          neighborhood: form.neighborhood || '',
+          fullAddress: form.fullAddress || '',
+          postalCode: form.postalCode || '',
+          instructions: form.instructions || '',
+        },
+        callback_url: window.location.origin + '/checkout',
+        amount: total,
+        currency: 'XOF',
+        description: description || `Commande Dango Import - ${productNames}`,
+        shippingMethod: shippingLabel || 'standard',
+        promoCode: promoCode || '',
+        total,
         paymentMethod: 'FedaPay',
+        custom_metadata: {
+          type: type || 'cart',
+          cartSource: 'frontend',
+          items: mappedItems,
+        },
         // Backwards-compatible fields expected by server
         cartItems: mappedItems,
         items: mappedItems,

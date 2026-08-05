@@ -41,10 +41,8 @@ export default function Checkout() {
     navigate('/login', { state: { from: '/checkout' } });
   }, [clearSession, navigate]);
 
-  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
   const [acceptCGV, setAcceptCGV] = useState(false);
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(null);
@@ -124,12 +122,13 @@ export default function Checkout() {
           const check = async () => {
             try {
               const token = localStorage.getItem('dangoToken');
-              const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`, {
+              const res = await fetch(`${API_BASE_URL}/api/payments/verify/${pending.transactionId}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
               });
               const data = await res.json();
-              const txStatus = (data.status || data.data?.status || '').toLowerCase();
-              const orderId = data.data?.orderId || data.data?.order_id || null;
+              const statusValue = (data.data?.local?.status || data.data?.remote?.status || '').toLowerCase();
+              const txStatus = statusValue;
+              const orderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
               if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(txStatus)) {
                 if (orderId) {
                   let tokens = [];
@@ -141,7 +140,6 @@ export default function Checkout() {
                     setQrTokens(tokens);
                     if (tokens.length) {
                       setShowQrPanel(true);
-                      setStep(5);
                     }
                   } catch (qrErr) {
                     console.error('Unable to fetch QR tokens after payment', qrErr);
@@ -311,7 +309,6 @@ export default function Checkout() {
     }
 
     if (!validateStep1()) {
-      setStep(1);
       return;
     }
 
@@ -429,7 +426,6 @@ export default function Checkout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            {step === 1 && (
               <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-5">
                   <MapPin />
@@ -511,181 +507,24 @@ export default function Checkout() {
                     <label className="block text-xs font-bold text-gray-700 mb-2">Instructions de livraison</label>
                     <textarea rows="3" value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
                   </div>
+                  <div className="md:col-span-2 flex items-start gap-3 mt-4">
+                    <label className="flex items-center gap-3 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={acceptCGV}
+                        onChange={(e) => setAcceptCGV(e.target.checked)}
+                        className="h-4 w-4 text-[#F68B1E] border-gray-300 rounded"
+                      />
+                      <span>J’accepte les conditions générales de vente (CGV)</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => navigate('/cart')} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour au panier</button>
-                  <button onClick={() => { if (validateStep1()) setStep(2); }} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
+                  <button onClick={handlePlaceOrder} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
                 </div>
               </section>
-            )}
-
-            {step === 2 && (
-              <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <Truck />
-                  <h2 className="text-xl font-black text-[#282828]">2. Mode de livraison</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {shippingMethods.map((method) => (
-                    <button
-                      key={method.value}
-                      onClick={() => setShippingMethod(method.value)}
-                      className={`text-left p-4 border rounded-xl transition ${
-                        shippingMethod === method.value ? 'border-[#F68B1E] bg-orange-50' : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <p className="text-sm font-black text-[#282828]">{method.label}</p>
-                      <p className="text-xs text-gray-500 mt-1">{method.helper}</p>
-                      <p className="text-xs text-[#F68B1E] mt-2 font-bold">{method.fee}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button onClick={() => setStep(1)} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour</button>
-                  <button onClick={() => setStep(3)} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
-                </div>
-              </section>
-            )}
-
-            {step === 3 && (
-              <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <CreditCard />
-                  <h2 className="text-xl font-black text-[#282828]">3. Paiement</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {paymentOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setPaymentMethod(option.id)}
-                      className={`text-left p-4 border rounded-xl transition ${
-                        paymentMethod === option.id ? 'border-[#F68B1E] bg-orange-50' : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <p className="text-sm font-black text-[#282828]">{option.label}</p>
-                      <p className="text-xs text-gray-500 mt-1">{option.helper}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button onClick={() => setStep(2)} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour</button>
-                  <button onClick={() => setStep(4)} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
-                </div>
-              </section>
-            )}
-
-            {step === 4 && (
-              <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-black text-[#282828]">4. Code promo</h2>
-                    <p className="text-sm text-gray-500 mt-1">Appliquez un code valable avant de confirmer.</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="EX: DANGO10" className="px-3 py-2.5 border rounded-md text-sm min-w-[160px]" />
-                  </div>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button onClick={() => setStep(3)} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour</button>
-                  <button onClick={() => setStep(5)} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">Suivant</button>
-                </div>
-              </section>
-            )}
-
-            {step === 5 && (
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-black text-[#282828]">5. Confirmation</h2>
-                    <p className="text-sm text-gray-500 mt-1">Vérifiez les informations avant de valider la commande.</p>
-                  </div>
-                  <button onClick={() => setShowSummary((prev) => !prev)} className="bg-[#F68B1E] text-white font-black px-4 py-2 rounded-lg">
-                    {showSummary ? 'Masquer' : 'Afficher'} le détail
-                  </button>
-                </div>
-
-                {showSummary && (
-                  <div className="mt-5 rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Client</span>
-                      <span className="font-bold text-[#282828]">{form.firstName} {form.lastName}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Livraison</span>
-                      <span className="font-bold text-[#282828]">{getShippingLabel()}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Paiement</span>
-                      <span className="font-bold text-[#282828]">{paymentOptions.find((option) => option.id === paymentMethod)?.label || 'Mobile Money'}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Adresse</span>
-                      <span className="font-bold text-[#282828] text-right">{form.fullAddress || form.city}</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3 mt-5">
-                  <button onClick={() => setStep(4)} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour</button>
-                  <button onClick={handlePlaceOrder} disabled={submitting} className="flex-1 bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black py-3 rounded-md transition">
-                    {submitting ? 'Traitement...' : 'Confirmer la commande'}
-                  </button>
-                </div>
-
-                {showQrPanel && qrTokens.length > 0 && (
-                  <div className="mt-6 rounded-2xl border border-[#F68B1E]/30 bg-[#fff7ed] p-5">
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                      <div>
-                        <h3 className="text-lg font-black text-[#b45309]">QR de validation</h3>
-                        <p className="text-sm text-[#92400e] mt-1">Montrez ce code au vendeur pour qu’il puisse valider votre commande.</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => navigate('/mes-commandes')}
-                        className="rounded-full bg-[#F68B1E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e67a0c] transition"
-                      >
-                        Voir mes commandes
-                      </button>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {qrTokens.map((tokenData) => {
-                        const key = tokenData.vendorId || tokenData.vendorName || tokenData.token;
-                        return (
-                          <div key={key} className="rounded-2xl border border-[#fcd9b6] bg-white p-4 shadow-sm">
-                            <div className="flex items-center justify-between mb-3 gap-2">
-                              <div>
-                                <p className="text-sm font-semibold text-[#92400e]">{tokenData.vendorName || 'Vendeur'}</p>
-                                <p className="text-xs text-[#7c2d12]">Montant vendeur : {Number(tokenData.vendorTotal || 0).toLocaleString('fr-FR')} F</p>
-                              </div>
-                            </div>
-                            {qrImages[key] ? (
-                              <img src={qrImages[key]} alt={`QR ${tokenData.vendorName}`} className="mx-auto h-48 w-48 object-contain" />
-                            ) : (
-                              <div className="flex h-48 items-center justify-center rounded-xl bg-[#fef3c7] text-sm text-[#92400e]">Génération du QR…</div>
-                            )}
-                            <div className="mt-3 rounded-xl bg-[#fefce8] p-3 text-xs text-[#92400e] break-all">
-                              {tokenData.token}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-md border border-gray-200 mt-4">
-                  <input type="checkbox" checked={acceptCGV} onChange={(e) => setAcceptCGV(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-[#F68B1E]" />
-                  <span className="text-xs text-gray-600 leading-relaxed">Je confirme les informations et j’accepte les conditions générales de vente.</span>
-                </label>
-              </div>
-            )}
           </div>
 
           <aside className="lg:col-span-1">

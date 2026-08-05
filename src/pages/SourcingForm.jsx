@@ -159,7 +159,7 @@ const SourcingForm = () => {
 
       const callbackUrl = `${window.location.origin}/sourcing/form?paid=1&id=${requestId || ''}`;
 
-      const paymentRes = await fetch(`${API_BASE_URL}/api/payment/create`, {
+      const paymentRes = await fetch(`${API_BASE_URL}/api/payments/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
