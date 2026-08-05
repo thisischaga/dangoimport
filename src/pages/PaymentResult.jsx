@@ -32,6 +32,10 @@ const PaymentResult = () => {
     setTransactionId(transactionIdParam);
 
     const token = localStorage.getItem('dangoToken');
+    let mounted = true;
+    let timerId = null;
+    const maxAttempts = 40;
+    let attempts = 0;
 
     const restoreBackupCart = () => {
       const backupRaw = localStorage.getItem('pendingFedapayCartBackup');
@@ -49,59 +53,111 @@ const PaymentResult = () => {
       }
     };
 
-    const loadOrderResult = async () => {
-      setLoading(true);
+    const fetchQrTokensForOrder = async (currentOrderId) => {
       try {
-        let currentOrderId = orderIdParam;
-        if (!currentOrderId && transactionIdParam) {
-          const response = await fetch(`${API_BASE_URL}/api/payments/verify/${transactionIdParam}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          const data = await response.json();
-          if (response.ok) {
-            currentOrderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
-            if (currentOrderId) {
-              setOrderId(currentOrderId);
-            }
-          }
+        const qrResponse = await fetchOrderQrTokens(currentOrderId, token);
+        const tokens = qrResponse.data?.qrTokens || [];
+        setQrTokens(tokens);
+        if (!tokens.length) {
+          setMessage('Commande confirmée, mais les codes QR ne sont pas encore prêts. Nous réessayons.');
+          return false;
+        }
+        setMessage('Paiement réussi ! Vos codes QR sont prêts.');
+        return true;
+      } catch (err) {
+        console.error('Erreur de récupération des QR:', err);
+        setMessage('Commande confirmée, mais impossible de récupérer le QR pour le moment. Nouvel essai en cours.');
+        return false;
+      }
+    };
+
+    const currentTransactionId = transactionIdParam;
+    const checkOrder = async () => {
+      if (!currentTransactionId) {
+        setMessage('Aucune transaction trouvée. Vérifiez votre commande plus tard.');
+        setLoading(false);
+        return false;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/payments/verify/${currentTransactionId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('verify response error', data);
+          setMessage('Impossible de vérifier l’état du paiement. Nous réessayons.');
+          return false;
         }
 
+        const currentOrderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
         if (currentOrderId) {
-          const qrResponse = await fetchOrderQrTokens(currentOrderId, token);
-          const tokens = qrResponse.data?.qrTokens || [];
-          setQrTokens(tokens);
-          if (!tokens.length) {
-            setMessage('Paiement réussi, mais aucun QR n’a encore été généré. Nous vous contacterons dès que possible.');
-          } else {
-            setMessage('Paiement réussi ! Vos codes QR sont prêts.');
-          }
-        } else {
-          setMessage('Paiement réussi, validation de la commande en cours. Restez sur cette page quelques instants.');
+          setOrderId(currentOrderId);
+          localStorage.removeItem('pendingFedapay');
+          localStorage.removeItem('pendingFedapayCartBackup');
+          return await fetchQrTokensForOrder(currentOrderId);
         }
+
+        const remoteStatus = (data.data?.remote?.status || '').toLowerCase();
+        if (['approved', 'completed', 'paid', 'success', 'successful'].includes(remoteStatus)) {
+          setMessage('Paiement validé, la commande est en cours de création. Patientez encore quelques instants.');
+          return false;
+        }
+
+        setMessage('Vérification du paiement en cours. Patientez...');
+        return false;
       } catch (err) {
-        console.error('Erreur lors du chargement du résultat de paiement', err);
-        toast.error(err.message || 'Impossible de charger le résultat de paiement.');
-        setMessage('Impossible de charger le résultat de paiement pour le moment.');
-      } finally {
-        setLoading(false);
+        console.error('Erreur lors de la vérification de paiement', err);
+        setMessage('Erreur serveur lors de la vérification. Nouvel essai en cours.');
+        return false;
       }
+    };
+
+    const startPolling = async () => {
+      setLoading(true);
+      const poll = async () => {
+        if (!mounted) return;
+        attempts += 1;
+        const finished = await checkOrder();
+        if (finished) {
+          setLoading(false);
+          return;
+        }
+
+        if (attempts >= maxAttempts) {
+          setLoading(false);
+          setMessage('La commande met trop de temps à se valider. Vérifiez votre espace commandes ou contactez le support.');
+          return;
+        }
+
+        timerId = window.setTimeout(poll, 3000);
+      };
+      await poll();
     };
 
     if (['failed', 'cancelled', 'error'].includes(statusParam)) {
       setMessage('Le paiement a échoué ou a été annulé. Votre panier a été restauré.');
       restoreBackupCart();
       setLoading(false);
-      return;
+      return () => {
+        mounted = false;
+        if (timerId) clearTimeout(timerId);
+      };
     }
 
     if (['success', 'approved', 'completed', 'paid'].includes(statusParam)) {
       setMessage('Paiement reçu. Nous vérifions votre commande.');
-      loadOrderResult();
-      return;
+      startPolling();
+    } else {
+      setMessage('Statut de paiement en attente. Nous vérifions l’état de la transaction.');
+      startPolling();
     }
 
-    setMessage('Statut de paiement en attente. Nous vérifions l’état de la transaction.');
-    loadOrderResult();
+    return () => {
+      mounted = false;
+      if (timerId) clearTimeout(timerId);
+    };
   }, [location.search, restoreCart]);
 
   useEffect(() => {
