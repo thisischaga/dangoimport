@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import QRCode from 'qrcode';
 import API_BASE_URL from '../apiConfig';
+import { fetchOrderQrTokens } from '../services/qrService';
 
 const normalizeOrdersResponse = (responseData) => {
   if (!responseData) return [];
@@ -90,11 +91,8 @@ const Orders = () => {
     setQrLoading((s) => ({ ...s, [orderId]: true }));
     try {
       const token = localStorage.getItem('dangoToken');
-      const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-      const res = await fetch(`${API_BASE_URL}/api/qr/generate/${orderId}`, { method: 'POST', headers });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Erreur');
-      const qrTokens = data.data?.qrTokens || [];
+      const qrResponse = await fetchOrderQrTokens(orderId, token);
+      const qrTokens = qrResponse.qrTokens || [];
       const images = [];
       await Promise.all(qrTokens.map(async t => {
         try { images.push({ token: t.token, img: await QRCode.toDataURL(String(t.token), { width: 300 }) }); }

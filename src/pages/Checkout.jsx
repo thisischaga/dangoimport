@@ -139,7 +139,7 @@ export default function Checkout() {
                     setQrLoading(true);
                     setQrError(null);
                     const qrResponse = await fetchOrderQrTokens(orderId, token);
-                    tokens = qrResponse.data?.qrTokens || [];
+                    tokens = qrResponse.qrTokens || [];
                     setQrTokens(tokens);
                     if (tokens.length) {
                       setShowQrPanel(true);

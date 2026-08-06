@@ -56,7 +56,7 @@ const PaymentResult = () => {
     const fetchQrTokensForOrder = async (currentOrderId) => {
       try {
         const qrResponse = await fetchOrderQrTokens(currentOrderId, token);
-        const tokens = qrResponse.data?.qrTokens || [];
+        const tokens = qrResponse.qrTokens || [];
         setQrTokens(tokens);
         if (!tokens.length) {
           setMessage('Commande confirmée, mais les codes QR ne sont pas encore prêts. Nous réessayons.');

@@ -9,10 +9,10 @@ export async function fetchOrderQrTokens(orderId, token) {
     },
   });
 
-  const data = await response.json();
+  const payload = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'Impossible de générer le code QR.');
+    throw new Error(payload.message || 'Impossible de générer le code QR.');
   }
 
-  return data;
+  return payload.data || payload;
 }

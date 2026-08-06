@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';
 import { getProductImage } from '../utils/imageUrl';
+import { fetchOrderQrTokens } from '../services/qrService';
 
 const ClientActivity = () => {
   const [achats, setAchats] = useState([]);
@@ -46,17 +47,8 @@ const ClientActivity = () => {
     try {
       const token = localStorage.getItem('dangoToken');
       if (!token) throw new Error('Utilisateur non connecté');
-      const res = await fetch(`${API_BASE_URL}/api/qr/generate/${orderId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Erreur récupération QR');
-
-      const qrTokens = (data.data && data.data.qrTokens) || [];
+      const qrResponse = await fetchOrderQrTokens(orderId, token);
+      const qrTokens = qrResponse.qrTokens || [];
       const images = {};
       await Promise.all(qrTokens.map(async (t) => {
         try {
