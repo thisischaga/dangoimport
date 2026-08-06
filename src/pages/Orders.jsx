@@ -301,13 +301,6 @@ const Orders = () => {
                 {!isCancelled && currentStepIdx >= 0 && (
                   <div className="p-5 border-b border-gray-100 dark:border-gray-750 bg-white dark:bg-gray-800">
                     <div className="relative flex justify-between items-center max-w-2xl mx-auto my-2">
-                      {/* Connecting progress line */}
-                      <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-gray-700 z-0 rounded-full" />
-                      <div 
-                        className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-gray-900 to-[#FF6B00] z-0 rounded-full transition-all duration-500" 
-                        style={{ width: `${(currentStepIdx / (STATUS_STEPS.length - 1)) * 100}%` }}
-                      />
-                      
                       {STATUS_STEPS.map((step, idx) => {
                         const isActive = idx <= currentStepIdx;
                         const isCurrent = idx === currentStepIdx;
@@ -315,12 +308,18 @@ const Orders = () => {
                           <div key={idx} className="flex flex-col items-center z-10">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition duration-300 border-2 ${
                               isActive 
-                                ? (isCurrent ? 'bg-[#FF6B00] border-[#FF6B00] text-white ring-4 ring-orange-500/20' : 'bg-gray-900 border-gray-900 text-white')
+                                ? (isCurrent ? 'bg-[#FF6B00] text-white' : 'bg-gray-900 text-white')
                                 : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
                             }`}>
                               {isActive && idx < currentStepIdx ? <Check className="w-4 h-4 stroke-[3px]" /> : <span>{idx + 1}</span>}
                             </div>
-                            <span className={`text-[10px] md:text-xs font-bold mt-2 tracking-tight ${isActive ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <span
+                              className={`text-[10px] md:text-xs font-bold mt-2 no-underline ${
+                                isActive
+                                  ? 'text-gray-800 dark:text-gray-200'
+                                  : 'text-gray-400 dark:text-gray-500'
+                              }`}
+                            >
                               {step.label}
                             </span>
                           </div>

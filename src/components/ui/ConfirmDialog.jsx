@@ -83,20 +83,24 @@ function ConfirmDialog({ title, message, confirmText, cancelText, danger, onConf
         role="dialog"
         aria-modal="true"
         style={{
-          position: 'fixed', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: 'fixed', inset: 0,
           zIndex: 99999,
-          width: '100%',
-          maxWidth: 420,
-          padding: '0 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
           boxSizing: 'border-box',
+          pointerEvents: 'none',
         }}
       >
         <div style={{
+          width: '100%',
+          maxWidth: 420,
           background: '#fff',
           borderRadius: 6,
           boxShadow: '0 20px 60px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(15, 23, 42, 0.05)',
           overflow: 'hidden',
+          pointerEvents: 'auto',
         }}>
           {/* Header */}
           <div style={{ padding: '24px 24px 0' }}>
