@@ -1,29 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { FaChevronRight } from 'react-icons/fa';
+import client from '../apiClient';
 
-const CATEGORIES = [
-  { name: 'Électronique', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80', desc: 'Smartphones, laptops, accessoires high-tech' },
-  { name: 'Beauté & Parfums', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80', desc: 'Cosmétiques, parfums, soins de luxe' },
-  { name: 'Maison & Déco', image: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=400&q=80', desc: 'Meubles, décoration, art de vivre' },
-  { name: 'Mode & Textile', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&q=80', desc: 'Vêtements, chaussures, accessoires' },
-  { name: 'Sport & Loisirs', image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&q=80', desc: 'Équipements sportifs, fitness, plein air' },
-  { name: 'Livres & Culture', image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&q=80', desc: 'Livres, musique, éducation' },
-  { name: 'Alimentation', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80', desc: 'Produits alimentaires, épices, boissons' },
-  { name: 'Enfants & Jouets', image: 'https://images.unsplash.com/photo-1555505019-8c3f1c4aba5f?w=400&q=80', desc: 'Jouets, vêtements bébé, puériculture' },
-  { name: 'Sacs & Maroquinerie', image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80', desc: 'Sacs à main, valises, porte-monnaie' },
-  { name: 'Agriculture', image: 'https://images.unsplash.com/photo-1586771107445-d3afbf0a6ddb?w=400&q=80', desc: 'Intrants agricoles, outillage, semences' },
-  { name: 'Jeux Vidéo', image: 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?w=400&q=80', desc: 'Consoles, jeux, accessoires gaming' },
-  { name: 'Auto & Moto', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80', desc: 'Pièces détachées, accessoires véhicules' },
-  { name: 'Bijoux & Montres', image: 'https://images.unsplash.com/photo-1515562141207-7a8f73b5cb11?w=400&q=80', desc: 'Bijoux, montres, accessoires précieux' },
-  { name: 'TV & Électroménager', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80', desc: 'Téléviseurs, réfrigérateurs, machines à laver' },
-  { name: 'Logistique & Transport', image: 'https://images.unsplash.com/photo-1586528116311-ad8ed7c663c0?w=400&q=80', desc: 'Services de transport, logistique B2B' },
-  { name: 'Événements', image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&q=80', desc: 'Articles de fête, mariages, sonorisation' },
-];
+const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80';
 
 export default function AllCategories() {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCategories() {
+      try {
+        setLoading(true);
+        const res = await client.get('/categories');
+        const fetched = Array.isArray(res?.data?.data) ? res.data.data : [];
+        if (isMounted) {
+          setCategories(fetched);
+          setError('');
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('Impossible de charger les catégories.');
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadCategories();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--color-layer-background-dim)] dark:bg-[#0f1115]">
@@ -48,33 +62,40 @@ export default function AllCategories() {
 
         {/* Category Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.name}
-              type="button"
-              onClick={() => navigate(`/shopping?category=${encodeURIComponent(cat.name)}`)}
-              className="group flex items-center gap-4 bg-white dark:bg-[#1e2130] rounded-xl border border-[var(--color-outline)] dark:border-gray-800 p-3 text-left transition-all duration-200 hover:border-[var(--color-accent-primary)] hover:shadow-md"
-            >
-              {/* Utilisation d'une image au lieu d'une icône */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 shadow-sm bg-gray-100">
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex-1 min-w-0 pr-2">
-                <p className="font-black text-[var(--color-on-layer-on-layer-primary)] dark:text-white text-[15px] sm:text-[16px] leading-tight group-hover:text-[var(--color-accent-primary)] transition-colors">
-                  {cat.name}
-                </p>
-                <p className="text-[var(--pc-caption-font-size)] text-[var(--color-on-layer-on-layer-tertiary)] mt-1 line-clamp-2">
-                  {cat.desc}
-                </p>
-              </div>
-              <FaChevronRight size={12} className="text-[var(--color-on-layer-on-layer-tertiary)] group-hover:text-[var(--color-accent-primary)] shrink-0 transition-colors mr-2" />
-            </button>
-          ))}
+          {loading ? (
+            <div className="col-span-full rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">Chargement des catégories...</div>
+          ) : error ? (
+            <div className="col-span-full rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">{error}</div>
+          ) : categories.length === 0 ? (
+            <div className="col-span-full rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">Aucune catégorie disponible pour le moment.</div>
+          ) : (
+            categories.map((cat) => (
+              <button
+                key={cat._id || cat.slug || cat.name}
+                type="button"
+                onClick={() => navigate(`/category/${cat.slug}`)}
+                className="group flex items-center gap-4 bg-white dark:bg-[#1e2130] rounded-xl border border-[var(--color-outline)] dark:border-gray-800 p-3 text-left transition-all duration-200 hover:border-[var(--color-accent-primary)] hover:shadow-md"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 shadow-sm bg-gray-100">
+                  <img 
+                    src={cat.image || DEFAULT_CATEGORY_IMAGE} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 pr-2">
+                  <p className="font-black text-[var(--color-on-layer-on-layer-primary)] dark:text-white text-[15px] sm:text-[16px] leading-tight group-hover:text-[var(--color-accent-primary)] transition-colors">
+                    {cat.name}
+                  </p>
+                  <p className="text-[var(--pc-caption-font-size)] text-[var(--color-on-layer-on-layer-tertiary)] mt-1 line-clamp-2">
+                    {cat.description || 'Découvrez les produits de cette catégorie.'}
+                  </p>
+                </div>
+                <FaChevronRight size={12} className="text-[var(--color-on-layer-on-layer-tertiary)] group-hover:text-[var(--color-accent-primary)] shrink-0 transition-colors mr-2" />
+              </button>
+            ))
+          )}
         </div>
 
         {/* CTA */}

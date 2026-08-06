@@ -10,16 +10,31 @@ import { memo } from 'react';
 import logo from '../images/logo.jpeg';
 import fedapayLogo from '../images/fedapay.jfif'
 
-const FooterColumn = ({ title, links }) => (
+const FooterColumn = ({ title, links = [] }) => (
   <div>
-    <h4 className="text-sm font-bold text-[#111] mb-4">{title}</h4>
+    <h4 className="text-sm font-bold text-[#111] mb-4">
+      {title}
+    </h4>
+
     <ul className="space-y-2">
-      {links.map((l) => (
-        <li key={l.label}>
-          {l.to ? (
-            <Link to={l.to} className="text-sm text-[#374151] hover:text-[#F68B1E] transition-colors block" aria-label={l.label}>{l.label}</Link>
+      {links.map((link) => (
+        <li key={link.label}>
+          {link.external ? (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[#374151] hover:text-[#F68B1E] transition-colors block"
+            >
+              {link.label}
+            </a>
           ) : (
-            <span className="text-sm text-[#374151]">{l.label}</span>
+            <Link
+              to={link.to}
+              className="text-sm text-[#374151] hover:text-[#F68B1E] transition-colors block"
+            >
+              {link.label}
+            </Link>
           )}
         </li>
       ))}
@@ -58,30 +73,35 @@ const Footer = () => {
 
   const columns = useMemo(() => ({
     marketplace: [
-      { label: 'Accueil', to: '/' },
-      { label: 'Produits', to: '/shopping' },
-      { label: 'Promotions', to: '/promotions' },
-      { label: 'Nouveautés', to: '/nouveautes' },
-      { label: 'Meilleures ventes', to: '/best-sellers' },
+      { label: "Accueil", to: "/" },
+      { label: "Produits", to: "/shopping" },
+      { label: "Promotions", to: "/promotions" },
+      { label: "Nouveautés", to: "/nouveautes" },
+      { label: "Meilleures ventes", to: "/best-sellers" },
     ],
+
     sellers: [
-      { label: 'Ouvrir une boutique', to: '/seller' },
+      {
+        label: "Portail vendeur",
+        href: "https://seller.dangoimport.com",
+        external: true,
+      },
+
     ],
+
     support: [
-      { label: 'Centre d\'aide', to: '/centre-aide' },
-      { label: 'FAQ', to: '/faq' },
-      { label: 'Contact', to: '/contact' },
-      { label: 'Livraison', to: '/livraison' },
-      
+      { label: "Centre d'aide", to: "/centre-aide" },
+      { label: "FAQ", to: "/faq" },
+      { label: "Contact", to: "/contact" },
+      { label: "Livraison", to: "/livraison" },
     ],
 
     legal: [
-      { label: 'Conditions générales', to: '/cgu' },
-      { label: 'Politique de confidentialité', to: '/politique-confidentialite' },
-      { label: 'Retours', to: '/retours' },
-      { label: 'Politique de remboursement', to: '/refund-policy' },
-      { label: 'Mentions légales', to: '/mentions-legales' },
-      
+      { label: "Conditions générales", to: "/cgu" },
+      { label: "Politique de confidentialité", to: "/politique-confidentialite" },
+      { label: "Retours", to: "/retours" },
+      { label: "Politique de remboursement", to: "/refund-policy" },
+      { label: "Mentions légales", to: "/mentions-legales" },
     ],
   }), []);
 

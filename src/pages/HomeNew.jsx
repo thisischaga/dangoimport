@@ -8,6 +8,7 @@ import {
   Store,
   UserRound,
   BadgeCheck as BadgeCheckAlt,
+  Filter,
 } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import ProductGrid from '../components/product/ProductGrid';
@@ -63,6 +64,7 @@ function HomeNew({ cartCount: cartCountProp }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const searchQuery = new URLSearchParams(location.search).get('q')?.trim() || '';
 
   useEffect(() => {
@@ -121,7 +123,7 @@ function HomeNew({ cartCount: cartCountProp }) {
   const popularStores = useMemo(() => {
     return Array.from(
       products.reduce((map, product) => {
-        const sellerName = product.sellerName || 'Vendeur indépendant';
+        const sellerName = product.sellerName || 'dangoimport';
         if (!map.has(sellerName)) {
           map.set(sellerName, {
             sellerName,
@@ -177,19 +179,29 @@ function HomeNew({ cartCount: cartCountProp }) {
         <section style={{ background: '#f6f6f7', paddingBottom: '0' }}>
           
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" style={{ paddingTop: '32px', paddingBottom: '0' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
               <div>
                 <p style={{ color: '#FF6B00', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>{searchQuery ? 'Résultats' : 'Sélection'}</p>
                 <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f0f0f', margin: 0 }}>
                   {searchQuery ? `Produits pour «${searchQuery}»` : 'Produits tendance'}
                 </h2>
               </div>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full bg-[#FF6B00] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e75b00] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/50 cursor-pointer"
+                style={{ cursor: 'pointer' }}
+              >
+                <Filter size={16} /> Filtres avancés
+              </button>
             </div>
           </div>
           <ProductGrid
             products={allProducts}
             loading={loading}
             onAddToCart={addToCart}
+            drawerOpen={drawerOpen}
+            setDrawerOpen={setDrawerOpen}
           />
         </section>
 
@@ -216,7 +228,7 @@ function HomeNew({ cartCount: cartCountProp }) {
         </section> */}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="rounded-[28px] border border-[#FFD9BE] bg-[#FFF3EA] p-8 lg:p-10">
+          <div className="rounded-[18px] border border-[#FFD9BE] bg-[#FFF3EA] p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-center">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FF6B00]">Devenir vendeur</p>
@@ -225,7 +237,7 @@ function HomeNew({ cartCount: cartCountProp }) {
                   Gérez vos stocks, vos promos et vos ventes en toute simplicité depuis votre tableau de bord.
                 </p>
               </div>
-              <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <div className="rounded-xl bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3 text-[#FF6B00]">
                   <Store size={22} />
                   <span className="font-semibold">Créer votre boutique</span>
@@ -235,9 +247,15 @@ function HomeNew({ cartCount: cartCountProp }) {
                   <li className="flex items-center gap-2"><BadgeCheckAlt size={16} className="text-[#FF6B00]" /> Activez des promos et boostez vos produits</li>
                   <li className="flex items-center gap-2"><BadgeCheckAlt size={16} className="text-[#FF6B00]" /> Recevez vos paiements en Mobile Money</li>
                 </ul>
-                <Link to="/seller" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#FF6B00]">
+
+                <a 
+                  className="mt-6 inline-flex items-center gap-2 font-semibold text-[#FF6B00]"
+                  href="https://seller.dangoimport.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Ouvrir ma boutique <ArrowRight size={16} />
-                </Link>
+                </a>
               </div>
             </div>
           </div>

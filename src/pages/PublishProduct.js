@@ -15,11 +15,14 @@ const PublishProduct = () => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'Électronique',
+    category: '',
     description: '',
     images: []
   });
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('dangoUser');
@@ -61,6 +64,28 @@ const PublishProduct = () => {
         toast.error('Impossible de charger certaines images.');
       });
   };
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        setCategoriesLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/api/categories`);
+        const fetched = Array.isArray(response?.data?.data) ? response.data.data : [];
+        setCategories(fetched);
+        setFormData((prev) => ({
+          ...prev,
+          category: prev.category || (fetched.length > 0 ? fetched[0].name : prev.category),
+        }));
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories :', error);
+        setCategoriesError('Impossible de charger les catégories.');
+      } finally {
+        setCategoriesLoading(false);
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,13 +167,18 @@ const PublishProduct = () => {
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
-                      <option value="Électronique">Électronique</option>
-                      <option value="Mode & Beauté">Mode & Beauté</option>
-                      <option value="Maison & Bureau">Maison & Bureau</option>
-                      <option value="Montres">Montres</option>
-                      <option value="Chaussures">Chaussures</option>
-                      <option value="Autres">Autres</option>
+                      <option value="">-- Sélectionner une catégorie --</option>
+                      {categories.map((category) => (
+                        <option key={category._id || category.slug} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
+                    {categoriesLoading && <div className="text-xs text-gray-500 mt-1">Chargement des catégories...</div>}
+                    {!categoriesLoading && categoriesError && <div className="text-xs text-red-600 mt-1">{categoriesError}</div>}
+                    {!categoriesLoading && !categoriesError && categories.length === 0 && (
+                      <div className="text-xs text-gray-500 mt-1">Aucune catégorie disponible pour le moment.</div>
+                    )}
                   </div>
                 </div>
               </div>

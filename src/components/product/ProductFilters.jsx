@@ -1,244 +1,343 @@
-import React, { useCallback, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, ChevronDown, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ArrowRight,
+  ChevronDown,
+  Filter,
+  Flame,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Truck,
+  Zap,
+  X,
+} from 'lucide-react';
+import { getCategories } from '../../api';
 
-const CATEGORIES = ['Tous', 'Vêtements', 'Électronique', 'Maison', 'Cadeaux', 'Auto', 'Nouveautés'];
 const SORT_OPTIONS = [
-  { value: 'default', label: 'Recommandés' },
-  { value: 'price_asc', label: 'Prix croissant' },
-  { value: 'price_desc', label: 'Prix décroissant' },
-  { value: 'popular', label: 'Popularité' },
-  { value: 'promo', label: 'Meilleures promos' },
+  { value: 'relevance', label: 'Pertinence' },
+  { value: 'newest', label: 'Plus récents' },
+  { value: 'price-asc', label: 'Prix croissant' },
+  { value: 'price-desc', label: 'Prix décroissant' },
+  { value: 'popular', label: 'Plus populaires' },
+  { value: 'bestSelling', label: 'Meilleures ventes' },
+  { value: 'bestRating', label: 'Meilleures notes' },
 ];
-const MIN_RATINGS = [0, 3, 3.5, 4, 4.5];
 
-function Chip({ label, active, onClick }) {
+const QUICK_FILTERS = [
+  { key: 'promotion', label: 'Promotions', icon: Flame },
+  { key: 'topRated', label: 'Les mieux notés', icon: Star },
+  { key: 'freeShipping', label: 'Livraison gratuite', icon: Truck },
+  { key: 'newArrival', label: 'Nouveautés', icon: Sparkles },
+  { key: 'favorites', label: 'Coups de cœur', icon: ShieldCheck },
+  { key: 'verifiedSeller', label: 'Boutiques vérifiées', icon: ShieldCheck },
+  { key: 'bestSelling', label: 'Meilleures ventes', icon: Zap },
+];
+
+const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];
+
+
+
+
+
+function CategoryCard({ category, active, onClick }) {
   return (
     <motion.button
+      type="button"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
+      className={`group relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[28px] border p-5 text-left transition shadow-sm ${active ? 'border-[#FF6B00] bg-[#FFF4E5] shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'}`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl font-semibold text-slate-700">
+          {category.name?.charAt(0) || 'C'}
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">{category.name}</p>
+          <p className="mt-2 text-sm text-slate-600">{category.productCount ?? 0} produit{(category.productCount ?? 0) !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+      <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#FF6B00]">
+        Voir <ArrowRight size={16} />
+      </span>
+    </motion.button>
+  );
+}
+
+function QuickFilterButton({ label, Icon, active, onClick }) {
+  return (
+    <motion.button
+      type="button"
       whileTap={{ scale: 0.95 }}
-      style={{
-        padding: '6px 14px',
-        borderRadius: '999px',
-        border: active ? '1.5px solid #FF6B00' : '1.5px solid #e0e0e0',
-        background: active ? '#FFF3EA' : '#fff',
-        color: active ? '#FF6B00' : '#555',
-        fontWeight: active ? 700 : 500,
-        fontSize: '12px',
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        transition: 'all 0.15s',
-        flexShrink: 0,
-      }}
+      onClick={onClick}
+      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${active ? 'border-[#FF6B00] bg-[#FFF4E5] text-[#FF6B00]' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'}`}
       aria-pressed={active}
     >
+      <Icon size={16} />
       {label}
     </motion.button>
   );
 }
 
-function ProductFilters({ onFiltersChange }) {
-  const [activeCategory, setActiveCategory] = useState('Tous');
-  const [activeSort, setActiveSort] = useState('default');
-  const [onlyPromo, setOnlyPromo] = useState(false);
-  const [onlyFreeShip, setOnlyFreeShip] = useState(false);
-  const [minRating, setMinRating] = useState(0);
-  const [showSortMenu, setShowSortMenu] = useState(false);
+function ProductFilters({ onFiltersChange, showAdvancedOnly = false, drawerOpen: drawerOpenProp, setDrawerOpen: setDrawerOpenProp }) {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sort, setSort] = useState('relevance');
+  const [internalDrawerOpen, setInternalDrawerOpen] = useState(false);
+  const drawerOpen = typeof drawerOpenProp === 'boolean' ? drawerOpenProp : internalDrawerOpen;
+  const setDrawerOpen = typeof setDrawerOpenProp === 'function' ? setDrawerOpenProp : setInternalDrawerOpen;
+  const [quickFilters, setQuickFilters] = useState({
+    promotion: false,
+    topRated: false,
+    freeShipping: false,
+    newArrival: false,
+    favorites: false,
+    verifiedSeller: false,
+    bestSelling: false,
+  });
+  const [advanced, setAdvanced] = useState({
+    minPrice: '',
+    maxPrice: '',
+    minRating: '',
+    brand: '',
+    country: '',
+    condition: '',
+    inStock: false,
+    freeShipping: false,
+    promotions: false,
+    verifiedSeller: false,
+    premiumSeller: false,
+  });
 
-  const emit = useCallback((patch) => {
-    const state = {
-      category: activeCategory,
-      sort: activeSort,
-      onlyPromo,
-      onlyFreeShip,
-      minRating,
-      ...patch,
+  const { data: categories = [], isLoading: loadingCategories, isError: categoriesError } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const category = useMemo(() => {
+    if (selectedCategory === 'all') return { name: 'Tous', slug: 'all', productCount: categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0) };
+    return categories.find((cat) => cat.slug === selectedCategory) || null;
+  }, [categories, selectedCategory]);
+
+
+  const selectedFilters = useMemo(() => {
+    const params = {
+      category: category && category.slug !== 'all' ? category.name : undefined,
+      sort,
+      minPrice: advanced.minPrice || undefined,
+      maxPrice: advanced.maxPrice || undefined,
+      promo: quickFilters.promotion || advanced.promotions ? 'true' : undefined,
+      onlyPromo: quickFilters.promotion || advanced.promotions || undefined,
+      onlyFreeShip: quickFilters.freeShipping || advanced.freeShipping || undefined,
+      rating: quickFilters.topRated ? '4.5' : advanced.minRating || undefined,
+      newArrival: quickFilters.newArrival ? 'true' : undefined,
+      bestSeller: quickFilters.bestSelling ? 'true' : undefined,
+      verifiedSeller: quickFilters.verifiedSeller || advanced.verifiedSeller ? 'true' : undefined,
+      brand: advanced.brand || undefined,
+      country: advanced.country || undefined,
+      condition: advanced.condition || undefined,
+      inStock: advanced.inStock ? 'true' : undefined,
+      premiumSeller: advanced.premiumSeller ? 'true' : undefined,
     };
-    onFiltersChange?.(state);
-  }, [activeCategory, activeSort, onlyPromo, onlyFreeShip, minRating, onFiltersChange]);
 
-  const setCategory = (cat) => { setActiveCategory(cat); emit({ category: cat }); };
-  const setSort = (s) => { setActiveSort(s); setShowSortMenu(false); emit({ sort: s }); };
-  const togglePromo = () => { setOnlyPromo((v) => { emit({ onlyPromo: !v }); return !v; }); };
-  const toggleFreeShip = () => { setOnlyFreeShip((v) => { emit({ onlyFreeShip: !v }); return !v; }); };
-  const setRating = (r) => { setMinRating(r); emit({ minRating: r }); };
+    return Object.keys(params).reduce((acc, key) => {
+      if (params[key] !== undefined && params[key] !== '') acc[key] = params[key];
+      return acc;
+    }, {});
+  }, [advanced, category, quickFilters, sort]);
 
-  const hasActiveFilters = activeCategory !== 'Tous' || activeSort !== 'default' || onlyPromo || onlyFreeShip || minRating > 0;
+  useEffect(() => {
+    onFiltersChange?.(selectedFilters);
+  }, [onFiltersChange, selectedFilters]);
 
-  const resetAll = () => {
-    setActiveCategory('Tous');
-    setActiveSort('default');
-    setOnlyPromo(false);
-    setOnlyFreeShip(false);
-    setMinRating(0);
-    onFiltersChange?.({ category: 'Tous', sort: 'default', onlyPromo: false, onlyFreeShip: false, minRating: 0 });
+  const toggleQuickFilter = useCallback((key) => {
+    setQuickFilters((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  }, []);
+
+  const handleCategoryClick = useCallback((slug) => {
+    setSelectedCategory(slug);
+  }, []);
+
+  const handleResetAdvanced = () => {
+    setAdvanced({
+      minPrice: '',
+      maxPrice: '',
+      minRating: '',
+      brand: '',
+      country: '',
+      condition: '',
+      inStock: false,
+      freeShipping: false,
+      promotions: false,
+      verifiedSeller: false,
+      premiumSeller: false,
+    });
   };
 
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderBottom: '1px solid #ebebeb',
-        padding: '12px 0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 20,
-      }}
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Row 1 — Categories + Sort */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            overflowX: 'auto',
-            scrollbarWidth: 'none',
-            paddingBottom: '8px',
-          }}
-        >
-          {/* Categories */}
-          {CATEGORIES.map((cat) => (
-            <Chip
-              key={cat}
-              label={cat}
-              active={activeCategory === cat}
-              onClick={() => setCategory(cat)}
-            />
-          ))}
+    <section >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 
-          {/* Spacer */}
-          <div style={{ flex: 1, minWidth: '8px' }} />
+        {!setDrawerOpenProp && (
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-[#FF6B00] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e75b00] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/50 cursor-pointer"
+            style={{ cursor: 'pointer' }}
+          >
+            <Filter size={16} /> Filtres avancés
+          </button>
+        )}
+      </div>
 
-          {/* Sort dropdown */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <motion.button
-              onClick={() => setShowSortMenu((v) => !v)}
-              whileTap={{ scale: 0.96 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                border: activeSort !== 'default' ? '1.5px solid #FF6B00' : '1.5px solid #e0e0e0',
-                background: activeSort !== 'default' ? '#FFF3EA' : '#fff',
-                color: activeSort !== 'default' ? '#FF6B00' : '#555',
-                fontWeight: 600,
-                fontSize: '12px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+      
+      <AnimatePresence>
+        {drawerOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
+          >
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+              className="absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col overflow-y-auto bg-white p-6 shadow-2xl"
             >
-              <SlidersHorizontal size={13} />
-              {SORT_OPTIONS.find((s) => s.value === activeSort)?.label}
-              <ChevronDown size={12} />
-            </motion.button>
-
-            <AnimatePresence>
-              {showSortMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  style={{
-                    position: 'absolute',
-                    right: 0,
-                    top: 'calc(100% + 6px)',
-                    background: '#fff',
-                    border: '1px solid #e8e8e8',
-                    borderRadius: '12px',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                    minWidth: '180px',
-                    zIndex: 50,
-                    overflow: 'hidden',
-                  }}
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">Filtres avancés</p>
+                  <h3 className="mt-2 text-2xl font-bold text-slate-950">Affinez votre univers</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(false)}
+                  className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-700 transition hover:bg-slate-100"
+                  aria-label="Fermer le panneau de filtres"
                 >
-                  {SORT_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setSort(opt.value)}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '10px 16px',
-                        background: activeSort === opt.value ? '#FFF3EA' : 'transparent',
-                        color: activeSort === opt.value ? '#FF6B00' : '#333',
-                        fontWeight: activeSort === opt.value ? 700 : 500,
-                        fontSize: '13px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'background 0.15s',
-                      }}
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-slate-700">Prix minimum</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={advanced.minPrice}
+                    onChange={(event) => setAdvanced((current) => ({ ...current, minPrice: event.target.value }))}
+                    placeholder="Ex. 10000"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-slate-700">Prix maximum</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={advanced.maxPrice}
+                    onChange={(event) => setAdvanced((current) => ({ ...current, maxPrice: event.target.value }))}
+                    placeholder="Ex. 50000"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-slate-700">Note minimale</label>
+                    <select
+                      value={advanced.minRating}
+                      onChange={(event) => setAdvanced((current) => ({ ...current, minRating: event.target.value }))}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
                     >
-                      {opt.label}
+                      <option value="">Aucune</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                      <option value="4.5">4.5+</option>
+                    </select>
+                  </div>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-slate-700">Condition</label>
+                    <select
+                      value={advanced.condition}
+                      onChange={(event) => setAdvanced((current) => ({ ...current, condition: event.target.value }))}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                    >
+                      <option value="">Toutes</option>
+                      {CONDITION_OPTIONS.map((condition) => (
+                        <option key={condition} value={condition}>{condition}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-slate-700">Marque</label>
+                  <input
+                    type="text"
+                    value={advanced.brand}
+                    onChange={(event) => setAdvanced((current) => ({ ...current, brand: event.target.value }))}
+                    placeholder="Ex. Samsung"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-slate-700">Pays d'origine</label>
+                  <input
+                    type="text"
+                    value={advanced.country}
+                    onChange={(event) => setAdvanced((current) => ({ ...current, country: event.target.value }))}
+                    placeholder="Ex. France"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { name: 'Disponibilité', key: 'inStock' },
+                    { name: 'Livraison gratuite', key: 'freeShipping' },
+                    { name: 'Promotions', key: 'promotions' },
+                    { name: 'Vendeurs vérifiés', key: 'verifiedSeller' },
+                    { name: 'Boutiques Premium', key: 'premiumSeller' },
+                  ].map((item) => (
+                    <button
+                      type="button"
+                      key={item.key}
+                      onClick={() => setAdvanced((current) => ({ ...current, [item.key]: !current[item.key] }))}
+                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${advanced[item.key] ? 'border-[#FF6B00] bg-[#FFF4E5] text-[#FF6B00]' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'}`}
+                    >
+                      {item.name}
                     </button>
                   ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+                </div>
+              </div>
 
-        {/* Row 2 — Quick filters */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flexWrap: 'wrap',
-          }}
-        >
-          <Chip
-            label="🔥 Promos"
-            active={onlyPromo}
-            onClick={togglePromo}
-          />
-          <Chip
-            label="🚚 Livraison gratuite"
-            active={onlyFreeShip}
-            onClick={toggleFreeShip}
-          />
-
-          {/* Min rating */}
-          {[3, 4, 4.5].map((r) => (
-            <Chip
-              key={r}
-              label={`⭐ ${r}+`}
-              active={minRating === r}
-              onClick={() => setRating(minRating === r ? 0 : r)}
-            />
-          ))}
-
-          {/* Reset */}
-          {hasActiveFilters && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              onClick={resetAll}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                border: '1.5px solid #ffb3b3',
-                background: '#fff1f1',
-                color: '#FF4747',
-                fontWeight: 600,
-                fontSize: '12px',
-                cursor: 'pointer',
-              }}
-            >
-              <X size={11} />
-              Réinitialiser
-            </motion.button>
-          )}
-        </div>
-      </div>
-    </div>
+              <div className="mt-6 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetAdvanced}
+                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                >
+                  Réinitialiser
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(false)}
+                  className="rounded-full bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e75b00]"
+                >
+                  Appliquer
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 

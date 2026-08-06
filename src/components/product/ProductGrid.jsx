@@ -18,9 +18,13 @@ function applyFilters(products, filters) {
 
   // Category
   if (filters.category && filters.category !== 'Tous') {
-    result = result.filter(
-      (p) => p.category?.toLowerCase() === filters.category.toLowerCase()
-    );
+    if (filters.category.toLowerCase() === 'nouveautés') {
+      result = result.filter((p) => Boolean(p.isNewArrival || p.isFeatured));
+    } else {
+      result = result.filter(
+        (p) => p.category?.toLowerCase() === filters.category.toLowerCase()
+      );
+    }
   }
 
   // Only promo
@@ -89,19 +93,28 @@ function EmptyState({ filters }) {
   );
 }
 
-function ProductGrid({ products = [], loading = false, onAddToCart }) {
-  const [filters, setFilters] = useState({
-    category: 'Tous',
-    sort: 'default',
-    onlyPromo: false,
-    onlyFreeShip: false,
-    minRating: 0,
-  });
+function ProductGrid({ products = [], loading = false, onAddToCart, filters: externalFilters, showFilters = true, drawerOpen, setDrawerOpen }) {
+  const [filters, setFilters] = useState(
+    externalFilters ?? {
+      category: 'Tous',
+      sort: 'default',
+      onlyPromo: false,
+      onlyFreeShip: false,
+      minRating: 0,
+    }
+  );
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const sentinelRef = useRef(null);
 
-  // Reset page when filters change
+  useEffect(() => {
+    if (externalFilters) {
+      setFilters(externalFilters);
+      setPage(1);
+    }
+  }, [externalFilters]);
+
+  // Reset page when filters change from the internal bar
   const handleFiltersChange = useCallback((newFilters) => {
     setFilters(newFilters);
     setPage(1);
@@ -134,7 +147,7 @@ function ProductGrid({ products = [], loading = false, onAddToCart }) {
 
   return (
     <div>
-      <ProductFilters onFiltersChange={handleFiltersChange} />
+      {showFilters && <ProductFilters onFiltersChange={handleFiltersChange} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />}
 
       <div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"

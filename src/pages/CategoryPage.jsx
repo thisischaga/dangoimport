@@ -17,18 +17,28 @@ async function fetchCategoryProducts(slug, page = 1, limit = 20, q = {}) {
 
 export default function CategoryPage() {
   const { slug } = useParams();
-  const { data: cat, isLoading: loadingCat } = useQuery({ queryKey: ['category', slug], queryFn: () => fetchCategory(slug), enabled: !!slug });
+  const { data: cat, isLoading: loadingCat, error: categoryError } = useQuery({ queryKey: ['category', slug], queryFn: () => fetchCategory(slug), enabled: !!slug });
   const { data: productsResp, isLoading: loadingProducts } = useQuery({ queryKey: ['categoryProducts', slug], queryFn: () => fetchCategoryProducts(slug, 1, 24), enabled: !!slug });
+
+  const isLoaded = !loadingCat && !categoryError && cat;
 
   return (
     <div className="min-h-screen bg-[#f6f6f7] text-slate-900">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {loadingCat ? <h1>Chargement...</h1> : (
+        {loadingCat ? (
+          <h1>Chargement...</h1>
+        ) : categoryError ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+            Impossible de charger la catégorie.
+          </div>
+        ) : isLoaded ? (
           <header className="mb-6">
             <h1 className="text-3xl font-bold">{cat.name}</h1>
             <p className="text-sm text-slate-600">{cat.description}</p>
             <p className="text-xs text-slate-500 mt-1">{cat.productCount ?? 0} produits</p>
           </header>
+        ) : (
+          <h1>Catégorie introuvable</h1>
         )}
 
         <section>
