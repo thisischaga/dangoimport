@@ -23,10 +23,11 @@ function ProductCard({ product, onAddToCart }) {
   const hasPromo = promoPrice > 0 && promoPrice < price;
   const discount = hasPromo ? Math.round((1 - promoPrice / price) * 100) : 0;
   const image = product?.image || product?.images?.[0]?.url || product?.images?.[0] || '';
-  const sellerName = product?.sellerName || product?.vendorName || 'Vendeur indépendant';
-  const stock = Number(product?.stock ?? 1);
-  const isOutOfStock = stock <= 0;
-  const isLowStock = !isOutOfStock && stock <= 10;
+  const sellerName = product?.sellerName || product?.vendorName || '';
+  const hasStockValue = Number.isFinite(Number(product?.stock));
+  const stock = hasStockValue ? Number(product.stock) : null;
+  const isOutOfStock = hasStockValue ? stock <= 0 : false;
+  const isLowStock = hasStockValue && !isOutOfStock && stock <= 10;
   const deliverySummary = Array.isArray(product?.deliveryZones)
     ? product.deliveryZones
         .map((zone) => zone?.locality || zone?.area || zone?.country)
@@ -89,12 +90,16 @@ function ProductCard({ product, onAddToCart }) {
       }}>
         {/*Seller*/}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#9a9a9a', overflow: 'hidden' }}>
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
-            {sellerName}
-          </span>
-          {product?.sellerVerified && (
-            <BadgeCheck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
-          )}
+          {sellerName ? (
+            <>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
+                {sellerName}
+              </span>
+              {product?.sellerVerified && (
+                <BadgeCheck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
+              )}
+            </>
+          ) : null}
         </div>
 
         {/* Product name */}
@@ -107,7 +112,7 @@ function ProductCard({ product, onAddToCart }) {
             maxWidth: '100%',
             width: '100%',
           }}>
-            {product?.name || 'Produit premium'}
+            {product?.name || ''}
           </h3>
         </Link>
 
@@ -133,7 +138,7 @@ function ProductCard({ product, onAddToCart }) {
             </p>
           )}
 
-          {!isOutOfStock && (
+          {hasStockValue && !isOutOfStock && (
             <p style={{ fontSize: '11px', color: isLowStock ? '#FF4747' : '#9a9a9a', margin: 0, fontWeight: isLowStock ? 600 : 400 }}>
               {isLowStock ? `Plus que ${stock} en stock` : `Stock restant : ${stock}`}
             </p>
