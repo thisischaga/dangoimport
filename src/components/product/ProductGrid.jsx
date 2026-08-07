@@ -114,14 +114,14 @@ function ProductGrid({
 
   return (
     <div>
-      {showFilters && (
+      {/**showFilters && (
         <ProductFilters
           filters={filters}
           onFiltersChange={onFiltersChange}
           drawerOpen={drawerOpen}
           setDrawerOpen={setDrawerOpen}
         />
-      )}
+      ) */}
 
       <div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"

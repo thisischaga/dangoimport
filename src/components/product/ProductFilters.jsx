@@ -354,7 +354,7 @@ function ProductFilters({
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="catalog-filters__btn catalog-filters__btn--primary"
+            className="catalog-filters__btn catalog-filters__btn--primary cursor-pointer"
           >
             <SlidersHorizontal size={16} />
             Filtres
