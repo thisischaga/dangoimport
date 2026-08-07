@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';

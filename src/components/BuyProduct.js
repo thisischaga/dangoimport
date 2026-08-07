@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import { initiateFedapayDirectPay, checkFedapayTransactionStatus } from '../services/fedapayCheckout';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 
 
 

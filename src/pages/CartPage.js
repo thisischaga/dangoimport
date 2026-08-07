@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Store, BadgeCheck, ChevronRight, Ticket, Truck, ShieldCheck, ShoppingCart } from 'lucide-react';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import Header from '../components/Header';
 import Footer from '../components/Footer';

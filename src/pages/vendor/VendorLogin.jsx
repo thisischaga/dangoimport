@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from '../../utils/toast';
 import API_BASE_URL from '../../apiConfig';
 import { saveVendorSession } from '../../utils/vendorAuth';
 import { Store } from 'lucide-react';

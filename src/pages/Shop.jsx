@@ -13,6 +13,7 @@ import ShopAbout from '../components/shop/ShopAbout';
 import ShopEmptyState from '../components/shop/ShopEmptyState';
 import { useStore, useStoreProducts, useStoreRelated } from '../hooks/useStore';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../components/ui/ToastProvider';
 import { getProductImage } from '../utils/imageUrl';
 import './Shop.css';
 
@@ -59,6 +60,7 @@ function buildWhatsAppUrl(raw) {
 export default function Shop() {
   const { slug } = useParams();
   const { addToCart } = useCart();
+  const toast = useToast();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -144,10 +146,8 @@ export default function Shop() {
       )}`;
       return;
     }
-    if (typeof window !== 'undefined' && window.dangoToast?.info) {
-      window.dangoToast.info('Coordonnées du vendeur indisponibles pour le moment.');
-    }
-  }, [store, seller]);
+    toast?.info?.('Coordonnées du vendeur indisponibles pour le moment.');
+  }, [store, seller, toast]);
 
   const handleShare = useCallback(async () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -159,28 +159,24 @@ export default function Shop() {
         return;
       }
       await navigator.clipboard.writeText(url);
-      if (window.dangoToast?.success) {
-        window.dangoToast.success('Lien de la boutique copié');
-      }
+      toast?.success?.('Lien de la boutique copié');
     } catch (err) {
       if (err?.name === 'AbortError') return;
       try {
         await navigator.clipboard.writeText(url);
-        if (window.dangoToast?.success) window.dangoToast.success('Lien de la boutique copié');
+        toast?.success?.('Lien de la boutique copié');
       } catch {
         /* ignore */
       }
     }
-  }, [store?.name]);
+  }, [store?.name, toast]);
 
   const handleAddToCart = useCallback(
     (product) => {
       addToCart?.(product);
-      if (window.dangoToast?.success) {
-        window.dangoToast.success('Produit ajouté au panier');
-      }
+      toast?.success?.('Produit ajouté au panier');
     },
-    [addToCart]
+    [addToCart, toast]
   );
 
   const bumpPage = useCallback((fn) => {

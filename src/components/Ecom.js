@@ -12,7 +12,7 @@ import {
   FaChevronLeft, FaChevronRight, FaFire, FaMedal, FaClock,
   FaShieldAlt, FaTruck, FaTimes, FaBolt, FaPercent,
 } from 'react-icons/fa';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import { getProductImage } from '../utils/imageUrl';
 
 const PAGE_SIZE = 16;

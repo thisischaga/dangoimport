@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { FaUpload, FaBox, FaTag, FaMoneyBillWave, FaAlignLeft } from 'react-icons/fa';

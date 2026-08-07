@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import QRCode from 'qrcode';
 import Header from '../components/Header';
 import Footer from '../components/Footer';

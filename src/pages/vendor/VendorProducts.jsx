@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from '../../utils/toast';
 import { useConfirm } from '../../components/ui/ConfirmDialog';
 import VendorLayout from '../../components/vendor/VendorLayout';
 import VendorRoute from '../../components/vendor/VendorRoute';

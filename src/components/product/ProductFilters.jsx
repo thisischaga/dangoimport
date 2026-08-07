@@ -1,343 +1,412 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowRight,
-  ChevronDown,
   Filter,
   Flame,
-  ShieldCheck,
+  Package,
+  SlidersHorizontal,
   Sparkles,
-  Star,
-  Truck,
-  Zap,
   X,
 } from 'lucide-react';
 import { getCategories } from '../../api';
+import {
+  countActiveFilters,
+  DEFAULT_CATALOG_FILTERS,
+} from '../../utils/productFilters';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Pertinence' },
-  { value: 'newest', label: 'Plus récents' },
+  { value: 'newest', label: 'Nouveautés' },
   { value: 'price-asc', label: 'Prix croissant' },
   { value: 'price-desc', label: 'Prix décroissant' },
   { value: 'popular', label: 'Plus populaires' },
-  { value: 'bestSelling', label: 'Meilleures ventes' },
-  { value: 'bestRating', label: 'Meilleures notes' },
-];
-
-const QUICK_FILTERS = [
-  { key: 'promotion', label: 'Promotions', icon: Flame },
-  { key: 'topRated', label: 'Les mieux notés', icon: Star },
-  { key: 'freeShipping', label: 'Livraison gratuite', icon: Truck },
-  { key: 'newArrival', label: 'Nouveautés', icon: Sparkles },
-  { key: 'favorites', label: 'Coups de cœur', icon: ShieldCheck },
-  { key: 'verifiedSeller', label: 'Boutiques vérifiées', icon: ShieldCheck },
-  { key: 'bestSelling', label: 'Meilleures ventes', icon: Zap },
+  { value: 'promo', label: 'Promotions' },
 ];
 
 const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];
 
-
-
-
-
-function CategoryCard({ category, active, onClick }) {
+function Chip({ active, onClick, children }) {
   return (
-    <motion.button
+    <button
       type="button"
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`group relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[28px] border p-5 text-left transition shadow-sm ${active ? 'border-[#FF6B00] bg-[#FFF4E5] shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'}`}
+      className={`catalog-filters__chip shrink-0 ${active ? 'is-active' : ''}`}
     >
-      <div className="flex items-center gap-3">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl font-semibold text-slate-700">
-          {category.name?.charAt(0) || 'C'}
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">{category.name}</p>
-          <p className="mt-2 text-sm text-slate-600">{category.productCount ?? 0} produit{(category.productCount ?? 0) !== 1 ? 's' : ''}</p>
-        </div>
-      </div>
-      <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#FF6B00]">
-        Voir <ArrowRight size={16} />
-      </span>
-    </motion.button>
+      {children}
+    </button>
   );
 }
 
-function QuickFilterButton({ label, Icon, active, onClick }) {
+function ToggleRow({ label, icon: Icon, checked, onChange }) {
   return (
-    <motion.button
-      type="button"
-      whileTap={{ scale: 0.95 }}
-      onClick={onClick}
-      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${active ? 'border-[#FF6B00] bg-[#FFF4E5] text-[#FF6B00]' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'}`}
-      aria-pressed={active}
-    >
-      <Icon size={16} />
-      {label}
-    </motion.button>
+    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-slate-300 has-[:checked]:border-[#FF6B00] has-[:checked]:bg-[#FFF4EB]">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 accent-[#FF6B00]"
+      />
+      {Icon ? <Icon size={16} className="text-[#FF6B00]" /> : null}
+      <span className="text-sm font-medium text-slate-800">{label}</span>
+    </label>
   );
 }
 
-function ProductFilters({ onFiltersChange, showAdvancedOnly = false, drawerOpen: drawerOpenProp, setDrawerOpen: setDrawerOpenProp }) {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sort, setSort] = useState('relevance');
+function ProductFilters({
+  filters: controlledFilters,
+  onFiltersChange,
+  drawerOpen: drawerOpenProp,
+  setDrawerOpen: setDrawerOpenProp,
+  showToolbar = true,
+}) {
+  const [internalFilters, setInternalFilters] = useState(DEFAULT_CATALOG_FILTERS);
+  const filters = controlledFilters ?? internalFilters;
+
+  const setFilters = useCallback(
+    (updater) => {
+      const next = typeof updater === 'function' ? updater(filters) : updater;
+      if (!controlledFilters) setInternalFilters(next);
+      onFiltersChange?.(next);
+    },
+    [controlledFilters, filters, onFiltersChange]
+  );
+
   const [internalDrawerOpen, setInternalDrawerOpen] = useState(false);
   const drawerOpen = typeof drawerOpenProp === 'boolean' ? drawerOpenProp : internalDrawerOpen;
-  const setDrawerOpen = typeof setDrawerOpenProp === 'function' ? setDrawerOpenProp : setInternalDrawerOpen;
-  const [quickFilters, setQuickFilters] = useState({
-    promotion: false,
-    topRated: false,
-    freeShipping: false,
-    newArrival: false,
-    favorites: false,
-    verifiedSeller: false,
-    bestSelling: false,
-  });
-  const [advanced, setAdvanced] = useState({
-    minPrice: '',
-    maxPrice: '',
-    minRating: '',
-    brand: '',
-    country: '',
-    condition: '',
-    inStock: false,
-    freeShipping: false,
-    promotions: false,
-    verifiedSeller: false,
-    premiumSeller: false,
-  });
+  const setDrawerOpen =
+    typeof setDrawerOpenProp === 'function' ? setDrawerOpenProp : setInternalDrawerOpen;
 
-  const { data: categories = [], isLoading: loadingCategories, isError: categoriesError } = useQuery({
+  const [draft, setDraft] = useState(filters);
+
+  useEffect(() => {
+    if (drawerOpen) setDraft(filters);
+  }, [drawerOpen, filters]);
+
+  const { data: categories = [], isLoading: loadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
     staleTime: 1000 * 60 * 5,
   });
 
-  const category = useMemo(() => {
-    if (selectedCategory === 'all') return { name: 'Tous', slug: 'all', productCount: categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0) };
-    return categories.find((cat) => cat.slug === selectedCategory) || null;
-  }, [categories, selectedCategory]);
+  const activeCount = useMemo(() => countActiveFilters(filters), [filters]);
 
+  const applyDraft = useCallback(() => {
+    setFilters(draft);
+    setDrawerOpen(false);
+  }, [draft, setFilters, setDrawerOpen]);
 
-  const selectedFilters = useMemo(() => {
-    const params = {
-      category: category && category.slug !== 'all' ? category.name : undefined,
-      sort,
-      minPrice: advanced.minPrice || undefined,
-      maxPrice: advanced.maxPrice || undefined,
-      promo: quickFilters.promotion || advanced.promotions ? 'true' : undefined,
-      onlyPromo: quickFilters.promotion || advanced.promotions || undefined,
-      onlyFreeShip: quickFilters.freeShipping || advanced.freeShipping || undefined,
-      rating: quickFilters.topRated ? '4.5' : advanced.minRating || undefined,
-      newArrival: quickFilters.newArrival ? 'true' : undefined,
-      bestSeller: quickFilters.bestSelling ? 'true' : undefined,
-      verifiedSeller: quickFilters.verifiedSeller || advanced.verifiedSeller ? 'true' : undefined,
-      brand: advanced.brand || undefined,
-      country: advanced.country || undefined,
-      condition: advanced.condition || undefined,
-      inStock: advanced.inStock ? 'true' : undefined,
-      premiumSeller: advanced.premiumSeller ? 'true' : undefined,
-    };
+  const resetAll = useCallback(() => {
+    setDraft(DEFAULT_CATALOG_FILTERS);
+    setFilters(DEFAULT_CATALOG_FILTERS);
+  }, [setFilters]);
 
-    return Object.keys(params).reduce((acc, key) => {
-      if (params[key] !== undefined && params[key] !== '') acc[key] = params[key];
-      return acc;
-    }, {});
-  }, [advanced, category, quickFilters, sort]);
-
-  useEffect(() => {
-    onFiltersChange?.(selectedFilters);
-  }, [onFiltersChange, selectedFilters]);
-
-  const toggleQuickFilter = useCallback((key) => {
-    setQuickFilters((current) => ({
-      ...current,
-      [key]: !current[key],
-    }));
+  const resetDraft = useCallback(() => {
+    setDraft(DEFAULT_CATALOG_FILTERS);
   }, []);
 
-  const handleCategoryClick = useCallback((slug) => {
-    setSelectedCategory(slug);
-  }, []);
+  const drawer = (
+    <AnimatePresence>
+      {drawerOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[120]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filtres produits"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Fermer"
+          />
 
-  const handleResetAdvanced = () => {
-    setAdvanced({
-      minPrice: '',
-      maxPrice: '',
-      minRating: '',
-      brand: '',
-      country: '',
-      condition: '',
-      inStock: false,
-      freeShipping: false,
-      promotions: false,
-      verifiedSeller: false,
-      premiumSeller: false,
-    });
-  };
+          <motion.aside
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#FF6B00]">
+                  Filtres
+                </p>
+                <h3 className="mt-1 text-xl font-bold text-slate-950">
+                  Affiner les résultats
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(false)}
+                className="rounded-full p-2 text-slate-500 hover:bg-slate-100"
+                aria-label="Fermer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-6">
+              {/* Catégories */}
+              <div>
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Catégories
+                </h4>
+                {loadingCategories ? (
+                  <p className="text-sm text-slate-400">Chargement…</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <Chip
+                      active={!draft.category}
+                      onClick={() => setDraft((f) => ({ ...f, category: '' }))}
+                    >
+                      Toutes
+                    </Chip>
+                    {categories.map((cat) => {
+                      const name = cat.name || cat.label || '';
+                      if (!name) return null;
+                      return (
+                        <Chip
+                          key={cat.slug || cat._id || name}
+                          active={draft.category === name}
+                          onClick={() =>
+                            setDraft((f) => ({
+                              ...f,
+                              category: f.category === name ? '' : name,
+                            }))
+                          }
+                        >
+                          {name}
+                          {cat.productCount != null ? (
+                            <span className="ml-1 opacity-60">({cat.productCount})</span>
+                          ) : null}
+                        </Chip>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Tri */}
+              <div>
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Trier par
+                </h4>
+                <select
+                  value={draft.sort}
+                  onChange={(e) => setDraft((f) => ({ ...f, sort: e.target.value }))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Prix */}
+              <div>
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Prix (FCFA)
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="Min"
+                    value={draft.minPrice}
+                    onChange={(e) =>
+                      setDraft((f) => ({ ...f, minPrice: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="Max"
+                    value={draft.maxPrice}
+                    onChange={(e) =>
+                      setDraft((f) => ({ ...f, maxPrice: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
+                  />
+                </div>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-2">
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Options
+                </h4>
+                <ToggleRow
+                  label="Promotions uniquement"
+                  icon={Flame}
+                  checked={draft.onlyPromo}
+                  onChange={(v) => setDraft((f) => ({ ...f, onlyPromo: v }))}
+                />
+                <ToggleRow
+                  label="Nouveautés"
+                  icon={Sparkles}
+                  checked={draft.newArrival}
+                  onChange={(v) => setDraft((f) => ({ ...f, newArrival: v }))}
+                />
+                <ToggleRow
+                  label="En stock uniquement"
+                  icon={Package}
+                  checked={draft.inStock}
+                  onChange={(v) => setDraft((f) => ({ ...f, inStock: v }))}
+                />
+              </div>
+
+              {/* Marque & condition */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Marque
+                  </label>
+                  <input
+                    type="text"
+                    value={draft.brand}
+                    onChange={(e) => setDraft((f) => ({ ...f, brand: e.target.value }))}
+                    placeholder="Ex. Samsung"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6B00]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                    État
+                  </label>
+                  <select
+                    value={draft.condition}
+                    onChange={(e) =>
+                      setDraft((f) => ({ ...f, condition: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6B00]"
+                  >
+                    <option value="">Tous</option>
+                    {CONDITION_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex gap-3 border-t border-slate-100 px-5 py-4">
+              <button
+                type="button"
+                onClick={resetDraft}
+                className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Effacer
+              </button>
+              <button
+                type="button"
+                onClick={applyDraft}
+                className="flex-1 rounded-xl bg-[#FF6B00] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#e75b00]"
+              >
+                Appliquer
+              </button>
+            </div>
+          </motion.aside>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  if (!showToolbar) {
+    return typeof document !== 'undefined'
+      ? createPortal(drawer, document.body)
+      : drawer;
+  }
 
   return (
-    <section >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="catalog-filters mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="catalog-filters__panel">
+        {/* Ligne 1 — tri + filtres toujours visibles */}
+        <div className="catalog-filters__controls">
+          <label className="catalog-filters__sort-wrap">
+            <span className="catalog-filters__sort-label">Trier</span>
+            <select
+              value={filters.sort}
+              onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
+              className="catalog-filters__sort"
+              aria-label="Trier les produits"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        {!setDrawerOpenProp && (
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-[#FF6B00] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e75b00] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/50 cursor-pointer"
-            style={{ cursor: 'pointer' }}
+            className="catalog-filters__btn catalog-filters__btn--primary"
           >
-            <Filter size={16} /> Filtres avancés
+            <SlidersHorizontal size={16} />
+            Filtres
+            {activeCount > 0 ? (
+              <span className="catalog-filters__badge">{activeCount}</span>
+            ) : null}
           </button>
-        )}
+
+          {activeCount > 0 ? (
+            <button
+              type="button"
+              onClick={resetAll}
+              className="catalog-filters__btn catalog-filters__btn--ghost"
+              title="Réinitialiser les filtres"
+            >
+              <X size={16} />
+            </button>
+          ) : null}
+        </div>
+
+        {/* Ligne 2 — catégories */}
+        <div className="catalog-filters__chips">
+          <Chip
+            active={!filters.category}
+            onClick={() => setFilters((f) => ({ ...f, category: '' }))}
+          >
+            Toutes
+          </Chip>
+          {!loadingCategories &&
+            categories.map((cat) => {
+              const name = cat.name || cat.label || '';
+              if (!name) return null;
+              return (
+                <Chip
+                  key={cat.slug || cat._id || name}
+                  active={filters.category === name}
+                  onClick={() =>
+                    setFilters((f) => ({
+                      ...f,
+                      category: f.category === name ? '' : name,
+                    }))
+                  }
+                >
+                  {name}
+                </Chip>
+              );
+            })}
+        </div>
       </div>
 
-      
-      <AnimatePresence>
-        {drawerOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50"
-          >
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-              className="absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col overflow-y-auto bg-white p-6 shadow-2xl"
-            >
-              <div className="mb-6 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">Filtres avancés</p>
-                  <h3 className="mt-2 text-2xl font-bold text-slate-950">Affinez votre univers</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-700 transition hover:bg-slate-100"
-                  aria-label="Fermer le panneau de filtres"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="space-y-5">
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700">Prix minimum</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={advanced.minPrice}
-                    onChange={(event) => setAdvanced((current) => ({ ...current, minPrice: event.target.value }))}
-                    placeholder="Ex. 10000"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700">Prix maximum</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={advanced.maxPrice}
-                    onChange={(event) => setAdvanced((current) => ({ ...current, maxPrice: event.target.value }))}
-                    placeholder="Ex. 50000"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                  />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-slate-700">Note minimale</label>
-                    <select
-                      value={advanced.minRating}
-                      onChange={(event) => setAdvanced((current) => ({ ...current, minRating: event.target.value }))}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                    >
-                      <option value="">Aucune</option>
-                      <option value="3">3+</option>
-                      <option value="4">4+</option>
-                      <option value="4.5">4.5+</option>
-                    </select>
-                  </div>
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-slate-700">Condition</label>
-                    <select
-                      value={advanced.condition}
-                      onChange={(event) => setAdvanced((current) => ({ ...current, condition: event.target.value }))}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                    >
-                      <option value="">Toutes</option>
-                      {CONDITION_OPTIONS.map((condition) => (
-                        <option key={condition} value={condition}>{condition}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700">Marque</label>
-                  <input
-                    type="text"
-                    value={advanced.brand}
-                    onChange={(event) => setAdvanced((current) => ({ ...current, brand: event.target.value }))}
-                    placeholder="Ex. Samsung"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700">Pays d'origine</label>
-                  <input
-                    type="text"
-                    value={advanced.country}
-                    onChange={(event) => setAdvanced((current) => ({ ...current, country: event.target.value }))}
-                    placeholder="Ex. France"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                  />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    { name: 'Disponibilité', key: 'inStock' },
-                    { name: 'Livraison gratuite', key: 'freeShipping' },
-                    { name: 'Promotions', key: 'promotions' },
-                    { name: 'Vendeurs vérifiés', key: 'verifiedSeller' },
-                    { name: 'Boutiques Premium', key: 'premiumSeller' },
-                  ].map((item) => (
-                    <button
-                      type="button"
-                      key={item.key}
-                      onClick={() => setAdvanced((current) => ({ ...current, [item.key]: !current[item.key] }))}
-                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${advanced[item.key] ? 'border-[#FF6B00] bg-[#FFF4E5] text-[#FF6B00]' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'}`}
-                    >
-                      {item.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={handleResetAdvanced}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Réinitialiser
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="rounded-full bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e75b00]"
-                >
-                  Appliquer
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+      {typeof document !== 'undefined' ? createPortal(drawer, document.body) : drawer}
+    </div>
   );
 }
 

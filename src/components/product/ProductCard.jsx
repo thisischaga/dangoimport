@@ -5,14 +5,7 @@ import { BadgeCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
 import ProductPrice from './ProductPrice';
 import ProductActions from './ProductActions';
-import { DiscountBadge, LabelBadge } from './ProductBadge';
-
-function getLabel(product) {
-  if (product?.isBestSeller) return { type: 'bestSeller', label: 'Best Seller' };
-  if (product?.isNew) return { type: 'nouveau', label: 'Nouveau' };
-  if (product?.isBoosted || product?.isFeatured) return { type: 'populaire', label: 'Populaire' };
-  return null;
-}
+import { CornerSealBadge, getCornerBadge } from './ProductBadge';
 
 function ProductCard({ product, onAddToCart }) {
   const [hovered, setHovered] = useState(false);
@@ -36,7 +29,7 @@ function ProductCard({ product, onAddToCart }) {
         .join(' · ')
     : '';
 
-  const label = getLabel(product);
+  const cornerBadge = getCornerBadge(product, { hasPromo, discount, isOutOfStock });
 
   return (
     <motion.article
@@ -46,77 +39,33 @@ function ProductCard({ product, onAddToCart }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ y: -3, boxShadow: '0 8px 28px rgba(0,0,0,0.11)' }}
-      style={{
-        background: '#fff',
-        borderRadius: '0',
-        overflow: 'hidden',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        opacity: isOutOfStock ? 0.72 : 1,
-        filter: isOutOfStock ? 'grayscale(0.2)' : 'none',
-        transition: 'box-shadow 0.25s, opacity 0.25s',
-        cursor: 'pointer',
-        minWidth: 0,
-        width: '100%',
-        maxWidth: '100%',
-        boxSizing: 'border-box',
-      }}
+      className="product-card"
     >
-      {/* ── IMAGE ── */}
       <Link
         to={`/product/${productId}`}
-        style={{ display: 'block', textDecoration: 'none', position: 'relative' }}
+        className="product-card__image-link"
         tabIndex={-1}
       >
-        {/* Badges top-left */}
-        <div style={{
-          position: 'absolute', top: '8px', left: '8px', zIndex: 2,
-          display: 'flex', flexDirection: 'column', gap: '4px',
-        }}>
-          
-          {label && !isOutOfStock && <LabelBadge type={label.type} label={label.label} />}
-          {isOutOfStock && <LabelBadge type="rupture" label="Rupture" />}
-        </div>
-
+        {cornerBadge ? (
+          <CornerSealBadge type={cornerBadge.type} label={cornerBadge.label} />
+        ) : null}
         <ProductImage src={image} alt={product?.name} isOutOfStock={isOutOfStock} />
       </Link>
 
-      {/* ── CONTENT ── */}
-      <div style={{
-        padding: '10px 10px 12px',
-        display: 'flex', flexDirection: 'column', gap: '5px', flex: 1,
-      }}>
-        {/*Seller*/}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#9a9a9a', overflow: 'hidden' }}>
-          {sellerName ? (
-            <>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
-                {sellerName}
-              </span>
-              {product?.sellerVerified && (
-                <BadgeCheck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
-              )}
-            </>
-          ) : null}
-        </div>
+      <div className="product-card__body">
+        {sellerName ? (
+          <div className="product-card__seller">
+            <span className="product-card__seller-name">{sellerName}</span>
+            {product?.sellerVerified ? (
+              <BadgeCheck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
+            ) : null}
+          </div>
+        ) : null}
 
-        {/* Product name */}
-        <Link to={`/product/${productId}`} style={{ textDecoration: 'none', width: '100%' }}>
-          <h3 style={{
-            fontSize: '13px', fontWeight: 600, color: '#1a1a1a', margin: 0,
-            lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '36px',
-            wordBreak: 'break-word', overflowWrap: 'anywhere',
-            maxWidth: '100%',
-            width: '100%',
-          }}>
-            {product?.name || ''}
-          </h3>
+        <Link to={`/product/${productId}`} className="product-card__title-link">
+          <h3 className="product-card__title">{product?.name || ''}</h3>
         </Link>
 
-        {/* Price */}
         <ProductPrice
           price={price}
           promoPrice={hasPromo ? promoPrice : null}
@@ -125,28 +74,21 @@ function ProductCard({ product, onAddToCart }) {
           deliveryZones={product?.deliveryZones}
         />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '2px' }}>
-          {product?.category && (
-            <p style={{ fontSize: '10px', color: '#9a9a9a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              {product.category}
-            </p>
-          )}
-
-          {deliverySummary && (
-            <p style={{ fontSize: '10px', color: '#7a7a7a', margin: 0, fontWeight: 600 }}>
-              Livraison: {deliverySummary}
-            </p>
-          )}
-
-          {hasStockValue && !isOutOfStock && (
-            <p style={{ fontSize: '11px', color: isLowStock ? '#FF4747' : '#9a9a9a', margin: 0, fontWeight: isLowStock ? 600 : 400 }}>
+        <div className="product-card__meta">
+          {product?.category ? (
+            <p className="product-card__category">{product.category}</p>
+          ) : null}
+          {deliverySummary ? (
+            <p className="product-card__delivery">Livraison: {deliverySummary}</p>
+          ) : null}
+          {hasStockValue && !isOutOfStock ? (
+            <p className={`product-card__stock ${isLowStock ? 'is-low' : ''}`}>
               {isLowStock ? `Plus que ${stock} en stock` : `Stock restant : ${stock}`}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Actions — hover only */}
-        <div style={{ marginTop: '4px', minHeight: hovered ? 'auto' : '0' }}>
+        <div className="product-card__actions" style={{ minHeight: hovered ? 'auto' : '0' }}>
           <ProductActions
             product={product}
             onAddToCart={onAddToCart}

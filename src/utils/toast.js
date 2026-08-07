@@ -1,28 +1,26 @@
-const noop = (message) => {
-  if (typeof window !== 'undefined' && window.console) {
-    console.warn('Toast fallback:', message);
-  }
-};
+/**
+ * Toast API — style admin (TikTok), via ToastProvider / window.dangoToast.
+ * Remplace react-toastify dans tout le site client.
+ */
 
-const getToastApi = () => {
-  if (typeof window !== 'undefined' && window.dangoToast) {
-    return window.dangoToast;
+function push(type, message, duration) {
+  if (!message) return;
+  const api = typeof window !== 'undefined' ? window.dangoToast : null;
+  if (api?.[type]) {
+    api[type](message, duration);
+    return;
   }
-  return {
-    success: noop,
-    error: noop,
-    warning: noop,
-    warn: noop,
-    info: noop,
-    clear: () => {},
-  };
-};
+  console.warn(`[toast:${type}]`, message);
+}
 
 export const toast = {
-  success: (message, duration) => getToastApi().success(message, duration),
-  error: (message, duration) => getToastApi().error(message, duration),
-  warning: (message, duration) => getToastApi().warning(message, duration),
-  warn: (message, duration) => (getToastApi().warn || getToastApi().warning)(message, duration),
-  info: (message, duration) => getToastApi().info(message, duration),
-  clear: () => getToastApi().clear(),
+  success: (message, duration) => push('success', message, duration),
+  error: (message, duration) => push('error', message, duration),
+  warning: (message, duration) => push('warning', message, duration),
+  // legacy alias used across the codebase
+  warn: (message, duration) => push('warning', message, duration),
+  info: (message, duration) => push('info', message, duration),
+  clear: () => window.dangoToast?.clear?.(),
 };
+
+export default toast;

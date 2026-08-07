@@ -1,103 +1,67 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
-const BADGE_STYLES = {
-  discount: {
-    bg: '#FF4747',
-    color: '#fff',
-    fontWeight: 700,
-  },
-  bestSeller: {
-    bg: '#FF6B00',
-    color: '#fff',
-    fontWeight: 700,
-  },
-  nouveau: {
-    bg: '#22c55e',
-    color: '#fff',
-    fontWeight: 700,
-  },
-  populaire: {
-    bg: '#8b5cf6',
-    color: '#fff',
-    fontWeight: 700,
-  },
-  boosted: {
-    bg: 'rgba(0,0,0,0.75)',
-    color: '#fff',
-    fontWeight: 600,
-  },
-  rupture: {
-    bg: 'rgba(0,0,0,0.7)',
-    color: '#fff',
-    fontWeight: 700,
-  },
+const BADGE_THEMES = {
+  promo: { bg: '#FF4747', color: '#fff' },
+  discount: { bg: '#FF4747', color: '#fff' },
+  bestSeller: { bg: '#FF6B00', color: '#fff' },
+  nouveau: { bg: '#22c55e', color: '#fff' },
+  populaire: { bg: '#8b5cf6', color: '#fff' },
+  boosted: { bg: '#1a1a1a', color: '#fff' },
+  rupture: { bg: '#64748b', color: '#fff' },
 };
 
+/**
+ * Scellé en quart de cercle — angle supérieur gauche de la carte produit.
+ */
+export function CornerSealBadge({ type = 'nouveau', label }) {
+  if (!label) return null;
+  const theme = BADGE_THEMES[type] || BADGE_THEMES.boosted;
+
+  return (
+    <div
+      className="product-corner-seal"
+      style={{ '--seal-bg': theme.bg, '--seal-color': theme.color }}
+      aria-hidden={false}
+    >
+      <span className="product-corner-seal__text">{label}</span>
+    </div>
+  );
+}
+
+export function getCornerBadge(product, { hasPromo, discount, isOutOfStock }) {
+  if (isOutOfStock) {
+    return { type: 'rupture', label: 'Rupture' };
+  }
+  if (hasPromo && discount > 0) {
+    return { type: 'promo', label: `-${discount}%` };
+  }
+  if (product?.isPromo && hasPromo) {
+    return { type: 'promo', label: 'Promo' };
+  }
+  if (product?.isNew || product?.isNewArrival) {
+    return { type: 'nouveau', label: 'Nouveau' };
+  }
+  if (product?.isBestSeller) {
+    return { type: 'bestSeller', label: 'Best Seller' };
+  }
+  if (product?.isBoosted || product?.isFeatured) {
+    return { type: 'populaire', label: 'Populaire' };
+  }
+  return null;
+}
+
+/* Legacy flat badges — kept for ProductDetail if needed */
 export function DiscountBadge({ discount }) {
   if (!discount || discount <= 0) return null;
-  const style = BADGE_STYLES.discount;
-  return (
-    <motion.span
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      style={{
-        background: style.bg,
-        color: style.color,
-        fontWeight: style.fontWeight,
-        fontSize: '11px',
-        borderRadius: '6px',
-        padding: '3px 7px',
-        lineHeight: 1.4,
-        display: 'inline-block',
-        letterSpacing: '0.02em',
-      }}
-    >
-      -{discount}%
-    </motion.span>
-  );
+  return <CornerSealBadge type="promo" label={`-${discount}%`} />;
 }
 
 export function LabelBadge({ type, label }) {
-  const style = BADGE_STYLES[type] || BADGE_STYLES.boosted;
-  if (!label) return null;
-  return (
-    <span
-      style={{
-        background: style.bg,
-        color: style.color,
-        fontWeight: style.fontWeight,
-        fontSize: '10px',
-        borderRadius: '6px',
-        padding: '3px 7px',
-        lineHeight: 1.4,
-        display: 'inline-block',
-        textTransform: 'uppercase',
-        letterSpacing: '0.04em',
-      }}
-    >
-      {label}
-    </span>
-  );
+  return <CornerSealBadge type={type} label={label} />;
 }
 
 export function RuptureBadge() {
-  const style = BADGE_STYLES.rupture;
-  return (
-    <span
-      style={{
-        background: style.bg,
-        color: style.color,
-        fontWeight: style.fontWeight,
-        fontSize: '12px',
-        borderRadius: '8px',
-        padding: '5px 12px',
-        display: 'inline-block',
-      }}
-    >
-      Rupture de stock
-    </span>
-  );
+  return <CornerSealBadge type="rupture" label="Rupture" />;
 }
 
-export default { DiscountBadge, LabelBadge, RuptureBadge };
+export default { CornerSealBadge, DiscountBadge, LabelBadge, RuptureBadge, getCornerBadge };

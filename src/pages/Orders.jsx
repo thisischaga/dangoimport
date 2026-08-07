@@ -6,8 +6,9 @@ import Footer from '../components/Footer';
 import QRCode from 'qrcode';
 import API_BASE_URL from '../apiConfig';
 import { fetchOrderQrTokens } from '../services/qrService';
+import toast from '../utils/toast';
 import { 
-  Search, Package, CreditCard, CheckCircle2, Truck, 
+  Search, Package, CreditCard, CheckCircle2, Truck,
   ChevronDown, ChevronUp, ExternalLink, FileText, 
   Store, Clock, AlertTriangle, Check, ArrowRight, Download 
 } from 'lucide-react';
@@ -163,7 +164,7 @@ const Orders = () => {
       a.href = url; a.download = `invoice-${orderId}.pdf`; document.body.appendChild(a); a.click(); a.remove();
     } catch (err) {
       console.error('downloadInvoice', err);
-      alert(err.message || 'Erreur téléchargement facture');
+      toast.error(err.message || 'Erreur téléchargement facture');
     }
   };
 

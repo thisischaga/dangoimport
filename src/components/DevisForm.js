@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import API_BASE_URL from '../apiConfig';
 import { FaSpinner, FaUpload } from 'react-icons/fa';
 

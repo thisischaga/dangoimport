@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from '../utils/toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import API_BASE_URL from '../apiConfig';
