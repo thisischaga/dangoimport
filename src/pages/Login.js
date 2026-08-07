@@ -48,8 +48,8 @@ const Login = () => {
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <img src={logo} alt="Dango Import" className="h-9 w-9 rounded-lg object-cover" />
           <div>
-            <p className="text-[18px] font-black text-gray-900 leading-none">DANGO</p>
-            <p className="text-[9px] font-black text-[#F68B1E] tracking-[0.25em]">IMPORT</p>
+            <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
+
           </div>
         </div>
         <div className="text-sm text-gray-500">
@@ -60,17 +60,7 @@ const Login = () => {
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-[420px]">
-          <div className="mb-4 bg-white rounded-t-2xl shadow-sm px-6 py-3 border border-b-0 border-gray-100">
-            <div className="flex">
-              <div className="flex-1 text-sm font-black text-center">CONNEXION</div>
-              <div className="flex-1 text-sm font-black text-center text-gray-500">INSCRIPTION</div>
-            </div>
-            <div className="mt-1 h-0.5">
-              <div className="w-1/2">
-                <div className="bg-[#F68B1E] h-1 rounded-full" />
-              </div>
-            </div>
-          </div>
+          
 
           <div className="bg-white rounded-b-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="p-8 sm:p-10">

@@ -55,19 +55,22 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F1F1F1] py-8 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
-      <div className="w-full max-w-md">
-        <div className="mb-4 bg-white rounded-t-2xl shadow-sm px-6 py-3 border border-b-0 border-gray-100">
-          <div className="flex">
-            <div onClick={() => navigate('/login')} className="flex-1 text-sm font-black py-3 text-center text-gray-500">CONNEXION</div>
-            <div onClick={() => navigate('/register')} className="flex-1 text-sm font-black py-3 text-center">INSCRIPTION</div>
-          </div>
-          <div className="mt-1 h-0.5">
-            <div className="w-1/2" style={{ marginLeft: '50%' }}>
-              <div className="bg-[#F68B1E] h-1 rounded-full" />
-            </div>
+    <div className="min-h-screen flex flex-col bg-[#F1F1F1]" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
+      <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+          <img src={logo} alt="Dango Import" className="h-9 w-9 rounded-lg object-cover" />
+          <div>
+            <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
+
           </div>
         </div>
+        <div className="text-sm text-gray-500">
+          J'ai déjà un compte ?{' '}
+          <Link to="/login" className="font-bold text-gray-900 hover:text-[#F68B1E]">Se connecter</Link>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-4">
 
         <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-b-2xl shadow-xl border border-gray-100 my-auto">
           <div className="flex flex-col items-center">
@@ -128,8 +131,9 @@ const Register = () => {
               <button disabled={loading} type="submit" className="w-full flex justify-center py-3 px-4 text-sm font-bold rounded-xl bg-[#F68B1E] text-white">{loading ? 'VÉRIFICATION...' : "VÉRIFIER ET S'INSCRIRE"}</button>
             </form>
           )}
-
-          <div className="mt-6 text-center text-sm text-gray-600">Vous avez déjà un compte ? <Link to="/login" className="font-bold text-[#F68B1E]">Se connecter</Link></div>
+          <div className="bg-gray-50 p-4 border-t border-gray-100 text-center">
+            <p className="text-[12px] text-gray-500">En vous connectant, vous acceptez nos <Link to="/cgu" className="underline">CGU</Link> et notre <Link to="/politique-de-confidentialité" className="underline">Politique de confidentialité</Link>.</p>
+          </div>
         </div>
       </div>
     </div>
