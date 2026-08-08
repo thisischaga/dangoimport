@@ -280,9 +280,20 @@ html.dark .focus\:ring-gray-200:focus { --tw-ring-color: #2d3748 !important; }
   border: 1px solid rgba(255, 255, 255, 0.08);
   animation: tiktokToastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: min(90vw, 480px);
-  white-space: pre-wrap;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
   pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .tiktok-toast {
+    max-width: min(92vw, 360px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @keyframes tiktokToastIn {

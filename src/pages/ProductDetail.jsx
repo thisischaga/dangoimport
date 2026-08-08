@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -359,7 +359,7 @@ export default function ProductDetail() {
                   )}
                 </div>
                 {hasPromo && (
-                  <p className="text-[11px] font-bold text-rose-500 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full w-fit">
+                  <p className="text-[11px] font-bold text-rose-500 bg-rose-50 border border-red-100 px-3 py-1 rounded-[10px] w-fit">
                     Économisez {formatCFA(price - promoPrice)} sur cet achat !
                   </p>
                 )}
@@ -388,8 +388,7 @@ export default function ProductDetail() {
               {/* Stock and Quantity */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-2">
-                  <span className={`h-2.5 w-2.5 rounded-full ${inStock ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                  <span className={`text-xs font-bold ${inStock ? 'text-emerald-700' : 'text-rose-600'}`}>
+                  <span className={`text-xs font-bold ${inStock ? 'text-black' : 'text-red-500'}`}>
                     {inStock ? (isLowStock ? `Plus que ${stock} restants !` : `En stock (${stock} disponibles)`) : 'Rupture de stock'}
                   </span>
                 </div>
@@ -412,7 +411,7 @@ export default function ProductDetail() {
                 <button
                   onClick={handleAddToCart}
                   disabled={!inStock}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-2xl py-3.5 px-6 text-sm font-bold shadow-sm transition cursor-pointer ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 px-6 text-sm font-bold shadow-sm transition cursor-pointer ${
                     inStock
                       ? 'bg-white border-2 border-[#FF6B00] text-[#FF6B00] hover:bg-[#FFFDFB]'
                       : 'bg-slate-100 border-none text-slate-400 cursor-not-allowed'
@@ -425,13 +424,12 @@ export default function ProductDetail() {
                 <button
                   onClick={handleBuyNow}
                   disabled={!inStock}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-2xl py-3.5 px-6 text-sm font-bold shadow-sm border-none text-white cursor-pointer ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 px-6 text-sm font-bold shadow-sm border-none text-white cursor-pointer ${
                     inStock
                       ? 'bg-[#FF6B00] hover:bg-[#e75b00]'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   }`}
                 >
-                  <Zap size={15} />
                   Acheter maintenant
                 </button>
               </div>
