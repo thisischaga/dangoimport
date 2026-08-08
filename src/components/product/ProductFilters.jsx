@@ -16,15 +16,6 @@ import {
   DEFAULT_CATALOG_FILTERS,
 } from '../../utils/productFilters';
 
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Pertinence' },
-  { value: 'newest', label: 'Nouveautés' },
-  { value: 'price-asc', label: 'Prix croissant' },
-  { value: 'price-desc', label: 'Prix décroissant' },
-  { value: 'popular', label: 'Plus populaires' },
-  { value: 'promo', label: 'Promotions' },
-];
-
 const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];
 
 function Chip({ active, onClick, children }) {
@@ -190,24 +181,6 @@ function ProductFilters({
                     })}
                   </div>
                 )}
-              </div>
-
-              {/* Tri */}
-              <div>
-                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Trier par
-                </h4>
-                <select
-                  value={draft.sort}
-                  onChange={(e) => setDraft((f) => ({ ...f, sort: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/15"
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* Prix */}

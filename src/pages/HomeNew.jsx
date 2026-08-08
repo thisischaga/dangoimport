@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  Store,
+  BadgeCheck as BadgeCheckAlt,
+  Flame,
+  Sparkles,
+  Star,
+  TrendingUp,
+  Compass,
+} from 'lucide-react';
 import ProductGrid from '../components/product/ProductGrid';
+import ProductCard from '../components/product/ProductCard';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import { mockProducts } from '../data/mockData';
@@ -64,7 +74,7 @@ function HomeNew({ cartCount: cartCountProp }) {
         }
       } catch {
         if (isMounted) {
-          setProducts(mockProducts.map(normalizeProduct));
+          setProducts([]);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -78,35 +88,60 @@ function HomeNew({ cartCount: cartCountProp }) {
     };
   }, [searchQuery, filters.category, filters.minPrice, filters.maxPrice, filters.sort]);
 
+  const offersOfDay = useMemo(() => {
+    return products.filter(p => p.promoPrice && p.promoPrice < p.price).slice(0, 5);
+  }, [products]);
+
+  const popularProducts = useMemo(() => {
+    return products.filter(p => p.isBoosted || p.isFeatured).slice(0, 5);
+  }, [products]);
+
+  const bestSellers = useMemo(() => {
+    return [...products].sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0)).slice(0, 5);
+  }, [products]);
+
+  const newArrivals = useMemo(() => {
+    return products.filter(p => p.isNewArrival || p.isNew).slice(0, 5);
+  }, [products]);
+
   const sectionTitle = searchQuery
-    ? `Produits pour «${searchQuery}»`
-    : 'Produits tendance';
+    ? `Résultats pour «${searchQuery}»`
+    : 'Recommandé pour vous';
 
   return (
     <div className="min-h-screen bg-[#f6f6f7] text-slate-900">
       <Header cartCount={cartCount} />
 
       <main>
+        {/* ── Desktop Hero Section + Category Sidebar ── */}
         {!searchQuery && (
-          <section className="hidden lg:block mx-auto max-w-7xl h-[300px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-            <div
-              className="overflow-hidden bg-cover bg-center"
-              style={{
-                backgroundImage: `linear-gradient(135deg, rgba(255, 106, 0, 0.87), rgba(186, 186, 180, 0.15)), url(${bannerImage})`,
-              }}
-            >
-              <div className="relative z-10 min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20">
-                <h1 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                  Achetez malin,
-                  <span className="block text-4xl sm:text-5xl lg:text-6xl font-black mt-3">
-                    livrez vite
-                  </span>
+          <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-xl bg-slate-950 text-white min-h-[300px] lg:h-[300px]  px-8 lg:px-12 py-10 shadow-lg ">
+              <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: `url(${bannerImage})` }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+              <div className="relative z-10 max-w-2xl mx-auto " style={{float: "left"}}>
+                <h1 className="text-3xl lg:text-5xl font-extrabold text-white leading-tight">
+                  Les meilleures offres <br />
+                  <span className="text-[#FF6B00]">au meilleur prix</span>
                 </h1>
+                <p className="text-slate-200 text-sm mt-4 font-semibold max-w-lg leading-relaxed">
+                  Découvrez notre catalogue de produit avec livraison rapide au Bénin et Togo.
+                </p>
+                <button
+                  onClick={() => {
+                    const gridEl = document.getElementById('marketplace-feeds');
+                    if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="mt-8 rounded-full bg-[#FF6B00] px-8 py-3 text-sm font-black text-white hover:bg-[#e75b00] cursor-pointer transition shadow-md hover:shadow-lg"
+                >
+                  Acheter maintenant
+                </button>
               </div>
             </div>
           </section>
         )}
 
+        {/* ── Promotional Header for Search ── */}
         {searchQuery && (
           <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -118,13 +153,77 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         )}
 
-        <section className="bg-[#f6f6f7] pb-0">
-          <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-            <div className="mb-4 font-display">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#FF6B00]">
-                {searchQuery ? 'Résultats' : 'Sélection'}
-              </p>
-              <h2 className="text-[22px] font-extrabold text-[#0f0f0f] tracking-tight">{sectionTitle}</h2>
+        {/* ── Marketplace Sections (Only when not searching) ── */}
+        {!searchQuery && (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10 pt-8">
+            {/* 1. Offres du jour */}
+            {offersOfDay.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-150 pb-2">
+                  <Flame className="text-[#FF6B00]" size={20} />
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Offres du jour</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {offersOfDay.map((product) => (
+                    <ProductCard key={product.id || product._id} product={product} onAddToCart={addToCart} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 2. Produits populaires */}
+            {popularProducts.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-150 pb-2">
+                  <Compass className="text-[#FF6B00]" size={20} />
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Produits populaires</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {popularProducts.map((product) => (
+                    <ProductCard key={product.id || product._id} product={product} onAddToCart={addToCart} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 3. Meilleures ventes */}
+            {bestSellers.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-150 pb-2">
+                  <TrendingUp className="text-[#FF6B00]" size={20} />
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Meilleures ventes</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {bestSellers.map((product) => (
+                    <ProductCard key={product.id || product._id} product={product} onAddToCart={addToCart} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 4. Nouveautés */}
+            {newArrivals.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-150 pb-2">
+                  <Sparkles className="text-[#FF6B00]" size={20} />
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Nouveautés</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {newArrivals.map((product) => (
+                    <ProductCard key={product.id || product._id} product={product} onAddToCart={addToCart} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
+        {/* ── 5. Recommandé pour vous (Main Catalog Grid Feed) ── */}
+        <section id="marketplace-feeds" className="bg-[#f6f6f7] pb-12">
+          <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+            <div className="mb-4 border-b border-slate-150 pb-2 flex items-center gap-2">
+              <Star className="text-[#FF6B00]" size={20} />
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">{sectionTitle}</h2>
             </div>
           </div>
 
@@ -139,6 +238,7 @@ function HomeNew({ cartCount: cartCountProp }) {
           />
         </section>
 
+        {/* ── Becoming a seller footer promo ── */}
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="rounded-[18px] border border-[#FFD9BE] bg-[#FFF3EA] p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-center">

@@ -468,10 +468,26 @@ const CartPage = () => {
               </div>
             </div>
 
-            
           </aside>
         </div>
+        
+        {/* Spacer for Mobile Sticky checkout bar */}
+        <div className="h-20 xl:hidden" />
       </main>
+
+      {/* Sticky Mobile Checkout Bar */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-[6px] border-t border-slate-200 px-4 py-3.5 shadow-lg z-40 flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total ({cartCount})</p>
+          <p className="text-xl font-black text-[#FF6B00] mt-0.5">{formatMoney(Number(promoPreview?.total || total))}</p>
+        </div>
+        <button
+          onClick={handleCheckout}
+          className="rounded-xl bg-[#FF6B00] px-5 py-3 text-xs font-black text-white shadow hover:bg-[#E85F00] transition cursor-pointer"
+        >
+          Passer au paiement
+        </button>
+      </div>
 
       <Footer />
     </div>

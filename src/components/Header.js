@@ -4,6 +4,7 @@ import { Search, ShoppingCart, Store, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
+import { Link } from 'react-router-dom';
 
 const navItems = [
   { label: 'Accueil', to: '/' },
@@ -164,7 +165,7 @@ const Header = () => {
     <header className="border-b border-slate-200 bg-[#FFF7F1]">
       <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
         {/* Logo and nav */}
-        <div className="flex flex-1 min-w-0 items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button type="button" aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0 cursor-pointer">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
@@ -175,16 +176,16 @@ const Header = () => {
             </div>
             <div className="hidden sm:block min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#FF6B00]">Marketplace</p>
-              <h1 className="text-lg font-black text-[#111827] truncate">Dangoimport.com</h1>
+              <h1 className="text-lg font-black text-[#111827] truncate">Dangoimport</h1>
             </div>
           </button>
 
         </div>
 
         {/* Search + actions */}
-        <div className="flex flex-1 min-w-0 items-center gap-2 justify-end">
+        <div className="flex flex-1 min-w-0 items-center gap-4 justify-end">
           <div className="hidden md:flex flex-1 justify-center min-w-0 relative">
-            <form onSubmit={handleSearch} className="w-full max-w-[950px] min-w-0 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex">
+            <form onSubmit={handleSearch} className="w-full min-w-0 items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex">
               <Search size={16} className="text-slate-500" />
               <input
                 className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
@@ -194,7 +195,7 @@ const Header = () => {
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
               />
-              <button className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white" type="submit">Rechercher</button>
+              <button className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer" style={{ cursor: 'pointer' }} type="submit">Rechercher</button>
             </form>
 
             {showSuggestions && (
@@ -425,6 +426,25 @@ const Header = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Secondary navigation / Category row for Desktop */}
+      <div className="hidden md:block bg-white border-b border-slate-100">
+        <div className="mx-auto max-w-7xl px-4 py-2 lg:px-8 flex items-center justify-between text-xs font-bold text-slate-600">
+          <div className="flex items-center gap-6">
+            <Link to="/category/electronique" className="hover:text-[#FF6B00] transition">Électronique</Link>
+            <Link to="/category/mode" className="hover:text-[#FF6B00] transition">Mode</Link>
+            <Link to="/category/maison" className="hover:text-[#FF6B00] transition">Maison</Link>
+            <Link to="/category/beaute" className="hover:text-[#FF6B00] transition">Beauté</Link>
+            <Link to="/category/telephones" className="hover:text-[#FF6B00] transition">Téléphones</Link>
+            <Link to="/category/informatique" className="hover:text-[#FF6B00] transition">Informatique</Link>
+            <Link to="/category/accessoires" className="hover:text-[#FF6B00] transition">Accessoires</Link>
+            <Link to="/category/sport" className="hover:text-[#FF6B00] transition">Sport</Link>
+          </div>
+          <div className="flex items-center gap-4 text-slate-500 font-medium">
+            <span>Livraison gratuite dès 50 000 FCFA</span>
+          </div>
+        </div>
+      </div>
     </header>
   );
 };

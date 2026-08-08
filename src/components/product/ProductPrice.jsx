@@ -65,7 +65,18 @@ function ProductPrice({
             >
               {formatCFA(price)}
             </span>
-
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: 'white',
+                background: 'red',
+                borderRadius: '4px',
+                padding: '5px 5px',
+              }}
+            >
+              -{discount}%
+            </span>
           </>
         )}
       </div>

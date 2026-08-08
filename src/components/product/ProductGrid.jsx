@@ -9,7 +9,6 @@ import { motion } from 'framer-motion';
 import { PackageSearch } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
-import ProductFilters from './ProductFilters';
 import { applyProductFilters } from '../../utils/productFilters';
 
 const PAGE_SIZE = 12;
@@ -55,9 +54,6 @@ function ProductGrid({
   onAddToCart,
   filters,
   onFiltersChange,
-  showFilters = true,
-  drawerOpen,
-  setDrawerOpen,
 }) {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -114,15 +110,6 @@ function ProductGrid({
 
   return (
     <div>
-      {/**showFilters && (
-        <ProductFilters
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-          drawerOpen={drawerOpen}
-          setDrawerOpen={setDrawerOpen}
-        />
-      ) */}
-
       <div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
         style={{ paddingTop: '20px', paddingBottom: '40px' }}
@@ -145,18 +132,15 @@ function ProductGrid({
         <div id="product-grid-main" style={{ display: 'grid', gap: '10px' }}>
           <style>{`
             #product-grid-main {
-              grid-template-columns: repeat(1, 1fr);
+              grid-template-columns: repeat(2, 1fr);
             }
             @media (min-width: 640px) {
-              #product-grid-main { grid-template-columns: repeat(2, 1fr); }
-            }
-            @media (min-width: 768px) {
               #product-grid-main { grid-template-columns: repeat(3, 1fr); }
             }
-            @media (min-width: 1024px) {
+            @media (min-width: 768px) {
               #product-grid-main { grid-template-columns: repeat(4, 1fr); }
             }
-            @media (min-width: 1280px) {
+            @media (min-width: 1024px) {
               #product-grid-main { grid-template-columns: repeat(5, 1fr); }
             }
           `}</style>

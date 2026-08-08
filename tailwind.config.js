@@ -19,7 +19,9 @@ module.exports = {
         bg: '#eaeded', // Gris clair Amazon
       },
       fontFamily: {
-        sans: ['"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
       },
     },
   },
