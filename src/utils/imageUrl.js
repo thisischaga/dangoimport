@@ -20,3 +20,16 @@ export function getProductImage(product) {
   if (raw?.url) return resolveImageUrl(raw.url);
   return null;
 }
+
+export function getProductImages(product, max = 5) {
+  if (!product) return [];
+  const raw = product.images || [];
+  const resolved = raw
+    .map((img) => (typeof img === 'string' ? resolveImageUrl(img) : resolveImageUrl(img?.url)))
+    .filter(Boolean);
+  if (resolved.length === 0) {
+    const single = getProductImage(product);
+    if (single) return [single];
+  }
+  return resolved.slice(0, max);
+}

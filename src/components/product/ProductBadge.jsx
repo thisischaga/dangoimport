@@ -42,7 +42,7 @@ export function getCornerBadge(product, { hasPromo, discount, isOutOfStock }) {
     return { type: 'nouveau', label: 'Nouveau' };
   }
   if (product?.isBestSeller) {
-    return { type: 'bestSeller', label: 'Best Seller' };
+    return { type: 'bestSeller', label: 'Top vente' };
   }
   if (product?.isBoosted || product?.isFeatured) {
     return { type: 'populaire', label: 'Populaire' };

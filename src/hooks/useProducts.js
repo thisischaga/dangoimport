@@ -92,6 +92,28 @@ export function useSimilarProducts(id) {
   });
 }
 
+export function useProductReviews(productId, { page = 1, limit = 10 } = {}) {
+  return useQuery({
+    queryKey: ['products', productId, 'reviews', page, limit],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      const res = await axios.get(`${API}/api/products/${productId}/reviews?${params}`, {
+        timeout: 15000,
+      });
+      const data = res.data?.data;
+      const reviews = Array.isArray(data) ? data : [];
+      const pagination = res.data?.pagination || {};
+      return { reviews, pagination };
+    },
+    enabled: !!productId,
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
 export function useVendorProducts(vendorName) {
   return useQuery({
     queryKey: ['products', 'vendor', vendorName],

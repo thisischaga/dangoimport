@@ -1,3 +1,11 @@
+export const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Pertinence' },
+  { value: 'newest', label: 'Nouveautés' },
+  { value: 'price-asc', label: 'Prix croissant' },
+  { value: 'price-desc', label: 'Prix décroissant' },
+  { value: 'promo', label: 'Promotions' },
+];
+
 /** Prix affiché : promo si valide, sinon prix normal */
 export function getEffectivePrice(product) {
   const price = Number(product?.price ?? 0) || 0;
@@ -8,6 +16,7 @@ export function getEffectivePrice(product) {
 
 export const DEFAULT_CATALOG_FILTERS = {
   category: '',
+  sort: 'relevance',
   minPrice: '',
   maxPrice: '',
   onlyPromo: false,
@@ -85,6 +94,23 @@ export function applyProductFilters(products, filters = {}) {
     );
   }
 
+  const sort = filters.sort || 'relevance';
+  if (sort === 'price-asc') {
+    result.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+  } else if (sort === 'price-desc') {
+    result.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+  } else if (sort === 'newest') {
+    result.sort(
+      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    );
+  } else if (sort === 'promo') {
+    result.sort((a, b) => {
+      const aPromo = getEffectivePrice(a) < Number(a.price ?? 0) ? 1 : 0;
+      const bPromo = getEffectivePrice(b) < Number(b.price ?? 0) ? 1 : 0;
+      return bPromo - aPromo;
+    });
+  }
+
   return result;
 }
 
@@ -94,6 +120,9 @@ export function buildProductQueryParams(filters = {}, searchQuery = '') {
   if (filters.category) params.set('category', filters.category);
   if (filters.minPrice) params.set('minPrice', String(filters.minPrice));
   if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice));
+  if (filters.sort && filters.sort !== 'relevance') {
+    params.set('sort', filters.sort);
+  }
 
   return params;
 }

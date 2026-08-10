@@ -11,7 +11,7 @@ import ShopStats from '../components/shop/ShopStats';
 import ShopFilters from '../components/shop/ShopFilters';
 import ShopAbout from '../components/shop/ShopAbout';
 import ShopEmptyState from '../components/shop/ShopEmptyState';
-import { useStore, useStoreProducts, useStoreRelated } from '../hooks/useStore';
+import { useStore, useStoreProducts } from '../hooks/useStore';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../components/ui/ToastProvider';
 import { getProductImage } from '../utils/imageUrl';
@@ -97,7 +97,6 @@ export default function Shop() {
   const stats = storePayload?.stats || {};
 
   const productsQuery = useStoreProducts(slug, queryParams);
-  const relatedQuery = useStoreRelated(slug, 8);
 
   const products = useMemo(
     () =>
@@ -105,11 +104,6 @@ export default function Shop() {
         .map((p) => normalizeProduct(p, seller?.isVerified))
         .filter(Boolean),
     [productsQuery.data, seller?.isVerified]
-  );
-
-  const related = useMemo(
-    () => (relatedQuery.data || []).map((p) => normalizeProduct(p, false)).filter(Boolean),
-    [relatedQuery.data]
   );
 
   const pagination = productsQuery.data?.pagination;
@@ -422,21 +416,6 @@ export default function Shop() {
             </div>
 
             <ShopAbout store={store} seller={seller} />
-
-            {related.length > 0 ? (
-              <section className="shop-related">
-                <h2>Vous pourriez aussi aimer</h2>
-                <div className="shop-grid shop-grid--related">
-                  {related.map((p) => (
-                    <ProductCard
-                      key={p._id || p.id}
-                      product={p}
-                      onAddToCart={handleAddToCart}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
           </>
         )}
       </div>

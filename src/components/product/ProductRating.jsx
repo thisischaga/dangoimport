@@ -1,70 +1,55 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 
-function StarIcon({ filled, half }) {
+function StarIcon({ filled, half, size = 12 }) {
   if (half) {
     return (
-      <span style={{ position: 'relative', display: 'inline-block', width: 12, height: 12 }}>
-        <Star size={12} style={{ color: '#e0e0e0', position: 'absolute', top: 0, left: 0 }} fill="#e0e0e0" />
-        <span style={{ position: 'absolute', top: 0, left: 0, overflow: 'hidden', width: '50%' }}>
-          <Star size={12} style={{ color: '#FF6B00' }} fill="#FF6B00" />
+      <span className="product-rating__star-half" style={{ width: size, height: size }}>
+        <Star size={size} fill="#e0e0e0" color="#e0e0e0" />
+        <span className="product-rating__star-half-fill">
+          <Star size={size} fill="#FF6B00" color="#FF6B00" />
         </span>
       </span>
     );
   }
   return (
     <Star
-      size={12}
+      size={size}
       style={{ color: filled ? '#FF6B00' : '#e0e0e0' }}
       fill={filled ? '#FF6B00' : '#e0e0e0'}
     />
   );
 }
 
-function ProductRating({ rating = 4.5, reviewCount, soldCount }) {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating - fullStars >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+function ProductRating({ rating, reviewCount, size = 'sm', showStars = true, hideCount = false }) {
+  const numRating = Number(rating);
+  const numReviews = Number(reviewCount);
 
-  const formatCount = (n) => {
-    if (!n) return null;
-    if (n >= 1000) return `${(n / 1000).toFixed(1).replace('.0', '')}k`;
-    return String(n);
-  };
+  if (!numRating || numRating <= 0 || !numReviews || numReviews <= 0) {
+    return null;
+  }
+
+  const fullStars = Math.floor(numRating);
+  const hasHalf = numRating - fullStars >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+  const fontSize = size === 'lg' ? '13px' : '11px';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
-      {/* Stars */}
-      <span style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
-        {Array.from({ length: fullStars }).map((_, i) => (
-          <StarIcon key={`f${i}`} filled />
-        ))}
-        {hasHalf && <StarIcon half />}
-        {Array.from({ length: emptyStars }).map((_, i) => (
-          <StarIcon key={`e${i}`} filled={false} />
-        ))}
-      </span>
-
-      {/* Rating number */}
-      <span style={{ fontSize: '11px', fontWeight: 600, color: '#FF6B00' }}>
-        {rating.toFixed(1)}
-      </span>
-
-      {/* Reviews */}
-      {reviewCount > 0 && (
-        <span style={{ fontSize: '11px', color: '#9a9a9a' }}>
-          ({formatCount(reviewCount)})
+    <div className="product-rating" style={{ fontSize }}>
+      {showStars && (
+        <span className="product-rating__stars">
+          {Array.from({ length: fullStars }).map((_, i) => (
+            <StarIcon key={`f${i}`} filled size={size === 'lg' ? 14 : 12} />
+          ))}
+          {hasHalf && <StarIcon half size={size === 'lg' ? 14 : 12} />}
+          {Array.from({ length: emptyStars }).map((_, i) => (
+            <StarIcon key={`e${i}`} filled={false} size={size === 'lg' ? 14 : 12} />
+          ))}
         </span>
       )}
-
-      {/* Sold */}
-      {soldCount > 0 && (
-        <>
-          <span style={{ color: '#d5d5d5', fontSize: '11px' }}>·</span>
-          <span style={{ fontSize: '11px', color: '#9a9a9a' }}>
-            {formatCount(soldCount)} vendus
-          </span>
-        </>
+      <span className="product-rating__value">{numRating.toFixed(1)}</span>
+      {!hideCount && (
+        <span className="product-rating__count">({numReviews} avis)</span>
       )}
     </div>
   );

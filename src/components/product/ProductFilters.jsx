@@ -14,6 +14,7 @@ import { getCategories } from '../../api';
 import {
   countActiveFilters,
   DEFAULT_CATALOG_FILTERS,
+  SORT_OPTIONS,
 } from '../../utils/productFilters';
 
 const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];
@@ -51,6 +52,8 @@ function ProductFilters({
   drawerOpen: drawerOpenProp,
   setDrawerOpen: setDrawerOpenProp,
   showToolbar = true,
+  title = 'Catalogue produits',
+  productCount = 0,
 }) {
   const [internalFilters, setInternalFilters] = useState(DEFAULT_CATALOG_FILTERS);
   const filters = controlledFilters ?? internalFilters;
@@ -306,56 +309,44 @@ function ProductFilters({
   return (
     <div className="catalog-filters mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="catalog-filters__panel">
-        {/* Ligne 1 — tri + filtres toujours visibles */}
-        <div className="catalog-filters__controls">
-          <label className="catalog-filters__sort-wrap">
-            <span className="catalog-filters__sort-label">Trier</span>
-            <select
-              value={filters.sort}
-              onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
-              className="catalog-filters__sort"
-              aria-label="Trier les produits"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
+        <div className="catalog-filters__header">
+          <div className="catalog-filters__title-block">
+            <p className="catalog-filters__label">Sélection</p>
+            <div className="catalog-filters__title-row">
+              <h2 className="catalog-filters__title">{title}</h2>
+              <span className="catalog-filters__count">
+                {productCount} produit{productCount === 1 ? '' : 's'}
+              </span>
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setDrawerOpen(true)}
-            className="catalog-filters__btn catalog-filters__btn--primary cursor-pointer"
-          >
-            <SlidersHorizontal size={16} />
-            Filtres
-            {activeCount > 0 ? (
-              <span className="catalog-filters__badge">{activeCount}</span>
-            ) : null}
-          </button>
-
-          {activeCount > 0 ? (
+          <div className="catalog-filters__controls">
             <button
               type="button"
-              onClick={resetAll}
-              className="catalog-filters__btn catalog-filters__btn--ghost"
-              title="Réinitialiser les filtres"
+              onClick={() => setDrawerOpen(true)}
+              className="catalog-filters__btn catalog-filters__btn--primary cursor-pointer"
             >
-              <X size={16} />
+              <SlidersHorizontal size={16} />
+              Filtres
+              {activeCount > 0 ? (
+                <span className="catalog-filters__badge">{activeCount}</span>
+              ) : null}
             </button>
-          ) : null}
+
+            {activeCount > 0 ? (
+              <button
+                type="button"
+                onClick={resetAll}
+                className="catalog-filters__btn catalog-filters__btn--ghost"
+                title="Réinitialiser les filtres"
+              >
+                <X size={16} />
+              </button>
+            ) : null}
+          </div>
         </div>
 
-        {/* Ligne 2 — catégories */}
         <div className="catalog-filters__chips">
-          <Chip
-            active={!filters.category}
-            onClick={() => setFilters((f) => ({ ...f, category: '' }))}
-          >
-            Toutes
-          </Chip>
           {!loadingCategories &&
             categories.map((cat) => {
               const name = cat.name || cat.label || '';
