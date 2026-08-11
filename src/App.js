@@ -45,6 +45,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
+import MobileTabBar from './components/mobiletabbar';
 
 function getPageTitle(pathname) {
   const routeTitles = [
@@ -196,7 +197,9 @@ function App() {
                   <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFour/>}/>
                   */}
                 </Routes>
+                <MobileTabBar />
               </Router>
+              
             </NotificationProvider>
           </CartProvider>
         </ConfirmProvider>

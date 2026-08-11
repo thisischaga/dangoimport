@@ -112,7 +112,12 @@ function ProductGrid({
     <div>
       <div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-        style={{ paddingTop: '20px', paddingBottom: '40px' }}
+        style={{ paddingTop: '100px', 
+          paddingBottom: '40px',
+          '@media (max-width: 768px)': {
+            paddingTop: '20px',
+          },
+        }}
       >
         {!loading && (
           <p

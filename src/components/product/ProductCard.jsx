@@ -22,11 +22,48 @@ function ProductCard({ product, onAddToCart }) {
   const hoverImage = images[1] || null;
 
   const stock = Number(product?.stock ?? 0) || 0;
+
+  const initialStock = Number(
+    product?.initialStock ??
+    product?.stockInitial ??
+    product?.originalStock ??
+    product?.stock ??
+    0
+  ) || 0;
+
   const minStock = Number(product?.minStock ?? 10) || 10;
+
   const isOutOfStock = stock <= 0;
-  const isLowStock = !isOutOfStock && stock <= minStock;
+
+  const isLowStock =
+    !isOutOfStock &&
+    stock <= minStock;
+
+  // Pourcentage de stock restant
+  const stockPercentage =
+    initialStock > 0
+      ? Math.min(100, Math.max(0, (stock / initialStock) * 100))
+      : 0;
 
   const brand = product?.brand || '';
+  const category = product?.category || '';
+  const sellerName = product?.vendorName || product?.sellerName || product?.vendor || '';
+  const sellerVerified = Boolean(product?.sellerVerified || product?.isVerified);
+
+  const deliveryZones = Array.isArray(product?.deliveryZones)
+    ? product.deliveryZones
+        .map((zone) =>
+          typeof zone === 'string'
+            ? zone
+            : zone?.name || zone?.label || zone?.country || zone?.city || ''
+        )
+        .filter(Boolean)
+    : [];
+
+  const shippingInfo = String(product?.shippingInfo || '').trim();
+  const deliveryInfo = deliveryZones.length > 0
+    ? deliveryZones.join(', ')
+    : shippingInfo;
 
   const rating = product?.rating != null ? Number(product.rating) : null;
   const reviewCount =
@@ -68,31 +105,35 @@ function ProductCard({ product, onAddToCart }) {
         </Link>
 
         <div className="product-card__actions">
+          
           <button
             type="button"
-            className={`product-card__action-btn ${liked ? 'is-liked' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setLiked((v) => !v);
+            style={{
+              width: '55px',
+              height: '55px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'orange',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
             }}
-            aria-label="Ajouter aux favoris"
-          >
-            <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
-          </button>
-          <button
-            type="button"
-            className="product-card__action-btn product-card__action-btn--cart"
+            className="product-card__action-btn"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
             aria-label="Ajouter au panier"
           >
-            <ShoppingCart size={16} />
+            <ShoppingCart size={29} color="white" fill="white"/>
           </button>
         </div>
       </div>
 
       <div className="product-card__body">
+        {(category || sellerName) && (
+          <div className="product-card__meta-line">
+            {category && <span className="product-card__category">{category}</span>}
+
+          </div>
+        )}
+
         <Link to={`/product/${productId}`} className="product-card__title-link">
           <h3 className="product-card__title" title={product?.name}>
             {product?.name || ''}
@@ -115,9 +156,55 @@ function ProductCard({ product, onAddToCart }) {
           )}
         </div>
 
-        {isLowStock && cornerBadge && (
-          <p className="product-card__stock is-low">Plus que {stock} disponibles</p>
+        {deliveryInfo && (
+          <div className="product-card__delivery-line">
+            <span className="product-card__delivery-status">Livraison : {deliveryInfo}</span>
+          </div>
         )}
+
+        <div className="product-card__stock-progress">
+          <div className="product-card__stock-header">
+            <span className="product-card__stock-label">
+              Stock
+            </span>
+
+            {isOutOfStock ? (
+              <span className="product-card__stock-text is-out">
+                Rupture de stock
+              </span>
+            ) : isLowStock ? (
+              <span className="product-card__stock-text is-low">
+                Plus que {stock} disponible{stock > 1 ? 's' : ''}
+              </span>
+            ) : (
+              <span className="product-card__stock-text is-in">
+                {stock} disponible{stock > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+
+          <div
+            className="product-card__stock-bar"
+            aria-label={
+              isOutOfStock
+                ? 'Rupture de stock'
+                : `${stock} produits disponibles`
+            }
+          >
+            <div
+              className={`product-card__stock-fill ${
+                isOutOfStock
+                  ? 'is-out'
+                  : isLowStock
+                    ? 'is-low'
+                    : 'is-in'
+              }`}
+              style={{
+                width: `${stockPercentage}%`,
+              }}
+            />
+          </div>
+        </div>
       </div>
     </article>
   );

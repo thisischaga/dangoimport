@@ -162,7 +162,21 @@ const Header = () => {
   const cartCount = getCartCount();
 
   return (
-    <header className="border-b border-slate-200 bg-[#FFF7F1]">
+    <header className="border-b border-slate-200 bg-[#FFF7F1]" style={{
+      position: 'fixed',
+      width: '100%',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 100,
+      backgroundColor: '#FFF7F1',
+      borderBottom: '1px solid #E5E7EB',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+      transition: 'all 0.3s ease',
+      '@media (max-width: 768px)': {
+        position: 'relative',
+      },
+    }}>
       <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
         {/* Logo and nav */}
         <div className="flex items-center gap-3 flex-shrink-0">

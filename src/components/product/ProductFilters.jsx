@@ -310,28 +310,9 @@ function ProductFilters({
     <div className="catalog-filters mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="catalog-filters__panel">
         <div className="catalog-filters__header">
-          <div className="catalog-filters__title-block">
-            <p className="catalog-filters__label">Sélection</p>
-            <div className="catalog-filters__title-row">
-              <h2 className="catalog-filters__title">{title}</h2>
-              <span className="catalog-filters__count">
-                {productCount} produit{productCount === 1 ? '' : 's'}
-              </span>
-            </div>
-          </div>
 
           <div className="catalog-filters__controls">
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              className="catalog-filters__btn catalog-filters__btn--primary cursor-pointer"
-            >
-              <SlidersHorizontal size={16} />
-              Filtres
-              {activeCount > 0 ? (
-                <span className="catalog-filters__badge">{activeCount}</span>
-              ) : null}
-            </button>
+      
 
             {activeCount > 0 ? (
               <button

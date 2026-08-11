@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt } from 'lucide-react';
+import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/product/ProductGrid';
 import ProductFilters from '../components/product/ProductFilters';
 import client from '../apiClient';
@@ -67,7 +67,7 @@ function HomeNew({ cartCount: cartCountProp }) {
       <Header cartCount={cartCount} />
 
       <main>
-        {!searchQuery && (
+        {/**!searchQuery && (
           <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-xl bg-slate-950 text-white min-h-[300px] lg:h-[300px] px-8 lg:px-12 py-10 shadow-lg">
               <div
@@ -83,33 +83,13 @@ function HomeNew({ cartCount: cartCountProp }) {
                 <p className="text-slate-200 text-sm mt-4 font-semibold max-w-lg leading-relaxed">
                   Découvrez notre catalogue avec livraison au Bénin et Togo.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    document.getElementById('marketplace-feeds')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="mt-8 rounded-full bg-[#FF6B00] px-8 py-3 text-sm font-black text-white hover:bg-[#e75b00] cursor-pointer transition shadow-md hover:shadow-lg"
-                >
-                  Voir le catalogue
-                </button>
               </div>
             </div>
           </section>
-        )}
+        ) */}
 
         <section id="marketplace-feeds" className="bg-[#f6f6f7] pb-12">
-          <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-            <div className="mb-1 flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3">
-              <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">{catalogTitle}</h2>
-                {!loading && (
-                  <p className="text-sm text-slate-500 mt-1">
-                    {products.length} produit{products.length !== 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          
 
           <ProductFilters
             filters={filters}
