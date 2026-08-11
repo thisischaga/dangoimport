@@ -162,14 +162,14 @@ const Header = () => {
   const cartCount = getCartCount();
 
   return (
-    <header className="border-b border-slate-200 bg-[#FFF7F1]" style={{
+    <header className="border-b border-slate-200 " style={{
       position: 'fixed',
       width: '100%',
       top: 0,
       left: 0,
       right: 0,
       zIndex: 100,
-      backgroundColor: '#FFF7F1',
+      backgroundColor: "#fff",
       borderBottom: '1px solid #E5E7EB',
       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
       transition: 'all 0.3s ease',
@@ -180,9 +180,9 @@ const Header = () => {
       <div className="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 lg:px-8">
         {/* Logo and nav */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          <button type="button" aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0 cursor-pointer">
+          {/**<button type="button" aria-label="Ouvrir le menu" onClick={() => setDrawerOpen(true)} className="md:hidden p-2 rounded-md text-slate-700 flex-shrink-0 cursor-pointer">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
+          </button> */}
 
           <button type="button" onClick={() => navigate('/')} className="flex items-center gap-3 text-left flex-shrink-0">
             <div className="rounded-2xl bg-[#FF6B00] p-2 text-white shadow-sm">
@@ -302,7 +302,7 @@ const Header = () => {
                       )}
                     </div>
                     <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-                      <button
+                      {user && <button
                         type="button"
                         onClick={() => {
                           navigate('/mes-commandes');
@@ -311,7 +311,7 @@ const Header = () => {
                         className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
                       >
                         Mes commandes
-                      </button>
+                      </button>}
                       {user ? (
                         <button
                           type="button"
@@ -344,7 +344,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Drawer + mobile search overlays */}
+      {/* Drawer + mobile search overlays 
       <AnimatePresence>
         {drawerOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40">
@@ -410,7 +410,7 @@ const Header = () => {
                     Se connecter
                   </button>
                 )}
-                <button
+                {/**<button
                   type="button"
                   onClick={() => {
                     navigate('/cart');
@@ -419,12 +419,12 @@ const Header = () => {
                   className="w-full rounded-full bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white cursor-pointer flex justify-center items-center"
                 >
                   Voir mon panier ({cartCount > 99 ? '99+' : cartCount})
-                </button>
+                </button> 
               </div>
             </motion.aside>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>*/}
 
       <AnimatePresence>
         {mobileSearchOpen && (
