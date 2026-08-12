@@ -172,7 +172,7 @@ const Orders = () => {
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-900 transition-colors duration-300">
       <Header />
       <main className="max-w-6xl mx-auto px-4 py-8" style={{
-        marginTop: "150px",
+        marginTop: "75px",
         '@media (max-width: 768px)': {
           marginTop: "0px",
         }

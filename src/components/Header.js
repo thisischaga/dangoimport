@@ -3,12 +3,11 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
-  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, ShoppingCart, User,
+  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
 import { getProductImage } from '../utils/imageUrl';
-import { useCart } from '../context/CartContext';
 import logo from '../images/logo.png';
 
 const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphone', 'Parfum', 'Montre', 'Chargeur', 'Écouteurs'];
@@ -244,7 +243,6 @@ function MobileCategoryDrawer({ open, onClose }) {
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartCount } = useCart();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
@@ -253,9 +251,11 @@ const Header = () => {
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const suggestionTimer = useRef(null);
   const accountRef = useRef(null);
+  const mobileSearchInputRef = useRef(null);
 
   useEffect(() => {
     const loadUser = () => {
@@ -326,12 +326,26 @@ const Header = () => {
     return () => window.removeEventListener('pointerdown', handleClickOutside);
   }, []);
 
-  // Ferme le tiroir mobile si on repasse en desktop
+  // Ferme le tiroir + la recherche mobile si on repasse en desktop
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+        setMobileSearchOpen(false);
+      }
+    };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  // Focus auto sur le champ dès qu'il s'ouvre sur mobile
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      const t = window.setTimeout(() => mobileSearchInputRef.current?.focus(), 150);
+      return () => window.clearTimeout(t);
+    }
+    return undefined;
+  }, [mobileSearchOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem('dangoToken');
@@ -345,6 +359,7 @@ const Header = () => {
     if (e) e.preventDefault();
     const q = searchQuery.trim();
     setShowSuggestions(false);
+    setMobileSearchOpen(false);
     navigate(q ? `/shopping?q=${encodeURIComponent(q)}` : '/shopping');
   };
 
@@ -353,6 +368,7 @@ const Header = () => {
     if (!normalizedTerm) return;
     setSearchQuery(normalizedTerm);
     setShowSuggestions(false);
+    setMobileSearchOpen(false);
     navigate(`/shopping?q=${encodeURIComponent(normalizedTerm)}`);
   };
 
@@ -360,10 +376,11 @@ const Header = () => {
   const userEmail = user?.userEmail || user?.email || '';
   const userSurname = user?.userSurname || user?.surname || '';
 
-  const SearchForm = ({ className = '' }) => (
+  const SearchForm = ({ className = '', inputRef }) => (
     <form onSubmit={handleSearch} className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex ${className}`}>
       <Search size={16} className="text-slate-500" />
       <input
+        ref={inputRef}
         className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
         placeholder="Cherchez un produit, une marque ou une catégorie"
         value={searchQuery}
@@ -416,21 +433,6 @@ const Header = () => {
         </div>
       )}
     </div>
-  );
-
-  const CartLink = ({ className = '' }) => (
-    <Link
-      to="/cart"
-      className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-orange-50 hover:text-[#FF6B00] ${className}`}
-      aria-label="Panier"
-    >
-      <ShoppingCart size={22} strokeWidth={2} />
-      {cartCount > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[9px] font-black leading-none text-white ring-2 ring-white">
-          {cartCount > 99 ? '99+' : cartCount}
-        </span>
-      )}
-    </Link>
   );
 
   const AccountMenu = () => (
@@ -529,14 +531,21 @@ const Header = () => {
             <Menu size={22} />
           </button>
 
-          {/* Logo */}
-          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2 shrink-0">
-            <div className="flex min-w-0 items-center">
-              <img src={logo} alt="logo dangoimport" width={80} height={50}/>
-              <h1 className="text-sm sm:text-base md:text-lg font-black text-[#111827] truncate">
-                <span style={{ color: '#FF6B00' }}>Marketplace</span>
-              </h1>
-            </div>
+          {/* Logo + nom du site */}
+          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2.5 shrink-0 min-w-0">
+            <img
+              src={logo}
+              alt="logo dangoimport"
+              className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-lg object-contain"
+            />
+            <span className="flex flex-col items-start leading-none min-w-0">
+              <span className="text-base sm:text-lg md:text-xl font-black tracking-tight text-[#111827] truncate">
+                Dango<span className="text-[#FF6B00]">import</span>
+              </span>
+              <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
+                Marketplace
+              </span>
+            </span>
           </button>
 
           {/* Recherche desktop (inline) */}
@@ -545,18 +554,42 @@ const Header = () => {
             {showSuggestions && <SuggestionsPanel />}
           </div>
 
-          {/* Panier + compte */}
+          {/* Icônes à droite */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <CartLink />
+            {/* Icône recherche mobile */}
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen((v) => !v)}
+              className={`md:hidden flex h-10 w-10 items-center justify-center rounded-full transition ${
+                mobileSearchOpen ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-700 hover:bg-slate-100'
+              }`}
+              aria-label="Rechercher"
+              aria-expanded={mobileSearchOpen}
+            >
+              {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+            </button>
+
             <AccountMenu />
           </div>
         </div>
 
-        {/* Recherche mobile (sa propre ligne) */}
-        <div className="relative md:hidden pb-2">
-          <SearchForm />
-          {showSuggestions && <SuggestionsPanel />}
-        </div>
+        {/* Recherche mobile (repliée par défaut, ouverte au clic sur l'icône) */}
+        <AnimatePresence initial={false}>
+          {mobileSearchOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative md:hidden overflow-visible"
+            >
+              <div className="pb-2 pt-1">
+                <SearchForm inputRef={mobileSearchInputRef} />
+              </div>
+              {showSuggestions && <SuggestionsPanel />}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Navigation secondaire desktop */}
