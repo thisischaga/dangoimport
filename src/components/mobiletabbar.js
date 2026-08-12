@@ -2,10 +2,9 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Home,
-  Grid2X2,
+  LayoutGrid,
   ShoppingCart,
-  ClipboardList,
-  UserRound,
+  ShoppingBag,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -16,11 +15,11 @@ const tabs = [
     icon: Home,
     exact: true,
   },
-  {
+  /**{
     label: 'Catégories',
     to: '/toutes-les-categories',
-    icon: Grid2X2,
-  },
+    icon: LayoutGrid,
+  }, */
   {
     label: 'Panier',
     to: '/cart',
@@ -30,12 +29,7 @@ const tabs = [
   {
     label: 'Commandes',
     to: '/mes-commandes',
-    icon: ClipboardList,
-  },
-  {
-    label: 'Compte',
-    to: '/login',
-    icon: UserRound,
+    icon: ShoppingBag,
   },
 ];
 
@@ -48,7 +42,10 @@ export default function MobileTabBar() {
       return location.pathname === '/';
     }
 
-    return location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`);
+    return (
+      location.pathname === tab.to ||
+      location.pathname.startsWith(`${tab.to}/`)
+    );
   };
 
   return (
@@ -70,7 +67,8 @@ export default function MobileTabBar() {
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      <div className="mx-auto grid max-w-md grid-cols-5">
+      {/* 4 colonnes maintenant */}
+      <div className="mx-auto grid max-w-md grid-cols-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab);
@@ -97,7 +95,6 @@ export default function MobileTabBar() {
               `}
               aria-label={tab.label}
             >
-              {/* Active indicator */}
               {active && (
                 <span
                   className="

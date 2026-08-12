@@ -119,7 +119,12 @@ export default function CategoryPage() {
       <div>
         <Header />
 
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" style={{
+            marginTop: "130px",
+            '@media (max-width: 768px)': {
+              marginTop: "0px",
+            }
+          }}>
           {/* Breadcrumbs */}
           <nav className="text-xs text-slate-400 font-semibold mb-4 flex items-center gap-1.5">
             <Link to="/" className="hover:text-[#FF6B00] transition">Accueil</Link>

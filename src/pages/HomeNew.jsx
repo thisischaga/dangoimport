@@ -67,7 +67,7 @@ function HomeNew({ cartCount: cartCountProp }) {
       <Header cartCount={cartCount} />
 
       <main style={{
-        marginTop: "90px",
+        marginTop: "120px",
         '@media (max-width: 768px)': {
           marginTop: "0px",
         }
