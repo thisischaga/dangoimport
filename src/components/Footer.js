@@ -23,7 +23,7 @@ import {
 
 import { motion } from 'framer-motion';
 
-import logo from '../images/logo.jpeg';
+import logo from '../images/logo.png';
 import fedapayLogo from '../images/fedapay.jfif';
 
 
@@ -314,10 +314,9 @@ const Footer = () => {
                   alt="DangoImport"
                   loading="lazy"
                   className="
-                    h-12
+                    h-22
                     w-auto
-                    max-w-[170px]
-                    rounded-lg
+                    max-w-[190px]
                     object-contain
                   "
                 />

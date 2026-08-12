@@ -171,7 +171,12 @@ const Orders = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-900 transition-colors duration-300">
       <Header />
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8" style={{
+        marginTop: "150px",
+        '@media (max-width: 768px)': {
+          marginTop: "0px",
+        }
+      }}>
         
         {/* Error alert banner */}
         {error && (
