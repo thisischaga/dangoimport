@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "../../../admin-panel"
+		},
+		{
+			"path": "../../../dangoimport-vitrine"
+		},
+		{
+			"path": "../../../dango-seller"
 		}
 	],
 	"settings": {}
