@@ -536,12 +536,10 @@ const Header = () => {
             <img
               src={logo}
               alt="logo dangoimport"
-              className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-lg object-contain"
+              className=" shrink-0  object-contain"
+              width={100}
             />
             <span className="flex flex-col items-start leading-none min-w-0">
-              <span className="text-base sm:text-lg md:text-xl font-black tracking-tight text-[#111827] truncate">
-                Dango<span className="text-[#FF6B00]">import</span>
-              </span>
               <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
                 Marketplace
               </span>

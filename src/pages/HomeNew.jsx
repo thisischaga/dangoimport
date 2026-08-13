@@ -112,7 +112,7 @@ function HomeNew({ cartCount: cartCountProp }) {
           />
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/**<section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="rounded-[18px] border border-[#FFD9BE] bg-[#FFF3EA] p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-center">
               <div>
@@ -156,7 +156,7 @@ function HomeNew({ cartCount: cartCountProp }) {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
       </main>
 
       <Footer />
