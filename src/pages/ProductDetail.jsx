@@ -9,6 +9,7 @@ import {
   Plus,
   BadgeCheck,
   RotateCcw,
+  Star,
 } from 'lucide-react';
 import { useProduct, useProductReviews } from '../hooks/useProducts';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
@@ -29,6 +30,36 @@ const SECTIONS = [
   { id: 'section-reviews', label: 'Avis' },
   { id: 'section-delivery', label: 'Livraison' },
 ];
+
+/**
+ * Mesure en continu la hauteur réelle du <header> fixe (elle change entre
+ * mobile/desktop et quand la barre de recherche mobile s'ouvre) et l'expose
+ * via la variable CSS --header-h, utilisée pour décaler tout le contenu.
+ */
+function useHeaderOffset() {
+  useEffect(() => {
+    const headerEl = document.querySelector('header');
+    if (!headerEl) return undefined;
+
+    const setVar = () => {
+      document.documentElement.style.setProperty(
+        '--header-h',
+        `${headerEl.offsetHeight}px`
+      );
+    };
+
+    setVar();
+
+    const ro = new ResizeObserver(setVar);
+    ro.observe(headerEl);
+    window.addEventListener('resize', setVar);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', setVar);
+    };
+  }, []);
+}
 
 function QuantitySelector({ value, onChange, max }) {
   const safeMax = Math.max(1, max || 1);
@@ -90,6 +121,8 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { addToCart, cart } = useCart();
   const stickyNavRef = useRef(null);
+
+  useHeaderOffset();
 
   const { data: product, isLoading, isError } = useProduct(id);
   const { data: reviewsData, isLoading: reviewsLoading } = useProductReviews(id, {
@@ -155,6 +188,16 @@ export default function ProductDetail() {
   const reviewCount =
     product?.totalReviews != null ? Number(product.totalReviews) : reviewsData?.pagination?.totalItems || 0;
 
+  const soldCount = Number(product?.totalSales ?? 0) || 0;
+
+  const badgeLabel = product?.isFeatured
+    ? 'Choix'
+    : product?.isBestSeller
+      ? 'Best-seller'
+      : product?.isPromo || hasPromo
+        ? 'Promo'
+        : null;
+
   const images = useMemo(() => {
     const base = getProductImages(product, 5);
     if (selectedVariant?.image) {
@@ -168,6 +211,11 @@ export default function ProductDetail() {
   const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
   const hasWarranty = Boolean(product?.warranty?.trim());
   const hasDelivery = deliveryZones.length > 0 || hasShippingInfo;
+
+  const freeShippingZone = useMemo(
+    () => deliveryZones.find((z) => z?.freeShipping),
+    [deliveryZones]
+  );
 
   const specifications = useMemo(() => {
     const specs = Array.isArray(product?.specifications) ? product.specifications : [];
@@ -219,8 +267,11 @@ export default function ProductDetail() {
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
-      const offset = stickyNavRef.current?.offsetHeight || 0;
-      const top = el.getBoundingClientRect().top + window.scrollY - offset - 12;
+      const headerH = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--header-h')
+      ) || 0;
+      const navH = stickyNavRef.current?.offsetHeight || 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH - navH - 12;
       window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);
@@ -286,13 +337,25 @@ export default function ProductDetail() {
           </div>
 
           <div className="product-detail-buybox">
+            {badgeLabel && (
+              <span className="product-detail-choice-badge">{badgeLabel}</span>
+            )}
+
             <h1 className="product-detail-title">{product.name}</h1>
 
             {product.brand && (
               <p className="product-detail-brand">Marque : {product.brand}</p>
             )}
 
-            <ProductRating rating={rating} reviewCount={reviewCount} size="lg" />
+            <div className="product-detail-meta-row">
+              <ProductRating rating={rating} reviewCount={reviewCount} size="lg" />
+              {soldCount > 0 && (
+                <span className="product-detail-sold">
+                  <Star size={12} fill="#ff6b00" color="#ff6b00" />
+                  {soldCount > 999 ? `${Math.floor(soldCount / 1000)}k+` : soldCount} vendus
+                </span>
+              )}
+            </div>
 
             <div className="product-detail-price">
               <span className="product-detail-price__current">{formatCFA(displayPrice)}</span>
@@ -307,7 +370,7 @@ export default function ProductDetail() {
             </div>
             {hasPromo && savings > 0 && (
               <p className="product-detail-savings">
-                Économie : {formatCFA(savings)}
+                Vous économisez {formatCFA(savings)}
               </p>
             )}
 
@@ -359,9 +422,15 @@ export default function ProductDetail() {
             </div>
 
             {hasDelivery && (
-              <div className="product-detail-delivery-preview">
+              <div
+                className={`product-detail-delivery-preview ${
+                  freeShippingZone ? 'is-free' : ''
+                }`}
+              >
                 <Truck size={16} />
-                <span>Livraison disponible</span>
+                <span>
+                  {freeShippingZone ? 'Livraison gratuite disponible' : 'Livraison disponible'}
+                </span>
               </div>
             )}
 

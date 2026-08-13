@@ -3,6 +3,8 @@
   background: #f6f6f7;
   display: flex;
   flex-direction: column;
+  /* Réserve l'espace occupé par le header fixe (mesuré dynamiquement en JS) */
+  padding-top: var(--header-h, 96px);
   padding-bottom: 72px;
 }
 
@@ -80,6 +82,8 @@
   padding: 16px;
 }
 
+/* Sur desktop, le bloc d'achat reste visible pendant le scroll,
+   juste sous le header fixe */
 .product-detail-buybox {
   background: #fff;
   border: 1px solid #e8e8ea;
@@ -87,7 +91,28 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  .product-detail-buybox {
+    position: sticky;
+    top: calc(var(--header-h, 96px) + 16px);
+    max-height: calc(100vh - var(--header-h, 96px) - 32px);
+    overflow-y: auto;
+  }
+}
+
+.product-detail-choice-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: #ffd75e;
+  color: #4a3200;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .product-detail-title {
@@ -111,6 +136,22 @@
   margin: 0;
 }
 
+.product-detail-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.product-detail-sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8a8a8a;
+}
+
 .product-detail-price {
   display: flex;
   align-items: baseline;
@@ -119,9 +160,9 @@
 }
 
 .product-detail-price__current {
-  font-size: 1.75rem;
+  font-size: 1.9rem;
   font-weight: 900;
-  color: #ff6b00;
+  color: #e02020;
   letter-spacing: -0.02em;
 }
 
@@ -135,7 +176,7 @@
   font-size: 12px;
   font-weight: 800;
   color: #fff;
-  background: #ff4747;
+  background: linear-gradient(135deg, #ff2e2e 0%, #ff6b00 100%);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -271,6 +312,12 @@
   border-radius: 8px;
 }
 
+.product-detail-delivery-preview.is-free {
+  background: #f0faf3;
+  color: #15803d;
+  font-weight: 700;
+}
+
 .product-detail-seller {
   border: 1px solid #ececee;
   border-radius: 12px;
@@ -347,10 +394,12 @@
   gap: 4px;
 }
 
+/* Nav de sections : se colle juste SOUS le header fixe (pas à top:0,
+   sinon elle se retrouve masquée derrière le header) */
 .product-detail-sticky-nav {
   position: sticky;
-  top: 0;
-  z-index: 30;
+  top: var(--header-h, 96px);
+  z-index: 40;
   background: #fff;
   border-bottom: 1px solid #ececee;
   margin: 24px -16px 0;
@@ -787,16 +836,19 @@
   border: 1px solid #eee;
 }
 
-/* Mobile bar */
+/* Barre CTA mobile — placée AU-DESSUS d'une éventuelle bottom-nav
+   globale du site (convention existante : #root a 64px de padding-bottom
+   en dessous de 768px pour la nav globale) */
 .product-detail-mobile-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 64px;
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 45;
   display: flex;
   gap: 8px;
   padding: 10px 12px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.97);
   border-top: 1px solid #e8e8ea;
   backdrop-filter: blur(8px);

@@ -237,8 +237,13 @@ function ProductGrid({
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <TabBar active={activeTab} onChange={setActiveTab} counts={tabCounts} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+        style={{
+          marginTop: 0,
+          paddingTop: 0,
+        }}
+      >
+        <TabBar active={activeTab} onChange={setActiveTab} />
 
         <div id="product-grid-main" style={{ display: 'grid', gap: '10px' }}>
           <style>{`

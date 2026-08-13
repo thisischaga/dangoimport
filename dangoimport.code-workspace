@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "../dango-seller"
+		},
+		{
+			"path": "../vitrinedangoimport"
 		}
 	],
 	"settings": {}

@@ -14,6 +14,28 @@ import {
 } from '../utils/productFilters';
 import { getProductImage } from '../utils/imageUrl';
 
+/** Réserve dynamiquement l'espace occupé par le header fixe */
+function useHeaderOffset() {
+  useEffect(() => {
+    const headerEl = document.querySelector('header');
+    if (!headerEl) return undefined;
+
+    const setVar = () => {
+      document.documentElement.style.setProperty('--header-h', `${headerEl.offsetHeight}px`);
+    };
+
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(headerEl);
+    window.addEventListener('resize', setVar);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', setVar);
+    };
+  }, []);
+}
+
 function HomeNew({ cartCount: cartCountProp }) {
   const location = useLocation();
   const { addToCart, cartCount: contextCount } = useCart();
@@ -23,6 +45,8 @@ function HomeNew({ cartCount: cartCountProp }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_CATALOG_FILTERS);
   const searchQuery = new URLSearchParams(location.search).get('q')?.trim() || '';
+
+  useHeaderOffset();
 
   const handleFiltersChange = useCallback((next) => {
     setFilters(next);
@@ -66,12 +90,7 @@ function HomeNew({ cartCount: cartCountProp }) {
     <div className="min-h-screen bg-[#f6f6f7] text-slate-900">
       <Header cartCount={cartCount} />
 
-      <main style={{
-        marginTop: "75px",
-        '@media (max-width: 768px)': {
-          marginTop: "0px",
-        }
-      }}>
+      <main style={{ paddingTop: 'var(--header-h, 96px)' }}>
         {/**!searchQuery && (
           <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-xl bg-slate-950 text-white min-h-[300px] lg:h-[300px] px-8 lg:px-12 py-10 shadow-lg">
@@ -93,15 +112,10 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         ) */}
 
-        <section id="marketplace-feeds" className="bg-[#f6f6f7] pb-12">
-          
+        <section id="marketplace-feeds" className="bg-[#f6f6f7] pb-12" style={{
+          marginTop: "10px"
+        }}>
 
-          <ProductFilters
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            drawerOpen={drawerOpen}
-            setDrawerOpen={setDrawerOpen}
-          />
 
           <ProductGrid
             products={products}
@@ -145,7 +159,7 @@ function HomeNew({ cartCount: cartCountProp }) {
                     Recevez vos paiements en Mobile Money
                   </li>
                 </ul>
-                <a
+                
                   className="mt-6 inline-flex items-center gap-2 font-semibold text-[#FF6B00]"
                   href="https://seller.dangoimport.com"
                   target="_blank"
