@@ -76,33 +76,17 @@ function useHeaderOffset() {
   }, []);
 }
 
-const STATUS_STEPS = [
-  { key: 'pending', label: 'Commandé' },
-  { key: 'confirmed', label: 'Payé' },
-  { key: 'processing', label: 'En préparation' },
-  { key: 'shipped', label: 'Expédié' },
-  { key: 'delivered', label: 'Livré' },
-];
-
-const getStatusStepIndex = (status) => {
-  const norm = String(status).toLowerCase();
-  if (norm === 'pending') return 0;
-  if (norm === 'confirmed') return 1;
-  if (norm === 'processing') return 2;
-  if (norm === 'shipped' || norm === 'shipping') return 3;
-  if (norm === 'delivered') return 4;
-  return -1;
-};
-
 const STATUS_BADGES = {
-  pending: { bg: 'bg-orange-50 text-[#FF6B00] border-orange-200', label: 'En attente de paiement' },
-  confirmed: { bg: 'bg-gray-900 text-white border-gray-900', label: 'Paiement confirmé' },
-  processing: { bg: 'bg-orange-50 text-[#FF6B00] border-orange-200', label: 'En préparation' },
-  shipping: { bg: 'bg-orange-50 text-[#FF6B00] border-orange-200', label: 'En livraison' },
-  shipped: { bg: 'bg-orange-50 text-[#FF6B00] border-orange-200', label: 'Expédiée' },
-  delivered: { bg: 'bg-gray-900 text-white border-gray-900', label: 'Livrée' },
-  cancelled: { bg: 'bg-gray-100 text-gray-500 border-gray-200', label: 'Annulée' },
-  refunded: { bg: 'bg-gray-100 text-gray-500 border-gray-200', label: 'Remboursée' },
+  pending: { bg: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Paiement en attente' },
+  confirmed: { bg: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Paiement confirmé' },
+  processing: { bg: 'bg-purple-50 text-purple-700 border-purple-200', label: 'En préparation' },
+  shipping: { bg: 'bg-orange-50 text-orange-700 border-orange-200', label: 'En livraison' },
+  shipped: { bg: 'bg-orange-50 text-orange-700 border-orange-200', label: 'Expédiée' },
+  ready: { bg: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Prête pour retrait' },
+  delivered: { bg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Livrée' },
+  completed: { bg: 'bg-green-50 text-green-700 border-green-200', label: 'Terminée' },
+  cancelled: { bg: 'bg-rose-50 text-rose-700 border-rose-200', label: 'Annulée' },
+  refunded: { bg: 'bg-gray-100 text-gray-700 border-gray-200', label: 'Remboursée' },
 };
 
 const Orders = () => {
@@ -266,7 +250,6 @@ const Orders = () => {
               </a>
             </div>
           ) : filtered.map((order) => {
-            const currentStepIdx = getStatusStepIndex(order.status);
             const isCancelled = ['cancelled', 'refunded'].includes(String(order.status).toLowerCase());
             const badgeMeta = STATUS_BADGES[String(order.status).toLowerCase()] || { bg: 'bg-gray-100 text-gray-800 border-gray-200', label: order.status };
 
@@ -297,7 +280,7 @@ const Orders = () => {
                     <div>
                       <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Statut</span>
                       <div className="mt-0.5">
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold border ${badgeMeta.bg}`}>
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-extrabold border ${badgeMeta.bg}`}>
                           {badgeMeta.label}
                         </span>
                       </div>
@@ -312,32 +295,6 @@ const Orders = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Timeline de progression */}
-                {!isCancelled && currentStepIdx >= 0 && (
-                  <div className="p-5 border-b border-gray-100 bg-white">
-                    <div className="relative flex justify-between items-center max-w-2xl mx-auto my-2">
-                      {STATUS_STEPS.map((step, idx) => {
-                        const isActive = idx <= currentStepIdx;
-                        const isCurrent = idx === currentStepIdx;
-                        return (
-                          <div key={idx} className="flex flex-col items-center z-10">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition duration-300 border-2 ${
-                              isActive
-                                ? (isCurrent ? 'bg-[#FF6B00] text-white border-[#FF6B00]' : 'bg-gray-900 text-white border-gray-900')
-                                : 'bg-white border-gray-300 text-gray-400'
-                            }`}>
-                              {isActive && idx < currentStepIdx ? <Check className="w-4 h-4 stroke-[3px]" /> : <span>{idx + 1}</span>}
-                            </div>
-                            <span className={`text-[10px] md:text-xs font-bold mt-2 ${isActive ? 'text-gray-800' : 'text-gray-400'}`}>
-                              {step.label}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
 
                 {/* Bannière annulée */}
                 {isCancelled && (

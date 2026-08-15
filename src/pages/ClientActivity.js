@@ -119,10 +119,14 @@ const ClientActivity = () => {
               // Fix image rendering
               const imgUrl = getProductImage(cmd) || cmd.picture;
               
-              let statusColor = "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300";
-              if (cmd.status === 'Payé') statusColor = "bg-green-50 text-green-700 border border-green-200";
-              else if (cmd.status?.toLowerCase().includes('en attente')) statusColor = "bg-yellow-50 text-yellow-700 border border-yellow-200";
-              else if (cmd.status?.toLowerCase().includes('livr')) statusColor = "bg-blue-50 text-blue-700 border border-blue-200";
+              let statusColor = "bg-gray-100 text-gray-700 border border-gray-200";
+              const s = (cmd.status || '').toLowerCase();
+              if (s.includes('payé') || s.includes('confirmed') || s.includes('confirmé')) statusColor = "bg-blue-50 text-blue-700 border border-blue-200";
+              else if (s.includes('attente') || s.includes('pending')) statusColor = "bg-amber-50 text-amber-700 border border-amber-200";
+              else if (s.includes('préparation') || s.includes('processing')) statusColor = "bg-purple-50 text-purple-700 border border-purple-200";
+              else if (s.includes('expédi') || s.includes('shipped') || s.includes('livraison')) statusColor = "bg-orange-50 text-orange-700 border border-orange-200";
+              else if (s.includes('livr') || s.includes('delivered') || s.includes('completed')) statusColor = "bg-emerald-50 text-emerald-700 border border-emerald-200";
+              else if (s.includes('annul') || s.includes('cancelled')) statusColor = "bg-rose-50 text-rose-700 border border-rose-200";
 
               return (
                 <>
