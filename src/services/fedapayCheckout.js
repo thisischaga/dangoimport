@@ -20,11 +20,12 @@ export async function initiateFedapayCheckout(payload, token) {
         throw new Error((data.message || "Erreur lors de l'initialisation du paiement FedaPay.") + detail);
     }
 
-    if (!data.url) {
+    const paymentUrl = data.url || data.paymentUrl || data.payment_url;
+    if (!paymentUrl) {
         throw new Error(data.message || 'URL de paiement FedaPay indisponible.');
     }
 
-    return data;
+    return { ...data, url: paymentUrl };
 }
 
 /**

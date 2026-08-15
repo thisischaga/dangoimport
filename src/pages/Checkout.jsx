@@ -54,7 +54,9 @@ export default function Checkout() {
   const [qrTokens, setQrTokens] = useState([]);
   const [qrImages, setQrImages] = useState({});
   const [showQrPanel, setShowQrPanel] = useState(false);
+  const [pendingFedapay, setPendingFedapay] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [qrError, setQrError] = useState(null);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',

@@ -20,6 +20,18 @@ export const toast = {
   // legacy alias used across the codebase
   warn: (message, duration) => push('warning', message, duration),
   info: (message, duration) => push('info', message, duration),
+  loading: (message, duration) => {
+    push('info', message, duration);
+    return `loading-${Date.now()}`;
+  },
+  update: (id, opts = {}) => {
+    const text = opts.render || opts.message;
+    const type = opts.type || 'info';
+    if (text) {
+      push(type, text, opts.autoClose || 3200);
+    }
+  },
+  dismiss: () => window.dangoToast?.clear?.(),
   clear: () => window.dangoToast?.clear?.(),
 };
 
