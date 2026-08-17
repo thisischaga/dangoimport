@@ -15,11 +15,11 @@ const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphon
 
 const CATEGORY_LINKS = [
   { label: 'Électronique', slug: 'electronique' },
-  { label: 'Mode', slug: 'mode' },
-  { label: 'Maison', slug: 'maison' },
-  { label: 'Beauté', slug: 'beaute' },
-  { label: 'Téléphones', slug: 'telephones' },
-  { label: 'Informatique', slug: 'informatique' },
+  { label: 'Mode', slug: 'mode', Icon: Shirt },
+  { label: 'Maison', slug: 'maison', Icon: HomeIcon },
+  { label: 'Beauté', slug: 'beaute', Icon: Sparkles },
+  { label: 'Téléphones', slug: 'telephones', Icon: Smartphone },
+  { label: 'Informatique', slug: 'informatique', Icon: Laptop },
   { label: 'Accessoires', slug: 'accessoires', Icon: Headphones },
   { label: 'Sport', slug: 'sport', Icon: Dumbbell },
 ];
@@ -517,7 +517,7 @@ const Header = () => {
       style={{
         position: 'fixed', width: '100%', top: 0, left: 0, right: 0, zIndex: 100,
         paddingBottom: '10px', backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.3s ease',
+        transition: 'all 0.3s ease',
       }}
     >
       <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-8">

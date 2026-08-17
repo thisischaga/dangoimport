@@ -237,22 +237,39 @@ function ProductGrid({
       >
         <TabBar active={activeTab} onChange={setActiveTab} />
 
-        <div id="product-grid-main" style={{ display: 'grid', gap: '10px', marginTop: "20px" }}>
-          <style>{`
-            #product-grid-main {
-              grid-template-columns: repeat(2, 1fr);
-            }
-            @media (min-width: 640px) {
-              #product-grid-main { grid-template-columns: repeat(3, 1fr); }
-            }
-            @media (min-width: 768px) {
-              #product-grid-main { grid-template-columns: repeat(4, 1fr); }
-            }
-            @media (min-width: 1024px) {
-              #product-grid-main { grid-template-columns: repeat(5, 1fr); }
-            }
-          `}</style>
+          <div id="product-grid-main">
+            <style>{`
+              #product-grid-main {
+                column-count: 2;
+                column-gap: 10px;
+                margin-top: 20px;
+              }
 
+              #product-grid-main > * {
+                break-inside: avoid;
+                -webkit-column-break-inside: avoid;
+                margin-bottom: 10px;
+                width: 100%;
+              }
+
+              @media (min-width: 640px) {
+                #product-grid-main {
+                  column-count: 3;
+                }
+              }
+
+              @media (min-width: 768px) {
+                #product-grid-main {
+                  column-count: 4;
+                }
+              }
+
+              @media (min-width: 1024px) {
+                #product-grid-main {
+                  column-count: 5;
+                }
+              }
+            `}</style>
           {loading
             ? Array.from({ length: skeletonCount }).map((_, i) => (
                 <ProductSkeleton key={i} />
