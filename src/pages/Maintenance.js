@@ -50,11 +50,11 @@ const Maintenance = () => {
             <div className="absolute -inset-1.5 bg-gradient-to-r from-[#ffdc2b] to-[#e6c600] rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
             <img 
               src={logo} 
-              alt="Dango Import" 
+              alt="Dangoimport" 
               className="relative h-16 w-16 rounded-2xl border border-slate-800 object-cover shadow-xl"
             />
           </div>
-          <h2 className="text-xl font-bold tracking-wider text-slate-300 uppercase">Dango Import</h2>
+          <h2 className="text-xl font-bold tracking-wider text-slate-300 uppercase">Dangoimport</h2>
         </div>
 
         {/* Card principale */}
@@ -133,7 +133,7 @@ const Maintenance = () => {
 
         {/* Footer de la page */}
         <p className="text-center text-xs text-slate-500 mt-8">
-          &copy; {new Date().getFullYear()} Dango Import. Tous droits réservés.
+          &copy; {new Date().getFullYear()} Dangoimport. Tous droits réservés.
         </p>
 
       </div>

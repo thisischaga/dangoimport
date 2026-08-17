@@ -172,7 +172,8 @@ function App() {
                   <Route path='/faq' element={<FAQ/>}/>
                   <Route path='/contact' element={<Contact/>}/>
                   <Route path='/livraison' element={<Livraison/>}/>
-                  <Route path='/retours' element={<Retours/>}/>
+                  <Route path='/retours' element={<PolitiqueRetour/>}/>
+                  <Route path='/retour' element={<PolitiqueRetour/>}/>
                   <Route path='/refund-policy' element={<PolitiqueRetour/>}/>
                   {/**<Route path='/cookies' element={<Cookies/>}/> */}
                   

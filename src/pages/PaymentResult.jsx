@@ -208,7 +208,7 @@ const PaymentResult = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {qrTokens.map((tokenData) => (
                   <div key={tokenData.token} className="rounded-2xl border border-gray-200 p-4 bg-gray-50">
-                    <p className="text-sm text-gray-600 mb-3">Vendeur : {tokenData.vendorName || tokenData.vendorId || 'Dango Import'}</p>
+                    <p className="text-sm text-gray-600 mb-3">Vendeur : {tokenData.vendorName || tokenData.vendorId || 'Dangoimport'}</p>
                     <div className="aspect-square overflow-hidden rounded-2xl bg-white p-4 flex items-center justify-center">
                       {qrImages[tokenData.token] ? (
                         <img src={qrImages[tokenData.token]} alt="QR code" className="max-w-full max-h-full" />

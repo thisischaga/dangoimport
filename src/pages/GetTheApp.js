@@ -39,7 +39,7 @@ export default function GetTheApp() {
                   <FaMobileAlt size={10} /> Application Mobile
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-5">
-                  Dango Import<br />
+                  Dangoimport<br />
                   <span className="text-[#ffdc2b]">dans votre poche</span>
                 </h1>
                 <p className="text-gray-300 text-[16px] mb-8 leading-relaxed max-w-lg">

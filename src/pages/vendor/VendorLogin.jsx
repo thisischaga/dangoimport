@@ -41,7 +41,7 @@ const VendorLogin = () => {
             <Store size={24} />
           </div>
           <h1 className="text-2xl font-black text-[#0F172A]">Connexion vendeur</h1>
-          <p className="mt-2 text-sm text-slate-600">Accédez à votre espace vendeur DANGOIMPORT</p>
+          <p className="mt-2 text-sm text-slate-600">Accédez à votre espace vendeur Dangoimport</p>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">

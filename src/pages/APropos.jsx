@@ -3,10 +3,10 @@ import LegalPageLayout from '../components/LegalPageLayout';
 
 const APropos = () => {
   return (
-    <LegalPageLayout title="À Propos de DANGOIMPORT">
+    <LegalPageLayout title="À Propos de Dangoimport">
       <section>
         <h2 className="text-[22px] font-semibold text-[#F68B1E] mt-8 mb-4">1. Qui sommes-nous ?</h2>
-        <p className="mb-4 text-justify">DANGOIMPORT est une marketplace dédiée à simplifier l'accès à des produits de qualité au Togo et au Bénin.</p>
+        <p className="mb-4 text-justify">Dangoimport est une marketplace dédiée à simplifier l'accès à des produits de qualité au Togo et au Bénin.</p>
       </section>
 
       <section>

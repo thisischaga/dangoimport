@@ -15,7 +15,7 @@ export default function Cookies() {
   return (
     <LegalPageLayout
       title="Politique des cookies"
-      description="Nos pratiques de collecte et d'utilisation des cookies sur Dango Import."
+      description="Nos pratiques de collecte et d'utilisation des cookies sur Dangoimport."
       icon={Cookie}
       breadcrumbs={[{ label: 'Informations légales', to: '/cgu' }, { label: 'Cookies' }]}
       sections={SECTIONS}

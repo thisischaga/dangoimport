@@ -7,7 +7,7 @@ const SECTIONS = [
   {
     id: 'identification',
     title: '1. Identification',
-    content: 'Le site DangoImport est édité par DANGOIMPORT SARL, domiciliée à Lomé, Togo.',
+    content: 'Le site Dangoimport est édité par Dangoimport SARL, domiciliée à Lomé, Togo.',
   },
   {
     id: 'contact',
@@ -23,7 +23,7 @@ const SECTIONS = [
   {
     id: 'propriete-intellectuelle',
     title: '4. Propriété Intellectuelle',
-    content: 'Tous les contenus du site sont la propriété de DANGOIMPORT. Toute reproduction sans autorisation préalable est interdite.',
+    content: 'Tous les contenus du site sont la propriété de Dangoimport. Toute reproduction sans autorisation préalable est interdite.',
   },
   {
     id: 'politique-confidentialite',
@@ -37,7 +37,7 @@ const MentionsLegales = () => {
   return (
     <LegalPageLayout
       title="Mentions Légales"
-      description="Les informations légales obligatoires concernant Dango Import et son hébergement."
+      description="Les informations légales obligatoires concernant Dangoimport et son hébergement."
       icon={FileText}
       breadcrumbs={[{ label: 'Informations légales', to: '/cgu' }, { label: 'Mentions légales' }]}
       sections={SECTIONS}

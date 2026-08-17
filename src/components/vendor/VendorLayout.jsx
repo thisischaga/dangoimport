@@ -33,7 +33,7 @@ const VendorLayout = ({ children, title, subtitle }) => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#F68B1E]">Espace Vendeur</p>
-              <p className="text-sm font-black text-[#0F172A]">DANGOIMPORT</p>
+              <p className="text-sm font-black text-[#0F172A]">Dangoimport</p>
             </div>
           </button>
           <div className="flex items-center gap-3">

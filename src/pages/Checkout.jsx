@@ -88,7 +88,7 @@ export default function Checkout() {
   const groupedProducts = useMemo(() => {
     const groups = {};
     for (const item of cartItems) {
-      const vendorKey = item.vendorName || item.vendor || 'Dango Import';
+      const vendorKey = item.vendorName || item.vendor || 'Dangoimport';
       if (!groups[vendorKey]) groups[vendorKey] = [];
       groups[vendorKey].push(item);
     }
@@ -328,7 +328,7 @@ export default function Checkout() {
           shippingFee: Number(preview?.shippingCost || 0),
           total: Number(preview?.total || subtotal),
           shippingLabel: getShippingLabel(),
-          description: 'Commande Dango Import',
+          description: 'Commande Dangoimport',
           type: 'cart',
         });
 

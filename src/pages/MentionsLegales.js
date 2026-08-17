@@ -17,7 +17,7 @@ const SECTIONS = [
   {
     id: "activite",
     title: "3. ACTIVITÉ",
-    content: `Dango Import est une marketplace en ligne permettant la mise en relation entre acheteurs et vendeurs partenaires, ainsi qu’un service d’accompagnement à l’importation de produits depuis la Chine.\nDango HUB agit en qualité d’intermédiaire et n’est pas le vendeur des produits proposés par les vendeurs partenaires.`
+    content: `Dangoimport est une marketplace en ligne permettant la mise en relation entre acheteurs et vendeurs partenaires, ainsi qu’un service d’accompagnement à l’importation de produits depuis la Chine.\nDango HUB agit en qualité d’intermédiaire et n’est pas le vendeur des produits proposés par les vendeurs partenaires.`
   },
   {
     id: "propriete",

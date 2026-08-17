@@ -664,7 +664,7 @@ select:focus-visible {
   @apply relative rounded-xl overflow-hidden bg-gradient-to-br from-[#1e2a33] to-[#344955] text-white flex flex-col justify-end min-h-[200px] sm:min-h-[280px] p-5 sm:p-8;
 }
 
-/* ─── Toast Dango Import ─────────────────────── */
+/* ─── Toast Dangoimport ─────────────────────── */
 .dango-toast.Toastify__toast-container {
   width: auto;
   max-width: 420px;
@@ -1140,7 +1140,7 @@ select:focus-visible {
   font-family: var(--font-sans);
 }
 /* =========================================================
-   PRODUCT CARD — DANGO IMPORT 
+   PRODUCT CARD — Dangoimport 
    ========================================================= */
 
 .product-card {
@@ -1552,7 +1552,7 @@ html.dark .product-card__title {
 }
 
 /* =========================================================
-   PC2 — PRODUCT CARD ALIBABA STYLE (Dango Import)
+   PC2 — PRODUCT CARD ALIBABA STYLE (Dangoimport)
    ========================================================= */
 
 .pc2 {

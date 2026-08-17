@@ -21,9 +21,9 @@ export default function ShopSeo({ store, seller, productCount }) {
     const name = store.name || seller?.name || 'Boutique';
     const description =
       (store.description && store.description.trim()) ||
-      `Découvrez les produits de ${name} sur Dango Import. ${productCount || 0} produit${(productCount || 0) > 1 ? 's' : ''} publié${(productCount || 0) > 1 ? 's' : ''}.`;
+      `Découvrez les produits de ${name} sur Dangoimport. ${productCount || 0} produit${(productCount || 0) > 1 ? 's' : ''} publié${(productCount || 0) > 1 ? 's' : ''}.`;
 
-    const title = `${name} | Boutique Dango Import`;
+    const title = `${name} | Boutique Dangoimport`;
     const url = typeof window !== 'undefined' ? window.location.href : '';
     const image = store.banner || store.logo || seller?.profileImage || '';
 

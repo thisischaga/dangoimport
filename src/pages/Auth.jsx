@@ -59,7 +59,7 @@ export default function Auth() {
           <div className="px-6 pt-6">
             <div className="flex items-center justify-between">
               <div className="text-xl font-extrabold text-[#111827] flex items-center gap-2">
-                <span>DANGOIMPORT</span>
+                <span>Dangoimport</span>
                 <span className="w-2 h-2 rounded-full bg-[#F68B1E] inline-block" />
               </div>
             </div>

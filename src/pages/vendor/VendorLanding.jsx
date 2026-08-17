@@ -58,7 +58,7 @@ const VendorLanding = () => {
         <div className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
           <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#F68B1E]">Programme vendeur</p>
           <h1 className="text-4xl font-black leading-tight sm:text-5xl">
-            Vendez vos produits sur DANGOIMPORT
+            Vendez vos produits sur Dangoimport
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-300">
             Rejoignez des milliers de vendeurs et touchez des clients au Togo et Bénin

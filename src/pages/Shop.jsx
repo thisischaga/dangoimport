@@ -145,8 +145,8 @@ export default function Shop() {
 
   const handleShare = useCallback(async () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
-    const title = store?.name || 'Boutique Dango Import';
-    const text = `Découvrez la boutique ${title} sur Dango Import`;
+    const title = store?.name || 'Boutique Dangoimport';
+    const text = `Découvrez la boutique ${title} sur Dangoimport`;
     try {
       if (navigator.share) {
         await navigator.share({ title, text, url });

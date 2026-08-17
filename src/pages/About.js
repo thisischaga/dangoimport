@@ -60,7 +60,7 @@ const About = () => {
                       </div>
                     </div>
                     <div className="w-[40%] sm:w-[50%] h-full flex items-center justify-end relative z-10">
-                      <img src={slide1Img} alt="Dango Import Vision" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                      <img src={slide1Img} alt="Dangoimport Vision" className="max-h-[110%] object-contain origin-right drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
                     </div>
                   </div>
                 </div>
@@ -121,7 +121,7 @@ const About = () => {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Notre Histoire</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Née de la volonté de résoudre les vraies problématiques des entrepreneurs et consommateurs locaux, Dango Import a vu le jour avec une conviction forte : <strong className="text-gray-900">Il est possible de créer une marketplace moderne, fiable et adaptée au contexte ouest-africain.</strong>
+              Née de la volonté de résoudre les vraies problématiques des entrepreneurs et consommateurs locaux, Dangoimport a vu le jour avec une conviction forte : <strong className="text-gray-900">Il est possible de créer une marketplace moderne, fiable et adaptée au contexte ouest-africain.</strong>
             </p>
             <p className="text-gray-600 leading-relaxed">
               Nous avons commencé par accompagner les importateurs depuis la Chine, puis nous avons rapidement compris le besoin d’une véritable marketplace locale où les vendeurs béninois et togolais peuvent écouler leurs produits dans de bonnes conditions. Aujourd’hui, nous combinons ces deux forces.
@@ -157,7 +157,7 @@ const About = () => {
               <div className="bg-gray-800 p-8 rounded-xl border border-gray-700">
                 <h3 className="text-xl font-bold text-[#ffdc2b] mb-4">Priorité à la marketplace locale</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">
-                  La majorité des produits disponibles sur Dango Import proviennent de vendeurs béninois et togolais.
+                  La majorité des produits disponibles sur Dangoimport proviennent de vendeurs béninois et togolais.
                 </p>
               </div>
               <div className="bg-gray-800 p-8 rounded-xl border border-gray-700">

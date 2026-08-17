@@ -42,7 +42,7 @@ const CartPage = () => {
   const groupedByVendor = useMemo(() => {
     const groups = {};
     for (const item of cart) {
-      const vendorName = item.vendorName || item.vendor || 'Dango Import';
+      const vendorName = item.vendorName || item.vendor || 'Dangoimport';
       const vendorLogo = item.vendorLogo || item.logo || '';
       if (!groups[vendorName]) {
         groups[vendorName] = { vendorName, vendorLogo, items: [] };

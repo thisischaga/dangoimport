@@ -53,7 +53,7 @@ const Services = () => {
                         Services sur mesure : <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffdc2b] to-white">Sourcing Chine</span>
                       </h1>
                       <p className="text-xs sm:text-base text-gray-300 mb-5 line-clamp-2 sm:line-clamp-none">
-                        Dango Import vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée.
+                        Dangoimport vous guide à chaque étape : sourcing fiable, négociation, contrôle qualité et livraison sécurisée.
                       </p>
                       <div className="flex gap-3">
                         <button onClick={() => setShowForm(true)} className="bg-[#ffdc2b] text-[#0f172a] hover:bg-[#e6c600] px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all shadow-lg shadow-[#ffdc2b]/20">

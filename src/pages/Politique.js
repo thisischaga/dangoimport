@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { FaShieldAlt, FaChevronRight, FaArrowUp, FaLock } from "react-icons/fa";
+import { FaArrowUp } from "react-icons/fa";
 
 const SECTIONS = [
   {
@@ -68,7 +68,7 @@ const SECTIONS = [
 ];
 
 export default function Politique() {
-  const [active, setActive] = useState("qui-sommes-nous");
+  const [active, setActive] = useState("donnees-collectees");
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
@@ -77,21 +77,16 @@ export default function Politique() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setActive(id);
-  };
-
   return (
     <div className="bg-white min-h-screen font-sans">
 
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-2xl">
-          <p className="text-sm text-blue-900 leading-relaxed font-medium">
-            <strong>Votre vie privée compte.</strong> Dango Import s'engage à protéger vos données personnelles avec le plus grand soin. Cette politique vous explique de manière transparente comment nous les utilisons.
+        <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
+          <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
+            <strong>Votre vie privée compte.</strong> Dangoimport s'engage à protéger vos données personnelles avec le plus grand soin. Cette politique vous explique de manière transparente comment nous les utilisons.
           </p>
           <p className="text-gray-400 text-sm md:text-base">
-            Dernière mise à jour : <span className="text-blue-400 font-bold">07 mai 2026</span>
+            Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">07 mai 2026</span>
           </p>
         </div>
 
@@ -105,7 +100,7 @@ export default function Politique() {
                   if (line.startsWith("-") || line.startsWith("•")) {
                     return (
                       <p key={i} className="flex items-start gap-3 text-gray-700 text-base leading-relaxed pl-4">
-                        <span className="text-blue-500 mt-1 shrink-0 text-lg">•</span>
+                        <span className="text-[#e6c600] mt-1 shrink-0 text-lg">•</span>
                         <span>{line.slice(1).trim()}</span>
                       </p>
                     );
@@ -121,17 +116,19 @@ export default function Politique() {
           <p className="text-gray-500 text-sm">
             Voir aussi nos{" "}
             <Link to="/cgu" className="text-[#e6c600] font-bold underline">Conditions Générales d'Utilisation</Link>
-            {" "}— © 2026 Dango Import Group. Tous droits réservés.
+            {" "}— © 2026 Dangoimport Group. Tous droits réservés.
           </p>
         </div>
       </article>
 
+      {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gray-900 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-[#ffdc2b] hover:text-gray-900 transition-colors"
         >
           <FaArrowUp size={14} />
         </button>
+      )}
 
       <Footer />
     </div>

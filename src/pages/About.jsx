@@ -5,7 +5,7 @@ import HeroSection from '../components/ui/HeroSection';
 export default function About(){
   return (
     <div>
-      <HeroSection title="À propos de DangoImport" subtitle="Nous connectons les acheteurs et vendeurs en Afrique avec fiabilité et rapidité." />
+      <HeroSection title="À propos de Dangoimport" subtitle="Nous connectons les acheteurs et vendeurs en Afrique avec fiabilité et rapidité." />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PageHeader title="Notre histoire" subtitle="Une marketplace pensée pour l'Afrique" />
 

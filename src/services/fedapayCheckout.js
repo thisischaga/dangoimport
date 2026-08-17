@@ -68,15 +68,26 @@ export async function checkFedapayTransactionStatus(transactionId) {
 }
 
 const normalizeCountryName = (value) => {
-    const normalized = String(value || '').trim().toLowerCase();
+    // Normalize and strip accents for robust matching
+    const raw = String(value || '').trim();
+    const normalized = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (['togo', 'tg'].includes(normalized)) return 'Togo';
-    if (['benin', 'bénin', 'bj'].includes(normalized)) return 'Bénin';
-    return 'Bénin';
+    if (['benin', 'bj'].includes(normalized)) return 'Bénin';
+    // fallback: return the raw value if it looks like a known country, else Bénin
+    return raw || 'Bénin';
+};
+
+const countryToCode = (value) => {
+    const raw = String(value || '').trim();
+    const normalized = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (['togo', 'tg'].includes(normalized)) return 'TG';
+    if (['benin', 'bj'].includes(normalized)) return 'BJ';
+    return 'BJ';
 };
 
 function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type }) {
     const productNames = cartItems.map((i) => i.name).join(', ');
-    const vendorName = [...new Set(cartItems.map((i) => i.vendorName).filter(Boolean))].join(', ') || 'Dango Import';
+    const vendorName = [...new Set(cartItems.map((i) => i.vendorName).filter(Boolean))].join(', ') || 'Dangoimport';
     const totalQty = cartItems.reduce((sum, i) => sum + i.quantity, 0);
     const phoneDigits = String(form.phone || '').replace(/\D/g, '');
     const phoneAsNumber = parseInt(phoneDigits.slice(-8), 10) || 97000000;
@@ -117,6 +128,9 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
         subtotal: (Number(i.price || i.salePrice || i.promoPrice || 0) * Number(i.quantity || 1)),
     })) : [];
 
+    const normalizedCountry = normalizeCountryName(form.country);
+    const resolvedCountryCode = countryToCode(form.country);
+
     return {
         ...base,
         customer: {
@@ -126,17 +140,20 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
           phone: fedapayPhone || form.phone,
         },
         shippingAddress: {
-          country: normalizeCountryName(form.country),
+          country: normalizedCountry,
           city: form.city || '',
           neighborhood: form.neighborhood || '',
           fullAddress: form.fullAddress || '',
           postalCode: form.postalCode || '',
           instructions: form.instructions || '',
         },
+        // Explicit country code so server sets correct phone_number.country for FedaPay
+        countryCode: resolvedCountryCode,
+        selectedCountry: normalizedCountry,
         callback_url: window.location.origin + '/checkout',
         amount: total,
         currency: 'XOF',
-        description: description || `Commande Dango Import - ${base.productSummary}`,
+        description: description || `Commande Dangoimport - ${base.productSummary}`,
         shippingMethod: shippingLabel || 'standard',
         promoCode: promoCode || '',
         total,

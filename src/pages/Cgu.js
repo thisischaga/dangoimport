@@ -13,17 +13,17 @@ const SECTIONS = [
   {
     id: "objet",
     title: "1. OBJET",
-    content: `Les présentes CGU ont pour objet de définir :\n• Les conditions d'accès et d'utilisation de la plateforme Dango Import ;\n• Les règles applicables aux commandes, paiements, livraisons et retours ;\n• Les droits et obligations des utilisateurs (clients) ;\n• Les limitations de responsabilité de Dango HUB.`,
+    content: `Les présentes CGU ont pour objet de définir :\n• Les conditions d'accès et d'utilisation de la plateforme Dangoimport ;\n• Les règles applicables aux commandes, paiements, livraisons et retours ;\n• Les droits et obligations des utilisateurs (clients) ;\n• Les limitations de responsabilité de Dango HUB.`,
   },
   {
     id: "definitions",
     title: "2. DÉFINITIONS",
-    content: `• Dango HUB : Structure juridique exploitant la plateforme.\n• Dango Import : Marketplace en ligne.\n• Utilisateur / Client : Toute personne physique ou morale accédant au site ou passant commande.\n• Vendeur Partenaire : Tiers indépendant qui propose des produits sur la marketplace.\n• Plateforme : Le site www.dangoimport.com et l'ensemble des services associés.`,
+    content: `• Dango HUB : Structure juridique exploitant la plateforme.\n• Dangoimport : Marketplace en ligne.\n• Utilisateur / Client : Toute personne physique ou morale accédant au site ou passant commande.\n• Vendeur Partenaire : Tiers indépendant qui propose des produits sur la marketplace.\n• Plateforme : Le site www.dangoimport.com et l'ensemble des services associés.`,
   },
   {
     id: "services",
     title: "3. NATURE DES SERVICES",
-    content: `Dango Import est une marketplace qui permet aux clients d'acheter des produits proposés par des vendeurs partenaires locaux (Bénin et Togo).\nUn service complémentaire d'accompagnement à l'importation depuis la Chine est également proposé.`,
+    content: `Dangoimport est une marketplace qui permet aux clients d'acheter des produits proposés par des vendeurs partenaires locaux (Bénin et Togo).\nUn service complémentaire d'accompagnement à l'importation depuis la Chine est également proposé.`,
   },
   {
     id: "acces",
@@ -33,7 +33,7 @@ const SECTIONS = [
   {
     id: "commandes",
     title: "5. COMMANDES",
-    content: `Toute commande passée sur la plateforme est ferme et définitive une fois confirmée par le client. Dango Import se réserve le droit d'annuler une commande en cas d'indisponibilité du produit, d'erreur de prix ou de suspicion de fraude.`,
+    content: `Toute commande passée sur la plateforme est ferme et définitive une fois confirmée par le client. Dangoimport se réserve le droit d'annuler une commande en cas d'indisponibilité du produit, d'erreur de prix ou de suspicion de fraude.`,
   },
   {
     id: "prix",
@@ -88,7 +88,7 @@ export default function Cgu() {
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
-    document.title = "Conditions Générales d'Utilisation – Dango Import";
+    document.title = "Conditions Générales d'Utilisation – Dangoimport";
     const onScroll = () => setShowTop(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -106,7 +106,7 @@ export default function Cgu() {
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
-            <strong>Important :</strong> En utilisant la plateforme Dango Import, vous acceptez les présentes CGU dans leur intégralité. Nous vous encourageons à les lire attentivement. Pour toute question, contactez-nous à{" "}
+            <strong>Important :</strong> En utilisant la plateforme Dangoimport, vous acceptez les présentes CGU dans leur intégralité. Nous vous encourageons à les lire attentivement. Pour toute question, contactez-nous à{" "}
             <a href="mailto:contact@dangoimport.com" className="underline font-bold text-[#2d3748]">contact@dangoimport.com</a>.
           </p>
           <p className="text-gray-400 text-sm md:text-base">
@@ -149,7 +149,7 @@ export default function Cgu() {
             <Link to="/cgu-vendeur" className="text-[#e6c600] font-bold underline">CGU Vendeurs</Link>
             {" "}et notre{" "}
             <Link to="/politique-de-confidentialite" className="text-[#e6c600] font-bold underline">Politique de Confidentialité</Link>
-            {" "}— © 2026 Dango Import Group. Tous droits réservés.
+            {" "}— © 2026 Dangoimport Group. Tous droits réservés.
           </p>
         </div>
       </article>

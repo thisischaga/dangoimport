@@ -92,7 +92,7 @@ export default function BuyerCentral() {
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-10">
               <span className="text-[12px] font-black text-[#ffdc2b] uppercase tracking-widest">Guides</span>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mt-2">Comment acheter sur Dango Import ?</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mt-2">Comment acheter sur Dangoimport ?</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {GUIDES.map(({ icon: Icon, color, title, steps }) => (

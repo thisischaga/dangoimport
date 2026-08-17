@@ -117,7 +117,7 @@ const PublishProduct = () => {
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-4">Vendre un Article</h1>
           <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
-            Remplissez les détails ci-dessous pour publier votre produit sur la boutique Dango Import.
+            Remplissez les détails ci-dessous pour publier votre produit sur la boutique Dangoimport.
           </p>
         </div>
 

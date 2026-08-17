@@ -7,7 +7,7 @@ export default function Terms(){
   ];
   return (
     <div>
-      <PageHeader title="Conditions Générales" subtitle="Conditions d'utilisation de DangoImport" breadcrumbs={[{label:'Accueil', to:'/'},{label:'Conditions générales'}]} />
+      <PageHeader title="Conditions Générales" subtitle="Conditions d'utilisation de Dangoimport" breadcrumbs={[{label:'Accueil', to:'/'},{label:'Conditions générales'}]} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <aside className="hidden lg:block">

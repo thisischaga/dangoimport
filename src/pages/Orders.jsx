@@ -244,7 +244,7 @@ const Orders = () => {
             <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center shadow-sm">
               <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-lg font-bold text-gray-800">Aucune commande trouvée</p>
-              <p className="text-gray-500 text-sm max-w-md mx-auto mt-1">Vous n'avez pas de commande correspondant aux filtres ou n'avez pas encore acheté sur Dango Import.</p>
+              <p className="text-gray-500 text-sm max-w-md mx-auto mt-1">Vous n'avez pas de commande correspondant aux filtres ou n'avez pas encore acheté sur Dangoimport.</p>
               <a href="/shop" className="inline-flex items-center gap-2 mt-5 px-6 py-3 bg-[#FF6B00] hover:bg-[#e05e00] text-white font-extrabold text-sm rounded-xl transition shadow-md">
                 Parcourir les produits <ArrowRight className="w-4 h-4" />
               </a>
@@ -308,7 +308,7 @@ const Orders = () => {
                 <div className="p-4 space-y-4">
                   {Object.values((order.items || []).reduce((acc, it) => {
                     const vid = it.vendorId || 'platform';
-                    if (!acc[vid]) acc[vid] = { vendorName: it.vendorName || 'Dango Import', items: [] };
+                    if (!acc[vid]) acc[vid] = { vendorName: it.vendorName || 'Dangoimport', items: [] };
                     acc[vid].items.push(it);
                     return acc;
                   }, {})).map((g, idx) => (

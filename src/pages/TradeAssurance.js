@@ -15,7 +15,7 @@ const PROTECTIONS = [
   {
     icon: FaHandshake, color: 'bg-indigo-500',
     title: 'Fournisseurs vérifiés',
-    desc: 'Tous les vendeurs sur Dango Import sont contrôlés et validés par notre équipe. Zéro escroquerie tolérée.',
+    desc: 'Tous les vendeurs sur Dangoimport sont contrôlés et validés par notre équipe. Zéro escroquerie tolérée.',
   },
   {
     icon: FaTruck, color: 'bg-green-500',
@@ -73,7 +73,7 @@ export default function TradeAssurance() {
               Trade <span className="text-[#ffdc2b]">Assurance</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-10">
-              Chaque transaction sur Dango Import est protégée. Achetez en toute confiance, nous avons tout prévu.
+              Chaque transaction sur Dangoimport est protégée. Achetez en toute confiance, nous avons tout prévu.
             </p>
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-10">
@@ -145,7 +145,7 @@ export default function TradeAssurance() {
           <div className="max-w-2xl mx-auto text-center px-4">
             <FaCheckCircle size={40} className="mx-auto mb-4 text-[#111]" />
             <h2 className="text-2xl md:text-3xl font-black text-[#111] mb-3">Prêt à acheter en confiance ?</h2>
-            <p className="text-[#444] text-[14px] mb-8">Rejoignez des milliers d'acheteurs satisfaits qui font confiance à Dango Import.</p>
+            <p className="text-[#444] text-[14px] mb-8">Rejoignez des milliers d'acheteurs satisfaits qui font confiance à Dangoimport.</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button onClick={() => navigate('/register')} className="bg-[#111] text-white font-black px-8 py-3.5 rounded-full transition-all hover:bg-[#333]">
                 Créer un compte

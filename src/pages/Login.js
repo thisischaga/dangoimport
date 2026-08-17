@@ -46,7 +46,7 @@ const Login = () => {
     <div className="min-h-screen flex flex-col bg-[#F1F1F1]" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
       <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-          <img src={logo} alt="Dango Import" className="h-9 w-9 rounded-lg object-cover" />
+          <img src={logo} alt="Dangoimport" className="h-9 w-9 rounded-lg object-cover" />
           <div>
             <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
 
@@ -65,7 +65,7 @@ const Login = () => {
           <div className="bg-white rounded-b-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="p-8 sm:p-10">
               <h1 className="text-2xl font-black text-gray-900 text-center mb-1">Connexion</h1>
-              <p className="text-sm text-gray-500 text-center mb-8">Accédez à votre espace Dango Import</p>
+              <p className="text-sm text-gray-500 text-center mb-8">Accédez à votre espace Dangoimport</p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>

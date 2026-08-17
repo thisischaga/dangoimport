@@ -6,7 +6,7 @@ const CGU = () => {
     <LegalPageLayout title="Conditions Générales d'Utilisation">
       <section>
         <h2 className="text-[22px] font-semibold text-[#F68B1E] mt-8 mb-4">1. Objet</h2>
-        <p className="mb-4 text-justify">Les présentes conditions générales régissent l'utilisation du site DangoImport et de ses services.</p>
+        <p className="mb-4 text-justify">Les présentes conditions générales régissent l'utilisation du site Dangoimport et de ses services.</p>
       </section>
 
       <section>
@@ -26,7 +26,7 @@ const CGU = () => {
 
       <section>
         <h2 className="text-[22px] font-semibold text-[#F68B1E] mt-8 mb-4">5. Responsabilité</h2>
-        <p className="mb-4 text-justify">DangoImport ne peut être tenu responsable des retards liés au transporteur ou de toute cause indépendante de sa volonté.</p>
+        <p className="mb-4 text-justify">Dangoimport ne peut être tenu responsable des retards liés au transporteur ou de toute cause indépendante de sa volonté.</p>
       </section>
     </LegalPageLayout>
   );

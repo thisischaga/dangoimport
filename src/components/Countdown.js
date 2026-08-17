@@ -58,7 +58,7 @@ const Countdown = ({ launchHour = 22 }) => {
           </div>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
-            <h3>Dango Import</h3>
+            <h3>Dangoimport</h3>
           </div>
         </div>
       </div>

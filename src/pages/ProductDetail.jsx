@@ -137,7 +137,7 @@ export default function ProductDetail() {
   const [activeSection, setActiveSection] = useState('section-description');
 
   useEffect(() => {
-    if (product?.name) document.title = `${product.name} | Dango Import`;
+    if (product?.name) document.title = `${product.name} | Dangoimport`;
     else if (!isLoading && !product) document.title = 'Produit introuvable';
   }, [product?.name, isLoading, product]);
 

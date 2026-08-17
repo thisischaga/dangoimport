@@ -307,11 +307,11 @@ const Footer = () => {
               <Link
                 to="/"
                 className="inline-flex items-center"
-                aria-label="DangoImport"
+                aria-label="Dangoimport"
               >
                 <img
                   src={logo}
-                  alt="DangoImport"
+                  alt="Dangoimport"
                   loading="lazy"
                   className="
                     h-22
