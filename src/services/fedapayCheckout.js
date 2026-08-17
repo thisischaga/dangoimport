@@ -7,7 +7,7 @@ export async function initiateFedapayCheckout(payload, token) {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await fetch(`${API_BASE_URL}/api/payments/create`, {
+    const response = await fetch(`${API_BASE_URL}/api/payment/create`, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),

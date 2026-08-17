@@ -1,206 +1,222 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Truck } from 'lucide-react';
+import { Star, Search, Truck } from 'lucide-react';
 import ProductImage from './ProductImage';
-import ProductRating from './ProductRating';
-import { CornerSealBadge, getCornerBadge } from './ProductBadge';
-import { formatCFA, calcDiscountPercent } from '../../utils/formatPrice';
+import { formatCFA } from '../../utils/formatPrice';
 import { getProductImages } from '../../utils/imageUrl';
+import API_BASE_URL from '../../apiConfig';
 
+/* ── Interactive Rating (Linked to Server) ─────────────── */
+function InteractiveRating({ productId, rating, count }) {
+  const [hover, setHover] = useState(0);
+  const [userRating, setUserRating] = useState(0);
+  const [toast, setToast] = useState('');
+  const display = hover || userRating || rating || 0;
+
+  const handleRate = async (e, val) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const token = localStorage.getItem('dangoToken');
+    if (!token) {
+      setToast('Connectez-vous !');
+      setTimeout(() => setToast(''), 2000);
+      return;
+    }
+
+    setUserRating(val);
+    setToast('Envoi...');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          rating: val,
+          title: 'Avis rapide',
+          comment: 'Noté depuis la carte produit.'
+        })
+      });
+
+      const resData = await response.json();
+      if (resData.success) {
+        setToast('Merci !');
+      } else {
+        setToast(resData.message || 'Erreur');
+      }
+    } catch (err) {
+      console.error(err);
+      setToast('Erreur connexion');
+    }
+
+    setTimeout(() => setToast(''), 2000);
+  };
+
+  return (
+    <span className="pc2-rating" onClick={e => e.preventDefault()}>
+      <span className="pc2-rating__stars">
+        {Array.from({ length: 5 }, (_, i) => {
+          const val = i + 1;
+          const filled = val <= Math.round(display);
+          return (
+            <button
+              key={i}
+              type="button"
+              className="pc2-rating__star-btn"
+              onMouseEnter={() => setHover(val)}
+              onMouseLeave={() => setHover(0)}
+              onClick={(e) => handleRate(e, val)}
+              aria-label={`Noter ${val}`}
+            >
+              <Star
+                size={10}
+                className={filled ? 'pc2-rating__star--full' : 'pc2-rating__star--empty'}
+              />
+            </button>
+          );
+        })}
+      </span>
+      {toast ? (
+        <span className="pc2-rating__toast" style={{ marginLeft: 6 }}>{toast}</span>
+      ) : (
+        count != null && count > 0 && (
+          <span className="pc2-rating__count" style={{ marginLeft: 4 }}>({count})</span>
+        )
+      )}
+    </span>
+  );
+}
+
+/* ── Product Card (Alibaba Model) ─────────────────────── */
 function ProductCard({ product, onAddToCart }) {
-  const [liked, setLiked] = useState(false);
-
   const productId = product?._id || product?.id;
   const price = Number(product?.price ?? 0) || 0;
   const promoPrice = Number(product?.promoPrice ?? product?.salePrice ?? 0) || 0;
   const hasPromo = promoPrice > 0 && promoPrice < price;
   const displayPrice = hasPromo ? promoPrice : price;
-  const discount = hasPromo ? calcDiscountPercent(price, promoPrice) : 0;
 
   const images = getProductImages(product, 2);
   const primaryImage = images[0] || product?.image || '';
   const hoverImage = images[1] || null;
 
   const stock = Number(product?.stock ?? 0) || 0;
-
   const initialStock = Number(
-    product?.initialStock ??
-    product?.stockInitial ??
-    product?.originalStock ??
-    product?.stock ??
-    0
+    product?.initialStock ?? product?.stockInitial ?? product?.originalStock ?? product?.stock ?? 0
   ) || 0;
-
   const minStock = Number(product?.minStock ?? 10) || 10;
-
   const isOutOfStock = stock <= 0;
   const isLowStock = !isOutOfStock && stock <= minStock;
 
-  const stockPercentage =
-    initialStock > 0
-      ? Math.min(100, Math.max(0, (stock / initialStock) * 100))
-      : 0;
+  const vendorName = product?.vendorName || product?.vendor || '';
+  const country = product?.country || product?.origin || '';
 
-  const brand = product?.brand || '';
-  const category = product?.category || '';
-
-  const soldCount = Number(
-    product?.soldCount ?? product?.sales ?? product?.totalSold ?? 0
-  ) || 0;
-
-  const freeShipping = Boolean(
-    product?.freeShipping ?? product?.isFreeShipping
-  );
-
-  const deliveryZones = Array.isArray(product?.deliveryZones)
-    ? product.deliveryZones
-        .map((zone) =>
-          typeof zone === 'string'
-            ? zone
-            : zone?.name || zone?.label || zone?.country || zone?.city || ''
-        )
-        .filter(Boolean)
-    : [];
-
-  const shippingInfo = String(product?.shippingInfo || '').trim();
-  const deliveryInfo = deliveryZones.length > 0
-    ? deliveryZones.join(', ')
-    : shippingInfo;
+  const soldCount = Number(product?.soldCount ?? product?.sales ?? product?.totalSold ?? 0) || 0;
+  const freeShipping = Boolean(product?.freeShipping ?? product?.isFreeShipping);
 
   const rating = product?.rating != null ? Number(product.rating) : null;
-  const reviewCount =
-    product?.totalReviews != null ? Number(product.totalReviews) : null;
+  const reviewCount = product?.totalReviews != null ? Number(product.totalReviews) : null;
 
-  const cornerBadge = getCornerBadge(product, { hasPromo, discount, isOutOfStock });
+  // Delivery zones / origin
+  const deliveryZones = Array.isArray(product?.deliveryZones)
+    ? product.deliveryZones
+        .map((z) => (typeof z === 'string' ? z : z?.name || z?.label || z?.country || ''))
+        .filter(Boolean)
+    : [];
+  const shippingInfo = String(product?.shippingInfo || '').trim();
+  const deliveryInfo = deliveryZones.length > 0 ? deliveryZones[0] : shippingInfo;
 
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isOutOfStock) return;
-    onAddToCart?.({
-      ...product,
-      id: productId,
-      _id: productId,
-      price,
-      promoPrice: hasPromo ? promoPrice : null,
-      image: primaryImage,
-      stock,
-    });
+  // Alibaba feature label (strictly real data)
+  const getFeatureLabel = () => {
+    if (freeShipping) return { text: 'Livraison gratuite', type: 'shipping' };
+    if (hasPromo) {
+      const discount = Math.round((1 - promoPrice / price) * 100);
+      return { text: `-${discount}% Prix inférieur aux similaires`, type: 'promo' };
+    }
+    return null;
   };
 
-  const handleToggleLike = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setLiked((v) => !v);
-  };
+  const feature = getFeatureLabel();
+
+  const yearsActive = product?.vendorYears || null;
+  const isVerified = product?.isVerified ?? product?.verified ?? false;
 
   return (
-    <article className={`product-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}>
-      <div className="product-card__image-wrap">
-        <Link to={`/product/${productId}`} className="product-card__image-link">
+    <article className={`pc2 ${isOutOfStock ? 'pc2--oos' : ''}`}>
+
+      {/* IMAGE (Alibaba style with rounded corners & visual button) */}
+      <div className="pc2__img-wrap">
+        <Link to={`/product/${productId}`} className="pc2__img-link">
           <ProductImage
             src={primaryImage}
             hoverSrc={hoverImage}
             alt={product?.name}
             isOutOfStock={isOutOfStock}
           />
-
-          {!cornerBadge && hasPromo && discount > 0 && (
-            <span className="product-card__discount-ribbon">-{discount}%</span>
-          )}
-
-          {isLowStock && !cornerBadge && (
-            <span className="product-card__stock-badge">Plus que {stock}</span>
-          )}
         </Link>
 
-        <div className="product-card__actions">
-          {/**<button
-            type="button"
-            className={`product-card__action-btn ${liked ? 'is-liked' : ''}`}
-            onClick={handleToggleLike}
-            aria-label="Ajouter aux favoris"
-            aria-pressed={liked}
-          >
-            <Heart size={15} fill={liked ? 'currentColor' : 'none'} />
-          </button> */}
-
-          <button
-            type="button"
-            className="product-card__action-btn product-card__action-btn--cart"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            aria-label="Ajouter au panier"
-          >
-            <ShoppingCart size={15} />
-          </button>
-        </div>
       </div>
 
-      <div className="product-card__body">
-        <Link to={`/product/${productId}`} className="product-card__title-link">
-          <h3 className="product-card__title" title={product?.name}>
-            {product?.name || ''}
-          </h3>
+      {/* BODY */}
+      <div className="pc2__body">
+
+        {/* Title (2 lines max) */}
+        <Link to={`/product/${productId}`} className="pc2__title-link">
+          <h3 className="pc2__title" title={product?.name}>{product?.name || ''}</h3>
         </Link>
 
-        {(brand || category) && (
-          <p className="product-card__brand">{brand || category}</p>
+        {/* Feature banner / Tag under title */}
+        {feature && (
+          <p className={`pc2__feature pc2__feature--${feature.type}`}>
+            {feature.text}
+          </p>
         )}
 
-        <div className="product-card__price-block">
-          <span className="product-card__price">{formatCFA(displayPrice)}</span>
-          {hasPromo && (
-            <span className="product-card__price-old">{formatCFA(price)}</span>
+        {/* Price (Bold, large, crossed-out original next to it) */}
+        <div className="pc2__price-row">
+          {hasPromo ? (
+            <>
+              <span className="pc2__price-old" style={{ textDecoration: 'line-through', color: '#94A3B8', marginRight: '6px', fontSize: '13px' }}>
+                {formatCFA(price)}
+              </span>
+              <span className="pc2__price">{formatCFA(promoPrice)}</span>
+            </>
+          ) : (
+            <span className="pc2__price">{formatCFA(price)}</span>
           )}
         </div>
 
-        <div className="product-card__meta-row">
-          <ProductRating rating={rating} reviewCount={reviewCount} compact />
-          {soldCount > 0 && (
-            <span className="product-card__sold">
-              {soldCount > 999 ? `${Math.floor(soldCount / 1000)}k+` : soldCount} vendus
-            </span>
-          )}
-        </div>
-
-        {(freeShipping || deliveryInfo) && (
-          <div className="product-card__delivery-line">
-            <Truck size={11} className="product-card__delivery-icon" />
-            <span className={freeShipping ? 'is-free' : ''}>
-              {freeShipping ? 'Livraison gratuite' : deliveryInfo}
-            </span>
-          </div>
+        {/* Sales */}
+        {soldCount > 0 && (
+          <p className="pc2__moq-sold" style={{ margin: 0 }}>
+            {soldCount} vendus
+          </p>
+        )}
+        {/* Delivery zone */}
+        {deliveryInfo && (
+          <p className="pc2__delivery-zone" style={{ margin: 0, fontSize: '11px', color: '#64748B', fontWeight: 600 }}>
+            Zone: {deliveryInfo}
+          </p>
         )}
 
-        <div className="product-card__stock-progress">
-          <div className="product-card__stock-header">
-            <span className="product-card__stock-label">Stock</span>
-            {isOutOfStock ? (
-              <span className="product-card__stock-text is-out">Rupture de stock</span>
-            ) : isLowStock ? (
-              <span className="product-card__stock-text is-low">
-                Plus que {stock} disponible{stock > 1 ? 's' : ''}
-              </span>
-            ) : (
-              <span className="product-card__stock-text is-in">
-                {stock} disponible{stock > 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
-
-          <div
-            className="product-card__stock-bar"
-            aria-label={isOutOfStock ? 'Rupture de stock' : `${stock} produits disponibles`}
-          >
-            <div
-              className={`product-card__stock-fill ${
-                isOutOfStock ? 'is-out' : isLowStock ? 'is-low' : 'is-in'
-              }`}
-              style={{ width: `${stockPercentage}%` }}
-            />
-          </div>
+        {/* Rating Row */}
+        <div className="pc2__rating-row">
+          <InteractiveRating productId={productId} rating={rating} count={reviewCount} />
         </div>
+
+        {/* Vendor age / origin / Verified status (At the bottom) */}
+        {(isVerified || yearsActive || country) && (
+          <p className="pc2__vendor-meta">
+            {isVerified && <span className="pc2__verified">Verified</span>}
+            {isVerified && (yearsActive || country) && <span className="pc2__meta-sep">·</span>}
+            {yearsActive && <span>{yearsActive} ans</span>}
+            {yearsActive && country && <span className="pc2__meta-sep">·</span>}
+            {country && <span className="pc2__country">{country}</span>}
+          </p>
+        )}
+
       </div>
     </article>
   );

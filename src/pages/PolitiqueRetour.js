@@ -155,7 +155,7 @@ export default function PolitiqueRetour() {
 
       <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12">
 
-        {/* Sidebar */}
+        {/* Sidebar 
         <aside className="lg:w-72 shrink-0">
           <div className="lg:sticky lg:top-28 bg-gray-50 rounded-3xl border border-gray-100 p-6">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-5">Sommaire</p>
