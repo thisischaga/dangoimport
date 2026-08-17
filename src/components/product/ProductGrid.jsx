@@ -150,10 +150,10 @@ function TabBar({ active, onChange, counts }) {
                 flex
                 shrink-0
                 items-center
-                gap-1.5
-                px-3.5
+                px-1
                 py-2
                 text-xs
+                gap-1
                 sm:text-sm
                 font-semibold
                 whitespace-nowrap
@@ -458,7 +458,8 @@ function ProductGrid({
         style={{
           marginTop: 0,
           paddingTop: 0,
-          backgroundColor: "white",
+          paddingBottom: "40px",
+          marginBottom:"0px"
         }}
       >
         {/* ================================================
@@ -468,7 +469,6 @@ function ProductGrid({
         <TabBar
           active={activeTab}
           onChange={setActiveTab}
-          counts={tabCounts}
         />
 
         {/* ================================================

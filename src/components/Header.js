@@ -573,12 +573,41 @@ const Header = () => {
             <button
               type="button"
               onClick={() => navigate('/cart')}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 transition"
+              className="
+                relative
+                hidden
+                md:flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-full
+                text-slate-700
+                transition
+                hover:bg-slate-100
+              "
               aria-label="Panier"
             >
               <ShoppingCart size={20} />
+
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6B00] text-[10px] font-black text-white">
+                <span
+                  className="
+                    absolute
+                    -top-0.5
+                    -right-0.5
+                    flex
+                    h-5
+                    w-5
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-[#FF6B00]
+                    text-[10px]
+                    font-black
+                    text-white
+                  "
+                >
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
