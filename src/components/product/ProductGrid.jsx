@@ -70,7 +70,7 @@ function TabBar({ active, onChange, counts }) {
       <div
         ref={scrollRef}
         className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', margin: '40px' }}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', marginBottom: '20px' }}
       >
         <style>{`
           .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -237,7 +237,7 @@ function ProductGrid({
       >
         <TabBar active={activeTab} onChange={setActiveTab} />
 
-        <div id="product-grid-main" style={{ display: 'grid', gap: '10px' }}>
+        <div id="product-grid-main" style={{ display: 'grid', gap: '10px', marginTop: "20px" }}>
           <style>{`
             #product-grid-main {
               grid-template-columns: repeat(2, 1fr);
