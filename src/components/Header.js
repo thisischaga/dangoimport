@@ -644,7 +644,7 @@ const Header = () => {
             <span className="mx-2 h-4 w-px bg-slate-200" />
           </div>
           <div className="flex items-center gap-4 text-slate-500 font-medium">
-            <span>Livraison gratuite dès 50 000 FCFA</span>
+            <span>Livraison gratuite dès 20 000 FCFA</span>
           </div>
         </div>
       </div>
