@@ -3,22 +3,23 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
-  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User,
+  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
 import { getProductImage } from '../utils/imageUrl';
 import logo from '../images/logo.png';
+import { useCart } from '../context/CartContext';
 
 const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphone', 'Parfum', 'Montre', 'Chargeur', 'Écouteurs'];
 
 const CATEGORY_LINKS = [
-  { label: 'Électronique', slug: 'electronique', Icon: Cpu },
-  { label: 'Mode', slug: 'mode', Icon: Shirt },
-  { label: 'Maison', slug: 'maison', Icon: HomeIcon },
-  { label: 'Beauté', slug: 'beaute', Icon: Sparkles },
-  { label: 'Téléphones', slug: 'telephones', Icon: Smartphone },
-  { label: 'Informatique', slug: 'informatique', Icon: Laptop },
+  { label: 'Électronique', slug: 'electronique' },
+  { label: 'Mode', slug: 'mode' },
+  { label: 'Maison', slug: 'maison' },
+  { label: 'Beauté', slug: 'beaute' },
+  { label: 'Téléphones', slug: 'telephones' },
+  { label: 'Informatique', slug: 'informatique' },
   { label: 'Accessoires', slug: 'accessoires', Icon: Headphones },
   { label: 'Sport', slug: 'sport', Icon: Dumbbell },
 ];
@@ -117,7 +118,7 @@ function CategoryMegaMenu() {
             className="absolute left-0 top-full z-40 mt-2 flex w-[720px] max-w-[90vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
           >
             <div className="w-56 shrink-0 border-r border-slate-100 bg-slate-50/60 py-2">
-              {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
+              {CATEGORY_LINKS.map(({ label, slug }) => (
                 <Link
                   key={slug}
                   to={`/category/${slug}`}
@@ -127,7 +128,7 @@ function CategoryMegaMenu() {
                     activeSlug === slug ? 'bg-white text-[#FF6B00]' : 'text-slate-700 hover:bg-white/70'
                   }`}
                 >
-                  <Icon size={16} className={activeSlug === slug ? 'text-[#FF6B00]' : 'text-slate-400'} />
+                  {/**<Icon size={16} className={activeSlug === slug ? 'text-[#FF6B00]' : 'text-slate-400'} /> */}
                   {label}
                 </Link>
               ))}
@@ -243,6 +244,7 @@ function MobileCategoryDrawer({ open, onClose }) {
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { cartCount } = useCart();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
@@ -565,6 +567,21 @@ const Header = () => {
               aria-expanded={mobileSearchOpen}
             >
               {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+            </button>
+
+            {/* Bouton Panier (desktop + mobile) */}
+            <button
+              type="button"
+              onClick={() => navigate('/cart')}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 transition"
+              aria-label="Panier"
+            >
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6B00] text-[10px] font-black text-white">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
             </button>
 
             <AccountMenu />

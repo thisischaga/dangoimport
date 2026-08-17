@@ -70,7 +70,7 @@ function TabBar({ active, onChange, counts }) {
       <div
         ref={scrollRef}
         className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', margin: '40px' }}
       >
         <style>{`
           .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -86,20 +86,12 @@ function TabBar({ active, onChange, counts }) {
               type="button"
               onClick={() => onChange(key)}
               className={`
-                relative flex shrink-0 items-center gap-1.5 rounded-full
-                border px-3.5 py-2 text-xs sm:text-sm font-semibold
-                transition-colors duration-200 whitespace-nowrap
-                ${
-                  isActive
-                    ? 'border-[#FF6B00] bg-[#FF6B00] text-white shadow-sm shadow-orange-200'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                }
-              `}
+                relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold duration-200 whitespace-nowrap bg-white text-slate-600`}
             >
-              <Icon
+              {/* <Icon
                 size={14}
                 className={isActive ? 'text-white' : 'text-slate-400'}
-              />
+              /> */}
               {label}
               {typeof count === 'number' && count > 0 && (
                 <span
