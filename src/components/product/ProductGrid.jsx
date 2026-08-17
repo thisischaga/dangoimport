@@ -15,6 +15,7 @@ import {
   Zap,
   Tag,
 } from 'lucide-react';
+
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import { applyProductFilters } from '../../utils/productFilters';
@@ -30,26 +31,41 @@ const TABS = [
   { key: 'promo', label: 'Promotions', Icon: Tag },
 ];
 
+/* =========================================================
+   TAB FILTER
+========================================================= */
+
 function matchesTab(product, tabKey) {
   if (tabKey === 'all') return true;
 
   switch (tabKey) {
     case 'bestseller':
       return Boolean(
-        product?.isBestSeller ?? product?.bestSeller ?? product?.bestseller
+        product?.isBestSeller ??
+          product?.bestSeller ??
+          product?.bestseller
       );
+
     case 'recommended':
       return Boolean(
-        product?.isRecommended ?? product?.recommended
+        product?.isRecommended ??
+          product?.recommended
       );
+
     case 'forYou':
       return Boolean(
-        product?.isForYou ?? product?.forYou ?? product?.recommendedForUser
+        product?.isForYou ??
+          product?.forYou ??
+          product?.recommendedForUser
       );
+
     case 'new':
       return Boolean(
-        product?.isNewArrival ?? product?.newArrival ?? product?.isNew
+        product?.isNewArrival ??
+          product?.newArrival ??
+          product?.isNew
       );
+
     case 'promo':
       return Boolean(
         product?.promoPrice ||
@@ -57,10 +73,15 @@ function matchesTab(product, tabKey) {
           product?.discount ||
           product?.onSale
       );
+
     default:
       return true;
   }
 }
+
+/* =========================================================
+   TAB BAR
+========================================================= */
 
 function TabBar({ active, onChange, counts }) {
   const scrollRef = useRef(null);
@@ -70,10 +91,47 @@ function TabBar({ active, onChange, counts }) {
       <div
         ref={scrollRef}
         className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', marginBottom: '20px' }}
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          marginBottom: '20px',
+        }}
       >
         <style>{`
-          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+
+          .product-tab {
+            position: relative;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            background: transparent;
+            color: #64748b;
+            transition:
+              color 0.2s ease,
+              background-color 0.2s ease;
+          }
+
+          .product-tab:hover {
+            color: #111827;
+            background: #f8fafc;
+          }
+
+          .product-tab--active {
+            color: #111827;
+          }
+
+          .product-tab--active::after {
+            content: "";
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: -1px;
+            height: 2px;
+            background: #111827;
+          }
         `}</style>
 
         {TABS.map(({ key, label, Icon }) => {
@@ -86,18 +144,50 @@ function TabBar({ active, onChange, counts }) {
               type="button"
               onClick={() => onChange(key)}
               className={`
-                relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold duration-200 whitespace-nowrap bg-white text-slate-600`}
+                product-tab
+                ${isActive ? 'product-tab--active' : ''}
+                relative
+                flex
+                shrink-0
+                items-center
+                gap-1.5
+                px-3.5
+                py-2
+                text-xs
+                sm:text-sm
+                font-semibold
+                whitespace-nowrap
+              `}
+              aria-pressed={isActive}
             >
-              {/* <Icon
+              {/*
+                Icône volontairement désactivée pour garder
+                l'interface sobre.
+              */}
+              {/*
+              <Icon
                 size={14}
-                className={isActive ? 'text-white' : 'text-slate-400'}
-              /> */}
+                className={isActive ? 'text-slate-900' : 'text-slate-400'}
+              />
+              */}
+
               {label}
+
               {typeof count === 'number' && count > 0 && (
                 <span
                   className={`
-                    ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none
-                    ${isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}
+                    ml-0.5
+                    rounded-full
+                    px-1.5
+                    py-0.5
+                    text-[10px]
+                    font-bold
+                    leading-none
+                    ${
+                      isActive
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-500'
+                    }
                   `}
                 >
                   {count}
@@ -108,17 +198,40 @@ function TabBar({ active, onChange, counts }) {
         })}
       </div>
 
-      {/* Fondu pour indiquer le scroll horizontal sur mobile */}
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent sm:hidden" />
+      {/* Indication de scroll horizontal sur mobile */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          right-0
+          top-0
+          h-full
+          w-8
+          bg-gradient-to-l
+          from-white
+          to-transparent
+          sm:hidden
+        "
+      />
     </div>
   );
 }
 
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
 function EmptyState({ onReset }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
       style={{
         gridColumn: '1 / -1',
         textAlign: 'center',
@@ -129,18 +242,50 @@ function EmptyState({ onReset }) {
         gap: '12px',
       }}
     >
-      <PackageSearch size={52} style={{ color: '#d5d5d5' }} />
-      <p style={{ fontSize: '16px', fontWeight: 700, color: '#555', margin: 0 }}>
+      <PackageSearch
+        size={52}
+        style={{
+          color: '#d5d5d5',
+        }}
+      />
+
+      <p
+        style={{
+          fontSize: '16px',
+          fontWeight: 700,
+          color: '#555',
+          margin: 0,
+        }}
+      >
         Aucun produit trouvé
       </p>
-      <p style={{ fontSize: '13px', color: '#9a9a9a', margin: 0 }}>
+
+      <p
+        style={{
+          fontSize: '13px',
+          color: '#9a9a9a',
+          margin: 0,
+        }}
+      >
         Essayez d&apos;ajuster vos filtres ou votre recherche.
       </p>
+
       {onReset ? (
         <button
           type="button"
           onClick={onReset}
-          className="mt-2 rounded-full bg-[#FF6B00] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#e75b00]"
+          className="
+            mt-2
+            rounded-full
+            bg-[#FF6B00]
+            px-5
+            py-2.5
+            text-sm
+            font-semibold
+            text-white
+            transition-colors
+            hover:bg-[#e75b00]
+          "
         >
           Réinitialiser les filtres
         </button>
@@ -148,6 +293,10 @@ function EmptyState({ onReset }) {
     </motion.div>
   );
 }
+
+/* =========================================================
+   PRODUCT GRID
+========================================================= */
 
 function ProductGrid({
   products = [],
@@ -159,59 +308,123 @@ function ProductGrid({
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+
   const sentinelRef = useRef(null);
+
+  /* =======================================================
+     RESET PAGE WHEN DATA / FILTER / TAB CHANGES
+  ======================================================= */
 
   useEffect(() => {
     setPage(1);
   }, [filters, products, activeTab]);
+
+  /* =======================================================
+     FILTERS
+  ======================================================= */
 
   const filtered = useMemo(
     () => applyProductFilters(products, filters),
     [products, filters]
   );
 
+  /* =======================================================
+     TAB FILTER
+  ======================================================= */
+
   const tabFiltered = useMemo(
-    () => filtered.filter((p) => matchesTab(p, activeTab)),
+    () =>
+      filtered.filter((product) =>
+        matchesTab(product, activeTab)
+      ),
     [filtered, activeTab]
   );
 
+  /* =======================================================
+     TAB COUNTS
+  ======================================================= */
+
   const tabCounts = useMemo(() => {
     const counts = {};
+
     TABS.forEach(({ key }) => {
       counts[key] =
         key === 'all'
           ? filtered.length
-          : filtered.filter((p) => matchesTab(p, key)).length;
+          : filtered.filter((product) =>
+              matchesTab(product, key)
+            ).length;
     });
+
     return counts;
   }, [filtered]);
 
+  /* =======================================================
+     PAGINATION
+  ======================================================= */
+
   const visible = useMemo(
-    () => tabFiltered.slice(0, page * PAGE_SIZE),
+    () =>
+      tabFiltered.slice(
+        0,
+        page * PAGE_SIZE
+      ),
     [tabFiltered, page]
   );
-  const hasMore = visible.length < tabFiltered.length;
+
+  const hasMore =
+    visible.length < tabFiltered.length;
+
+  /* =======================================================
+     INFINITE SCROLL
+  ======================================================= */
 
   useEffect(() => {
-    if (!sentinelRef.current || !hasMore) return;
+    if (!sentinelRef.current || !hasMore) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          setLoadingMore(true);
-          setTimeout(() => {
-            setPage((p) => p + 1);
-            setLoadingMore(false);
-          }, 400);
+        if (!entries[0]?.isIntersecting) {
+          return;
         }
+
+        if (loadingMore) {
+          return;
+        }
+
+        setLoadingMore(true);
+
+        setTimeout(() => {
+          setPage((currentPage) => currentPage + 1);
+          setLoadingMore(false);
+        }, 400);
       },
-      { threshold: 0.1, rootMargin: '200px' }
+      {
+        threshold: 0.1,
+        rootMargin: '200px',
+      }
     );
+
     observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, visible.length]);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [
+    hasMore,
+    visible.length,
+    loadingMore,
+  ]);
+
+  /* =======================================================
+     RESET FILTERS
+  ======================================================= */
 
   const handleReset = useCallback(() => {
     setActiveTab('all');
+
     onFiltersChange?.({
       category: '',
       sort: 'relevance',
@@ -227,92 +440,206 @@ function ProductGrid({
 
   const skeletonCount = 10;
 
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
-    <div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+    <div className="w-full">
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-7xl
+          px-4
+          sm:px-6
+          lg:px-8
+        "
         style={{
           marginTop: 0,
           paddingTop: 0,
         }}
       >
-        <TabBar active={activeTab} onChange={setActiveTab} />
+        {/* ================================================
+            TABS
+        ================================================= */}
 
-          <div id="product-grid-main">
-            <style>{`
+        <TabBar
+          active={activeTab}
+          onChange={setActiveTab}
+          counts={tabCounts}
+        />
+
+        {/* ================================================
+            PRODUCT GRID
+        ================================================= */}
+
+        <div
+          id="product-grid-main"
+          style={{
+            display: 'grid',
+            gap: '10px',
+            marginTop: '20px',
+
+            /*
+             * IMPORTANT :
+             * Les cartes restent alignées en haut.
+             *
+             * On ne force PAS leur hauteur.
+             * Chaque carte conserve donc sa hauteur
+             * naturelle en fonction de son contenu.
+             */
+            alignItems: 'start',
+          }}
+        >
+          <style>{`
+            #product-grid-main {
+              grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+              align-items: start;
+            }
+
+            #product-grid-main > * {
+              min-width: 0;
+              align-self: start;
+            }
+
+            @media (min-width: 640px) {
               #product-grid-main {
-                column-count: 2;
-                column-gap: 10px;
-                margin-top: 20px;
+                grid-template-columns:
+                  repeat(3, minmax(0, 1fr));
               }
+            }
 
-              #product-grid-main > * {
-                break-inside: avoid;
-                -webkit-column-break-inside: avoid;
-                margin-bottom: 10px;
-                width: 100%;
+            @media (min-width: 768px) {
+              #product-grid-main {
+                grid-template-columns:
+                  repeat(4, minmax(0, 1fr));
               }
+            }
 
-              @media (min-width: 640px) {
-                #product-grid-main {
-                  column-count: 3;
+            @media (min-width: 1024px) {
+              #product-grid-main {
+                grid-template-columns:
+                  repeat(5, minmax(0, 1fr));
+              }
+            }
+          `}</style>
+
+          {/* ==============================================
+              LOADING INITIAL
+          =============================================== */}
+
+          {loading ? (
+            Array.from({
+              length: skeletonCount,
+            }).map((_, index) => (
+              <ProductSkeleton
+                key={`skeleton-${index}`}
+              />
+            ))
+          ) : visible.length === 0 ? (
+            /* ============================================
+               EMPTY
+            ============================================= */
+
+            <EmptyState
+              onReset={
+                onFiltersChange
+                  ? handleReset
+                  : undefined
+              }
+            />
+          ) : (
+            /* ============================================
+               PRODUCTS
+            ============================================= */
+
+            visible.map((product, index) => (
+              <motion.div
+                key={
+                  product.id ||
+                  product._id ||
+                  `product-${index}`
                 }
-              }
+                initial={{
+                  opacity: 0,
+                  y: 12,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.25,
+                  delay:
+                    Math.min(
+                      index % PAGE_SIZE,
+                      6
+                    ) * 0.05,
+                }}
+                style={{
+                  minWidth: 0,
+                  alignSelf: 'start',
+                }}
+              >
+                <ProductCard
+                  product={product}
+                  onAddToCart={onAddToCart}
+                />
+              </motion.div>
+            ))
+          )}
 
-              @media (min-width: 768px) {
-                #product-grid-main {
-                  column-count: 4;
-                }
-              }
-
-              @media (min-width: 1024px) {
-                #product-grid-main {
-                  column-count: 5;
-                }
-              }
-            `}</style>
-          {loading
-            ? Array.from({ length: skeletonCount }).map((_, i) => (
-                <ProductSkeleton key={i} />
-              ))
-            : visible.length === 0
-              ? <EmptyState onReset={onFiltersChange ? handleReset : undefined} />
-              : visible.map((product, idx) => (
-                  <motion.div
-                    key={product.id || product._id || idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.25,
-                      delay: Math.min(idx % PAGE_SIZE, 6) * 0.05,
-                    }}
-                  >
-                    <ProductCard product={product} onAddToCart={onAddToCart} />
-                  </motion.div>
-                ))}
+          {/* ==============================================
+              LOADING MORE
+          =============================================== */}
 
           {loadingMore &&
-            Array.from({ length: 4 }).map((_, i) => (
-              <ProductSkeleton key={`more-${i}`} />
+            Array.from({
+              length: 4,
+            }).map((_, index) => (
+              <ProductSkeleton
+                key={`more-${index}`}
+              />
             ))}
         </div>
 
+        {/* ================================================
+            INFINITE SCROLL SENTINEL
+        ================================================= */}
+
         {hasMore && !loading && (
-          <div ref={sentinelRef} style={{ height: '40px', marginTop: '20px' }} />
+          <div
+            ref={sentinelRef}
+            style={{
+              height: '40px',
+              marginTop: '20px',
+            }}
+          />
         )}
 
-        {!hasMore && !loading && tabFiltered.length > 0 && (
-          <p
-            style={{
-              textAlign: 'center',
-              marginTop: '32px',
-              fontSize: '13px',
-              color: '#c0c0c0',
-              fontWeight: 500,
-            }}
-          >
-            Tous les produits ont été chargés
-          </p>
-        )}
+        {/* ================================================
+            END OF PRODUCTS
+        ================================================= */}
+
+        {!hasMore &&
+          !loading &&
+          tabFiltered.length > 0 && (
+            <p
+              style={{
+                textAlign: 'center',
+                marginTop: '32px',
+                marginBottom: '20px',
+                fontSize: '13px',
+                color: '#c0c0c0',
+                fontWeight: 500,
+              }}
+            >
+              Tous les produits ont été chargés
+            </p>
+          )}
       </div>
     </div>
   );

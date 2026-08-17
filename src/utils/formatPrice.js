@@ -12,3 +12,10 @@ export function calcDiscountPercent(original, current) {
 }
 
 export default formatCFA;
+export function formatSoftS(value) {
+  const amount = Number(value) || 0;
+
+  return `XOF ${new Intl.NumberFormat('fr-FR', {
+    maximumFractionDigits: 0,
+  }).format(amount)}`;
+}

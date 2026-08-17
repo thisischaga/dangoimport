@@ -1951,3 +1951,22 @@ html.dark .pc2__sep { background: #1E293B; }
 *{
   background-color: white;
 }
+.pc2 {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  align-self: start;
+}
+
+.pc2__body {
+  height: auto;
+  min-height: 0;
+}
+
+.pc2__title {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #111827;
+}
