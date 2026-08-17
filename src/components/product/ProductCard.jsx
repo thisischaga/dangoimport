@@ -517,7 +517,15 @@ function ProductCard({
         }
 
         .pc2__feature--promo {
-          color: #ea580c;
+          color: white;
+          background-color: red;
+          font-size: 10px;
+          line-height: 1.3;
+          border-radius: 2px;
+          width: max-content;
+          height: max-content;
+          padding-left: 4px;
+          padding-right: 4px;
         }
 
         /* =================================================

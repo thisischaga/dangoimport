@@ -90,7 +90,11 @@ function HomeNew({ cartCount: cartCountProp }) {
     <div className="min-h-screen bg-[#f6f6f7] text-slate-900">
       <Header cartCount={cartCount} />
 
-      <main style={{ paddingTop: 'var(--header-h, 96px)', marginTop: "20px" }}>
+      <main
+        style={{
+          paddingTop: 'calc(var(--header-h, 96px) + 3px)',
+        }}
+      >
         {/**!searchQuery && (
           <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-xl bg-slate-950 text-white min-h-[300px] lg:h-[300px] px-8 lg:px-12 py-10 shadow-lg">

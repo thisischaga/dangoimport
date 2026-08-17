@@ -458,6 +458,7 @@ function ProductGrid({
         style={{
           marginTop: 0,
           paddingTop: 0,
+          backgroundColor: "white",
         }}
       >
         {/* ================================================
