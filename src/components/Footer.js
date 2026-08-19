@@ -269,7 +269,7 @@ const Footer = () => {
 
 
   return (
-    <footer className="mt-12 bg-white text-[#0f172a]">
+    <footer className="mt-12 bg-white text-[#0f172a] mb-10 ">
 
       {/* =====================================================
           MAIN FOOTER

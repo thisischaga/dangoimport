@@ -87,7 +87,7 @@ function TabBar({ active, onChange, counts }) {
   const scrollRef = useRef(null);
 
   return (
-    <div className="relative mb-4">
+    <div className="relative mb-4 w-full px-2 sm:px-0">
       <div
         ref={scrollRef}
         className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
@@ -451,7 +451,7 @@ function ProductGrid({
           mx-auto
           w-full
           max-w-7xl
-          px-4
+          px-0
           sm:px-6
           lg:px-8
         "
@@ -481,17 +481,9 @@ function ProductGrid({
             display: 'grid',
             gap: '10px',
             marginTop: '20px',
-
-            /*
-             * IMPORTANT :
-             * Les cartes restent alignées en haut.
-             *
-             * On ne force PAS leur hauteur.
-             * Chaque carte conserve donc sa hauteur
-             * naturelle en fonction de son contenu.
-             */
             alignItems: 'start',
           }}
+          className="px-2 sm:px-0"
         >
           <style>{`
             #product-grid-main {
