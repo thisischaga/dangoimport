@@ -105,6 +105,9 @@ export default function Checkout() {
     if (['approved', 'completed', 'paid', 'successful', 'success'].includes(urlStatus)) {
       const pending = pendingRawFromStorage ? JSON.parse(pendingRawFromStorage) : null;
       const txId = pending?.transactionId || urlParams.get('transactionId');
+      clearCart();
+      localStorage.removeItem('pendingFedapay');
+      localStorage.removeItem('dangoPromoCode');
       navigate(`/checkout/result?status=success${txId ? `&transactionId=${encodeURIComponent(txId)}` : ''}`, { replace: true });
       return;
     }
@@ -125,7 +128,7 @@ export default function Checkout() {
           const check = async () => {
             try {
               const token = localStorage.getItem('dangoToken');
-              const res = await fetch(`${API_BASE_URL}/api/payments/verify/${pending.transactionId}`, {
+              const res = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${pending.transactionId}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
               });
               const data = await res.json();

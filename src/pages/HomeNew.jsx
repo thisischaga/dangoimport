@@ -13,6 +13,7 @@ import {
   DEFAULT_CATALOG_FILTERS,
 } from '../utils/productFilters';
 import { getProductImage } from '../utils/imageUrl';
+import PromoBanner from '../components/PromoBanner';
 
 /** Réserve dynamiquement l'espace occupé par le header fixe */
 function useHeaderOffset() {
@@ -97,21 +98,8 @@ function HomeNew({ cartCount: cartCountProp }) {
       >
         {/**!searchQuery && (
           <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-xl bg-slate-950 text-white min-h-[300px] lg:h-[300px] px-8 lg:px-12 py-10 shadow-lg">
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-45"
-                style={{ backgroundImage: `url(${bannerImage})` }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
-              <div className="relative z-10 max-w-2xl">
-                <h1 className="text-3xl lg:text-5xl font-extrabold text-white leading-tight">
-                  Les meilleures offres <br />
-                  <span className="text-[#FF6B00]">au meilleur prix</span>
-                </h1>
-                <p className="text-slate-200 text-sm mt-4 font-semibold max-w-lg leading-relaxed">
-                  Découvrez notre catalogue avec livraison au Bénin et Togo.
-                </p>
-              </div>
+            <div className="overflow-hidden rounded-2xl shadow-lg">
+              <PromoBanner />
             </div>
           </section>
         ) */}

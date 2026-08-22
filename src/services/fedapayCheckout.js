@@ -72,17 +72,19 @@ const normalizeCountryName = (value) => {
     const raw = String(value || '').trim();
     const normalized = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (['togo', 'tg'].includes(normalized)) return 'Togo';
-    if (['benin', 'bj'].includes(normalized)) return 'Bénin';
-    // fallback: return the raw value if it looks like a known country, else Bénin
-    return raw || 'Bénin';
+    // Match 'Bénin', 'Benin', 'bénin', 'BJ', etc.
+    if (['benin', 'bj', 'bénin'].includes(normalized) || normalized.startsWith('benin')) return 'Bénin';
+    // fallback: return the raw value if it looks like a known country, else Togo
+    return raw || 'Togo';
 };
 
 const countryToCode = (value) => {
     const raw = String(value || '').trim();
     const normalized = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (['togo', 'tg'].includes(normalized)) return 'TG';
-    if (['benin', 'bj'].includes(normalized)) return 'BJ';
-    return 'BJ';
+    // Match 'Bénin', 'Benin', 'bénin', 'BJ', etc.
+    if (['benin', 'bj', 'bénin'].includes(normalized) || normalized.startsWith('benin')) return 'BJ';
+    return 'TG'; // Default to Togo (FedaPay sandbox default)
 };
 
 function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, shippingLabel, description, type }) {
@@ -104,7 +106,8 @@ function buildCartBasePayload({ form, cartItems, subtotal, shippingFee, total, s
         lat: form.lat || 6.37,
         lng: form.lng || 2.43,
         deliveryFee: shippingFee,
-        address: [form.address, form.neighborhood].filter(Boolean).join(', ') || form.address,
+        address: [form.fullAddress, form.neighborhood].filter(Boolean).join(', ') || form.fullAddress || '',
+        fullAddress: form.fullAddress || '',
         city: form.city || 'Non précisé',
         totalPrice: total,
         productPrice: subtotal,
@@ -150,6 +153,7 @@ export function buildCartFedapayPayload({ form, cartItems, subtotal, shippingFee
         // Explicit country code so server sets correct phone_number.country for FedaPay
         countryCode: resolvedCountryCode,
         selectedCountry: normalizedCountry,
+        deliveryCountry: normalizedCountry, // Ajout de la clé attendue par le backend
         callback_url: window.location.origin + '/checkout',
         amount: total,
         currency: 'XOF',

@@ -447,9 +447,8 @@ const Header = () => {
         onClick={() => setAccountOpen((prev) => !prev)}
         className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 cursor-pointer"
       >
-        <User size={16} className="sm:hidden" />
-        <span className="hidden sm:inline">{user?.userFirstname || 'Compte'}</span>
-        <ChevronDown size={16} className="hidden sm:inline" />
+
+        <User size={16} className="hidden sm:inline" />
       </button>
 
       <AnimatePresence>
@@ -548,11 +547,7 @@ const Header = () => {
             </span>
           </button>
 
-          {/* Recherche desktop (inline) */}
-          <div className="relative hidden md:flex flex-1 min-w-0">
-            <SearchForm />
-            {showSuggestions && <SuggestionsPanel />}
-          </div>
+          
 
           {/* Icônes à droite */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -643,8 +638,13 @@ const Header = () => {
             <CategoryMegaMenu />
             <span className="mx-2 h-4 w-px bg-slate-200" />
           </div>
+          {/* Recherche desktop (inline) */}
+          <div className="relative hidden md:flex flex-1 min-w-0">
+            <SearchForm />
+            {showSuggestions && <SuggestionsPanel />}
+          </div>
           <div className="flex items-center gap-4 text-slate-500 font-medium">
-            <span>Livraison gratuite dès 20 000 FCFA</span>
+            <h1 className='text-[#FF6B00] text-lg font-bold ml-3'>Livraison gratuite dès 20 000 FCFA</h1>
           </div>
         </div>
       </div>

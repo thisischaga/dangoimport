@@ -14,6 +14,12 @@
 		},
 		{
 			"path": "../dangoimport-vitrine"
+		},
+		{
+			"path": "../gama_project/web"
+		},
+		{
+			"path": "../gama_project/server"
 		}
 	],
 	"settings": {}

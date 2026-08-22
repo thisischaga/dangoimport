@@ -1,27 +1,49 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 
-function StarIcon({ filled, half, size = 12 }) {
-  if (half) {
-    return (
-      <span className="product-rating__star-half" style={{ width: size, height: size }}>
-        <Star size={size} fill="#e0e0e0" color="#e0e0e0" />
-        <span className="product-rating__star-half-fill">
-          <Star size={size} fill="#FF6B00" color="#FF6B00" />
-        </span>
-      </span>
-    );
-  }
+function StarFull({ size }) {
+  return <Star size={size} fill="#FF6B00" color="#FF6B00" />;
+}
+
+function StarEmpty({ size }) {
+  return <Star size={size} fill="#e8e8e8" color="#e8e8e8" />;
+}
+
+function StarHalf({ size }) {
   return (
-    <Star
-      size={size}
-      style={{ color: filled ? '#FF6B00' : '#e0e0e0' }}
-      fill={filled ? '#FF6B00' : '#e0e0e0'}
-    />
+    <span
+      style={{
+        position: 'relative',
+        display: 'inline-flex',
+        width: size,
+        height: size,
+        flexShrink: 0,
+      }}
+    >
+      <Star size={size} fill="#e8e8e8" color="#e8e8e8" />
+      <span
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '50%',
+          overflow: 'hidden',
+          display: 'inline-flex',
+        }}
+      >
+        <Star size={size} fill="#FF6B00" color="#FF6B00" />
+      </span>
+    </span>
   );
 }
 
-function ProductRating({ rating, reviewCount, size = 'sm', showStars = true, hideCount = false }) {
+function ProductRating({
+  rating,
+  reviewCount,
+  size = 'sm',
+  showStars = true,
+  hideCount = false,
+}) {
   const numRating = Number(rating);
   const numReviews = Number(reviewCount);
 
@@ -29,27 +51,56 @@ function ProductRating({ rating, reviewCount, size = 'sm', showStars = true, hid
     return null;
   }
 
+  const starSize = size === 'lg' ? 15 : 13;
   const fullStars = Math.floor(numRating);
   const hasHalf = numRating - fullStars >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
-  const fontSize = size === 'lg' ? '13px' : '11px';
 
   return (
-    <div className="product-rating" style={{ fontSize }}>
+    <div
+      className="product-rating"
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        flexWrap: 'nowrap',
+        fontSize: size === 'lg' ? 13 : 11,
+      }}
+    >
       {showStars && (
-        <span className="product-rating__stars">
+        <span
+          className="product-rating__stars"
+          style={{
+            display: 'inline-flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 1,
+            flexShrink: 0,
+          }}
+        >
           {Array.from({ length: fullStars }).map((_, i) => (
-            <StarIcon key={`f${i}`} filled size={size === 'lg' ? 14 : 12} />
+            <StarFull key={`f${i}`} size={starSize} />
           ))}
-          {hasHalf && <StarIcon half size={size === 'lg' ? 14 : 12} />}
+          {hasHalf && <StarHalf size={starSize} />}
           {Array.from({ length: emptyStars }).map((_, i) => (
-            <StarIcon key={`e${i}`} filled={false} size={size === 'lg' ? 14 : 12} />
+            <StarEmpty key={`e${i}`} size={starSize} />
           ))}
         </span>
       )}
-      <span className="product-rating__value">{numRating.toFixed(1)}</span>
+      <span
+        className="product-rating__value"
+        style={{ fontWeight: 700, color: '#ff6b00', whiteSpace: 'nowrap' }}
+      >
+        {numRating.toFixed(1)}
+      </span>
       {!hideCount && (
-        <span className="product-rating__count">({numReviews} avis)</span>
+        <span
+          className="product-rating__count"
+          style={{ color: '#9a9a9a', whiteSpace: 'nowrap' }}
+        >
+          ({numReviews} avis)
+        </span>
       )}
     </div>
   );

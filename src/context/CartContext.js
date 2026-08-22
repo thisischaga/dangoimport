@@ -36,6 +36,8 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
+    let toastToTrigger = null;
+
     setCart((prevCart) => {
       const existing = prevCart.find((item) => (item._id || item.id) === productId);
 
@@ -47,10 +49,10 @@ export const CartProvider = ({ children }) => {
         if (newQty > stock) {
           const addable = stock - currentQty;
           if (addable <= 0) {
-            toast.warn(`Stock maximum atteint pour "${product.name}" (${stock} en stock).`);
+            toastToTrigger = { type: 'warn', message: `Stock maximum atteint pour "${product.name}" (${stock} en stock).` };
             return prevCart;
           }
-          toast.warn(`Seulement ${addable} unité(s) ajoutée(s) — stock limité à ${stock}.`);
+          toastToTrigger = { type: 'warn', message: `Seulement ${addable} unité(s) ajoutée(s) — stock limité à ${stock}.` };
           return prevCart.map((item) =>
             (item._id || item.id) === productId
               ? { ...item, ...product, _id: productId, quantity: stock }
@@ -58,7 +60,7 @@ export const CartProvider = ({ children }) => {
           );
         }
 
-        toast.info(`Quantité mise à jour : ${newQty}×`);
+        toastToTrigger = { type: 'info', message: `Quantité mise à jour : ${newQty}×` };
         return prevCart.map((item) =>
           (item._id || item.id) === productId
             ? { ...item, ...product, _id: productId, quantity: newQty }
@@ -68,9 +70,14 @@ export const CartProvider = ({ children }) => {
 
       // Nouveau produit
       const addQty = Math.min(quantityToAdd, stock);
-      toast.success(`${product.name} ajouté au panier`);
+      toastToTrigger = { type: 'success', message: `${product.name} ajouté au panier` };
       return [...prevCart, { ...product, _id: productId, quantity: addQty }];
     });
+
+    // Trigger toast outside of the render phase/setCart callback
+    if (toastToTrigger) {
+      toast[toastToTrigger.type](toastToTrigger.message);
+    }
   }, []);
 
   const removeFromCart = useCallback((productId) => {

@@ -25,7 +25,7 @@ const PaymentResult = () => {
     const params = new URLSearchParams(location.search);
     const statusParam = (params.get('status') || 'success').toLowerCase();
     const orderIdParam = params.get('orderId');
-    const transactionIdParam = params.get('transactionId');
+    const transactionIdParam = params.get('transactionId') || params.get('id');
 
     setStatus(statusParam);
     setOrderId(orderIdParam);
@@ -80,7 +80,7 @@ const PaymentResult = () => {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/payments/verify/${currentTransactionId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${currentTransactionId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await response.json();

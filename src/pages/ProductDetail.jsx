@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ChevronRight,
@@ -518,6 +518,7 @@ export default function ProductDetail() {
         </section>
 
         <ProductReviewsSection
+          productId={productId}
           reviews={reviewsData?.reviews || []}
           productRating={rating}
           totalReviews={reviewCount}
