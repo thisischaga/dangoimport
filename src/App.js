@@ -83,14 +83,53 @@ function getPageTitle(pathname) {
   ];
 
   const route = routeTitles.find((item) => item.regex.test(pathname));
-  return route ? route.title : 'Marketplace';
+  return route ? `${route.title} | Dangoimport` : 'Dangoimport | Marketplace locale';
+}
+
+function getPageDescription(pathname) {
+  const defaultDesc = 'Dangoimport est la marketplace locale de référence au Bénin et au Togo. Découvrez des milliers de produits de vendeurs béninois et togolais. Achetez malin et vendez facilement.';
+  const routeDescriptions = [
+    { regex: /^\/$/, description: 'Dangoimport - Achetez des articles de qualité au Bénin et au Togo au meilleur prix.' },
+    { regex: /^\/shopping$/, description: 'Parcourez la boutique en ligne Dangoimport. Produits diversifiés, commandes sécurisées.' },
+    { regex: /^\/mes-commandes$/, description: 'Suivez vos commandes en temps réel et générez vos codes QR de retrait.' },
+    { regex: /^\/toutes-les-categories$/, description: 'Découvrez toutes les catégories de produits disponibles sur Dangoimport.' },
+    { regex: /^\/centre-aide$/, description: 'Trouvez des réponses à vos questions et contactez notre assistance clientèle.' },
+    { regex: /^\/checkout$/, description: 'Finalisez votre achat en toute sécurité sur Dangoimport.' },
+    { regex: /^\/cgu$/, description: 'Conditions Générales d’Utilisation de la plateforme Dangoimport.' },
+    { regex: /^\/politique-retour$/, description: 'Consultez nos conditions de retour et de remboursement sous 72 heures.' },
+    { regex: /^\/a-propos$/, description: 'Découvrez qui nous sommes, notre vision et nos services de sourcing Chine.' },
+  ];
+
+  const route = routeDescriptions.find((item) => item.regex.test(pathname));
+  return route ? route.description : defaultDesc;
 }
 
 function PageTitleUpdater() {
   const location = useLocation();
 
   useEffect(() => {
+    // 1. Mise à jour du titre
     document.title = getPageTitle(location.pathname);
+
+    // 2. Gestion de l'URL Canonique (Pour résoudre "Pages en double sans URL canonique")
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    // Nettoie l'URL en ne conservant que le domaine et le chemin d'accès (sans paramètres de requête)
+    const cleanHref = `https://marketplace.dangoimport.com${location.pathname}`;
+    canonicalLink.setAttribute('href', cleanHref);
+
+    // 3. Gestion de la Meta Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', getPageDescription(location.pathname));
   }, [location.pathname]);
 
   return null;

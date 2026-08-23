@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dangoimport.com/sitemap.xml
+Disallow: /checkout
+Disallow: /checkout/result
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://marketplace.dangoimport.com/sitemap.xml

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
@@ -129,7 +129,7 @@ function InteractiveRating({
                 aria-label={`Noter ${value}`}
               >
                 <Star
-                  size={11}
+                  size={15}
                   strokeWidth={2}
                   className={
                     filled
@@ -167,6 +167,14 @@ function ProductCard({
   product,
   onAddToCart,
 }) {
+  const handleQuickAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onAddToCart) {
+      onAddToCart(product);
+    }
+  };
+
   /* =======================================================
      BASIC PRODUCT DATA
   ======================================================= */
@@ -442,6 +450,37 @@ function ProductCard({
           text-decoration: none;
         }
 
+        .pc2__quick-add-btn {
+          position: absolute;
+          bottom: 8px;
+          right: 8px;
+          width: 32px;
+          height: 32px;
+          border-radius: 9999px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          color: #FF6B00;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 10;
+          padding: 0;
+        }
+
+        .pc2__quick-add-btn:hover {
+          background: #FF6B00;
+          color: #ffffff;
+          border-color: #FF6B00;
+          transform: scale(1.05);
+        }
+
+        .pc2__quick-add-btn:active {
+          transform: scale(0.95);
+        }
+
         /* =================================================
            BODY
         ================================================= */
@@ -473,13 +512,13 @@ function ProductCard({
         .pc2__title {
           margin: 0;
 
-          font-size: 14px;
+          font-size: 12px;
           line-height: 1.35;
 
           /*
            * Nom du produit en gras.
            */
-          font-weight: 700;
+          font-weight: 620;
 
           color: #111827;
 
@@ -659,7 +698,7 @@ function ProductCard({
         }
 
         .pc2-rating__star--full {
-          color: #f59e0b;
+          color: #000;
 
           fill: currentColor;
         }
@@ -761,6 +800,13 @@ function ProductCard({
           .pc2__delivery-zone {
             font-size: 10px;
           }
+
+          .pc2__quick-add-btn {
+            bottom: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+          }
         }
 
       `}</style>
@@ -793,6 +839,15 @@ function ProductCard({
               }
             />
           </Link>
+          {!isOutOfStock && onAddToCart && (
+            <button
+              onClick={handleQuickAddToCart}
+              className="pc2__quick-add-btn"
+              title="Ajouter au panier"
+            >
+              <ShoppingCart size={15} />
+            </button>
+          )}
         </div>
 
         {/* =================================================
@@ -832,17 +887,19 @@ function ProductCard({
 
           <div className="pc2__price-row">
 
+            <span className="pc2__price">
+              {formatSoftS(
+                displayPrice
+              )}
+            </span>
+
             {hasPromo && (
               <span className="pc2__price-old">
                 {formatSoftS(price)}
               </span>
             )}
 
-            <span className="pc2__price">
-              {formatSoftS(
-                displayPrice
-              )}
-            </span>
+            
 
           </div>
 

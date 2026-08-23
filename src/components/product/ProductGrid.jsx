@@ -475,50 +475,57 @@ function ProductGrid({
             PRODUCT GRID
         ================================================= */}
 
-        <div
-          id="product-grid-main"
-          style={{
-            display: 'grid',
-            gap: '10px',
-            marginTop: '20px',
-            alignItems: 'start',
-          }}
-          className="px-2 sm:px-0"
-        >
-          <style>{`
-            #product-grid-main {
-              grid-template-columns:
-                repeat(2, minmax(0, 1fr));
+        <style>{`
+          #product-grid-main {
+            display: block;
+            column-count: 2;
+            column-gap: 10px;
+          }
 
+          #product-grid-main > * {
+            display: inline-block;
+            width: 100%;
+            break-inside: avoid;
+            margin-bottom: 10px;
+          }
+
+          @media (min-width: 640px) {
+            #product-grid-main {
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 10px;
               align-items: start;
             }
 
             #product-grid-main > * {
-              min-width: 0;
+              display: block;
+              width: auto;
+              break-inside: auto;
+              margin-bottom: 0;
               align-self: start;
             }
+          }
 
-            @media (min-width: 640px) {
-              #product-grid-main {
-                grid-template-columns:
-                  repeat(3, minmax(0, 1fr));
-              }
+          @media (min-width: 768px) {
+            #product-grid-main {
+              grid-template-columns: repeat(4, minmax(0, 1fr));
             }
+          }
 
-            @media (min-width: 768px) {
-              #product-grid-main {
-                grid-template-columns:
-                  repeat(4, minmax(0, 1fr));
-              }
+          @media (min-width: 1024px) {
+            #product-grid-main {
+              grid-template-columns: repeat(5, minmax(0, 1fr));
             }
+          }
+        `}</style>
 
-            @media (min-width: 1024px) {
-              #product-grid-main {
-                grid-template-columns:
-                  repeat(5, minmax(0, 1fr));
-              }
-            }
-          `}</style>
+        <div
+          id="product-grid-main"
+          style={{
+            marginTop: '20px',
+          }}
+          className="px-2 sm:px-0"
+        >
 
           {/* ==============================================
               LOADING INITIAL
