@@ -254,7 +254,9 @@ const CartPage = () => {
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" style={{
+        paddingTop: 'calc(var(--header-h, 96px) + 30px)',
+      }}>
         <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
           <button onClick={() => navigate('/shopping')} className="inline-flex items-center gap-2 font-semibold text-slate-700 hover:text-[#FF6B00]">
             <ArrowLeft className="h-4 w-4" />
@@ -267,9 +269,8 @@ const CartPage = () => {
             <h1 className="text-2xl font-black text-slate-900 sm:text-4xl">Mon panier</h1>
             <p className="mt-1 text-sm text-slate-500">{cartCount} article(s) · {estimatedDelivery}</p>
           </div>
-          <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200">Commande prête pour le checkout</div>
+          <div className=" px-4 py-2 text-sm font-bold text-slate-700">Commande prête pour le checkout</div>
         </div>
-
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-5">
             {groupedByVendor.map((group) => (
@@ -290,7 +291,6 @@ const CartPage = () => {
                     </div>
                     <div>
                       <p className="text-base font-black text-slate-900">{group.vendorName}</p>
-                      <Link to="/shopping" className="text-xs font-bold text-[#FF6B00]">Voir la boutique</Link>
                     </div>
                   </div>
                   <div className="rounded-full bg-[#FFF7F1] px-3 py-1 text-xs font-bold text-[#FF6B00]">Groupe vendeur</div>
