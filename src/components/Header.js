@@ -445,7 +445,8 @@ const Header = () => {
         aria-expanded={accountOpen}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 cursor-pointer"
+        className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 
+        text-sm font-semibold text-slate-700 cursor-pointer hidden sm:inline"
       >
 
         <User size={16} className="hidden sm:inline" />
@@ -644,7 +645,7 @@ const Header = () => {
             {showSuggestions && <SuggestionsPanel />}
           </div>
           <div className="flex items-center gap-4 text-slate-500 font-medium">
-            <h1 className='text-[#FF6B00] text-lg font-bold ml-3'>Livraison gratuite dès 20 000 FCFA</h1>
+            <h1 className='text-[#FF6B00] text-lg font-bold ml-3'>Livraison gratuite possible</h1>
           </div>
         </div>
       </div>
