@@ -80,6 +80,12 @@ const PaymentResult = () => {
       }
 
       try {
+        // Route réelle confirmée dans routes/fedapayRoutes.js : GET /transaction/:id,
+        // qui renvoie { success: true, data: transaction } — `transaction` étant le
+        // document Mongo brut (transactionId, status, orderId, ...), pas de forme
+        // imbriquée { local, remote }. `orderId` n'est renseigné qu'une fois le
+        // webhook FedaPay traité (transaction.approved) ; avant ça il vaut null,
+        // d'où le polling.
         const response = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${currentTransactionId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -91,7 +97,7 @@ const PaymentResult = () => {
           return false;
         }
 
-        const currentOrderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
+        const currentOrderId = data.data?.orderId || null;
         if (currentOrderId) {
           setOrderId(currentOrderId);
           localStorage.removeItem('pendingFedapay');
@@ -99,10 +105,15 @@ const PaymentResult = () => {
           return await fetchQrTokensForOrder(currentOrderId);
         }
 
-        const remoteStatus = (data.data?.remote?.status || '').toLowerCase();
-        if (['approved', 'completed', 'paid', 'success', 'successful'].includes(remoteStatus)) {
+        const remoteStatus = (data.data?.status || '').toLowerCase();
+        if (remoteStatus === 'approved') {
           setMessage('Paiement validé, la commande est en cours de création. Patientez encore quelques instants.');
           return false;
+        }
+        if (remoteStatus === 'failed' || remoteStatus === 'canceled') {
+          setMessage('Le paiement a échoué ou a été annulé.');
+          restoreBackupCart();
+          return true;
         }
 
         setMessage('Vérification du paiement en cours. Patientez...');

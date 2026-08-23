@@ -9,24 +9,526 @@ import { useCart } from '../context/CartContext';
 import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
 import { fetchOrderQrTokens } from '../services/qrService';
 
-const MapPin = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
-const CreditCard = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" /></svg>;
-const ShoppingBag = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>;
-const ChevronRight = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>;
-const Check = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 18 4 13" /></svg>;
-const ArrowLeft = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>;
-const Truck = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h11v10H3z" /><path d="M14 9h3l4 4v4h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></svg>;
-
-const paymentOptions = [
-  { id: 'fedapay', label: 'FedaPay', helper: 'Paiement en ligne via FedaPay' },
+/* ─── Données des formules ─── */
+const SHIPPING_PLANS = [
+  {
+    value: 'standard',
+    label: 'Standard',
+    tagline: 'Économique',
+    price: 0,
+    priceLabel: 'Gratuit',
+    delay: '3 à 7 jours ouvrés',
+    color: 'emerald',
+    features: [
+      'Commandes regroupées par zone',
+      'Tournées planifiées et optimisées',
+      'Délai communiqué avant l\'expédition',
+      'Pas de priorité de traitement',
+    ],
+  },
+  {
+    value: 'express',
+    label: 'Express',
+    tagline: 'Prioritaire',
+    price: 2250,
+    priceLabel: '2 250 FCFA',
+    delay: 'Sous 24 heures',
+    color: 'amber',
+    features: [
+      'Livreur dédié pour votre commande',
+      'Traitement immédiat à la validation',
+      'Prioritaire dans la file d\'attente',
+      'Suivi disponible à la demande',
+    ],
+  },
+  {
+    value: 'premium',
+    label: 'Premium',
+    tagline: 'Ultra-rapide',
+    price: 5000,
+    priceLabel: '5 000 FCFA',
+    delay: 'Immédiate ',
+    color: 'purple',
+    features: [
+      'Livraison dans la journée garantie',
+      'Livreur exclusivement dédié',
+      'Livraison de nuit possible',
+      'Assistance téléphonique incluse',
+    ],
+  },
 ];
 
-const shippingMethods = [
-  { value: 'standard', label: 'Livraison standard', helper: 'Livraison 2 à 5 jours', fee: 'Selon le poids' },
-  { value: 'express', label: 'Livraison express', helper: 'Livraison rapide sous 48h', fee: '+10% du sous-total' },
-  { value: 'pickup', label: 'Retrait en point relais', helper: 'À retirer chez un partenaire', fee: 'Gratuit' },
+const STEPS = [
+  { id: 1, label: 'Adresse', shortLabel: 'Adresse' },
+  { id: 2, label: 'Livraison', shortLabel: 'Livraison' },
+  { id: 3, label: 'Paiement', shortLabel: 'Paiement' },
 ];
 
+/* ─── Stepper Progress Bar ─── */
+function StepperBar({ currentStep }) {
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between relative">
+        {/* Background line */}
+        <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200 mx-8" />
+        {/* Progress line */}
+        <div
+          className="absolute top-5 left-0 h-[2px] bg-[#F68B1E] mx-8 transition-all duration-500 ease-out"
+          style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`, maxWidth: 'calc(100% - 4rem)' }}
+        />
+
+        {STEPS.map((step) => {
+          const isCompleted = currentStep > step.id;
+          const isActive = currentStep === step.id;
+
+          return (
+            <div key={step.id} className="flex flex-col items-center relative z-10">
+              <div
+                className={[
+                  'w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border-2',
+                  isCompleted
+                    ? 'bg-[#F68B1E] border-[#F68B1E] text-white shadow-lg shadow-orange-200'
+                    : isActive
+                    ? 'bg-white border-[#F68B1E] text-[#F68B1E] shadow-lg shadow-orange-100'
+                    : 'bg-white border-gray-200 text-gray-400',
+                ].join(' ')}
+              >
+                {step.id}
+              </div>
+              <span
+                className={[
+                  'mt-2 text-xs font-bold transition-colors duration-300',
+                  isActive ? 'text-[#F68B1E]' : isCompleted ? 'text-[#282828]' : 'text-gray-400',
+                ].join(' ')}
+              >
+                {step.shortLabel}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Mini Order Summary (floating panel) ─── */
+function MiniOrderSummary({ cartItems, itemUnitPrice, subtotal, shippingFee, shippingMethod, preview, previewLoading, isOpen, onToggle }) {
+  const plan = SHIPPING_PLANS.find((p) => p.value === shippingMethod);
+  const discount = Number(preview?.discount || 0);
+  const total = Number(preview?.subtotal ?? subtotal) + shippingFee - discount;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
+      {/* Header — toujours visible */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50/50 transition"
+      >
+        <div className="flex items-center gap-3">
+          <div className="text-left">
+            <p className="text-xs text-gray-500 font-medium">Résumé de commande</p>
+            <p className="text-sm font-black text-[#282828]">
+              {cartItems.length} article{cartItems.length > 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-base font-black text-[#F68B1E]">
+            {previewLoading ? '...' : `${total.toLocaleString('fr-FR')} FCFA`}
+          </span>
+          <span className="text-xs font-bold text-gray-400">
+            {isOpen ? 'Masquer' : 'Afficher'}
+          </span>
+        </div>
+      </button>
+
+      {/* Expanded content */}
+      <div
+        className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="px-5 pb-5 border-t border-gray-100">
+          {/* Product list */}
+          <div className="space-y-3 mt-4 max-h-[200px] overflow-y-auto pr-1">
+            {cartItems.map((item) => (
+              <div key={item._id || item.id} className="flex gap-3 items-center">
+                <img
+                  src={item.image || item.images?.[0]?.url}
+                  alt={item.name}
+                  className="w-11 h-11 rounded-lg object-cover bg-gray-100 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-[#282828] line-clamp-1">{item.name}</p>
+                  <p className="text-[11px] text-gray-400">Qté : {item.quantity}</p>
+                </div>
+                <p className="text-xs font-black text-[#282828] shrink-0">
+                  {itemUnitPrice(item).toLocaleString('fr-FR')} F
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Totals */}
+          <div className="mt-4 pt-3 border-t border-gray-100 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Sous-total</span>
+              <span className="font-semibold text-[#282828]">{subtotal.toLocaleString('fr-FR')} F</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Livraison ({plan?.label || 'Standard'})</span>
+              <span className={shippingFee === 0 ? 'font-black text-emerald-600' : 'font-semibold text-[#282828]'}>
+                {shippingFee === 0 ? 'Gratuit' : `${shippingFee.toLocaleString('fr-FR')} F`}
+              </span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Réduction</span>
+                <span className="font-bold text-emerald-600">−{discount.toLocaleString('fr-FR')} F</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 1 : Adresse de livraison ─── */
+function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId, handleSelectAddress }) {
+  const fields = [
+    { key: 'firstName', label: 'Prénom', required: true, half: true },
+    { key: 'lastName', label: 'Nom', required: true, half: true },
+    { key: 'email', label: 'Email', type: 'email', required: true, half: true },
+    { key: 'phone', label: 'Téléphone', type: 'tel', required: true, half: true },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Saved addresses */}
+      {savedAddresses.length > 0 && (
+        <div>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Adresses enregistrées</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {savedAddresses.map((address) => {
+              const id = address._id || address.id || 'default';
+              const isActive = selectedAddressId === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => handleSelectAddress(address)}
+                  className={[
+                    'text-left p-4 rounded-xl border-2 transition-all duration-200 group',
+                    isActive
+                      ? 'border-[#F68B1E] bg-gradient-to-br from-orange-50 to-amber-50/30 shadow-sm'
+                      : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm',
+                  ].join(' ')}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          {address.label || 'Adresse'}
+                        </span>
+                        {address.isDefault && (
+                          <span className="text-[9px] rounded-full bg-[#F68B1E] text-white px-2 py-0.5 font-bold">
+                            Défaut
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm font-bold text-[#282828]">{address.city}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{address.fullAddress}</p>
+                    </div>
+                    <div
+                      className={[
+                        'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all',
+                        isActive ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300',
+                      ].join(' ')}
+                    >
+                      {isActive && <div className="w-2 h-2 rounded-full bg-white" />}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Form */}
+      <div>
+        {savedAddresses.length > 0 && (
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Ou renseigner manuellement</p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+          {fields.map(({ key, label, type = 'text', required }) => (
+            <div key={key}>
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                {label}{required && <span className="text-[#F68B1E] ml-0.5">*</span>}
+              </label>
+              <input
+                type={type}
+                value={form[key]}
+                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                className={[
+                  'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
+                  errors[key]
+                    ? 'border-red-300 bg-red-50/50 focus:border-red-300'
+                    : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
+                ].join(' ')}
+                placeholder={label}
+              />
+              {errors[key] && (
+                <p className="text-red-500 text-[11px] mt-1 font-medium flex items-center gap-1">
+                  {errors[key]}
+                </p>
+              )}
+            </div>
+          ))}
+
+          {/* Country */}
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+              Pays<span className="text-[#F68B1E] ml-0.5">*</span>
+            </label>
+            <select
+              value={form.country}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200 appearance-none cursor-pointer"
+            >
+              <option>Togo</option>
+              <option>Bénin</option>
+            </select>
+          </div>
+
+          {/* City */}
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+              Ville<span className="text-[#F68B1E] ml-0.5">*</span>
+            </label>
+            <input
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              className={[
+                'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
+                errors.city
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-300'
+                  : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
+              ].join(' ')}
+              placeholder="Ville"
+            />
+            {errors.city && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.city}</p>}
+          </div>
+
+          {/* Neighborhood */}
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Quartier</label>
+            <input
+              value={form.neighborhood}
+              onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200"
+              placeholder="Quartier"
+            />
+          </div>
+
+          {/* Postal code */}
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Code postal</label>
+            <input
+              value={form.postalCode}
+              onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200"
+              placeholder="Code postal"
+            />
+          </div>
+
+          {/* Full address */}
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+              Adresse complète<span className="text-[#F68B1E] ml-0.5">*</span>
+            </label>
+            <input
+              value={form.fullAddress}
+              onChange={(e) => setForm({ ...form, fullAddress: e.target.value })}
+              className={[
+                'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
+                errors.fullAddress
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-300'
+                  : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
+              ].join(' ')}
+              placeholder="Numéro, rue, bâtiment..."
+            />
+            {errors.fullAddress && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.fullAddress}</p>}
+          </div>
+
+          {/* Instructions */}
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Instructions de livraison</label>
+            <textarea
+              rows="2"
+              value={form.instructions}
+              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200 resize-none"
+              placeholder="Bâtiment, code d'accès, remarques..."
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 2 : Formule de livraison ─── */
+function StepShipping({ shippingMethod, setShippingMethod }) {
+  const colorMap = {
+    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+    amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+    purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-gray-500 mb-2">
+        Choisissez le mode d'acheminement de votre commande.
+      </p>
+
+      <div className="space-y-3">
+        {SHIPPING_PLANS.map((plan) => {
+          const isSelected = shippingMethod === plan.value;
+          const colors = colorMap[plan.color];
+
+          return (
+            <button
+              key={plan.value}
+              type="button"
+              onClick={() => setShippingMethod(plan.value)}
+              className={[
+                'w-full text-left rounded-2xl border-2 transition-all duration-300 group overflow-hidden',
+                isSelected
+                  ? `border-[#F68B1E] shadow-lg shadow-orange-100/40`
+                  : 'border-gray-100 hover:border-gray-200 hover:shadow-sm',
+              ].join(' ')}
+            >
+              {/* Main row */}
+              <div className="flex items-center gap-4 px-5 py-4">
+                {/* Radio indicator */}
+                <div
+                  className={[
+                    'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200',
+                    isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300 group-hover:border-gray-400',
+                  ].join(' ')}
+                >
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-black text-[#282828]">{plan.label}</span>
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${colors.badge}`}>
+                      {plan.tagline}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">{plan.delay}</p>
+                </div>
+
+                {/* Price */}
+                <div className="text-right shrink-0">
+                  <span className={`text-base font-black ${plan.price === 0 ? 'text-emerald-600' : 'text-[#282828]'}`}>
+                    {plan.priceLabel}
+                  </span>
+                </div>
+              </div>
+
+              {/* Expanded features */}
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${isSelected ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}
+              >
+                <div className="px-5 pb-4 pt-0">
+                  <div className={`rounded-xl ${colors.bg} p-3`}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {plan.features.map((feat) => (
+                        <div key={feat} className="flex items-start gap-2 text-xs text-gray-600">
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 3 : Paiement ─── */
+function StepPayment({ acceptCGV, setAcceptCGV, submitting, handlePlaceOrder, computedTotal, previewLoading, form, shippingMethod }) {
+  const plan = SHIPPING_PLANS.find((p) => p.value === shippingMethod);
+
+  return (
+    <div className="space-y-6">
+      {/* Recap card */}
+      <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-5">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Récapitulatif</p>
+        <div className="space-y-2">
+          <div className="flex flex-col">
+            <p className="text-xs font-bold text-[#282828]">Livraison à :</p>
+            <p className="text-xs text-gray-500">
+              {form.fullAddress}{form.city ? `, ${form.city}` : ''}{form.country ? ` — ${form.country}` : ''}
+            </p>
+          </div>
+          <div className="flex flex-col pt-2">
+            <p className="text-xs font-bold text-[#282828]">Mode de livraison :</p>
+            <p className="text-xs text-gray-500">{plan?.label || 'Standard'} — {plan?.delay}</p>
+          </div>
+        </div>
+      </div>
+
+
+      {/* CGV */}
+      <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/50 cursor-pointer select-none hover:bg-gray-50 transition group">
+        <input
+          type="checkbox"
+          checked={acceptCGV}
+          onChange={(e) => setAcceptCGV(e.target.checked)}
+          className="mt-1 h-5 w-5 accent-[#F68B1E] rounded"
+        />
+        <span className="text-sm text-gray-600 leading-relaxed">
+          J'ai lu et j'accepte les conditions générales de vente de Dangoimport.
+        </span>
+      </label>
+
+      {/* Submit */}
+      <button
+        onClick={handlePlaceOrder}
+        disabled={submitting || !acceptCGV}
+        className={[
+          'w-full font-black py-4 rounded-xl transition-all duration-200 text-sm tracking-wide relative overflow-hidden group',
+          submitting || !acceptCGV
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-200/60 hover:-translate-y-0.5',
+        ].join(' ')}
+      >
+        {submitting ? (
+          'Redirection en cours...'
+        ) : (
+          `Confirmer et payer — ${previewLoading ? '...' : `${computedTotal.toLocaleString('fr-FR')} FCFA`}`
+        )}
+      </button>
+
+      <p className="text-center text-[11px] text-gray-400">
+        Paiement sécurisé via FedaPay
+      </p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPOSANT PRINCIPAL — CHECKOUT WIZARD
+   ═══════════════════════════════════════════════════════════════ */
 export default function Checkout() {
   const navigate = useNavigate();
   const { cart: cartItems = [], clearCart } = useCart();
@@ -41,6 +543,8 @@ export default function Checkout() {
     navigate('/login', { state: { from: '/checkout' } });
   }, [clearSession, navigate]);
 
+  /* ─── State ─── */
+  const [currentStep, setCurrentStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [acceptCGV, setAcceptCGV] = useState(false);
@@ -48,7 +552,7 @@ export default function Checkout() {
   const [preview, setPreview] = useState(null);
   const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [shippingMethod, setShippingMethod] = useState('standard');
-  const [paymentMethod, setPaymentMethod] = useState('fedapay');
+  const [paymentMethod] = useState('fedapay');
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [qrTokens, setQrTokens] = useState([]);
@@ -57,6 +561,7 @@ export default function Checkout() {
   const [pendingFedapay, setPendingFedapay] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrError, setQrError] = useState(null);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -70,13 +575,16 @@ export default function Checkout() {
     instructions: '',
   });
 
-  const itemUnitPrice = (item) => {
-    const price = Number(item.promoPrice) > 0 && Number(item.promoPrice) < Number(item.price || 0)
-      ? Number(item.promoPrice)
-      : Number(item.salePrice) > 0
-      ? Number(item.salePrice)
-      : Number(item.price || 0);
+  const shippingFee = SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.price ?? 0;
 
+  /* ─── Helpers ─── */
+  const itemUnitPrice = (item) => {
+    const price =
+      Number(item.promoPrice) > 0 && Number(item.promoPrice) < Number(item.price || 0)
+        ? Number(item.promoPrice)
+        : Number(item.salePrice) > 0
+        ? Number(item.salePrice)
+        : Number(item.price || 0);
     return Number.isFinite(price) ? price : 0;
   };
 
@@ -85,23 +593,14 @@ export default function Checkout() {
     [cartItems]
   );
 
-  const groupedProducts = useMemo(() => {
-    const groups = {};
-    for (const item of cartItems) {
-      const vendorKey = item.vendorName || item.vendor || 'Dangoimport';
-      if (!groups[vendorKey]) groups[vendorKey] = [];
-      groups[vendorKey].push(item);
-    }
-    return Object.entries(groups);
-  }, [cartItems]);
+  const getShippingLabel = () => SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.label || 'Standard';
 
-  const getShippingLabel = () => shippingMethods.find((method) => method.value === shippingMethod)?.label || 'Livraison standard';
-
+  /* ─── Effects ─── */
   useEffect(() => {
-    // Check URL parameters if redirected back from FedaPay return_url
     const urlParams = new URLSearchParams(window.location.search);
     const urlStatus = (urlParams.get('status') || '').toLowerCase();
     const pendingRawFromStorage = localStorage.getItem('pendingFedapay');
+
     if (['approved', 'completed', 'paid', 'successful', 'success'].includes(urlStatus)) {
       const pending = pendingRawFromStorage ? JSON.parse(pendingRawFromStorage) : null;
       const txId = pending?.transactionId || urlParams.get('transactionId');
@@ -119,7 +618,6 @@ export default function Checkout() {
       return;
     }
 
-    // If we returned from FedaPay with a pending transaction, poll its status
     let pollId;
     if (pendingRawFromStorage) {
       try {
@@ -133,9 +631,8 @@ export default function Checkout() {
               });
               const data = await res.json();
               const statusValue = (data.data?.local?.status || data.data?.remote?.status || '').toLowerCase();
-              const txStatus = statusValue;
               const orderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
-              if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(txStatus)) {
+              if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(statusValue)) {
                 if (orderId) {
                   let tokens = [];
                   try {
@@ -144,29 +641,21 @@ export default function Checkout() {
                     const qrResponse = await fetchOrderQrTokens(orderId, token);
                     tokens = qrResponse.qrTokens || [];
                     setQrTokens(tokens);
-                    if (tokens.length) {
-                      setShowQrPanel(true);
-                    }
+                    if (tokens.length) setShowQrPanel(true);
                   } catch (qrErr) {
-                    console.error('Unable to fetch QR tokens after payment', qrErr);
-                    setQrError(qrErr.message || 'Erreur lors de la récupération du QR.');
+                    setQrError(qrErr.message || 'Erreur QR');
                   } finally {
                     setQrLoading(false);
                   }
-
                   clearCart();
                   localStorage.removeItem('pendingFedapay');
                   localStorage.removeItem('dangoPromoCode');
-                  if (tokens.length === 0) {
-                    toast.error('Paiement reçu, mais aucun code QR n’a pu être généré pour le moment.');
-                  }
+                  if (tokens.length === 0) toast.error('Paiement reçu, mais aucun QR généré.');
                   if (pollId) clearInterval(pollId);
-                } else {
-                  console.log('FedaPay approved, waiting for order creation/webhook to attach orderId');
                 }
               }
             } catch (err) {
-              console.error('Error checking Fedapay transaction status', err);
+              console.error('Error polling FedaPay status', err);
             }
           };
           check();
@@ -177,23 +666,17 @@ export default function Checkout() {
         console.error('pendingFedapay parse error', e);
       }
     }
-    const token = localStorage.getItem('dangoToken');
+
     const pendingRaw = localStorage.getItem('pendingFedapay');
     if (pendingRaw) {
       try {
         const pending = JSON.parse(pendingRaw);
-        if (pending && pending.transactionId) {
-          setPendingFedapay(pending);
-        }
-      } catch (e) {
-        console.error('pendingFedapay parse error', e);
-      }
+        if (pending && pending.transactionId) setPendingFedapay(pending);
+      } catch (e) { /* noop */ }
     }
 
-    if (!token) {
-      redirectToLogin();
-      return;
-    }
+    const token = localStorage.getItem('dangoToken');
+    if (!token) { redirectToLogin(); return; }
 
     try {
       const userData = JSON.parse(localStorage.getItem('dangoUser') || '{}');
@@ -201,18 +684,16 @@ export default function Checkout() {
       setSavedAddresses(userAddresses);
 
       if (userData.userFirstname || userData.firstname) {
-        const firstName = userData.userFirstname || userData.firstname || '';
-        const lastName = userData.userSurname || userData.lastName || userData.surname || '';
         setForm((prev) => ({
           ...prev,
-          firstName,
-          lastName,
+          firstName: userData.userFirstname || userData.firstname || '',
+          lastName: userData.userSurname || userData.lastName || userData.surname || '',
           email: userData.userEmail || userData.email || '',
           phone: userData.userPhone || userData.phone || '',
         }));
       }
 
-      const defaultAddress = userAddresses.find((address) => address.isDefault) || userAddresses[0];
+      const defaultAddress = userAddresses.find((a) => a.isDefault) || userAddresses[0];
       if (defaultAddress) {
         setSelectedAddressId(defaultAddress._id || defaultAddress.id || 'default');
         setForm((prev) => ({
@@ -227,6 +708,8 @@ export default function Checkout() {
     } catch (error) {
       console.error('Erreur chargement utilisateur:', error);
     }
+
+    return () => { if (pollId) clearInterval(pollId); };
   }, [navigate, redirectToLogin]);
 
   useEffect(() => {
@@ -234,66 +717,55 @@ export default function Checkout() {
       if (!cartItems.length) return;
       const token = localStorage.getItem('dangoToken');
       if (!token) return;
-
       setPreviewLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/orders/preview`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            items: cartItems.map((item) => ({
-              productId: item._id || item.id,
-              quantity: item.quantity || 1,
-            })),
+            items: cartItems.map((item) => ({ productId: item._id || item.id, quantity: item.quantity || 1 })),
             shippingMethod,
             promoCode,
           }),
         });
-
         const data = await response.json();
-        if (response.status === 401 || response.status === 403) {
-          redirectToLogin();
-          throw new Error(data.message || 'Session expirée, veuillez vous reconnecter.');
-        }
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Impossible de calculer le total');
-        }
+        if (response.status === 401 || response.status === 403) { redirectToLogin(); return; }
+        if (!response.ok) throw new Error(data.message || 'Impossible de calculer le total');
         setPreview(data.data || null);
-        if (promoCode?.trim()) {
-          localStorage.setItem('dangoPromoCode', promoCode.trim().toUpperCase());
-        } else {
-          localStorage.removeItem('dangoPromoCode');
-        }
+        if (promoCode?.trim()) localStorage.setItem('dangoPromoCode', promoCode.trim().toUpperCase());
+        else localStorage.removeItem('dangoPromoCode');
       } catch (error) {
         console.error('Erreur preview:', error);
-        toast.error(error.message || 'Erreur de calcul du total');
-        if (!promoCode?.trim()) {
-          localStorage.removeItem('dangoPromoCode');
-        }
       } finally {
         setPreviewLoading(false);
       }
     };
-
     const timer = window.setTimeout(loadPreview, 250);
     return () => window.clearTimeout(timer);
   }, [cartItems, shippingMethod, promoCode]);
 
-  const validateStep1 = () => {
-    const newErrors = {};
-    if (!form.firstName.trim()) newErrors.firstName = 'Le prénom est requis';
-    if (!form.lastName.trim()) newErrors.lastName = 'Le nom est requis';
-    if (!form.email.trim()) newErrors.email = 'L’email est requis';
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) newErrors.phone = 'Téléphone valide requis';
-    if (!form.country.trim()) newErrors.country = 'Le pays est requis';
-    if (!form.city.trim()) newErrors.city = 'La ville est requise';
-    if (!form.fullAddress.trim()) newErrors.fullAddress = 'L’adresse est requise';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  useEffect(() => {
+    if (!qrTokens.length) { setQrImages({}); return; }
+    qrTokens.forEach((tokenData) => {
+      const key = tokenData.vendorId || tokenData.vendorName || tokenData.token;
+      QRCode.toDataURL(tokenData.token, { width: 280, margin: 2 })
+        .then((url) => setQrImages((prev) => ({ ...prev, [key]: url })))
+        .catch(console.error);
+    });
+  }, [qrTokens]);
+
+  /* ─── Validation ─── */
+  const validateForm = () => {
+    const e = {};
+    if (!form.firstName.trim()) e.firstName = 'Le prénom est requis';
+    if (!form.lastName.trim()) e.lastName = 'Le nom est requis';
+    if (!form.email.trim()) e.email = "L'email est requis";
+    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) e.phone = 'Téléphone valide requis';
+    if (!form.country.trim()) e.country = 'Le pays est requis';
+    if (!form.city.trim()) e.city = 'La ville est requise';
+    if (!form.fullAddress.trim()) e.fullAddress = "L'adresse est requise";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSelectAddress = (address) => {
@@ -308,105 +780,87 @@ export default function Checkout() {
     }));
   };
 
+  /* ─── Paiement ─── */
   const handlePlaceOrder = async () => {
+    if (!validateForm()) {
+      toast.error('Veuillez remplir correctement les informations de livraison');
+      return;
+    }
     if (!acceptCGV) {
-      toast.error('Vous devez accepter les conditions avant de confirmer');
+      toast.error('Veuillez accepter les conditions générales de vente');
       return;
     }
-
-    if (!validateStep1()) {
-      return;
-    }
-
     setSubmitting(true);
     const token = localStorage.getItem('dangoToken');
     const toastId = toast.loading('Préparation du paiement...');
-
     try {
-      if (paymentMethod === 'fedapay') {
-        const payload = buildCartFedapayPayload({
-          form,
-          cartItems,
-          subtotal,
-          shippingFee: Number(preview?.shippingCost || 0),
-          total: Number(preview?.total || subtotal),
-          shippingLabel: getShippingLabel(),
-          description: 'Commande Dangoimport',
-          type: 'cart',
-        });
-
-        const data = await initiateFedapayCheckout(payload, token);
-        if (!data?.url) {
-          throw new Error('URL de paiement FedaPay introuvable.');
-        }
-
-        toast.update(toastId, {
-          render: 'Redirection vers FedaPay...',
-          type: 'info',
-          isLoading: false,
-          autoClose: 2000,
-        });
-
-        try {
-          localStorage.setItem('pendingFedapay', JSON.stringify({ transactionId: data.transactionId, localTransactionId: data.localTransactionId }));
-          localStorage.setItem('pendingFedapayCartBackup', JSON.stringify(cartItems));
-        } catch (e) {
-          console.warn('Impossible de sauvegarder le panier de secours', e);
-        }
-
-        window.location.href = data.url;
-        return;
-      }
-      // Only FedaPay is supported for online payments. Other flows are deprecated.
-      toast.update(toastId, {
-        render: 'Seul FedaPay est supporté pour le paiement en ligne.',
-        type: 'error',
-        isLoading: false,
-        autoClose: 3000,
+      const computedTotal = Number(preview?.subtotal ?? subtotal) + shippingFee - Number(preview?.discount || 0);
+      const payload = buildCartFedapayPayload({
+        form,
+        cartItems,
+        subtotal,
+        shippingFee,
+        total: computedTotal,
+        shippingLabel: getShippingLabel(),
+        description: 'Commande Dangoimport',
+        type: 'cart',
       });
-      setSubmitting(false);
-      return;
+
+      const data = await initiateFedapayCheckout(payload, token);
+      if (!data?.url) throw new Error('URL de paiement FedaPay introuvable.');
+
+      toast.update(toastId, { render: 'Redirection vers FedaPay...', type: 'info', isLoading: false, autoClose: 2000 });
+
+      try {
+        localStorage.setItem('pendingFedapay', JSON.stringify({ transactionId: data.transactionId, localTransactionId: data.localTransactionId }));
+        localStorage.setItem('pendingFedapayCartBackup', JSON.stringify(cartItems));
+      } catch (e) { console.warn('Impossible de sauvegarder le panier de secours', e); }
+
+      window.location.href = data.url;
     } catch (error) {
-      console.error('Erreur création commande:', error);
-      toast.update(toastId, {
-        render: `❌ ${error.message}`,
-        type: 'error',
-        isLoading: false,
-        autoClose: 3000,
-      });
+      console.error('Erreur paiement:', error);
+      toast.update(toastId, { render: `${error.message}`, type: 'error', isLoading: false, autoClose: 4000 });
     } finally {
       setSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    if (!qrTokens.length) {
-      setQrImages({});
+  /* ─── Navigation entre étapes ─── */
+  const goNext = () => {
+    if (currentStep === 1) {
+      if (!validateForm()) {
+        toast.error('Veuillez remplir les champs obligatoires.');
+        return;
+      }
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, 3));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goBack = () => {
+    if (currentStep === 1) {
+      navigate('/cart');
       return;
     }
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    qrTokens.forEach((tokenData) => {
-      const key = tokenData.vendorId || tokenData.vendorName || tokenData.token;
-      QRCode.toDataURL(tokenData.token, { width: 280, margin: 2 })
-        .then((url) => {
-          setQrImages((prev) => ({ ...prev, [key]: url }));
-        })
-        .catch((err) => {
-          console.error('QRCode generation failed:', err);
-        });
-    });
-  }, [qrTokens]);
-
+  /* ─── Panier vide ─── */
   if (!cartItems.length) {
     return (
       <>
         <Header />
-        <div className="min-h-[70vh] bg-[#f5f5f5] flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-24 h-24 mx-auto mb-4 text-gray-300"><ShoppingBag /></div>
-            <h2 className="text-xl font-black text-gray-900 mb-2">Panier vide</h2>
-            <p className="text-gray-500 text-sm mb-6">Ajoutez des produits avant de finaliser</p>
-            <button onClick={() => navigate('/shopping')} className="bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black px-8 py-3 rounded-lg transition">
+        <div className="min-h-[70vh] bg-[#FAFAFA] flex items-center justify-center pt-28">
+          <div className="text-center px-6">
+            <h2 className="text-xl font-black text-gray-900 mb-2">Votre panier est vide</h2>
+            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+              Ajoutez des produits avant de finaliser votre commande.
+            </p>
+            <button
+              onClick={() => navigate('/shopping')}
+              className="bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black px-8 py-3.5 rounded-xl transition-all hover:shadow-lg hover:shadow-orange-200/50 hover:-translate-y-0.5"
+            >
               Continuer le shopping
             </button>
           </div>
@@ -416,171 +870,143 @@ export default function Checkout() {
     );
   }
 
+  const computedTotal = Number(preview?.subtotal ?? subtotal) + shippingFee - Number(preview?.discount || 0);
+
+  const stepTitles = {
+    1: 'Adresse de livraison',
+    2: 'Formule de livraison',
+    3: 'Confirmation & paiement',
+  };
+
+  /* ─── Rendu principal ─── */
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#FAFAFA]">
       <Header />
 
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-2">
-          <button onClick={() => navigate('/cart')} className="flex items-center gap-1 text-[#282828] hover:text-[#F68B1E] transition text-sm font-semibold">
-            <ArrowLeft /> Retour au panier
-          </button>
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-100 pt-24 sm:pt-28">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
+          <StepperBar currentStep={currentStep} />
         </div>
       </div>
 
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#282828]">Paiement et livraison</h1>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pb-32">
+        {/* Order summary (collapsible) */}
+        <div className="mb-6">
+          <MiniOrderSummary
+            cartItems={cartItems}
+            itemUnitPrice={itemUnitPrice}
+            subtotal={subtotal}
+            shippingFee={shippingFee}
+            shippingMethod={shippingMethod}
+            preview={preview}
+            previewLoading={previewLoading}
+            isOpen={summaryOpen}
+            onToggle={() => setSummaryOpen(!summaryOpen)}
+          />
         </div>
-      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-              <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <MapPin />
-                  <h2 className="text-xl font-black text-[#282828]">1. Adresse de livraison</h2>
-                </div>
-
-                {savedAddresses.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
-                    {savedAddresses.map((address) => (
-                      <button
-                        key={address._id || address.id || `${address.city}-${address.fullAddress}`}
-                        onClick={() => handleSelectAddress(address)}
-                        className={`text-left p-4 border rounded-xl transition ${
-                          selectedAddressId === (address._id || address.id || 'default')
-                            ? 'border-[#F68B1E] bg-orange-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-black text-gray-500 uppercase">{address.label || 'Adresse'}</span>
-                          {address.isDefault && <span className="text-[10px] rounded-full bg-[#F68B1E] text-white px-2 py-1">Par défaut</span>}
-                        </div>
-                        <p className="text-sm font-bold text-[#282828]">{address.city}</p>
-                        <p className="text-sm text-gray-600">{address.fullAddress}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Prénom *</label>
-                    <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Nom *</label>
-                    <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Email *</label>
-                    <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Téléphone *</label>
-                    <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Pays *</label>
-                    <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm bg-white">
-                      <option>Togo</option>
-                      <option>Bénin</option>
-                    </select>
-                    {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Ville *</label>
-                    <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Quartier</label>
-                    <input value={form.neighborhood} onChange={(e) => setForm({ ...form, neighborhood: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Code postal</label>
-                    <input value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Adresse complète *</label>
-                    <input value={form.fullAddress} onChange={(e) => setForm({ ...form, fullAddress: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                    {errors.fullAddress && <p className="text-red-500 text-xs mt-1">{errors.fullAddress}</p>}
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Instructions de livraison</label>
-                    <textarea rows="3" value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} className="w-full px-3 py-2.5 border rounded-md text-sm" />
-                  </div>
-                  <div className="md:col-span-2 flex items-start gap-3 mt-4">
-                    <label className="flex items-center gap-3 text-sm text-gray-700">
-                      <input
-                        type="checkbox"
-                        checked={acceptCGV}
-                        onChange={(e) => setAcceptCGV(e.target.checked)}
-                        className="h-4 w-4 text-[#F68B1E] border-gray-300 rounded"
-                      />
-                      <span>J’accepte les conditions générales de vente (CGV)</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button onClick={() => navigate('/cart')} className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-900 font-black py-3 rounded-md transition">Retour au panier</button>
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={submitting}
-                    className={`flex-1 font-black py-3 rounded-md transition ${submitting ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white'}`}
-                  >
-                    {submitting ? 'Redirection...' : 'Suivant'}
-                  </button>
-                </div>
-              </section>
+        {/* Step content card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* Step header */}
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#F68B1E] flex items-center justify-center text-white text-sm font-black">
+                {currentStep}
+              </div>
+              <h2 className="text-base font-black text-[#282828]">{stepTitles[currentStep]}</h2>
+            </div>
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                <ShoppingBag />
-                <h3 className="text-lg font-black text-[#282828]">Résumé commande</h3>
-              </div>
+          {/* Step body */}
+          <div className="p-6">
+            {currentStep === 1 && (
+              <StepAddress
+                form={form}
+                setForm={setForm}
+                errors={errors}
+                savedAddresses={savedAddresses}
+                selectedAddressId={selectedAddressId}
+                handleSelectAddress={handleSelectAddress}
+              />
+            )}
+            {currentStep === 2 && (
+              <StepShipping
+                shippingMethod={shippingMethod}
+                setShippingMethod={setShippingMethod}
+              />
+            )}
+            {currentStep === 3 && (
+              <StepPayment
+                acceptCGV={acceptCGV}
+                setAcceptCGV={setAcceptCGV}
+                submitting={submitting}
+                handlePlaceOrder={handlePlaceOrder}
+                computedTotal={computedTotal}
+                previewLoading={previewLoading}
+                form={form}
+                shippingMethod={shippingMethod}
+              />
+            )}
+          </div>
+        </div>
 
-              <div className="space-y-4 mt-4 max-h-[360px] overflow-y-auto pr-1">
-                {groupedProducts.map(([vendorName, items]) => (
-                  <div key={vendorName} className="border border-gray-100 rounded-xl p-3 bg-gray-50">
-                    <p className="text-xs font-black text-gray-500 uppercase mb-2">{vendorName}</p>
-                    <div className="space-y-3">
-                      {items.map((item) => (
-                        <div key={item._id || item.id} className="flex gap-3">
-                          <img src={item.image || item.images?.[0]?.url} alt={item.name} className="w-14 h-14 rounded-lg object-cover bg-white" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-[#282828] line-clamp-2">{item.name}</p>
-                            <p className="text-xs text-gray-500 mt-1">Qté: {item.quantity}</p>
-                            <p className="text-sm font-black text-[#F68B1E] mt-1">{itemUnitPrice(item).toLocaleString('fr-FR')} F</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Navigation buttons */}
+        <div className="flex items-center justify-between mt-6 gap-3">
+          <button
+            type="button"
+            onClick={goBack}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-gray-600 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+          >
+            {currentStep === 1 ? 'Panier' : 'Retour'}
+          </button>
 
-              <div className="space-y-3 pt-5 border-t border-gray-100 mt-5">
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Sous-total</span><span className="font-bold">{subtotal.toLocaleString('fr-FR')} F</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Livraison</span><span className="font-bold">{previewLoading ? '...' : `${Number(preview?.shippingCost || 0).toLocaleString('fr-FR')} F`}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Taxes</span><span className="font-bold">{previewLoading ? '...' : `${Number(preview?.tax || 0).toLocaleString('fr-FR')} F`}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Réduction</span><span className="font-bold text-green-600">-{previewLoading ? '...' : `${Number(preview?.discount || 0).toLocaleString('fr-FR')} F`}</span></div>
-                <div className="flex justify-between text-lg font-black text-[#282828] border-t border-gray-100 pt-3"><span>Total</span><span className="text-[#F68B1E]">{previewLoading ? '...' : `${Number(preview?.total ?? subtotal).toLocaleString('fr-FR')} F`}</span></div>
-              </div>
-            </div>
-          </aside>
+          {currentStep < 3 && (
+            <button
+              type="button"
+              onClick={goNext}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white bg-[#F68B1E] hover:bg-[#E67A0C] shadow-lg shadow-orange-200/40 hover:shadow-xl hover:shadow-orange-200/50 hover:-translate-y-0.5 transition-all"
+            >
+              Continuer
+            </button>
+          )}
         </div>
       </main>
+
+      {/* Mobile bottom bar — total always visible */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-50 lg:hidden">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <div>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total</p>
+            <p className="text-base font-black text-[#F68B1E]">
+              {previewLoading ? '...' : `${computedTotal.toLocaleString('fr-FR')} FCFA`}
+            </p>
+          </div>
+          {currentStep < 3 ? (
+            <button
+              type="button"
+              onClick={goNext}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white bg-[#F68B1E] hover:bg-[#E67A0C] shadow-lg shadow-orange-200/40 transition-all"
+            >
+              Continuer
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePlaceOrder}
+              disabled={submitting || !acceptCGV}
+              className={[
+                'flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all',
+                submitting || !acceptCGV
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white shadow-lg shadow-orange-200/40',
+              ].join(' ')}
+            >
+              {submitting ? 'Paiement...' : 'Payer'}
+            </button>
+          )}
+        </div>
+      </div>
 
       <Footer />
     </div>
