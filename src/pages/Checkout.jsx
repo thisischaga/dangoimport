@@ -630,8 +630,8 @@ export default function Checkout() {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
               });
               const data = await res.json();
-              const statusValue = (data.data?.local?.status || data.data?.remote?.status || '').toLowerCase();
-              const orderId = data.data?.local?.orderId || data.data?.local?.order_id || null;
+              const statusValue = (data.data?.status || '').toLowerCase();
+              const orderId = data.data?.orderId || null;
               if (res.ok && ['approved', 'completed', 'paid', 'successful', 'success'].includes(statusValue)) {
                 if (orderId) {
                   let tokens = [];

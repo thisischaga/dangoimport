@@ -343,10 +343,10 @@ const CartPage = () => {
                                 </button>
                               </div>
 
-                              <button onClick={() => toggleWishlist(item)} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition ${isFavorite ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                              {/**<button onClick={() => toggleWishlist(item)} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition ${isFavorite ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
                                 <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
                                 {isFavorite ? 'Favori' : 'Favoris'}
-                              </button>
+                              </button> */}
 
                               <button onClick={() => shareItem(item)} className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200">
                                 <Share2 className="h-4 w-4" />
@@ -398,7 +398,7 @@ const CartPage = () => {
               )}
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            {/**<section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <BadgeCheck className="h-5 w-5 text-[#FF6B00]" />
                 <h2 className="text-xl font-black text-slate-900">Vous pourriez aussi aimer</h2>
@@ -427,7 +427,7 @@ const CartPage = () => {
               ) : (
                 <p className="text-sm text-slate-500">Aucune suggestion disponible pour le moment.</p>
               )}
-            </section>
+            </section> */}
           </div>
 
           <aside className="xl:sticky xl:top-24 xl:self-start">
