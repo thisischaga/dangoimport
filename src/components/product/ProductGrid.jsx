@@ -239,13 +239,17 @@ function EmptyState({ onReset }) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: '12px',
+        width: '100%',
+        breakInside: 'avoid',
       }}
     >
       <PackageSearch
         size={52}
         style={{
           color: '#d5d5d5',
+          margin: '0 auto',
         }}
       />
 

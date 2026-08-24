@@ -14,7 +14,7 @@ import { useCart } from '../context/CartContext';
 const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphone', 'Parfum', 'Montre', 'Chargeur', 'Écouteurs'];
 
 const CATEGORY_LINKS = [
-  { label: 'Électronique', slug: 'electronique' },
+  { label: 'Électronique', slug: 'electronique', Icon: Cpu },
   { label: 'Mode', slug: 'mode', Icon: Shirt },
   { label: 'Maison', slug: 'maison', Icon: HomeIcon },
   { label: 'Beauté', slug: 'beaute', Icon: Sparkles },
