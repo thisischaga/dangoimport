@@ -318,6 +318,11 @@ const Orders = () => {
                         <div className="flex items-center gap-2">
                           <Store className="w-4 h-4 text-[#FF6B00]" />
                           <span className="font-extrabold text-sm text-gray-800">{g.vendorName}</span>
+                          {g.items.some(i => i.isVendorCertified || i.isCertified) && (
+                            <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                              ✓ Certifié
+                            </span>
+                          )}
                         </div>
                         <button
                           onClick={() => { window.location.href = `/shop/${encodeURIComponent(g.vendorName)}`; }}

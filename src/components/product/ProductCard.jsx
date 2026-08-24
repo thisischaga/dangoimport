@@ -276,6 +276,14 @@ function ProductCard({
     product?.verified ??
     false;
 
+  const isCertified =
+    Boolean(
+      product?.isVendorCertified ??
+      product?.isCertified ??
+      product?.vendorIsCertified ??
+      false
+    );
+
   /* =======================================================
      SALES
   ======================================================= */
@@ -514,11 +522,6 @@ function ProductCard({
 
           font-size: 12px;
           line-height: 1.35;
-
-          /*
-           * Nom du produit en gras.
-           */
-          font-weight: 620;
 
           color: #111827;
 
@@ -936,10 +939,38 @@ function ProductCard({
 
           {/* VENDOR */}
 
-          {(isVerified ||
+          {(vendorName ||
+            isCertified ||
+            isVerified ||
             yearsActive ||
             country) && (
             <p className="pc2__vendor-meta">
+
+              {vendorName && (
+                <span className="pc2__vendor-name" style={{ fontWeight: 600, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  {vendorName}
+                  {isCertified && (
+                    <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                      ✓ Certifié
+                    </span>
+                  )}
+                </span>
+              )}
+
+              {!vendorName && isCertified && (
+                <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                  ✓ Certifié
+                </span>
+              )}
+
+              {(vendorName || isCertified) &&
+                (isVerified ||
+                  yearsActive ||
+                  country) && (
+                  <span className="pc2__meta-sep">
+                    ·
+                  </span>
+                )}
 
               {isVerified && (
                 <span className="pc2__verified">

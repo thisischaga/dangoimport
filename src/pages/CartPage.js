@@ -290,7 +290,14 @@ const CartPage = () => {
                       )}
                     </div>
                     <div>
-                      <p className="text-base font-black text-slate-900">{group.vendorName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-black text-slate-900">{group.vendorName}</p>
+                        {group.items.some(i => i.isVendorCertified || i.isCertified) && (
+                          <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                            ✓ Certifié
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="rounded-full bg-[#FFF7F1] px-3 py-1 text-xs font-bold text-[#FF6B00]">Groupe vendeur</div>

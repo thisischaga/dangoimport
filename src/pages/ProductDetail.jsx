@@ -442,10 +442,12 @@ export default function ProductDetail() {
                     {(sellerName.charAt(0) || 'V').toUpperCase()}
                   </div>
                   <div>
-                    <p className="product-detail-seller__name">
+                    <p className="product-detail-seller__name" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       {sellerName}
-                      {product?.sellerVerified && (
-                        <BadgeCheck size={16} className="product-detail-seller__verified" />
+                      {(product?.sellerVerified || product?.isVendorCertified || product?.isCertified) && (
+                        <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                          ✓ Certifié
+                        </span>
                       )}
                     </p>
                     {rating != null && reviewCount > 0 && (
