@@ -234,14 +234,17 @@ function EmptyState({ onReset }) {
       }}
       style={{
         gridColumn: '1 / -1',
+        columnSpan: 'all',
         textAlign: 'center',
-        padding: '60px 20px',
+        padding: '40px 16px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '12px',
         width: '100%',
+        maxWidth: '560px',
+        margin: '0 auto',
         breakInside: 'avoid',
       }}
     >

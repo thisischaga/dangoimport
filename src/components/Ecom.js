@@ -438,12 +438,12 @@ const Ecom = () => {
                 {Array(10).fill(0).map((_, i) => <SkeletonCard key={i} />)}
               </div>
             ) : displayed.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-2xl border border-gray-200">
+              <div className="mx-auto w-full max-w-[560px] text-center py-16 sm:py-24 bg-white rounded-2xl border border-gray-200">
                 <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4 text-gray-300">
                   <FaSearch size={24} />
                 </div>
                 <h3 className="text-xl font-black text-gray-900 mb-2">Aucun produit trouvé</h3>
-                <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto">
+                <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto px-4">
                   {query ? `Aucun résultat pour « ${query} ».` : 'Essayez d\'autres filtres ou catégories.'}
                 </p>
                 <button type="button" onClick={resetFilters} className="btn-home px-6 py-2.5 rounded-lg text-sm font-bold">
