@@ -20,6 +20,9 @@
 		},
 		{
 			"path": "../gama_project/server"
+		},
+		{
+			"path": "../agora-server"
 		}
 	],
 	"settings": {}
