@@ -104,7 +104,7 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         ) */}
 
-        <section id="marketplace-feeds" className="bg-[#fff] pb-12" style={{
+        <section id="marketplace-feeds" className="bg-[#f5f5f5] pb-12" style={{
           marginTop: "10px"
         }}>
 
