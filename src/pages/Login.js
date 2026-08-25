@@ -3,7 +3,14 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import toast from '../utils/toast';
-import { FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import {
+    FaEnvelope,
+    FaLock,
+    FaSignInAlt,
+    FaEye,
+    FaEyeSlash,
+    FaGoogle
+} from 'react-icons/fa';
 import logo from '../images/logo.png';
 
 const Login = () => {
@@ -41,6 +48,11 @@ const Login = () => {
       setLoading(false);
     }
   };
+  const handleGoogleLogin = () => {
+
+    window.location.href =
+        `${API_BASE_URL}/api/auth/google`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F1F1F1]" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
@@ -64,9 +76,54 @@ const Login = () => {
 
           <div className="bg-white rounded-b-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="p-8 sm:p-10">
+              
               <h1 className="text-2xl font-black text-gray-900 text-center mb-1">Connexion</h1>
               <p className="text-sm text-gray-500 text-center mb-8">Accédez à votre espace Dangoimport</p>
+              <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  className="
+                      w-full
+                      border
+                      border-gray-300
+                      bg-white
+                      text-gray-800
+                      font-bold
+                      py-3.5
+                      rounded-xl
+                      flex
+                      items-center
+                      justify-center
+                      gap-3
+                      hover:bg-gray-50
+                  "
+              >
 
+                  <FaGoogle
+                      className="text-red-500"
+                      size={18}
+                  />
+
+                  Continuer avec Google
+
+              </button>
+
+
+              <div className="flex items-center gap-4 my-6">
+
+                  <div className="flex-1 h-px bg-gray-200" />
+
+                  <span className="
+                      text-xs
+                      text-gray-400
+                      font-medium
+                  ">
+                      OU
+                  </span>
+
+                  <div className="flex-1 h-px bg-gray-200" />
+
+              </div>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Adresse Email</label>

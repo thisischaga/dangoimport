@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import toast from '../utils/toast';
-import { FaUser, FaEnvelope, FaLock, FaShieldAlt } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaShieldAlt, FaGoogle } from 'react-icons/fa';
 import logo from '../images/logo.png';
 
 const Register = () => {
@@ -54,11 +54,16 @@ const Register = () => {
     }
   };
 
+  const handleGoogleSignup = () => {
+
+    window.location.href =
+        `${API_BASE_URL}/api/auth/google`;
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F1F1F1]" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
       <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-          <img src={logo} alt="Dangoimport" className="h-9 w-9 rounded-lg object-cover" />
           <div>
             <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
 
@@ -74,11 +79,46 @@ const Register = () => {
 
         <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-b-2xl shadow-xl border border-gray-100 my-auto">
           <div className="flex flex-col items-center">
-            <img src={logo} alt="Dangoimport" className="h-16 w-16 rounded-xl border border-gray-200 mb-6 cursor-pointer" onClick={() => navigate('/')} />
             <h2 className="text-center text-3xl font-black text-gray-900">{step === 1 ? 'Créer un compte' : 'Vérifiez votre email'}</h2>
             <p className="mt-2 text-center text-sm text-gray-600">{step === 1 ? 'Rejoignez Dangoimport et commencez à importer.' : `Nous avons envoyé un code à ${formData.userEmail}`}</p>
           </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            className="
+                w-full
+                border
+                border-gray-300
+                bg-white
+                py-3
+                rounded-xl
+                font-bold
+                text-gray-800
+                flex
+                items-center
+                justify-center
+                gap-3
+            "
+        >
 
+            <FaGoogle size={18} />
+
+            Continuer avec Google
+
+        </button>
+
+
+        <div className="flex items-center gap-4 my-6">
+
+            <div className="flex-1 h-px bg-gray-200" />
+
+            <span className="text-xs text-gray-400">
+                OU
+            </span>
+
+            <div className="flex-1 h-px bg-gray-200" />
+
+        </div>
           {step === 1 ? (
             <form className="mt-8 space-y-6" onSubmit={handleSendOTP}>
               <div className="space-y-4">

@@ -46,6 +46,7 @@ import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
 import MobileTabBar from './components/mobiletabbar';
+import OAuthSuccess from './pages/OAuthSuccess';
 
 function getPageTitle(pathname) {
   const routeTitles = [
@@ -229,6 +230,10 @@ function App() {
 
                   <Route path='/login' element={<Login/>}/>
                   <Route path='/register' element={<Register/>}/>
+                  <Route
+                      path="/oauth-success"
+                      element={<OAuthSuccess />}
+                  />
                   {/**
                   <Route path='/blog/articles' element={<Blog/>}/>
                   <Route path='/blog/finance-personnelle' element={<PerFinance/>}/>
