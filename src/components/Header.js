@@ -377,6 +377,8 @@ const Header = () => {
   const userDisplayName = user?.userFirstname || user?.firstname || user?.userName || user?.name || 'Compte';
   const userEmail = user?.userEmail || user?.email || '';
   const userSurname = user?.userSurname || user?.surname || '';
+  const userAvatar = user?.profileImage || user?.avatar || user?.photoURL || user?.picture || user?.userProfileImage || '';
+  const userInitial = (userDisplayName || 'U').charAt(0).toUpperCase();
 
   const SearchForm = ({ className = '', inputRef }) => (
     <form onSubmit={handleSearch} className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex ${className}`}>
@@ -445,11 +447,32 @@ const Header = () => {
         aria-expanded={accountOpen}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 
-        text-sm font-semibold text-slate-700 cursor-pointer hidden sm:inline"
+        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-white px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
       >
+        {userAvatar ? (
+          <img
+            src={userAvatar}
+            alt={userDisplayName}
+            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-slate-100"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextSibling?.style?.setProperty('display', 'flex');
+            }}
+          />
+        ) : null}
 
-        <User size={16} className="hidden sm:inline" />
+        <span
+          className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF1E5] text-[#FF6B00] font-bold text-sm ${userAvatar ? 'hidden' : 'flex'}`}
+          style={{ display: userAvatar ? 'none' : 'flex' }}
+        >
+          {user ? userInitial : <User size={16} />}
+        </span>
+
+        {user && (
+          <span className="hidden sm:inline truncate max-w-[120px] text-left">
+            {userDisplayName}
+          </span>
+        )}
       </button>
 
       <AnimatePresence>
