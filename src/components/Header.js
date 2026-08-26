@@ -462,7 +462,7 @@ const Header = () => {
         ) : null}
 
         <span
-          className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF1E5] text-[#FF6B00] font-bold text-sm ${userAvatar ? 'hidden' : 'flex'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 font-bold text-sm ${userAvatar ? 'hidden' : 'flex'}`}
           style={{ display: userAvatar ? 'none' : 'flex' }}
         >
           {user ? userInitial : <User size={16} />}

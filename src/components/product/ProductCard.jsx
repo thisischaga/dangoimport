@@ -458,24 +458,24 @@ function ProductCard({
           width: 32px;
           height: 32px;
           border-radius: 9999px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          color: #FF6B00;
+          background: rgba(255, 255, 255, 0.92);
+          border: 1px solid rgba(148, 163, 184, 0.45);
+          color: #334155;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 10;
           padding: 0;
         }
 
         .pc2__quick-add-btn:hover {
-          background: #FF6B00;
-          color: #ffffff;
-          border-color: #FF6B00;
-          transform: scale(1.05);
+          background: #f8fafc;
+          color: #0f172a;
+          border-color: rgba(100, 116, 139, 0.5);
+          transform: scale(1.03);
         }
 
         .pc2__quick-add-btn:active {
