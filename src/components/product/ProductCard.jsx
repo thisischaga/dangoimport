@@ -415,13 +415,10 @@ function ProductCard({
           min-height: 0;
           align-self: start;
 
-          background: rgba(255, 255, 255, 0.18);
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          border-radius: 18px;
+          border-radius: 10px;
           overflow: hidden;
           display: block;
           box-sizing: border-box;
-          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
         }
 
         /*
