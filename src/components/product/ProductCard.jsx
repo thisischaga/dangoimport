@@ -415,17 +415,13 @@ function ProductCard({
           min-height: 0;
           align-self: start;
 
-          background: #ffffff;
-
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          border-radius: 18px;
           overflow: hidden;
-
-          /*
-           * IMPORTANT :
-           * aucune hauteur fixe.
-           */
           display: block;
-
           box-sizing: border-box;
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
         }
 
         /*
@@ -448,8 +444,8 @@ function ProductCard({
           width: 100%;
           height: auto;
           overflow: hidden;
-
-          background: #f8fafc;
+          border-radius: 16px 16px 0 0;
+          background: rgba(248, 250, 252, 0.7);
         }
 
         .pc2__img-link {
@@ -497,10 +493,9 @@ function ProductCard({
           width: 100%;
           height: auto;
           min-height: 0;
-
-          padding: 8px 2px 4px;
-
+          padding: 10px 12px 12px;
           display: block;
+          background: transparent;
         }
 
         /* =================================================
@@ -560,14 +555,13 @@ function ProductCard({
 
         .pc2__feature--promo {
           color: white;
-          background-color: red;
+          background-color: #ef4444;
           font-size: 10px;
           line-height: 1.3;
-          border-radius: 2px;
+          border-radius: 9999px;
           width: max-content;
           height: max-content;
-          padding-left: 4px;
-          padding-right: 4px;
+          padding: 2px 7px;
         }
 
         /* =================================================

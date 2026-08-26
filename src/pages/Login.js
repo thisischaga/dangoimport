@@ -441,7 +441,7 @@ const Login = () => {
 
             {/* HEADER */}
 
-            <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex items-center justify-between">
+            <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
                 <div
                     className="flex items-center gap-2.5 cursor-pointer"
@@ -464,13 +464,13 @@ const Login = () => {
 
                 </div>
 
-                <div className="text-sm text-gray-500">
+                <div className="text-[11px] sm:text-sm text-gray-500 leading-tight text-left sm:text-right">
 
                     Nouveau ?{' '}
 
                     <Link
                         to="/register"
-                        className="font-bold text-gray-900 hover:text-[#F68B1E]"
+                        className="font-bold text-gray-900 hover:text-[#F68B1E] break-words"
                     >
                         S'inscrire
                     </Link>

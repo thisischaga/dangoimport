@@ -1,16 +1,90 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
 import toast from '../utils/toast';
 import { FaUser, FaEnvelope, FaLock, FaShieldAlt, FaGoogle } from 'react-icons/fa';
-import logo from '../images/logo.png';
+
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';
 
 const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ userFirstname: '', userSurname: '', userEmail: '', userPassword: '', otp: '' });
+
+  const saveAuthentication = useCallback((data) => {
+    if (!data?.token) {
+      throw new Error('Token d\'authentification manquant.');
+    }
+
+    localStorage.setItem('dangoToken', data.token);
+    localStorage.setItem('dangoUser', JSON.stringify(data.user || {}));
+    window.dispatchEvent(new Event('authChange'));
+  }, []);
+
+  const handleGoogleSignup = useCallback(async (response) => {
+    if (!response?.credential) {
+      toast.error("Google n'a pas fourni de jeton.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data } = await axios.post(
+        `${API_BASE_URL}/api/auth/google`,
+        { token: response.credential },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      saveAuthentication(data);
+      toast.success('Inscription Google réussie !');
+      navigate('/shopping');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Impossible de s\'inscrire avec Google.');
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate, saveAuthentication]);
+
+  const initializeGoogle = useCallback(() => {
+    if (!window.google?.accounts?.id) {
+      return false;
+    }
+
+    if (!GOOGLE_CLIENT_ID) {
+      toast.error('Configuration Google manquante.');
+      return false;
+    }
+
+    const container = document.getElementById('google-signup-button');
+    if (!container) {
+      return false;
+    }
+
+    container.innerHTML = '';
+
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleSignup,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    });
+
+    window.google.accounts.id.renderButton(container, {
+      theme: 'outline',
+      size: 'large',
+      width: '100%',
+      text: 'continue_with',
+      shape: 'rectangular',
+      logo_alignment: 'left',
+      locale: 'fr',
+    });
+
+    return true;
+  }, [handleGoogleSignup]);
 
   useEffect(() => {
     const id = 'roboto-font-register';
@@ -22,6 +96,32 @@ const Register = () => {
       document.head.appendChild(link);
     }
   }, []);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) {
+      return;
+    }
+
+    if (window.google?.accounts?.id) {
+      initializeGoogle();
+      return;
+    }
+
+    let script = document.querySelector(`script[src="${GOOGLE_SCRIPT}"]`);
+
+    if (script) {
+      script.addEventListener('load', initializeGoogle);
+      return () => script.removeEventListener('load', initializeGoogle);
+    }
+
+    script = document.createElement('script');
+    script.src = GOOGLE_SCRIPT;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => initializeGoogle();
+    script.onerror = () => toast.error('Impossible de charger Google.');
+    document.head.appendChild(script);
+  }, [initializeGoogle]);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -54,24 +154,21 @@ const Register = () => {
     }
   };
 
-  const handleGoogleSignup = () => {
-
-    window.location.href =
-        `${API_BASE_URL}/api/auth/google`;
+  const handleGoogleLegacySignup = () => {
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F1F1F1]" style={{ fontFamily: 'Roboto, system-ui, Arial' }}>
-      <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex items-center justify-between">
+      <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <div>
             <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
-
           </div>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-[11px] sm:text-sm text-gray-500 leading-tight text-left sm:text-right">
           J'ai déjà un compte ?{' '}
-          <Link to="/login" className="font-bold text-gray-900 hover:text-[#F68B1E]">Se connecter</Link>
+          <Link to="/login" className="font-bold text-gray-900 hover:text-[#F68B1E] break-words">Se connecter</Link>
         </div>
       </div>
 
@@ -82,30 +179,18 @@ const Register = () => {
             <h2 className="text-center text-3xl font-black text-gray-900">{step === 1 ? 'Créer un compte' : 'Vérifiez votre email'}</h2>
             <p className="mt-2 text-center text-sm text-gray-600">{step === 1 ? 'Rejoignez Dangoimport et commencez à importer.' : `Nous avons envoyé un code à ${formData.userEmail}`}</p>
           </div>
-          <button
-            type="button"
-            onClick={handleGoogleSignup}
-            className="
-                w-full
-                border
-                border-gray-300
-                bg-white
-                py-3
-                rounded-xl
-                font-bold
-                text-gray-800
-                flex
-                items-center
-                justify-center
-                gap-3
-            "
-        >
-
-            <FaGoogle size={18} />
-
-            Continuer avec Google
-
-        </button>
+          {GOOGLE_CLIENT_ID ? (
+            <div id="google-signup-button" className="w-full min-h-[44px]" />
+          ) : (
+            <button
+              type="button"
+              onClick={handleGoogleLegacySignup}
+              className="w-full border border-gray-300 bg-white py-3 rounded-xl font-bold text-gray-800 flex items-center justify-center gap-3"
+            >
+              <FaGoogle size={18} />
+              Continuer avec Google
+            </button>
+          )}
 
 
         <div className="flex items-center gap-4 my-6">
