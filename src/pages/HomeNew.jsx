@@ -88,7 +88,7 @@ function HomeNew({ cartCount: cartCountProp }) {
       : 'Catalogue produits';
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
       <Header cartCount={cartCount} />
 
       <main
