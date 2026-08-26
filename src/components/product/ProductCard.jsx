@@ -415,7 +415,7 @@ function ProductCard({
           min-height: 0;
           align-self: start;
 
-          border-radius: 10px;
+          border-radius: 5px;
           overflow: hidden;
           display: block;
           box-sizing: border-box;
