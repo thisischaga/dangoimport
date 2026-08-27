@@ -2,7 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 
 function StarFull({ size }) {
-  return <Star size={size} fill="#FF6B00" color="#FF6B00" />;
+  return <Star size={size} fill="#000" color="#000" />;
 }
 
 function StarEmpty({ size }) {

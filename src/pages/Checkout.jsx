@@ -8,6 +8,7 @@ import API_BASE_URL from '../apiConfig';
 import { useCart } from '../context/CartContext';
 import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
 import { fetchOrderQrTokens } from '../services/qrService';
+import { getVendorDeliveryZonesByVendor } from '../api';
 
 /* ─── Données des formules ─── */
 const SHIPPING_PLANS = [
@@ -379,18 +380,59 @@ function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId,
 }
 
 /* ─── Step 2 : Formule de livraison ─── */
-function StepShipping({ shippingMethod, setShippingMethod }) {
+function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor = {}, selectedZonesByVendor = {}, onSelectZone }) {
   const colorMap = {
     emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
     amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
     purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
   };
 
+  const vendorGroups = Object.entries(vendorZonesByVendor).map(([vendorId, zones]) => ({
+    vendorId,
+    vendorName: zones?.[0]?.vendorName || 'Vendeur',
+    zones: Array.isArray(zones) ? zones : [],
+  }));
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-500 mb-2">
         Choisissez le mode d'acheminement de votre commande.
       </p>
+
+      {vendorGroups.length > 0 && (
+        <div className="space-y-3 rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">Zones de livraison vendeur</p>
+          {vendorGroups.map(({ vendorId, vendorName, zones }) => (
+            <div key={vendorId} className="space-y-2">
+              <p className="text-sm font-bold text-[#282828]">{vendorName}</p>
+              {zones.map((zone) => {
+                const isSelected = selectedZonesByVendor[vendorId]?._id === zone._id;
+                const fee = Number(zone.deliveryFee || zone.fee || 0);
+                const summary = `${zone.zoneName || zone.country || 'Zone'}${zone.city ? ` • ${zone.city}` : ''}${fee > 0 ? ` • ${fee.toLocaleString('fr-FR')} F` : ' • Gratuit'}`;
+                return (
+                  <button
+                    key={`${vendorId}-${zone._id || zone.zoneName || zone.city}`}
+                    type="button"
+                    onClick={() => onSelectZone(vendorId, zone)}
+                    className={[
+                      'w-full flex items-center justify-between gap-4 rounded-xl border-2 px-3 py-2 text-left transition-all',
+                      isSelected ? 'border-[#F68B1E] bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300',
+                    ].join(' ')}
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-[#282828]">{zone.zoneName || zone.country || 'Zone'}</p>
+                      <p className="text-[11px] text-gray-500">{summary}</p>
+                    </div>
+                    <span className={['inline-flex h-5 w-5 items-center justify-center rounded-full border-2', isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300'].join(' ')}>
+                      {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="space-y-3">
         {SHIPPING_PLANS.map((plan) => {
@@ -553,6 +595,8 @@ export default function Checkout() {
   const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [paymentMethod] = useState('fedapay');
+  const [vendorZonesByVendor, setVendorZonesByVendor] = useState({});
+  const [selectedZonesByVendor, setSelectedZonesByVendor] = useState({});
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [qrTokens, setQrTokens] = useState([]);
@@ -575,7 +619,69 @@ export default function Checkout() {
     instructions: '',
   });
 
-  const shippingFee = SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.price ?? 0;
+  useEffect(() => {
+    const vendorIds = [...new Set(
+      cartItems
+        .map((item) => item.vendorId || item.vendor_id || item.sellerId || item.vendor)
+        .filter(Boolean)
+    )];
+
+    if (!vendorIds.length) {
+      setVendorZonesByVendor({});
+      setSelectedZonesByVendor({});
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    Promise.all(
+      vendorIds.map(async (vendorId) => {
+        try {
+          const response = await getVendorDeliveryZonesByVendor(vendorId);
+          return { vendorId, zones: Array.isArray(response?.data) ? response.data : [] };
+        } catch (error) {
+          return { vendorId, zones: [] };
+        }
+      })
+    )
+      .then((results) => {
+        if (cancelled) return;
+        const nextVendorZones = {};
+        results.forEach(({ vendorId, zones }) => {
+          if (zones.length) nextVendorZones[vendorId] = zones;
+        });
+        setVendorZonesByVendor(nextVendorZones);
+
+        setSelectedZonesByVendor((prev) => {
+          const next = { ...prev };
+          Object.entries(nextVendorZones).forEach(([vendorId, zones]) => {
+            if (!next[vendorId]) {
+              const preferred = zones.find((zone) => zone.isDefault || Number(zone.deliveryFee || zone.fee || 0) === 0) || zones[0];
+              if (preferred) next[vendorId] = preferred;
+            }
+          });
+          return next;
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setVendorZonesByVendor({});
+          setSelectedZonesByVendor({});
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems]);
+
+  const shippingFee = useMemo(() => {
+    const zoneFees = Object.values(selectedZonesByVendor).reduce((sum, zone) => sum + Number(zone?.deliveryFee || zone?.fee || 0), 0);
+    if (zoneFees > 0 || Object.keys(vendorZonesByVendor).length > 0) {
+      return zoneFees;
+    }
+    return SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.price ?? 0;
+  }, [selectedZonesByVendor, shippingMethod, vendorZonesByVendor]);
 
   /* ─── Helpers ─── */
   const itemUnitPrice = (item) => {
@@ -934,6 +1040,9 @@ export default function Checkout() {
               <StepShipping
                 shippingMethod={shippingMethod}
                 setShippingMethod={setShippingMethod}
+                vendorZonesByVendor={vendorZonesByVendor}
+                selectedZonesByVendor={selectedZonesByVendor}
+                onSelectZone={(vendorId, zone) => setSelectedZonesByVendor((prev) => ({ ...prev, [vendorId]: zone }))}
               />
             )}
             {currentStep === 3 && (

@@ -50,7 +50,7 @@ import OAuthSuccess from './pages/OAuthSuccess';
 
 function getPageTitle(pathname) {
   const routeTitles = [
-    { regex: /^\/$/, title: 'Dangoimport - Trouvez tout ce que vous voulez' },
+    { regex: /^\/$/, title: 'Dangoimport' },
     { regex: /^\/shopping$/, title: 'Boutique' },
     { regex: /^\/mes-commandes$/, title: 'Mes commandes' },
     { regex: /^\/toutes-les-categories$/, title: 'Toutes les catégories' },
@@ -84,7 +84,7 @@ function getPageTitle(pathname) {
   ];
 
   const route = routeTitles.find((item) => item.regex.test(pathname));
-  return route ? `${route.title} | Dangoimport` : 'Dangoimport ';
+  return route ? route.title : 'Dangoimport';
 }
 
 function getPageDescription(pathname) {
@@ -109,21 +109,27 @@ function PageTitleUpdater() {
   const location = useLocation();
 
   useEffect(() => {
-    // 1. Mise à jour du titre
+    const canonicalUrl = 'https://dangoimport.com/';
+    const isRootPage = location.pathname === '/';
+
     document.title = getPageTitle(location.pathname);
 
-    // 2. Gestion de l'URL Canonique (Pour résoudre "Pages en double sans URL canonique")
     let canonicalLink = document.querySelector('link[rel="canonical"]');
     if (!canonicalLink) {
       canonicalLink = document.createElement('link');
       canonicalLink.setAttribute('rel', 'canonical');
       document.head.appendChild(canonicalLink);
     }
-    // Nettoie l'URL en ne conservant que le domaine et le chemin d'accès (sans paramètres de requête)
-    const cleanHref = `https://dangoimport.com${location.pathname}`;
-    canonicalLink.setAttribute('href', cleanHref);
+    canonicalLink.setAttribute('href', canonicalUrl);
 
-    // 3. Gestion de la Meta Description
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.setAttribute('name', 'robots');
+      document.head.appendChild(robotsMeta);
+    }
+    robotsMeta.setAttribute('content', isRootPage ? 'index, follow' : 'noindex, nofollow');
+
     let metaDescription = document.querySelector('meta[name="description"]');
     if (!metaDescription) {
       metaDescription = document.createElement('meta');
@@ -199,7 +205,7 @@ function App() {
                   <Route path='/politique-confidentialite' element={<Politique />}/>
                   <Route path='/politique-retour' element={<PolitiqueRetour/>}/>
                   <Route path='/mentions-legales' element={<MentionsLegales />} />
-                  <Route path='/a-propos' element={<APropos />} />
+                  {/**<Route path='/a-propos' element={<APropos />} /> */}
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
                   <Route path='/mes-commandes' element={<Orders/>}/>
@@ -222,7 +228,7 @@ function App() {
                   <Route path='/category/:slug' element={<CategoryPage/>}/>
                   <Route path='/shop/:slug' element={<Shop/>}/>
                   {/* Backwards compatibility: redirect old /store/:slug links to /shop/:slug */}
-                  <Route path='/store/:slug' element={<StoreRedirect />} />
+                  {/**<Route path='/store/:slug' element={<StoreRedirect />} /> */}
                   <Route path='/cart' element={<CartPage/>}/>
                   <Route path='/checkout' element={<Checkout/>}/>
                   <Route path='/checkout/result' element={<PaymentResult/>}/>

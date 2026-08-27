@@ -311,14 +311,23 @@ function ProductCard({
       product?.deliveryZones
     )
       ? product.deliveryZones
-          .map((zone) =>
-            typeof zone === 'string'
-              ? zone
-              : zone?.name ||
-                zone?.label ||
-                zone?.country ||
-                ''
-          )
+          .map((zone) => {
+            if (typeof zone === 'string') {
+              return zone.trim();
+            }
+
+            const label = [
+              zone?.zoneName,
+              zone?.locality,
+              zone?.area,
+              zone?.city,
+              zone?.country,
+            ]
+              .filter(Boolean)
+              .join(' • ');
+
+            return label || zone?.name || zone?.label || '';
+          })
           .filter(Boolean)
       : [];
 

@@ -88,7 +88,7 @@ export default function Cgu() {
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
-    document.title = "Conditions Générales d'Utilisation – Dangoimport";
+    document.title = "Conditions générales d'utilisation";
     const onScroll = () => setShowTop(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);

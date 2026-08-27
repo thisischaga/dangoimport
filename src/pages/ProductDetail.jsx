@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   ChevronRight,
   ShoppingCart,
@@ -10,8 +10,10 @@ import {
   BadgeCheck,
   RotateCcw,
   Star,
+  MessageCircle,
 } from 'lucide-react';
 import { useProduct, useProductReviews } from '../hooks/useProducts';
+import { getVendorDeliveryZonesByVendor, startConversation } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
 import { useCart } from '../context/CartContext';
@@ -119,6 +121,7 @@ function ExpandableText({ text, maxLines = 6 }) {
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart, cart } = useCart();
   const stickyNavRef = useRef(null);
 
@@ -135,9 +138,11 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [activeSection, setActiveSection] = useState('section-description');
+  const [sellerZones, setSellerZones] = useState([]);
+  const [sellerZonesLoading, setSellerZonesLoading] = useState(false);
 
   useEffect(() => {
-    if (product?.name) document.title = `${product.name} | Dangoimport`;
+    if (product?.name) document.title = product.name;
     else if (!isLoading && !product) document.title = 'Produit introuvable';
   }, [product?.name, isLoading, product]);
 
@@ -182,6 +187,7 @@ export default function ProductDetail() {
   const isLowStock = inStock && stock <= minStock;
 
   const productId = product?._id || product?.id;
+  const sellerId = product?.vendorId || product?.sellerId || product?.vendor_id || null;
   const isInCart = cart.some((item) => (item._id || item.id) === productId);
 
   const rating = product?.rating != null ? Number(product.rating) : null;
@@ -207,15 +213,51 @@ export default function ProductDetail() {
     return base;
   }, [product, selectedVariant]);
 
-  const deliveryZones = Array.isArray(product?.deliveryZones) ? product.deliveryZones : [];
+  const productDeliveryZones = Array.isArray(product?.deliveryZones) ? product.deliveryZones : [];
+  const deliveryZones = useMemo(
+    () => {
+      const zoneList = [...productDeliveryZones, ...sellerZones];
+      return zoneList.filter((zone, index, arr) => {
+        const key = [zone?.country, zone?.area, zone?.locality, zone?.zoneName, zone?.city].join('|');
+        return key && arr.findIndex((item) => [item?.country, item?.area, item?.locality, item?.zoneName, item?.city].join('|') === key) === index;
+      });
+    },
+    [productDeliveryZones, sellerZones]
+  );
   const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
   const hasWarranty = Boolean(product?.warranty?.trim());
   const hasDelivery = deliveryZones.length > 0 || hasShippingInfo;
 
   const freeShippingZone = useMemo(
-    () => deliveryZones.find((z) => z?.freeShipping),
+    () => deliveryZones.find((z) => z?.freeShipping || Number(z?.price || 0) === 0),
     [deliveryZones]
   );
+
+  useEffect(() => {
+    if (!sellerId) {
+      setSellerZones([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setSellerZonesLoading(true);
+
+    getVendorDeliveryZonesByVendor(sellerId)
+      .then((response) => {
+        if (cancelled) return;
+        setSellerZones(Array.isArray(response?.data) ? response.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setSellerZones([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSellerZonesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sellerId]);
 
   const specifications = useMemo(() => {
     const specs = Array.isArray(product?.specifications) ? product.specifications : [];
@@ -263,6 +305,30 @@ export default function ProductDetail() {
     navigate('/cart');
   }, [normalizedProduct, inStock, isInCart, addToCart, qty, navigate]);
 
+  const handleContactSeller = useCallback(async () => {
+    if (!sellerId) {
+      toast.error('Ce produit n’a pas de vendeur associé.');
+      return;
+    }
+
+    const token = localStorage.getItem('dangoToken');
+    if (!token) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+
+    try {
+      const response = await startConversation({ sellerId, productId: productId || null });
+      if (!response?.success) {
+        throw new Error(response?.message || 'Impossible de démarrer la conversation.');
+      }
+      toast.success('Conversation démarrée avec le vendeur.');
+    } catch (error) {
+      console.error('[ProductDetail] contact seller error:', error);
+      toast.error(error.message || 'Impossible de démarrer la conversation.');
+    }
+  }, [navigate, productId, sellerId]);
+
   const scrollToSection = useCallback((sectionId) => {
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
@@ -302,7 +368,7 @@ export default function ProductDetail() {
         <div className="product-detail-not-found">
           <Package size={52} />
           <h2>Produit introuvable</h2>
-          <p>Le produit recherché est indisponible ou a expiré.</p>
+          <p>Le produit recherché est indisponible ou a été suspendu.</p>
           <button type="button" onClick={() => navigate('/')}>
             Retour à l&apos;accueil
           </button>
@@ -351,7 +417,7 @@ export default function ProductDetail() {
               <ProductRating rating={rating} reviewCount={reviewCount} size="lg" />
               {soldCount > 0 && (
                 <span className="product-detail-sold">
-                  <Star size={12} fill="#ff6b00" color="#ff6b00" />
+                  <Star size={12} fill="#000" color="#000" />
                   {soldCount > 999 ? `${Math.floor(soldCount / 1000)}k+` : soldCount} vendus
                 </span>
               )}
@@ -398,6 +464,7 @@ export default function ProductDetail() {
               <div className="product-detail-qty-row">
                 <span className="product-detail-qty-label">Quantité</span>
                 <QuantitySelector value={qty} onChange={setQty} max={stock} />
+                <p className='text-sm text-gray-500 mt-2'>Total : {hasPromo ? formatCFA(promoPrice * qty) : formatCFA(price * qty)} </p>
               </div>
             )}
 
@@ -427,7 +494,6 @@ export default function ProductDetail() {
                   freeShippingZone ? 'is-free' : ''
                 }`}
               >
-                <Truck size={16} />
                 <span>
                   {freeShippingZone ? 'Livraison gratuite disponible' : 'Livraison disponible'}
                 </span>
@@ -455,21 +521,29 @@ export default function ProductDetail() {
                     )}
                   </div>
                 </div>
-                {sellerSlug && (
+                <button
+                  type="button"
+                  className="product-detail-seller__cta"
+                  onClick={handleContactSeller}
+                >
+                  <MessageCircle size={14} />
+                  {sellerZonesLoading ? 'Chargement…' : 'Contacter le vendeur'}
+                </button>
+                {/**sellerSlug && (
                   <Link to={`/shop/${sellerSlug}`} className="product-detail-seller__link">
                     Visiter la boutique
                   </Link>
-                )}
+                ) */}
               </div>
             )}
 
             {(hasDelivery || hasWarranty) && (
               <div className="product-detail-trust">
                 {hasDelivery && (
-                  <span><Truck size={14} /> Livraison</span>
+                  <span> Livraison</span>
                 )}
                 {hasWarranty && (
-                  <span><RotateCcw size={14} /> Garantie</span>
+                  <span> Garantie</span>
                 )}
               </div>
             )}
@@ -535,9 +609,16 @@ export default function ProductDetail() {
               {deliveryZones.length > 0 && (
                 <ul>
                   {deliveryZones.map((zone, i) => {
-                    const locality =
-                      zone.locality || zone.area || zone.country || 'Zone';
-                    const time = zone.deliveryTime;
+                    const label = [
+                      zone.zoneName,
+                      zone.locality || zone.area || zone.city,
+                      zone.country,
+                    ]
+                      .filter(Boolean)
+                      .join(' • ');
+
+                    const locality = label || 'Zone';
+                    const time = zone.deliveryTime || zone.estimatedDelivery;
                     const priceLabel =
                       zone.freeShipping || Number(zone.price) === 0
                         ? 'Gratuite'
@@ -547,8 +628,8 @@ export default function ProductDetail() {
                     return (
                       <li key={i}>
                         <strong>{locality}</strong>
-                        {time && ` — Délai : ${time}`}
-                        {priceLabel && ` — ${priceLabel}`}
+                        {time && ` • Délai : ${time}`}
+                        {priceLabel && ` • ${priceLabel}`}
                       </li>
                     );
                   })}
