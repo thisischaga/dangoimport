@@ -88,7 +88,7 @@ function HomeNew({ cartCount: cartCountProp }) {
       : 'Catalogue produits';
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+    <div className="min-h-screen text-slate-900">
       <Header cartCount={cartCount} />
 
       <main
@@ -104,7 +104,7 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         ) */}
 
-        <section id="marketplace-feeds" className="bg-[#f5f5f5] pb-12" style={{
+        <section id="marketplace-feeds" className=" pb-12" style={{
           marginTop: "10px"
         }}>
 

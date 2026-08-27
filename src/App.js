@@ -50,7 +50,7 @@ import OAuthSuccess from './pages/OAuthSuccess';
 
 function getPageTitle(pathname) {
   const routeTitles = [
-    { regex: /^\/$/, title: 'Marketplace' },
+    { regex: /^\/$/, title: 'Dangoimport - Trouvez tout ce que vous voulez' },
     { regex: /^\/shopping$/, title: 'Boutique' },
     { regex: /^\/mes-commandes$/, title: 'Mes commandes' },
     { regex: /^\/toutes-les-categories$/, title: 'Toutes les catégories' },
@@ -84,7 +84,7 @@ function getPageTitle(pathname) {
   ];
 
   const route = routeTitles.find((item) => item.regex.test(pathname));
-  return route ? `${route.title} | Dangoimport` : 'Dangoimport | Marketplace locale';
+  return route ? `${route.title} | Dangoimport` : 'Dangoimport ';
 }
 
 function getPageDescription(pathname) {
@@ -120,7 +120,7 @@ function PageTitleUpdater() {
       document.head.appendChild(canonicalLink);
     }
     // Nettoie l'URL en ne conservant que le domaine et le chemin d'accès (sans paramètres de requête)
-    const cleanHref = `https://marketplace.dangoimport.com${location.pathname}`;
+    const cleanHref = `https://dangoimport.com${location.pathname}`;
     canonicalLink.setAttribute('href', cleanHref);
 
     // 3. Gestion de la Meta Description
