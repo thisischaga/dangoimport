@@ -86,7 +86,10 @@ export default function MobileTabBar() {
                 justify-center
                 gap-1
                 transition-all
-                duration-200
+                duration-250
+                active:scale-95
+                hover:scale-105
+                transform
                 ${
                   active
                     ? 'text-[#FF6B00]'

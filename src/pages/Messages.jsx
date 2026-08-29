@@ -66,7 +66,9 @@ export default function Messages() {
           const buyer = thread.buyer || {};
           const seller = thread.seller || {};
           const contactName = formatName(remoteUser || buyer || seller);
-          const lastMessage = thread.lastMessage || 'Aucun message pour l’instant.';
+          const lastMessage = (thread.lastMessage && typeof thread.lastMessage === 'object')
+            ? (thread.lastMessage.content || '')
+            : (thread.lastMessage || 'Aucun message pour l’instant.');
           const unread = Number(thread.unreadCountBuyer || 0) > 0;
 
           return {

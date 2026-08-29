@@ -5,12 +5,31 @@
 
 function push(type, message, duration) {
   if (!message) return;
+
+  let cleanMessage = message;
+
+  // Remplacer les expressions réservées aux développeurs par une phrase compréhensible pour les visiteurs
+  if (type === 'error' || type === 'warning') {
+    const devKeywords = [
+      'cannot find module', 'referenceerror', 'typeerror', 'mongo', 'database', 
+      'internal server error', 'server error', 'syntaxerror', 'stack', 'undefined',
+      'null', 'http', 'render', 'localhost', 'network error', 'axio', 'failed to fetch',
+      'fetch failed'
+    ];
+    const lowerMsg = String(cleanMessage).toLowerCase();
+    const isDevMsg = devKeywords.some(keyword => lowerMsg.includes(keyword)) || lowerMsg.includes('error:') || lowerMsg.includes('exception:');
+
+    if (isDevMsg) {
+      cleanMessage = "Une erreur technique est survenue. Veuillez réessayer plus tard.";
+    }
+  }
+
   const api = typeof window !== 'undefined' ? window.dangoToast : null;
   if (api?.[type]) {
-    api[type](message, duration);
+    api[type](cleanMessage, duration);
     return;
   }
-  console.warn(`[toast:${type}]`, message);
+  console.warn(`[toast:${type}]`, cleanMessage);
 }
 
 export const toast = {

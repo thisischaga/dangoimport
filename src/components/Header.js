@@ -390,6 +390,27 @@ const Header = () => {
     navigate(`/shopping?q=${encodeURIComponent(normalizedTerm)}`);
   };
 
+  const handleSearchBlur = (event) => {
+    const nextTarget = event?.relatedTarget;
+    const activeSearchShell = desktopSearchRef.current || mobileSearchInputRef.current || desktopSearchInputRef.current;
+
+    if (nextTarget && activeSearchShell && activeSearchShell.contains(nextTarget)) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      const currentActive = document.activeElement;
+      const stillInsideSearch =
+        (desktopSearchRef.current && desktopSearchRef.current.contains(currentActive)) ||
+        (mobileSearchInputRef.current === currentActive) ||
+        (desktopSearchInputRef.current === currentActive);
+
+      if (!stillInsideSearch) {
+        setShowSuggestions(false);
+      }
+    }, 120);
+  };
+
   const userDisplayName = user?.userFirstname || user?.firstname || user?.userName || user?.name || 'Compte';
   const userEmail = user?.userEmail || user?.email || '';
   const userSurname = user?.userSurname || user?.surname || '';
@@ -406,7 +427,7 @@ const Header = () => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
-        onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
+        onBlur={handleSearchBlur}
       />
       <button className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap" type="submit">
         Rechercher

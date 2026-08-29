@@ -160,7 +160,23 @@ function App() {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        const message = error.response?.data?.message || "Une erreur est survenue lors de la communication avec le serveur.";
+        let message = error.response?.data?.message || "Une erreur est survenue lors de la communication avec le serveur.";
+        
+        // Nettoyer les messages d'erreurs réservés aux développeurs
+        const devKeywords = [
+          'cannot find module', 'referenceerror', 'typeerror', 'mongo', 'database', 
+          'internal server error', 'server error', 'syntaxerror', 'stack', 'undefined',
+          'null', 'http', 'render', 'localhost', 'network error', 'axio', 'undefined'
+        ];
+        const lowerMsg = String(message).toLowerCase();
+        const isDevMsg = devKeywords.some(keyword => lowerMsg.includes(keyword)) || lowerMsg.includes('error:') || lowerMsg.includes('exception:');
+        
+        if (error.response?.status === 401) {
+          message = "Vous devez être connecté pour effectuer cette action.";
+        } else if (isDevMsg) {
+          message = "Une erreur technique est survenue. Veuillez réessayer plus tard.";
+        }
+
         // On évite d'afficher le toast pour les erreurs 401 sur le login
         if (error.response?.status !== 401 || !window.location.pathname.includes('login')) {
           if (typeof window !== 'undefined' && window.dangoToast?.error) {

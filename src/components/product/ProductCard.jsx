@@ -430,17 +430,6 @@ function ProductCard({
           box-sizing: border-box;
         }
 
-        /*
-         * Empêche le contenu interne de créer
-         * artificiellement de grands espaces.
-         */
-        .pc2,
-        .pc2 *,
-        .pc2 *::before,
-        .pc2 *::after {
-          box-sizing: border-box;
-        }
-
         /* =================================================
            IMAGE
         ================================================= */
