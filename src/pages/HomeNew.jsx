@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+﻿import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/product/ProductGrid';
@@ -92,9 +92,7 @@ function HomeNew({ cartCount: cartCountProp }) {
       <Header cartCount={cartCount} />
 
       <main
-        style={{
-          paddingTop: 'calc(var(--header-h, 96px) + 3px)',
-        }}
+
       >
         {/**!searchQuery && (
           <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">

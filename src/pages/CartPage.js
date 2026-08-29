@@ -254,9 +254,7 @@ const CartPage = () => {
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" style={{
-        paddingTop: 'calc(var(--header-h, 96px) + 30px)',
-      }}>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
           <button onClick={() => navigate('/shopping')} className="inline-flex items-center gap-2 font-semibold text-slate-700 hover:text-[#FF6B00]">
             <ArrowLeft className="h-4 w-4" />

@@ -309,17 +309,8 @@ const Footer = () => {
                 className="inline-flex items-center"
                 aria-label="Dangoimport"
               >
-                <img
-                  src={logo}
-                  alt="Dangoimport"
-                  loading="lazy"
-                  className="
-                    h-22
-                    w-auto
-                    max-w-[190px]
-                    object-contain
-                  "
-                />
+                <h1 className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">Dangoimport</h1>
+
               </Link>
 
               <p className="mt-4 max-w-sm text-sm leading-6 text-[#6b7280]">

@@ -254,10 +254,13 @@ const Header = () => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
 
   const suggestionTimer = useRef(null);
   const accountRef = useRef(null);
+  const desktopSearchRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
+  const desktopSearchInputRef = useRef(null);
 
   useEffect(() => {
     const loadUser = () => {
@@ -323,10 +326,13 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (accountRef.current && !accountRef.current.contains(event.target)) setAccountOpen(false);
+      if (desktopSearchOpen && desktopSearchRef.current && !desktopSearchRef.current.contains(event.target)) {
+        setDesktopSearchOpen(false);
+      }
     };
     window.addEventListener('pointerdown', handleClickOutside);
     return () => window.removeEventListener('pointerdown', handleClickOutside);
-  }, []);
+  }, [desktopSearchOpen]);
 
   // Ferme le tiroir + la recherche mobile si on repasse en desktop
   useEffect(() => {
@@ -349,6 +355,14 @@ const Header = () => {
     return undefined;
   }, [mobileSearchOpen]);
 
+  useEffect(() => {
+    if (desktopSearchOpen) {
+      const t = window.setTimeout(() => desktopSearchInputRef.current?.focus(), 150);
+      return () => window.clearTimeout(t);
+    }
+    return undefined;
+  }, [desktopSearchOpen]);
+
   const handleLogout = () => {
     localStorage.removeItem('dangoToken');
     localStorage.removeItem('dangoUser');
@@ -362,6 +376,7 @@ const Header = () => {
     const q = searchQuery.trim();
     setShowSuggestions(false);
     setMobileSearchOpen(false);
+    setDesktopSearchOpen(false);
     navigate(q ? `/shopping?q=${encodeURIComponent(q)}` : '/shopping');
   };
 
@@ -371,6 +386,7 @@ const Header = () => {
     setSearchQuery(normalizedTerm);
     setShowSuggestions(false);
     setMobileSearchOpen(false);
+    setDesktopSearchOpen(false);
     navigate(`/shopping?q=${encodeURIComponent(normalizedTerm)}`);
   };
 
@@ -501,13 +517,23 @@ const Header = () => {
 
             <div className="border-t border-slate-100 px-4 py-3 space-y-2">
               {user && (
-                <button
-                  type="button"
-                  onClick={() => { navigate('/mes-commandes'); setAccountOpen(false); }}
-                  className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
-                >
-                  Mes commandes
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => { navigate('/mes-commandes'); setAccountOpen(false); }}
+                    className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
+                  >
+                    Mes commandes
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { navigate('/messages'); setAccountOpen(false); }}
+                    className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
+                  >
+                    Mes messages
+                  </button>
+                </>
               )}
 
               {user ? (
@@ -535,18 +561,9 @@ const Header = () => {
   );
 
   return (
-    <header
-      className="border-b border-slate-200"
-      style={{
-        position: 'fixed', width: '100%', top: 0, left: 0, right: 0, zIndex: 100,
-        paddingBottom: '10px', backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB',
-        transition: 'all 0.3s ease',
-      }}
-    >
-      <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-8">
-        {/* Ligne principale */}
-        <div className="flex items-center gap-2 sm:gap-3 py-2">
-          {/* Bouton catégories mobile */}
+    <header className="relative top-0 left-0 right-0 z-40 px-3 pt-3 sm:px-4 lg:px-6">
+      <div className="mx-auto max-w-7xl rounded-[28px] border border-slate-200 bg-white/95 px-3 shadow-sm backdrop-blur-sm sm:px-4 lg:px-5">
+        <div className="flex items-center gap-2 py-2.5 sm:gap-3">
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
@@ -556,77 +573,54 @@ const Header = () => {
             <Menu size={22} />
           </button>
 
-          {/* Logo + nom du site */}
-          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2.5 shrink-0 min-w-0">
-            <img
-              src={logo}
-              alt="logo dangoimport"
-              className=" shrink-0  object-contain"
-              width={100}
-            />
-            <span className="flex flex-col items-start leading-none min-w-0">
-              <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                Marketplace
-              </span>
-            </span>
+          <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2.5 min-w-0">
+            <h1 className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">Dangoimport</h1>
           </button>
 
-          
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <CategoryMegaMenu />
+          </div>
 
-          {/* Icônes à droite */}
+          <div className="hidden md:flex flex-1 justify-center">
+            {desktopSearchOpen ? (
+              <div ref={desktopSearchRef} className="relative w-full max-w-2xl">
+                <SearchForm inputRef={desktopSearchInputRef} className="h-11" />
+                {showSuggestions && <SuggestionsPanel />}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDesktopSearchOpen(true)}
+                className="flex w-full max-w-xl items-center justify-between gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-slate-300 hover:bg-slate-100"
+              >
+                <span className="flex items-center gap-2">
+                  <Search size={16} className="text-slate-500" />
+                  <span>Rechercher un produit...</span>
+                </span>
+              </button>
+            )}
+          </div>
+
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Icône recherche mobile */}
             <button
               type="button"
               onClick={() => setMobileSearchOpen((v) => !v)}
-              className={`md:hidden flex h-10 w-10 items-center justify-center rounded-full transition ${
-                mobileSearchOpen ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-700 hover:bg-slate-100'
-              }`}
+              className="md:hidden flex h-10 w-10 items-center justify-center rounded-full transition text-slate-700 hover:bg-slate-100"
               aria-label="Rechercher"
               aria-expanded={mobileSearchOpen}
             >
               {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
             </button>
 
-            {/* Bouton Panier (desktop + mobile) */}
             <button
               type="button"
               onClick={() => navigate('/cart')}
-              className="
-                relative
-                hidden
-                md:flex
-                h-10
-                w-10
-                items-center
-                justify-center
-                rounded-full
-                text-slate-700
-                transition
-                hover:bg-slate-100
-              "
+              className="relative hidden md:flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
               aria-label="Panier"
             >
               <ShoppingCart size={20} />
-
               {cartCount > 0 && (
-                <span
-                  className="
-                    absolute
-                    -top-0.5
-                    -right-0.5
-                    flex
-                    h-5
-                    w-5
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-[#FF6B00]
-                    text-[10px]
-                    font-black
-                    text-white
-                  "
-                >
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6B00] text-[10px] font-black text-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -636,7 +630,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Recherche mobile (repliée par défaut, ouverte au clic sur l'icône) */}
         <AnimatePresence initial={false}>
           {mobileSearchOpen && (
             <motion.div
@@ -644,36 +637,15 @@ const Header = () => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="relative md:hidden overflow-visible"
+              className="relative overflow-visible pb-2 md:hidden"
             >
-              <div className="pb-2 pt-1">
-                <SearchForm inputRef={mobileSearchInputRef} />
-              </div>
+              <SearchForm inputRef={mobileSearchInputRef} />
               {showSuggestions && <SuggestionsPanel />}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Navigation secondaire desktop */}
-      <div className="hidden md:block bg-white border-b border-slate-100">
-        <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-8 flex items-center justify-between text-xs font-bold text-slate-600">
-          <div className="flex items-center gap-1">
-            <CategoryMegaMenu />
-            <span className="mx-2 h-4 w-px bg-slate-200" />
-          </div>
-          {/* Recherche desktop (inline) */}
-          <div className="relative hidden md:flex flex-1 min-w-0">
-            <SearchForm />
-            {showSuggestions && <SuggestionsPanel />}
-          </div>
-          <div className="flex items-center gap-4 text-slate-500 font-medium">
-            <h1 className='text-[#FF6B00] text-lg font-bold ml-3'>Livraison gratuite possible</h1>
-          </div>
-        </div>
-      </div>
-
-      {/* Tiroir catégories mobile */}
       <MobileCategoryDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </header>
   );

@@ -528,9 +528,7 @@ function ProductGrid({
 
         <div
           id="product-grid-main"
-          style={{
-            marginTop: '20px',
-          }}
+
           className="px-2 sm:px-0"
         >
 
@@ -637,7 +635,6 @@ function ProductGrid({
             <p
               style={{
                 textAlign: 'center',
-                marginTop: '32px',
                 marginBottom: '20px',
                 fontSize: '13px',
                 color: '#c0c0c0',

@@ -33,36 +33,6 @@ const SECTIONS = [
   { id: 'section-delivery', label: 'Livraison' },
 ];
 
-/**
- * Mesure en continu la hauteur réelle du <header> fixe (elle change entre
- * mobile/desktop et quand la barre de recherche mobile s'ouvre) et l'expose
- * via la variable CSS --header-h, utilisée pour décaler tout le contenu.
- */
-function useHeaderOffset() {
-  useEffect(() => {
-    const headerEl = document.querySelector('header');
-    if (!headerEl) return undefined;
-
-    const setVar = () => {
-      document.documentElement.style.setProperty(
-        '--header-h',
-        `${headerEl.offsetHeight}px`
-      );
-    };
-
-    setVar();
-
-    const ro = new ResizeObserver(setVar);
-    ro.observe(headerEl);
-    window.addEventListener('resize', setVar);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', setVar);
-    };
-  }, []);
-}
-
 function QuantitySelector({ value, onChange, max }) {
   const safeMax = Math.max(1, max || 1);
   return (
@@ -124,8 +94,6 @@ export default function ProductDetail() {
   const location = useLocation();
   const { addToCart, cart } = useCart();
   const stickyNavRef = useRef(null);
-
-  useHeaderOffset();
 
   const { data: product, isLoading, isError } = useProduct(id);
   const { data: reviewsData, isLoading: reviewsLoading } = useProductReviews(id, {
@@ -323,6 +291,7 @@ export default function ProductDetail() {
         throw new Error(response?.message || 'Impossible de démarrer la conversation.');
       }
       toast.success('Conversation démarrée avec le vendeur.');
+      navigate('/messages');
     } catch (error) {
       console.error('[ProductDetail] contact seller error:', error);
       toast.error(error.message || 'Impossible de démarrer la conversation.');
@@ -333,11 +302,8 @@ export default function ProductDetail() {
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
-      const headerH = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--header-h')
-      ) || 0;
       const navH = stickyNavRef.current?.offsetHeight || 0;
-      const top = el.getBoundingClientRect().top + window.scrollY - headerH - navH - 12;
+      const top = el.getBoundingClientRect().top + window.scrollY - navH - 12;
       window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+﻿import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../apiClient';
 import Header from '../components/Header';
@@ -171,7 +171,6 @@ const Orders = () => {
       <Header />
       <main
         className="max-w-6xl mx-auto px-4 pb-8"
-        style={{ paddingTop: 'calc(var(--header-h, 96px) + 24px)' }}
       >
 
         {/* Bannière d'erreur */}
