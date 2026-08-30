@@ -392,18 +392,23 @@ const Header = () => {
 
   const handleSearchBlur = (event) => {
     const nextTarget = event?.relatedTarget;
-    const activeSearchShell = desktopSearchRef.current || mobileSearchInputRef.current || desktopSearchInputRef.current;
+    const currentInput = event?.currentTarget;
+    const searchWidget = currentInput?.closest?.('[data-search-widget]');
+    const suggestionPanel = searchWidget?.querySelector?.('[data-suggestions-panel]');
 
-    if (nextTarget && activeSearchShell && activeSearchShell.contains(nextTarget)) {
+    if (nextTarget && searchWidget && searchWidget.contains(nextTarget)) {
+      return;
+    }
+
+    if (nextTarget && suggestionPanel && suggestionPanel.contains(nextTarget)) {
       return;
     }
 
     window.setTimeout(() => {
       const currentActive = document.activeElement;
       const stillInsideSearch =
-        (desktopSearchRef.current && desktopSearchRef.current.contains(currentActive)) ||
-        (mobileSearchInputRef.current === currentActive) ||
-        (desktopSearchInputRef.current === currentActive);
+        (searchWidget && searchWidget.contains(currentActive)) ||
+        (suggestionPanel && suggestionPanel.contains(currentActive));
 
       if (!stillInsideSearch) {
         setShowSuggestions(false);
@@ -418,7 +423,11 @@ const Header = () => {
   const userInitial = (userDisplayName || 'U').charAt(0).toUpperCase();
 
   const SearchForm = ({ className = '', inputRef }) => (
-    <form onSubmit={handleSearch} className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex ${className}`}>
+    <form
+      onSubmit={handleSearch}
+      data-search-widget
+      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex ${className}`}
+    >
       <Search size={16} className="text-slate-500" />
       <input
         ref={inputRef}
@@ -429,14 +438,18 @@ const Header = () => {
         onFocus={() => setShowSuggestions(true)}
         onBlur={handleSearchBlur}
       />
-      <button className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap" type="submit">
+      <button
+        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap"
+        type="submit"
+        onMouseDown={(e) => e.preventDefault()}
+      >
         Rechercher
       </button>
     </form>
   );
 
   const SuggestionsPanel = () => (
-    <div className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+    <div data-suggestions-panel className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
       <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
         Suggestions de recherche
       </div>

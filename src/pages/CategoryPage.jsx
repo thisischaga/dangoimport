@@ -119,12 +119,7 @@ export default function CategoryPage() {
       <div>
         <Header />
 
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" style={{
-            marginTop: "130px",
-            '@media (max-width: 768px)': {
-              marginTop: "0px",
-            }
-          }}>
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" >
           {/* Breadcrumbs */}
           <nav className="text-xs text-slate-400 font-semibold mb-4 flex items-center gap-1.5">
             <Link to="/" className="hover:text-[#FF6B00] transition">Accueil</Link>
@@ -132,7 +127,7 @@ export default function CategoryPage() {
             <span className="text-slate-600 truncate">{isLoaded ? cat.name : 'Catégorie'}</span>
           </nav>
 
-          {/* Header row */}
+          {/* Header row 
           <header className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -145,11 +140,11 @@ export default function CategoryPage() {
             <span className="bg-white border border-slate-200 px-3 py-1.5 rounded-full text-xs font-bold text-slate-600">
               {filteredProducts.length} produits trouvés
             </span>
-          </header>
+          </header>*/}
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div >
             {/* ── LEFT SIDEBAR FILTERS (Desktop) ── */}
-            <aside className="hidden lg:block lg:col-span-3 bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-6 h-fit sticky top-24">
+            {/**<aside className="hidden lg:block lg:col-span-3 bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-6 h-fit sticky top-24">
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
                   <SlidersHorizontal size={14} className="text-[#FF6B00]" /> Filtres
@@ -159,7 +154,7 @@ export default function CategoryPage() {
                 </button>
               </div>
 
-              {/* Price range */}
+              {/* Price range 
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Prix (FCFA)</h4>
                 <div className="grid grid-cols-2 gap-2">
@@ -178,9 +173,9 @@ export default function CategoryPage() {
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-[#FF6B00]"
                   />
                 </div>
-              </div>
+              </div>*/}
 
-              {/* Rating */}
+              {/* Rating 
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Note minimale</h4>
                 <select
@@ -193,9 +188,9 @@ export default function CategoryPage() {
                   <option value="4">4.0 ★ & plus</option>
                   <option value="3">3.0 ★ & plus</option>
                 </select>
-              </div>
+              </div>*/}
 
-              {/* Availability & Shipping toggles */}
+              {/* Availability & Shipping toggles 
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Options</h4>
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-700">
@@ -216,9 +211,9 @@ export default function CategoryPage() {
                   />
                   <span>Livraison gratuite</span>
                 </label>
-              </div>
+              </div>*/}
 
-              {/* Brand filter */}
+              {/* Brand filter 
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Marque</h4>
                 <input
@@ -229,14 +224,14 @@ export default function CategoryPage() {
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-[#FF6B00]"
                 />
               </div>
-            </aside>
+            </aside> */}
 
             {/* ── MAIN CONTENT LISTING (9 cols) ── */}
             <main className="lg:col-span-9 space-y-4">
-              {/* Sort controls and mobile filter button */}
+              {/* Sort controls and mobile filter button 
               <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  {/* Mobile filter button */}
+                  {/* Mobile filter button 
                   <button
                     onClick={() => setMobileFiltersOpen(true)}
                     className="lg:hidden flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
@@ -245,7 +240,7 @@ export default function CategoryPage() {
                   </button>
                 </div>
 
-                {/* Sort selector */}
+                {/* Sort selector 
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-slate-500 hidden sm:inline">Trier par:</span>
                   <select
@@ -259,7 +254,7 @@ export default function CategoryPage() {
                     <option value="newest">Nouveautés</option>
                   </select>
                 </div>
-              </div>
+              </div>*/}
 
               {/* Products feed */}
               <ProductGrid

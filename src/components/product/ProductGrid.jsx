@@ -26,49 +26,12 @@ const PAGE_SIZE = 12;
 
 const BANNER_SLIDES = [
   {
-    key: 'all',
-    title: 'Tous les Produits',
-    subtitle: 'Explorez l\'intégralité de notre catalogue marketplace',
-    badge: 'Catalogue',
-    btnText: 'Tout voir',
-    gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-    emoji: '🛍️'
-  },
-  {
-    key: 'bestseller',
-    title: 'Meilleures Ventes',
-    subtitle: 'Découvrez les produits les plus populaires achetés par la communauté',
-    badge: 'Tendances',
-    btnText: 'Parcourir',
-    gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-    emoji: '🔥'
-  },
-  {
-    key: 'recommended',
-    title: 'Sélection Recommandée',
-    subtitle: 'Nos meilleures recommandations sélectionnées pour vous',
-    badge: 'Favoris',
-    btnText: 'Voir les recommandations',
-    gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-    emoji: '⭐'
-  },
-  {
-    key: 'forYou',
-    title: 'Sélection Pour Vous',
-    subtitle: 'Des suggestions personnalisées adaptées à vos préférences',
-    badge: 'Personnalisé',
-    btnText: 'Découvrir',
-    gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-    emoji: '👤'
-  },
-  {
     key: 'new',
     title: 'Les Nouveautés',
     subtitle: 'Soyez le premier à découvrir nos tout derniers arrivages',
     badge: 'Nouveaux',
     btnText: 'Découvrir',
     gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-    emoji: '🆕'
   },
   {
     key: 'promo',
@@ -77,7 +40,6 @@ const BANNER_SLIDES = [
     badge: 'Promos -50%',
     btnText: 'Profiter des offres',
     gradient: 'linear-gradient(135deg, #eab308 0%, #d97706 100%)',
-    emoji: '💰'
   }
 ];
 
@@ -133,9 +95,24 @@ function matchesTab(product, tabKey) {
    BANNER SLIDER (Large sliding banner representing each category)
 ========================================================= */
 
-function BannerSlider({ activeTab, onChange }) {
-  const currentIndex = BANNER_SLIDES.findIndex(s => s.key === activeTab);
-  const slide = BANNER_SLIDES[currentIndex >= 0 ? currentIndex : 0];
+function BannerSlider({ activeTab, onChange, products = [] }) {
+  const matchedIndex = BANNER_SLIDES.findIndex(s => s.key === activeTab);
+  const currentIndex = matchedIndex >= 0 ? matchedIndex : 0;
+  const slide = BANNER_SLIDES[currentIndex];
+
+  // Dynamically find a matching product image from the database products list
+  const getProductImageForCategory = (key) => {
+    if (key === 'new') {
+      const match = products.find(p => p.isNewArrival || p.isNew || p.isFeatured);
+      return match?.image || '';
+    } else if (key === 'promo') {
+      const match = products.find(p => p.promoPrice || p.isPromo);
+      return match?.image || '';
+    }
+    return '';
+  };
+
+  const productImage = getProductImageForCategory(slide.key);
 
   const handlePrev = () => {
     const nextIndex = (currentIndex - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length;
@@ -233,15 +210,44 @@ function BannerSlider({ activeTab, onChange }) {
         .dango-banner__visual {
           position: relative;
           z-index: 2;
-          font-size: 72px;
-          user-select: none;
-          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.18));
-          animation: dango-float 4s ease-in-out infinite;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
-        @keyframes dango-float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-8px) rotate(4deg); }
+        .dango-banner__img-wrap {
+          position: relative;
+          z-index: 2;
+          width: 130px;
+          height: 130px;
+          border-radius: 16px;
+          overflow: hidden;
+          background: #ffffff;
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+          transition: transform 0.3s ease;
+        }
+
+        .dango-banner:hover .dango-banner__img-wrap {
+          transform: scale(1.05) rotate(2deg);
+        }
+
+        .dango-banner__img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .dango-banner__img-placeholder {
+          width: 130px;
+          height: 130px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(8px);
+          border: 2px dashed rgba(255, 255, 255, 0.4);
         }
 
         .dango-banner-nav {
@@ -277,28 +283,52 @@ function BannerSlider({ activeTab, onChange }) {
             min-height: 160px;
           }
           .dango-banner__content {
-            max-width: 80%;
+            max-width: 75%;
           }
-          .dango-banner__visual {
-            font-size: 48px;
+          .dango-banner__img-wrap,
+          .dango-banner__img-placeholder {
+            width: 100px;
+            height: 100px;
           }
           .dango-banner-nav {
             display: none;
           }
         }
+
+        /* ── Dots ── */
+        .dango-banner-dots {
+          display: flex;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 12px;
+        }
+
+        .dango-banner-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #e2e8f0;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          transition: all 0.2s;
+        }
+
+        .dango-banner-dot--active {
+          width: 24px;
+          border-radius: 4px;
+          background: #FF6B00;
+        }
       `}</style>
 
       {/* Nav Prev */}
-      <button className="dango-banner-nav dango-banner-nav--prev" onClick={handlePrev} type="button">
-        <ChevronLeft size={20} />
-      </button>
+
 
       {/* Slide Container */}
       <div className="dango-banner" style={{ background: slide.gradient }}>
         <div className="dango-banner__bg-pattern" />
         
         <div className="dango-banner__content">
-          <span className="dango-banner__badge">{slide.badge}</span>
           <h2 className="dango-banner__title">{slide.title}</h2>
           <p className="dango-banner__subtitle">{slide.subtitle}</p>
           <button className="dango-banner__btn" type="button">
@@ -307,26 +337,35 @@ function BannerSlider({ activeTab, onChange }) {
         </div>
 
         <div className="dango-banner__visual">
-          {slide.emoji}
+          {productImage ? (
+            <div className="dango-banner__img-wrap">
+              <img src={productImage} alt={slide.title} className="dango-banner__img" />
+            </div>
+          ) : (
+            <div className="dango-banner__img-placeholder" />
+          )}
         </div>
       </div>
 
-      {/* Nav Next */}
+      {/* Nav Next 
       <button className="dango-banner-nav dango-banner-nav--next" onClick={handleNext} type="button">
         <ChevronRight size={20} />
-      </button>
+      </button>*/}
 
       {/* Dots Indicator */}
       <div className="dango-banner-dots">
-        {BANNER_SLIDES.map((s, idx) => (
-          <button
-            key={s.key}
-            className={`dango-banner-dot ${s.key === activeTab ? 'dango-banner-dot--active' : ''}`}
-            onClick={() => onChange(s.key)}
-            type="button"
-            aria-label={`Slide ${idx + 1}`}
-          />
-        ))}
+        {BANNER_SLIDES.map((s, idx) => {
+          const isDotActive = activeTab === s.key || (activeTab === 'all' && idx === 0);
+          return (
+            <button
+              key={s.key}
+              className={`dango-banner-dot ${isDotActive ? 'dango-banner-dot--active' : ''}`}
+              onClick={() => onChange(s.key)}
+              type="button"
+              aria-label={`Slide ${idx + 1}`}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -591,6 +630,7 @@ function ProductGrid({
         <BannerSlider
           activeTab={activeTab}
           onChange={setActiveTab}
+          products={products}
         />
 
         {/* ================================================
