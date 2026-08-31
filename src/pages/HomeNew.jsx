@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt, SlidersHorizontal, Tag, Flame } from 'lucide-react';
+﻿import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ArrowRight, Store, BadgeCheck as BadgeCheckAlt, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/product/ProductGrid';
 import ProductFilters from '../components/product/ProductFilters';
 import client from '../apiClient';
@@ -66,26 +66,6 @@ function HomeNew({ cartCount: cartCountProp }) {
       ? filters.category
       : 'Catalogue produits';
 
-  // Meilleures ventes (triées par ventes ou par défaut)
-  const bestSellers = useMemo(() => {
-    return [...products]
-      .sort((a, b) => (Number(b.totalSales || 0)) - (Number(a.totalSales || 0)))
-      .slice(0, 3);
-  }, [products]);
-
-  // Produits en promo pour la section "Deal du Jour"
-  const dealsOfTheDay = useMemo(() => {
-    const promos = products.filter(p => p.promoPrice !== null && p.promoPrice > 0 && p.promoPrice < p.price);
-    if (promos.length > 0) {
-      return promos.slice(0, 3);
-    }
-    // Simulation si aucune promo en DB pour la démo
-    return products.slice(0, 3).map((p, idx) => ({
-      ...p,
-      promoPrice: Math.round(p.price * (0.7 - idx * 0.1)) // -30%, -40%, -50%
-    }));
-  }, [products]);
-
   return (
     <div className="min-h-screen text-slate-900">
       <Header cartCount={cartCount} />
@@ -101,107 +81,11 @@ function HomeNew({ cartCount: cartCountProp }) {
           </section>
         ) */}
 
-        {/* Section Offres du jour */}
-        {!searchQuery && products.length > 0 && (
-          <section className="mx-auto max-w-5xl px-4 pt-8 pb-4">
-            {/* Titre principal centré */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-black text-slate-900">Offres du jour</h2>
-            </div>
+        <section id="marketplace-feeds" className=" pb-12" style={{
+          marginTop: "10px"
+        }}>
 
-            {/* Cadre avec bordure, sans background ni border-radius */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: 0, background: 'none', padding: '24px' }}>
-              <div className="grid gap-8 md:grid-cols-2">
-                
-                {/* 1. Meilleures ventes */}
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div className="text-center mb-5">
-                    <h3 className="text-lg font-extrabold text-slate-900">Meilleures ventes</h3>
-                    <div className="mt-2 inline-flex items-center gap-1 bg-[#FFF9F3] text-[#FF6B00] px-3 py-1 text-xs font-bold rounded-full">
-                      <span>De super prix et choix de qualité</span>
-                      <span>&gt;</span>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    {bestSellers.map((p) => {
-                      const hasPromo = p.promoPrice !== null && p.promoPrice < p.price;
-                      return (
-                        <Link key={p.id} to={`/product/${p.id}`} className="group block text-decoration-none">
-                          <div style={{ aspectRatio: '1', border: '1px solid #f1f5f9', borderRadius: 0, overflow: 'hidden', background: '#f8fafc' }}>
-                            {p.image ? (
-                              <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center font-bold text-slate-300">
-                                {p.name?.charAt(0)}
-                              </div>
-                            )}
-                          </div>
-                          <div className="mt-2 text-left">
-                            <p className="text-xs font-medium text-slate-700 truncate mb-0.5">{p.name}</p>
-                            <p className="text-sm font-black text-[#FF6B00] m-0">
-                              {Number(hasPromo ? p.promoPrice : p.price).toLocaleString('fr-FR')} F
-                            </p>
-                            {hasPromo && (
-                              <p className="text-[10px] text-slate-400 line-through m-0">
-                                {Number(p.price).toLocaleString('fr-FR')} F
-                              </p>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 2. Deal du Jour */}
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div className="text-center mb-5">
-                    <h3 className="text-lg font-extrabold text-slate-900">Deal du Jour</h3>
-                    <div className="mt-2 inline-flex items-center gap-1 bg-[#FFF0F0] text-[#FF3B30] px-3 py-1 text-xs font-bold rounded-full">
-                      <span>Jusqu'à -80%</span>
-                      <span>&gt;</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    {dealsOfTheDay.map((p) => {
-                      const discountPercent = Math.round(((p.price - p.promoPrice) / p.price) * 100);
-                      return (
-                        <Link key={p.id} to={`/product/${p.id}`} className="group block text-decoration-none">
-                          <div style={{ aspectRatio: '1', border: '1px solid #f1f5f9', borderRadius: 0, overflow: 'hidden', background: '#f8fafc' }}>
-                            {p.image ? (
-                              <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center font-bold text-slate-300">
-                                {p.name?.charAt(0)}
-                              </div>
-                            )}
-                          </div>
-                          <div className="mt-2 text-left">
-                            <p className="text-xs font-medium text-slate-700 truncate mb-0.5">{p.name}</p>
-                            <p className="text-sm font-black text-slate-900 m-0">
-                              {Number(p.promoPrice).toLocaleString('fr-FR')} F
-                            </p>
-                            <p className="text-[10px] text-slate-400 line-through m-0">
-                              {Number(p.price).toLocaleString('fr-FR')} F
-                            </p>
-                            <span className="inline-block bg-red-600 text-white text-[9px] font-black px-1 mt-1">
-                              -{discountPercent}%
-                            </span>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section id="marketplace-feeds" className=" pb-12" style={{ marginTop: '10px' }}>
           <ProductGrid
             products={products}
             loading={loading}
@@ -284,7 +168,6 @@ function normalizeProduct(product) {
     rating: product?.rating != null ? Number(product.rating) : null,
     totalReviews: product?.totalReviews != null ? Number(product.totalReviews) : null,
     vendorSlug: product?.vendorSlug || product?.storeSlug,
-    totalSales: Number(product?.totalSales ?? 0) || 0
   };
 }
 
