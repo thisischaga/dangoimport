@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../apiClient';
 import Header from '../components/Header';
@@ -54,27 +54,6 @@ function formatCurrency(x = 0) {
   } catch (e) { return String(x); }
 }
 
-/** Réserve dynamiquement l'espace occupé par le header fixe */
-function useHeaderOffset() {
-  useEffect(() => {
-    const headerEl = document.querySelector('header');
-    if (!headerEl) return undefined;
-
-    const setVar = () => {
-      document.documentElement.style.setProperty('--header-h', `${headerEl.offsetHeight}px`);
-    };
-
-    setVar();
-    const ro = new ResizeObserver(setVar);
-    ro.observe(headerEl);
-    window.addEventListener('resize', setVar);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', setVar);
-    };
-  }, []);
-}
 
 const STATUS_BADGES = {
   pending: { bg: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Paiement en attente' },
@@ -90,7 +69,6 @@ const STATUS_BADGES = {
 };
 
 const Orders = () => {
-  useHeaderOffset();
 
   const { data: orders = [], isLoading, error } = useQuery({ queryKey: ['my-orders'], queryFn: fetchMyOrders, staleTime: 1000 * 60 * 30 });
 

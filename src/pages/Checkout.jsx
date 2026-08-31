@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  MapPin, User, Mail, Phone, Home, Navigation, Hash, Globe, MessageSquare,
+  Truck, Zap, Crown, Leaf, ShieldCheck, Lock, CreditCard, Check, ChevronLeft,
+  Sparkles, Package, Smartphone, BadgeCheck,
+} from 'lucide-react';
 import toast from '../utils/toast';
 import QRCode from 'qrcode';
 import Header from '../components/Header';
@@ -16,14 +22,15 @@ const SHIPPING_PLANS = [
     value: 'standard',
     label: 'Standard',
     tagline: 'Économique',
-    price: 0,
-    priceLabel: 'Gratuit',
+    price: 1500,
+    priceLabel: '1 500 FCFA',
     delay: '3 à 7 jours ouvrés',
     color: 'emerald',
+    icon: Leaf,
     features: [
       'Commandes regroupées par zone',
       'Tournées planifiées et optimisées',
-      'Délai communiqué avant l\'expédition',
+      "Délai communiqué avant l'expédition",
       'Pas de priorité de traitement',
     ],
   },
@@ -35,10 +42,11 @@ const SHIPPING_PLANS = [
     priceLabel: '2 250 FCFA',
     delay: 'Sous 24 heures',
     color: 'amber',
+    icon: Zap,
     features: [
       'Livreur dédié pour votre commande',
       'Traitement immédiat à la validation',
-      'Prioritaire dans la file d\'attente',
+      "Prioritaire dans la file d'attente",
       'Suivi disponible à la demande',
     ],
   },
@@ -50,6 +58,7 @@ const SHIPPING_PLANS = [
     priceLabel: '5 000 FCFA',
     delay: 'Immédiate ',
     color: 'purple',
+    icon: Crown,
     features: [
       'Livraison dans la journée garantie',
       'Livreur exclusivement dédié',
@@ -60,49 +69,53 @@ const SHIPPING_PLANS = [
 ];
 
 const STEPS = [
-  { id: 1, label: 'Adresse', shortLabel: 'Adresse' },
-  { id: 2, label: 'Livraison', shortLabel: 'Livraison' },
-  { id: 3, label: 'Paiement', shortLabel: 'Paiement' },
+  { id: 1, label: 'Adresse', icon: MapPin },
+  { id: 2, label: 'Livraison', icon: Truck },
+  { id: 3, label: 'Paiement', icon: CreditCard },
 ];
 
-/* ─── Stepper Progress Bar ─── */
+/* ─── Stepper Progress Bar (premium) ─── */
 function StepperBar({ currentStep }) {
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between relative">
-        {/* Background line */}
-        <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200 mx-8" />
-        {/* Progress line */}
-        <div
-          className="absolute top-5 left-0 h-[2px] bg-[#F68B1E] mx-8 transition-all duration-500 ease-out"
-          style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`, maxWidth: 'calc(100% - 4rem)' }}
+      <div className="relative flex items-center justify-between">
+        <div className="absolute left-0 right-0 top-5 mx-9 h-[3px] rounded-full bg-gray-100 sm:mx-10" />
+        <motion.div
+          initial={false}
+          animate={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute left-0 top-5 mx-9 h-[3px] rounded-full bg-gradient-to-r from-[#F68B1E] to-[#FFA94D] sm:mx-10"
+          style={{ maxWidth: 'calc(100% - 2.25rem)' }}
         />
 
         {STEPS.map((step) => {
           const isCompleted = currentStep > step.id;
           const isActive = currentStep === step.id;
+          const Icon = step.icon;
 
           return (
-            <div key={step.id} className="flex flex-col items-center relative z-10">
-              <div
+            <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+              <motion.div
+                animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                transition={{ duration: 0.4 }}
                 className={[
-                  'w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border-2',
+                  'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-black transition-all duration-300',
                   isCompleted
-                    ? 'bg-[#F68B1E] border-[#F68B1E] text-white shadow-lg shadow-orange-200'
+                    ? 'border-[#F68B1E] bg-[#F68B1E] text-white shadow-md shadow-orange-200'
                     : isActive
-                    ? 'bg-white border-[#F68B1E] text-[#F68B1E] shadow-lg shadow-orange-100'
-                    : 'bg-white border-gray-200 text-gray-400',
+                    ? 'border-[#F68B1E] bg-white text-[#F68B1E] shadow-md shadow-orange-100 ring-4 ring-orange-50'
+                    : 'border-gray-200 bg-white text-gray-300',
                 ].join(' ')}
               >
-                {step.id}
-              </div>
+                {isCompleted ? <Check className="h-4 w-4" strokeWidth={3} /> : <Icon className="h-4 w-4" strokeWidth={2.5} />}
+              </motion.div>
               <span
                 className={[
-                  'mt-2 text-xs font-bold transition-colors duration-300',
-                  isActive ? 'text-[#F68B1E]' : isCompleted ? 'text-[#282828]' : 'text-gray-400',
+                  'text-[11px] font-bold tracking-wide transition-colors duration-300',
+                  isActive ? 'text-[#F68B1E]' : isCompleted ? 'text-[#282828]' : 'text-gray-300',
                 ].join(' ')}
               >
-                {step.shortLabel}
+                {step.label}
               </span>
             </div>
           );
@@ -112,65 +125,79 @@ function StepperBar({ currentStep }) {
   );
 }
 
-/* ─── Mini Order Summary (floating panel) ─── */
-function MiniOrderSummary({ cartItems, itemUnitPrice, subtotal, shippingFee, shippingMethod, preview, previewLoading, isOpen, onToggle }) {
+/* ─── Résumé de commande — panneau unique (mobile: repliable / desktop: fixe) ─── */
+function OrderSummaryPanel({ cartItems, itemUnitPrice, subtotal, shippingFee, shippingMethod, preview, previewLoading, variant = 'sticky', isOpen, onToggle }) {
   const plan = SHIPPING_PLANS.find((p) => p.value === shippingMethod);
   const discount = Number(preview?.discount || 0);
   const total = Number(preview?.subtotal ?? subtotal) + shippingFee - discount;
+  const collapsible = variant === 'collapsible';
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
-      {/* Header — toujours visible */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50/50 transition"
-      >
-        <div className="flex items-center gap-3">
+  return (  
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex w-full items-center justify-between px-5 py-4 transition hover:bg-gray-50/50"
+        >
           <div className="text-left">
-            <p className="text-xs text-gray-500 font-medium">Résumé de commande</p>
+            <p className="text-xs font-medium text-gray-500">Résumé de commande</p>
             <p className="text-sm font-black text-[#282828]">
               {cartItems.length} article{cartItems.length > 1 ? 's' : ''}
             </p>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-base font-black text-[#F68B1E]">
-            {previewLoading ? '...' : `${total.toLocaleString('fr-FR')} FCFA`}
-          </span>
-          <span className="text-xs font-bold text-gray-400">
-            {isOpen ? 'Masquer' : 'Afficher'}
-          </span>
-        </div>
-      </button>
+          <div className="flex items-center gap-3">
+            <span className="text-base font-black text-[#F68B1E]">
+              {previewLoading ? '...' : `${total.toLocaleString('fr-FR')} FCFA`}
+            </span>
+            <span className="text-xs font-bold text-gray-400">{isOpen ? 'Masquer' : 'Afficher'}</span>
+          </div>
+        </button>
+      ) : (
+        <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
 
-      {/* Expanded content */}
+          <div>
+            <p className="text-sm font-black text-[#282828]">Résumé de commande</p>
+            <p className="text-xs text-gray-400">
+              {cartItems.length} article{cartItems.length > 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+        className={
+          collapsible
+            ? `overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`
+            : ''
+        }
       >
-        <div className="px-5 pb-5 border-t border-gray-100">
-          {/* Product list */}
-          <div className="space-y-3 mt-4 max-h-[200px] overflow-y-auto pr-1">
+        <div className={collapsible ? 'border-t border-gray-100 px-5 pb-5' : 'px-5 pb-5'}>
+          <div className="mt-4 max-h-[220px] space-y-3 overflow-y-auto pr-1">
             {cartItems.map((item) => (
-              <div key={item._id || item.id} className="flex gap-3 items-center">
-                <img
-                  src={item.image || item.images?.[0]?.url}
-                  alt={item.name}
-                  className="w-11 h-11 rounded-lg object-cover bg-gray-100 shrink-0"
-                />
+              <div key={item._id || item.id} className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <img
+                    src={item.image || item.images?.[0]?.url}
+                    alt={item.name}
+                    className="h-12 w-12 rounded-xl border border-gray-100 bg-gray-50 object-cover"
+                  />
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[9px] font-black text-white ring-2 ring-white">
+                    {item.quantity}
+                  </span>
+                </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-[#282828] line-clamp-1">{item.name}</p>
+                  <p className="line-clamp-1 text-xs font-bold text-[#282828]">{item.name}</p>
                   <p className="text-[11px] text-gray-400">Qté : {item.quantity}</p>
                 </div>
-                <p className="text-xs font-black text-[#282828] shrink-0">
-                  {itemUnitPrice(item).toLocaleString('fr-FR')} F
+                <p className="shrink-0 text-xs font-black text-[#282828]">
+                  {(itemUnitPrice(item) * Number(item.quantity || 1)).toLocaleString('fr-FR')} F
                 </p>
               </div>
             ))}
           </div>
 
-          {/* Totals */}
-          <div className="mt-4 pt-3 border-t border-gray-100 space-y-2">
+          <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Sous-total</span>
               <span className="font-semibold text-[#282828]">{subtotal.toLocaleString('fr-FR')} F</span>
@@ -188,28 +215,69 @@ function MiniOrderSummary({ cartItems, itemUnitPrice, subtotal, shippingFee, shi
               </div>
             )}
           </div>
+
+          <div className="mt-4 flex items-center justify-between rounded-xl bg-gradient-to-br from-orange-50 to-amber-50/40 px-4 py-3">
+            <span className="text-sm font-bold text-gray-600">Total</span>
+            <span className="text-lg font-black text-[#F68B1E]">
+              {previewLoading ? '...' : `${total.toLocaleString('fr-FR')} FCFA`}
+            </span>
+          </div>
+
+          {!collapsible && (
+            <div className="mt-5 space-y-2.5 border-t border-gray-100 pt-4 text-[11px] text-gray-500">
+              <div className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> Paiement 100% sécurisé</div>
+              <div className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> Données chiffrées de bout en bout</div>
+              <div className="flex items-center gap-2"><Smartphone className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> Mobile Money & cartes acceptés</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
+/* ─── Champ avec icône ─── */
+function IconField({ icon: Icon, label, required, error, children }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+        {label}
+        {required && <span className="ml-0.5 text-[#F68B1E]">*</span>}
+      </label>
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
+        {children}
+      </div>
+      {error && <p className="mt-1 text-[11px] font-medium text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+const inputBaseCls = (hasError) =>
+  [
+    'w-full rounded-xl border-2 py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200',
+    hasError
+      ? 'border-red-300 bg-red-50/50 focus:border-red-300'
+      : 'border-gray-100 bg-gray-50/50 focus:border-orange-200 focus:bg-white focus:shadow-sm focus:ring-4 focus:ring-orange-50',
+  ].join(' ');
+
+const FIELD_ICONS = { firstName: User, lastName: User, email: Mail, phone: Phone };
+
 /* ─── Step 1 : Adresse de livraison ─── */
 function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId, handleSelectAddress }) {
   const fields = [
-    { key: 'firstName', label: 'Prénom', required: true, half: true },
-    { key: 'lastName', label: 'Nom', required: true, half: true },
-    { key: 'email', label: 'Email', type: 'email', required: true, half: true },
-    { key: 'phone', label: 'Téléphone', type: 'tel', required: true, half: true },
+    { key: 'firstName', label: 'Prénom', required: true },
+    { key: 'lastName', label: 'Nom', required: true },
+    { key: 'email', label: 'Email', type: 'email', required: true },
+    { key: 'phone', label: 'Téléphone', type: 'tel', required: true },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Saved addresses */}
       {savedAddresses.length > 0 && (
         <div>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Adresses enregistrées</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">Adresses enregistrées</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {savedAddresses.map((address) => {
               const id = address._id || address.id || 'default';
               const isActive = selectedAddressId === id;
@@ -219,7 +287,7 @@ function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId,
                   type="button"
                   onClick={() => handleSelectAddress(address)}
                   className={[
-                    'text-left p-4 rounded-xl border-2 transition-all duration-200 group',
+                    'group rounded-xl border-2 p-4 text-left transition-all duration-200',
                     isActive
                       ? 'border-[#F68B1E] bg-gradient-to-br from-orange-50 to-amber-50/30 shadow-sm'
                       : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm',
@@ -227,26 +295,25 @@ function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId,
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      <div className="mb-1 flex items-center gap-2">
+                        <MapPin className={`h-3.5 w-3.5 ${isActive ? 'text-[#F68B1E]' : 'text-gray-300'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                           {address.label || 'Adresse'}
                         </span>
                         {address.isDefault && (
-                          <span className="text-[9px] rounded-full bg-[#F68B1E] text-white px-2 py-0.5 font-bold">
-                            Défaut
-                          </span>
+                          <span className="rounded-full bg-[#F68B1E] px-2 py-0.5 text-[9px] font-bold text-white">Défaut</span>
                         )}
                       </div>
                       <p className="text-sm font-bold text-[#282828]">{address.city}</p>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{address.fullAddress}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{address.fullAddress}</p>
                     </div>
                     <div
                       className={[
-                        'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all',
+                        'mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
                         isActive ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300',
                       ].join(' ')}
                     >
-                      {isActive && <div className="w-2 h-2 rounded-full bg-white" />}
+                      {isActive && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
                     </div>
                   </div>
                 </button>
@@ -256,122 +323,85 @@ function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId,
         </div>
       )}
 
-      {/* Form */}
       <div>
         {savedAddresses.length > 0 && (
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Ou renseigner manuellement</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">Ou renseigner manuellement</p>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
           {fields.map(({ key, label, type = 'text', required }) => (
-            <div key={key}>
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                {label}{required && <span className="text-[#F68B1E] ml-0.5">*</span>}
-              </label>
+            <IconField key={key} icon={FIELD_ICONS[key]} label={label} required={required} error={errors[key]}>
               <input
                 type={type}
                 value={form[key]}
                 onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className={[
-                  'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
-                  errors[key]
-                    ? 'border-red-300 bg-red-50/50 focus:border-red-300'
-                    : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
-                ].join(' ')}
+                className={inputBaseCls(!!errors[key])}
                 placeholder={label}
               />
-              {errors[key] && (
-                <p className="text-red-500 text-[11px] mt-1 font-medium flex items-center gap-1">
-                  {errors[key]}
-                </p>
-              )}
-            </div>
+            </IconField>
           ))}
 
-          {/* Country */}
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-              Pays<span className="text-[#F68B1E] ml-0.5">*</span>
-            </label>
+          <IconField icon={Globe} label="Pays" required>
             <select
               value={form.country}
               onChange={(e) => setForm({ ...form, country: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200 appearance-none cursor-pointer"
+              className={inputBaseCls(false) + ' cursor-pointer appearance-none'}
             >
               <option>Togo</option>
               <option>Bénin</option>
             </select>
-          </div>
+          </IconField>
 
-          {/* City */}
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-              Ville<span className="text-[#F68B1E] ml-0.5">*</span>
-            </label>
+          <IconField icon={MapPin} label="Ville" required error={errors.city}>
             <input
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className={[
-                'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
-                errors.city
-                  ? 'border-red-300 bg-red-50/50 focus:border-red-300'
-                  : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
-              ].join(' ')}
+              className={inputBaseCls(!!errors.city)}
               placeholder="Ville"
             />
-            {errors.city && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.city}</p>}
-          </div>
+          </IconField>
 
-          {/* Neighborhood */}
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Quartier</label>
+          <IconField icon={Navigation} label="Quartier">
             <input
               value={form.neighborhood}
               onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200"
+              className={inputBaseCls(false)}
               placeholder="Quartier"
             />
-          </div>
+          </IconField>
 
-          {/* Postal code */}
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Code postal</label>
+          <IconField icon={Hash} label="Code postal">
             <input
               value={form.postalCode}
               onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200"
+              className={inputBaseCls(false)}
               placeholder="Code postal"
             />
+          </IconField>
+
+          <div className="sm:col-span-2">
+            <IconField icon={Home} label="Adresse complète" required error={errors.fullAddress}>
+              <input
+                value={form.fullAddress}
+                onChange={(e) => setForm({ ...form, fullAddress: e.target.value })}
+                className={inputBaseCls(!!errors.fullAddress)}
+                placeholder="Numéro, rue, bâtiment..."
+              />
+            </IconField>
           </div>
 
-          {/* Full address */}
           <div className="sm:col-span-2">
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-              Adresse complète<span className="text-[#F68B1E] ml-0.5">*</span>
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+              Instructions de livraison
             </label>
-            <input
-              value={form.fullAddress}
-              onChange={(e) => setForm({ ...form, fullAddress: e.target.value })}
-              className={[
-                'w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all duration-200',
-                errors.fullAddress
-                  ? 'border-red-300 bg-red-50/50 focus:border-red-300'
-                  : 'border-gray-100 bg-gray-50/50 focus:border-gray-100 focus:bg-white focus:shadow-sm',
-              ].join(' ')}
-              placeholder="Numéro, rue, bâtiment..."
-            />
-            {errors.fullAddress && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.fullAddress}</p>}
-          </div>
-
-          {/* Instructions */}
-          <div className="sm:col-span-2">
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Instructions de livraison</label>
-            <textarea
-              rows="2"
-              value={form.instructions}
-              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-100 bg-gray-50/50 rounded-xl text-sm font-medium outline-none focus:border-gray-100 focus:bg-white transition-all duration-200 resize-none"
-              placeholder="Bâtiment, code d'accès, remarques..."
-            />
+            <div className="relative">
+              <textarea
+                rows="2"
+                value={form.instructions}
+                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                className="w-full resize-none rounded-xl border-2 border-gray-100 bg-gray-50/50 py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200 focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-50"
+                placeholder="Bâtiment, code d'accès, remarques..."
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -382,9 +412,9 @@ function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId,
 /* ─── Step 2 : Formule de livraison ─── */
 function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor = {}, selectedZonesByVendor = {}, onSelectZone }) {
   const colorMap = {
-    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
-    amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
-    purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
+    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', iconWrap: 'bg-emerald-100 text-emerald-600' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', iconWrap: 'bg-amber-100 text-amber-600' },
+    purple: { bg: 'bg-purple-50', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', iconWrap: 'bg-purple-100 text-purple-600' },
   };
 
   const vendorGroups = Object.entries(vendorZonesByVendor).map(([vendorId, zones]) => ({
@@ -395,9 +425,7 @@ function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor =
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500 mb-2">
-        Choisissez le mode d'acheminement de votre commande.
-      </p>
+      <p className="mb-2 text-sm text-gray-500">Choisissez le mode d'acheminement de votre commande.</p>
 
       {vendorGroups.length > 0 && (
         <div className="space-y-3 rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
@@ -415,7 +443,7 @@ function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor =
                     type="button"
                     onClick={() => onSelectZone(vendorId, zone)}
                     className={[
-                      'w-full flex items-center justify-between gap-4 rounded-xl border-2 px-3 py-2 text-left transition-all',
+                      'flex w-full items-center justify-between gap-4 rounded-xl border-2 px-3 py-2 text-left transition-all',
                       isSelected ? 'border-[#F68B1E] bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300',
                     ].join(' ')}
                   >
@@ -424,7 +452,7 @@ function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor =
                       <p className="text-[11px] text-gray-500">{summary}</p>
                     </div>
                     <span className={['inline-flex h-5 w-5 items-center justify-center rounded-full border-2', isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300'].join(' ')}>
-                      {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+                      {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
                     </span>
                   </button>
                 );
@@ -438,6 +466,7 @@ function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor =
         {SHIPPING_PLANS.map((plan) => {
           const isSelected = shippingMethod === plan.value;
           const colors = colorMap[plan.color];
+          const Icon = plan.icon;
 
           return (
             <button
@@ -445,52 +474,48 @@ function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor =
               type="button"
               onClick={() => setShippingMethod(plan.value)}
               className={[
-                'w-full text-left rounded-2xl border-2 transition-all duration-300 group overflow-hidden',
-                isSelected
-                  ? `border-[#F68B1E] shadow-lg shadow-orange-100/40`
-                  : 'border-gray-100 hover:border-gray-200 hover:shadow-sm',
+                'group w-full overflow-hidden rounded-2xl border-2 text-left transition-all duration-300',
+                isSelected ? 'border-[#F68B1E] shadow-lg shadow-orange-100/40' : 'border-gray-100 hover:border-gray-200 hover:shadow-sm',
               ].join(' ')}
             >
-              {/* Main row */}
               <div className="flex items-center gap-4 px-5 py-4">
-                {/* Radio indicator */}
-                <div
-                  className={[
-                    'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200',
-                    isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300 group-hover:border-gray-400',
-                  ].join(' ')}
-                >
-                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colors.iconWrap}`}>
+                  <Icon className="h-5 w-5" strokeWidth={2} />
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-black text-[#282828]">{plan.label}</span>
-                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${colors.badge}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${colors.badge}`}>
                       {plan.tagline}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{plan.delay}</p>
+                  <p className="mt-0.5 text-xs text-gray-500">{plan.delay}</p>
                 </div>
 
-                {/* Price */}
-                <div className="text-right shrink-0">
+                <div className="shrink-0 text-right">
                   <span className={`text-base font-black ${plan.price === 0 ? 'text-emerald-600' : 'text-[#282828]'}`}>
                     {plan.priceLabel}
                   </span>
                 </div>
+
+                <div
+                  className={[
+                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200',
+                    isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300 group-hover:border-gray-400',
+                  ].join(' ')}
+                >
+                  {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                </div>
               </div>
 
-              {/* Expanded features */}
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden ${isSelected ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}
-              >
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSelected ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-5 pb-4 pt-0">
                   <div className={`rounded-xl ${colors.bg} p-3`}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {plan.features.map((feat) => (
                         <div key={feat} className="flex items-start gap-2 text-xs text-gray-600">
+                          <Check className={`mt-0.5 h-3 w-3 shrink-0 ${colors.text}`} strokeWidth={3} />
                           <span>{feat}</span>
                         </div>
                       ))}
@@ -512,57 +537,73 @@ function StepPayment({ acceptCGV, setAcceptCGV, submitting, handlePlaceOrder, co
 
   return (
     <div className="space-y-6">
-      {/* Recap card */}
       <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-5">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Récapitulatif</p>
-        <div className="space-y-2">
-          <div className="flex flex-col">
-            <p className="text-xs font-bold text-[#282828]">Livraison à :</p>
-            <p className="text-xs text-gray-500">
-              {form.fullAddress}{form.city ? `, ${form.city}` : ''}{form.country ? ` — ${form.country}` : ''}
-            </p>
+        <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-400">Récapitulatif</p>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]"><MapPin className="h-3.5 w-3.5" /></div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-[#282828]">Livraison à</p>
+              <p className="text-xs text-gray-500">
+                {form.fullAddress}{form.city ? `, ${form.city}` : ''}{form.country ? ` — ${form.country}` : ''}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col pt-2">
-            <p className="text-xs font-bold text-[#282828]">Mode de livraison :</p>
-            <p className="text-xs text-gray-500">{plan?.label || 'Standard'} — {plan?.delay}</p>
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]"><Truck className="h-3.5 w-3.5" /></div>
+            <div>
+              <p className="text-xs font-bold text-[#282828]">Mode de livraison</p>
+              <p className="text-xs text-gray-500">{plan?.label || 'Standard'} {plan?.delay}</p>
+            </div>
           </div>
         </div>
       </div>
 
+      <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3 text-gray-400">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Sécurisé</div>
+        <span className="text-gray-200">•</span>
+        <div className="flex items-center gap-1.5 text-[11px] font-bold"><Smartphone className="h-4 w-4 text-gray-400" /> Mobile Money</div>
+      </div>
 
-      {/* CGV */}
-      <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/50 cursor-pointer select-none hover:bg-gray-50 transition group">
+      <label className="group flex cursor-pointer select-none items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition hover:bg-gray-50">
         <input
           type="checkbox"
           checked={acceptCGV}
           onChange={(e) => setAcceptCGV(e.target.checked)}
-          className="mt-1 h-5 w-5 accent-[#F68B1E] rounded"
+          className="mt-1 h-5 w-5 rounded accent-[#F68B1E]"
         />
-        <span className="text-sm text-gray-600 leading-relaxed">
+        <span className="text-sm leading-relaxed text-gray-600">
           J'ai lu et j'accepte les conditions générales de vente de Dangoimport.
         </span>
       </label>
 
-      {/* Submit */}
       <button
         onClick={handlePlaceOrder}
         disabled={submitting || !acceptCGV}
         className={[
-          'w-full font-black py-4 rounded-xl transition-all duration-200 text-sm tracking-wide relative overflow-hidden group',
+          'group relative w-full overflow-hidden rounded-xl py-4 text-sm font-black tracking-wide transition-all duration-200',
           submitting || !acceptCGV
-            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-200/60 hover:-translate-y-0.5',
+            ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+            : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E67A0C] hover:shadow-xl hover:shadow-orange-200/60',
         ].join(' ')}
       >
-        {submitting ? (
-          'Redirection en cours...'
-        ) : (
-          `Confirmer et payer — ${previewLoading ? '...' : `${computedTotal.toLocaleString('fr-FR')} FCFA`}`
+        <span className="relative z-10 inline-flex items-center justify-center gap-2">
+          {submitting ? (
+            'Redirection en cours...'
+          ) : (
+            <>
+              <Lock className="h-4 w-4" />
+              Confirmer et payer {previewLoading ? '...' : `${computedTotal.toLocaleString('fr-FR')} FCFA`}
+            </>
+          )}
+        </span>
+        {!(submitting || !acceptCGV) && (
+          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         )}
       </button>
 
-      <p className="text-center text-[11px] text-gray-400">
-        Paiement sécurisé via FedaPay
+      <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-gray-400">
+        <Lock className="h-3 w-3" /> Paiement sécurisé via FedaPay
       </p>
     </div>
   );
@@ -957,15 +998,15 @@ export default function Checkout() {
     return (
       <>
         <Header />
-        <div className="min-h-[70vh] bg-[#FAFAFA] flex items-center justify-center pt-28">
-          <div className="text-center px-6">
-            <h2 className="text-xl font-black text-gray-900 mb-2">Votre panier est vide</h2>
-            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+        <div className="flex min-h-[70vh] items-center justify-center bg-[#FAFAFA] pt-28">
+          <div className="px-6 text-center">
+            <h2 className="mb-2 text-xl font-black text-gray-900">Votre panier est vide</h2>
+            <p className="mx-auto mb-6 max-w-xs text-sm text-gray-500">
               Ajoutez des produits avant de finaliser votre commande.
             </p>
             <button
               onClick={() => navigate('/shopping')}
-              className="bg-[#F68B1E] hover:bg-[#E67A0C] text-white font-black px-8 py-3.5 rounded-xl transition-all hover:shadow-lg hover:shadow-orange-200/50 hover:-translate-y-0.5"
+              className="rounded-xl bg-[#F68B1E] px-8 py-3.5 font-black text-white transition-all hover:-translate-y-0.5 hover:bg-[#E67A0C] hover:shadow-lg hover:shadow-orange-200/50"
             >
               Continuer le shopping
             </button>
@@ -984,109 +1025,150 @@ export default function Checkout() {
     3: 'Confirmation & paiement',
   };
 
+  const stepVariants = {
+    enter: { opacity: 0, x: 16 },
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -16 },
+  };
+
   /* ─── Rendu principal ─── */
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <Header />
 
-      {/* Top bar */}
-      <div className="bg-white border-b border-gray-100 pt-24 sm:pt-28">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
+      <div className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-black text-[#282828] sm:text-xl">Finaliser votre commande</h1>
+              <p className="text-xs text-gray-400">Étape {currentStep} sur 3</p>
+            </div>
+            <div className="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 sm:flex">
+              <ShieldCheck className="h-3.5 w-3.5" /> Paiement sécurisé
+            </div>
+          </div>
           <StepperBar currentStep={currentStep} />
         </div>
       </div>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pb-32">
-        {/* Order summary (collapsible) */}
-        <div className="mb-6">
-          <MiniOrderSummary
-            cartItems={cartItems}
-            itemUnitPrice={itemUnitPrice}
-            subtotal={subtotal}
-            shippingFee={shippingFee}
-            shippingMethod={shippingMethod}
-            preview={preview}
-            previewLoading={previewLoading}
-            isOpen={summaryOpen}
-            onToggle={() => setSummaryOpen(!summaryOpen)}
-          />
-        </div>
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-32 sm:px-6 lg:pb-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+          <div>
+            {/* Mobile summary — collapsible */}
+            <div className="mb-6 lg:hidden">
+              <OrderSummaryPanel
+                variant="collapsible"
+                cartItems={cartItems}
+                itemUnitPrice={itemUnitPrice}
+                subtotal={subtotal}
+                shippingFee={shippingFee}
+                shippingMethod={shippingMethod}
+                preview={preview}
+                previewLoading={previewLoading}
+                isOpen={summaryOpen}
+                onToggle={() => setSummaryOpen(!summaryOpen)}
+              />
+            </div>
 
-        {/* Step content card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {/* Step header */}
-          <div className="px-6 py-5 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#F68B1E] flex items-center justify-center text-white text-sm font-black">
-                {currentStep}
+            <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="border-b border-gray-100 px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F68B1E] text-sm font-black text-white">
+                    {currentStep}
+                  </div>
+                  <h2 className="text-base font-black text-[#282828]">{stepTitles[currentStep]}</h2>
+                </div>
               </div>
-              <h2 className="text-base font-black text-[#282828]">{stepTitles[currentStep]}</h2>
+
+              <div className="p-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    {currentStep === 1 && (
+                      <StepAddress
+                        form={form}
+                        setForm={setForm}
+                        errors={errors}
+                        savedAddresses={savedAddresses}
+                        selectedAddressId={selectedAddressId}
+                        handleSelectAddress={handleSelectAddress}
+                      />
+                    )}
+                    {currentStep === 2 && (
+                      <StepShipping
+                        shippingMethod={shippingMethod}
+                        setShippingMethod={setShippingMethod}
+                        vendorZonesByVendor={vendorZonesByVendor}
+                        selectedZonesByVendor={selectedZonesByVendor}
+                        onSelectZone={(vendorId, zone) => setSelectedZonesByVendor((prev) => ({ ...prev, [vendorId]: zone }))}
+                      />
+                    )}
+                    {currentStep === 3 && (
+                      <StepPayment
+                        acceptCGV={acceptCGV}
+                        setAcceptCGV={setAcceptCGV}
+                        submitting={submitting}
+                        handlePlaceOrder={handlePlaceOrder}
+                        computedTotal={computedTotal}
+                        previewLoading={previewLoading}
+                        form={form}
+                        shippingMethod={shippingMethod}
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={goBack}
+                className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-bold text-gray-600 transition-all hover:border-gray-300 hover:bg-gray-50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {currentStep === 1 ? 'Panier' : 'Retour'}
+              </button>
+
+              {currentStep < 3 && (
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="flex items-center gap-2 rounded-xl bg-[#F68B1E] px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200/40 transition-all hover:-translate-y-0.5 hover:bg-[#E67A0C] hover:shadow-xl hover:shadow-orange-200/50"
+                >
+                  Continuer
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Step body */}
-          <div className="p-6">
-            {currentStep === 1 && (
-              <StepAddress
-                form={form}
-                setForm={setForm}
-                errors={errors}
-                savedAddresses={savedAddresses}
-                selectedAddressId={selectedAddressId}
-                handleSelectAddress={handleSelectAddress}
-              />
-            )}
-            {currentStep === 2 && (
-              <StepShipping
-                shippingMethod={shippingMethod}
-                setShippingMethod={setShippingMethod}
-                vendorZonesByVendor={vendorZonesByVendor}
-                selectedZonesByVendor={selectedZonesByVendor}
-                onSelectZone={(vendorId, zone) => setSelectedZonesByVendor((prev) => ({ ...prev, [vendorId]: zone }))}
-              />
-            )}
-            {currentStep === 3 && (
-              <StepPayment
-                acceptCGV={acceptCGV}
-                setAcceptCGV={setAcceptCGV}
-                submitting={submitting}
-                handlePlaceOrder={handlePlaceOrder}
-                computedTotal={computedTotal}
-                previewLoading={previewLoading}
-                form={form}
-                shippingMethod={shippingMethod}
-              />
-            )}
+          {/* Desktop summary — persistent, sticky */}
+          <div className="hidden lg:sticky lg:top-8 lg:block">
+            <OrderSummaryPanel
+              variant="sticky"
+              cartItems={cartItems}
+              itemUnitPrice={itemUnitPrice}
+              subtotal={subtotal}
+              shippingFee={shippingFee}
+              shippingMethod={shippingMethod}
+              preview={preview}
+              previewLoading={previewLoading}
+            />
           </div>
-        </div>
-
-        {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-6 gap-3">
-          <button
-            type="button"
-            onClick={goBack}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-gray-600 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
-          >
-            {currentStep === 1 ? 'Panier' : 'Retour'}
-          </button>
-
-          {currentStep < 3 && (
-            <button
-              type="button"
-              onClick={goNext}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white bg-[#F68B1E] hover:bg-[#E67A0C] shadow-lg shadow-orange-200/40 hover:shadow-xl hover:shadow-orange-200/50 hover:-translate-y-0.5 transition-all"
-            >
-              Continuer
-            </button>
-          )}
         </div>
       </main>
 
       {/* Mobile bottom bar — total always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-50 lg:hidden">
-        <div className="flex items-center justify-between max-w-2xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white px-4 py-3 lg:hidden">
+        <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total</p>
             <p className="text-base font-black text-[#F68B1E]">
               {previewLoading ? '...' : `${computedTotal.toLocaleString('fr-FR')} FCFA`}
             </p>
@@ -1095,7 +1177,7 @@ export default function Checkout() {
             <button
               type="button"
               onClick={goNext}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white bg-[#F68B1E] hover:bg-[#E67A0C] shadow-lg shadow-orange-200/40 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-[#F68B1E] px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200/40 transition-all hover:bg-[#E67A0C]"
             >
               Continuer
             </button>
@@ -1105,10 +1187,10 @@ export default function Checkout() {
               onClick={handlePlaceOrder}
               disabled={submitting || !acceptCGV}
               className={[
-                'flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all',
+                'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
                 submitting || !acceptCGV
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#F68B1E] hover:bg-[#E67A0C] text-white shadow-lg shadow-orange-200/40',
+                  ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                  : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E67A0C]',
               ].join(' ')}
             >
               {submitting ? 'Paiement...' : 'Payer'}

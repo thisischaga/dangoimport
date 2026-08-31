@@ -11,6 +11,21 @@ import { getProductImage } from '../utils/imageUrl';
 import logo from '../images/logo.png';
 import { useCart } from '../context/CartContext';
 
+/** Calcule et expose la hauteur du header via la variable CSS --header-h */
+function useHeaderHeight(headerRef) {
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return undefined;
+    const update = () =>
+      document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => { ro.disconnect(); window.removeEventListener('resize', update); };
+  }, [headerRef]);
+}
+
 const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphone', 'Parfum', 'Montre', 'Chargeur', 'Écouteurs'];
 
 const CATEGORY_LINKS = [
@@ -100,12 +115,12 @@ function CategoryMegaMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-bold transition ${
+        className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition ${
           open ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-700 hover:bg-slate-50'
         }`}
       >
-        <Menu size={15} />
         Toutes les catégories
+        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -118,7 +133,7 @@ function CategoryMegaMenu() {
             className="absolute left-0 top-full z-40 mt-2 flex w-[720px] max-w-[90vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
           >
             <div className="w-56 shrink-0 border-r border-slate-100 bg-slate-50/60 py-2">
-              {CATEGORY_LINKS.map(({ label, slug }) => (
+              {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
                 <Link
                   key={slug}
                   to={`/category/${slug}`}
@@ -128,7 +143,7 @@ function CategoryMegaMenu() {
                     activeSlug === slug ? 'bg-white text-[#FF6B00]' : 'text-slate-700 hover:bg-white/70'
                   }`}
                 >
-                  {/**<Icon size={16} className={activeSlug === slug ? 'text-[#FF6B00]' : 'text-slate-400'} /> */}
+                  <Icon size={16} className={activeSlug === slug ? 'text-[#FF6B00]' : 'text-slate-400'} />
                   {label}
                 </Link>
               ))}
@@ -242,6 +257,8 @@ function MobileCategoryDrawer({ open, onClose }) {
 }
 
 const Header = () => {
+  const headerRef = useRef(null);
+  useHeaderHeight(headerRef);
   const navigate = useNavigate();
   const location = useLocation();
   const { cartCount } = useCart();
@@ -255,6 +272,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   const suggestionTimer = useRef(null);
   const accountRef = useRef(null);
@@ -363,6 +381,12 @@ const Header = () => {
     return undefined;
   }, [desktopSearchOpen]);
 
+  // Si l'utilisateur change (nouvelle connexion, avatar mis à jour...),
+  // on redonne sa chance à la nouvelle image avant de retomber sur le repli.
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user]);
+
   const handleLogout = () => {
     localStorage.removeItem('dangoToken');
     localStorage.removeItem('dangoUser');
@@ -421,6 +445,7 @@ const Header = () => {
   const userSurname = user?.userSurname || user?.surname || '';
   const userAvatar = user?.profileImage || user?.avatar || user?.photoURL || user?.picture || user?.userProfileImage || '';
   const userInitial = (userDisplayName || 'U').charAt(0).toUpperCase();
+  const showAvatarImage = Boolean(userAvatar) && !avatarError;
 
   const SearchForm = ({ className = '', inputRef }) => (
     <form
@@ -499,28 +524,23 @@ const Header = () => {
         onClick={() => setAccountOpen((prev) => !prev)}
         className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-white px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
       >
-        {userAvatar ? (
+        {showAvatarImage ? (
           <img
             src={userAvatar}
             alt={userDisplayName}
             className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-slate-100"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextSibling?.style?.setProperty('display', 'flex');
-            }}
+            onError={() => setAvatarError(true)}
           />
-        ) : null}
-
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 font-bold text-sm ${userAvatar ? 'hidden' : 'flex'}`}
-          style={{ display: userAvatar ? 'none' : 'flex' }}
-        >
-          {user ? userInitial : <User size={16} />}
-        </span>
+        ) : (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 font-bold text-sm">
+            {user ? userInitial : <User size={16} />}
+          </span>
+        )}
 
         {user && (
-          <span className="hidden sm:inline truncate max-w-[120px] text-left">
+          <span className="hidden sm:flex items-center gap-1 truncate max-w-[120px] text-left">
             {userDisplayName}
+            <ChevronDown size={13} className={`shrink-0 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
           </span>
         )}
       </button>
@@ -550,31 +570,12 @@ const Header = () => {
             </div>
 
             <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-              {user && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => { navigate('/mes-commandes'); setAccountOpen(false); }}
-                    className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
-                  >
-                    Mes commandes
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { navigate('/messages'); setAccountOpen(false); }}
-                    className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex justify-center items-center"
-                  >
-                    Mes messages
-                  </button>
-                </>
-              )}
 
               {user ? (
                 <button
                   type="button"
                   onClick={() => { handleLogout(); setAccountOpen(false); }}
-                  className="w-full rounded-2xl bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] hover:bg-[#FEF1E6] cursor-pointer flex justify-center items-center"
+                  className="w-full rounded-2xl bg-[red] px-4 py-3 text-center text-sm font-semibold text-[#fff] hover:text-[gray] cursor-pointer flex justify-center items-center"
                 >
                   Déconnexion
                 </button>
@@ -595,8 +596,9 @@ const Header = () => {
   );
 
   return (
-    <header className="relative top-0 left-0 right-0 z-40 px-3 pt-3 sm:px-4 lg:px-6">
-      <div className="mx-auto max-w-7xl rounded-[28px] border border-slate-200 bg-white/95 px-3 shadow-sm backdrop-blur-sm sm:px-4 lg:px-5">
+    <>
+    <header ref={headerRef} className="fixed top-0 left-0 right-0 z-40   ">
+      <div className="mx-auto max-w-7xl  border border-slate-200 bg-white sm:px-4 lg:px-5">
         <div className="flex items-center gap-2 py-2.5 sm:gap-3">
           <button
             type="button"
@@ -608,7 +610,7 @@ const Header = () => {
           </button>
 
           <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2.5 min-w-0">
-            <h1 className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">Dangoimport</h1>
+            <h1>DANGOIMPORT</h1>
           </button>
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
@@ -682,6 +684,9 @@ const Header = () => {
 
       <MobileCategoryDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </header>
+    {/* Espaceur dynamique : pousse le contenu sous le header fixe */}
+    <div aria-hidden="true" style={{ height: 'var(--header-h, 72px)' }} />
+    </>
   );
 };
 

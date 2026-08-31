@@ -423,8 +423,6 @@ function ProductCard({
           height: auto;
           min-height: 0;
           align-self: start;
-
-          border-radius: 5px;
           overflow: hidden;
           display: block;
           box-sizing: border-box;
@@ -439,7 +437,7 @@ function ProductCard({
           width: 100%;
           height: auto;
           overflow: hidden;
-          border-radius: 16px 16px 0 0;
+          border-radius: 5px 5px 0 0;
           background: rgba(248, 250, 252, 0.7);
         }
 

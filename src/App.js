@@ -225,7 +225,6 @@ function App() {
                   {/**<Route path='/a-propos' element={<APropos />} /> */}
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
-                  <Route path='/mes-commandes' element={<Orders/>}/>
                   <Route path='/messages' element={<Messages/>}/>
                   <Route path='/toutes-les-categories' element={<AllCategories/>}/>
                   <Route path='/selection-vedette' element={<FeaturedSelection/>}/>

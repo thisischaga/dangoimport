@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   ChevronRight,
@@ -32,6 +32,12 @@ const SECTIONS = [
   { id: 'section-reviews', label: 'Avis' },
   { id: 'section-delivery', label: 'Livraison' },
 ];
+
+/**
+ * Mesure en continu la hauteur réelle du <header> fixe (elle change entre
+ * mobile/desktop et quand la barre de recherche mobile s'ouvre) et l'expose
+ * via la variable CSS --header-h, utilisée pour décaler tout le contenu.
+ */
 
 function QuantitySelector({ value, onChange, max }) {
   const safeMax = Math.max(1, max || 1);
@@ -91,9 +97,10 @@ function ExpandableText({ text, maxLines = 6 }) {
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { addToCart, cart } = useCart();
   const stickyNavRef = useRef(null);
+
+  const location = useLocation();
 
   const { data: product, isLoading, isError } = useProduct(id);
   const { data: reviewsData, isLoading: reviewsLoading } = useProductReviews(id, {
@@ -110,7 +117,7 @@ export default function ProductDetail() {
   const [sellerZonesLoading, setSellerZonesLoading] = useState(false);
 
   useEffect(() => {
-    if (product?.name) document.title = product.name;
+    if (product?.name) document.title = `${product.name} | Dangoimport`;
     else if (!isLoading && !product) document.title = 'Produit introuvable';
   }, [product?.name, isLoading, product]);
 
@@ -291,7 +298,6 @@ export default function ProductDetail() {
         throw new Error(response?.message || 'Impossible de démarrer la conversation.');
       }
       toast.success('Conversation démarrée avec le vendeur.');
-      navigate('/messages');
     } catch (error) {
       console.error('[ProductDetail] contact seller error:', error);
       toast.error(error.message || 'Impossible de démarrer la conversation.');
@@ -302,8 +308,11 @@ export default function ProductDetail() {
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
+      const headerH = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--header-h')
+      ) || 0;
       const navH = stickyNavRef.current?.offsetHeight || 0;
-      const top = el.getBoundingClientRect().top + window.scrollY - navH - 12;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH - navH - 12;
       window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);
@@ -482,9 +491,11 @@ export default function ProductDetail() {
                         </span>
                       )}
                     </p>
-                    {rating != null && reviewCount > 0 && (
-                      <ProductRating rating={rating} reviewCount={reviewCount} />
-                    )}
+                    <div>
+                      {rating != null && reviewCount > 0 && (
+                        <ProductRating rating={rating} reviewCount={reviewCount} />
+                      )}
+                    </div>
                   </div>
                 </div>
                 <button
@@ -575,16 +586,9 @@ export default function ProductDetail() {
               {deliveryZones.length > 0 && (
                 <ul>
                   {deliveryZones.map((zone, i) => {
-                    const label = [
-                      zone.zoneName,
-                      zone.locality || zone.area || zone.city,
-                      zone.country,
-                    ]
-                      .filter(Boolean)
-                      .join(' • ');
-
-                    const locality = label || 'Zone';
-                    const time = zone.deliveryTime || zone.estimatedDelivery;
+                    const locality =
+                      zone.locality || zone.area || zone.country || 'Zone';
+                    const time = zone.deliveryTime;
                     const priceLabel =
                       zone.freeShipping || Number(zone.price) === 0
                         ? 'Gratuite'
@@ -594,8 +598,8 @@ export default function ProductDetail() {
                     return (
                       <li key={i}>
                         <strong>{locality}</strong>
-                        {time && ` • Délai : ${time}`}
-                        {priceLabel && ` • ${priceLabel}`}
+                        {time && ` Délai : ${time}`}
+                        {priceLabel && ` ${priceLabel}`}
                       </li>
                     );
                   })}
