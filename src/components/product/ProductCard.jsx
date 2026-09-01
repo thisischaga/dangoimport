@@ -166,6 +166,7 @@ function InteractiveRating({
 function ProductCard({
   product,
   onAddToCart,
+  isForPromoSection,
 }) {
   const handleQuickAddToCart = (e) => {
     e.preventDefault();
@@ -551,7 +552,6 @@ function ProductCard({
           background-color: #ef4444;
           font-size: 10px;
           line-height: 1.3;
-          border-radius: 9999px;
           width: max-content;
           height: max-content;
           padding: 2px 7px;
@@ -926,28 +926,39 @@ function ProductCard({
 
           {/* VENDOR */}
 
-          {(vendorName ||
-            isCertified ||
-            isVerified ||
-            yearsActive ||
-            country) && (
-            <p className="pc2__vendor-meta">
+            {(vendorName ||
+              isCertified ||
+              isVerified ||
+              yearsActive ||
+              country) && (
+              <p className="pc2__vendor-meta">
+  
+                {vendorName && (
+                  <span className="pc2__vendor-name" style={{ 
+                    fontWeight: 600, 
+                    color: '#475569', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: 3,
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {vendorName}
+                    {isCertified && (
+                      <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }} title="Vendeur Certifié">
+                        ✓ Certifié
+                      </span>
+                    )}
+                  </span>
+                )}
+  
+                {!vendorName && isCertified && (
+                  <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }} title="Vendeur Certifié">
+                    ✓ Certifié
+                  </span>
 
-              {vendorName && (
-                <span className="pc2__vendor-name" style={{ fontWeight: 600, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                  {vendorName}
-                  {isCertified && (
-                    <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
-                      ✓ Certifié
-                    </span>
-                  )}
-                </span>
-              )}
-
-              {!vendorName && isCertified && (
-                <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
-                  ✓ Certifié
-                </span>
               )}
 
               {(vendorName || isCertified) &&

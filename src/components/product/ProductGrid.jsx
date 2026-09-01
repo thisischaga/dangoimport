@@ -455,6 +455,175 @@ function EmptyState({ onReset }) {
   );
 }
 
+
+ /**=========================================================
+   DEAL DU JOUR / MEILLEURES VENTES
+ * =========================================================*/
+
+  function PromoSection({ products = [], onAddToCart }) {
+  // Identifie les IDs des produits en promo pour les exclure des meilleures ventes
+  const promoIds = useMemo(() => {
+    const ids = new Set();
+    products.forEach(p => {
+      const price = Number(p.price || 0);
+      const promo = Number(p.promoPrice || p.salePrice || 0);
+      if (promo > 0 && promo < price) ids.add(p._id || p.id);
+    });
+    return ids;
+  }, [products]);
+
+  // Meilleures ventes : produits SANS promo, triés par ventes/note
+  const bestSellers = useMemo(() => {
+    return [...products]
+      .filter(p => !promoIds.has(p._id || p.id))
+      .sort((a, b) => {
+        const salesA = Number(a.totalSales || a.soldCount || a.sales || 0);
+        const salesB = Number(b.totalSales || b.soldCount || b.sales || 0);
+        if (salesB !== salesA) return salesB - salesA;
+        return Number(b.rating || 0) - Number(a.rating || 0);
+      })
+      .slice(0, 2);
+  }, [products, promoIds]);
+
+  // Deal du Jour : uniquement les produits en promo, triés par % de remise
+  const deals = useMemo(() => {
+    const promos = products.filter(p => {
+      const price = Number(p.price || 0);
+      const promo = Number(p.promoPrice || p.salePrice || 0);
+      return promo > 0 && promo < price;
+    });
+    if (promos.length > 0) {
+      return promos
+        .sort((a, b) => {
+          const discA = (Number(a.price) - Number(a.promoPrice || a.salePrice)) / Number(a.price);
+          const discB = (Number(b.price) - Number(b.promoPrice || b.salePrice)) / Number(b.price);
+          return discB - discA;
+        })
+        .slice(0, 2);
+    }
+    // Simulation avec produits sans promo si aucun deal en DB
+    return products
+      .filter(p => !promoIds.has(p._id || p.id))
+      .slice(0, 2)
+      .map((p, i) => ({
+        ...p,
+        promoPrice: Math.round(Number(p.price || 0) * (0.75 - i * 0.05))
+      }));
+  }, [products, promoIds]);
+
+  // Calcul du % de remise maximum parmi les deals (pour le badge)
+  const maxDiscountPercent = useMemo(() => {
+    if (deals.length === 0) return 0;
+    return Math.max(...deals.map(p => {
+      const price = Number(p.price || 0);
+      const promo = Number(p.promoPrice || p.salePrice || 0);
+      if (!price || !promo) return 0;
+      return Math.round(((price - promo) / price) * 100);
+    }));
+  }, [deals]);
+
+  if (products.length === 0) return null;
+
+  return (
+    <div style={{
+      width: '100%',
+      maxWidth: '900px',
+      margin: '24px auto 8px auto',
+      padding: '0 12px',
+    }}>
+      {/* Titre principal */}
+      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+        <h1 style={{
+          fontSize: '25px',
+          fontWeight: 'bolder',
+          color: '#111827',
+          margin: 0,
+          letterSpacing: '-0.3px'
+        }}>Offres du jour</h1>
+      </div>
+
+      {/* Cadre avec bordure */}
+      <div style={{
+        border: '1px solid #E2E8F0',
+        borderRadius: 0,
+        background: 'none',
+        padding: '20px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px',
+      }}>
+        {/* ---- MEILLEURES VENTES ---- */}
+        <div>
+          <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
+              Meilleures ventes
+            </h3>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '4px',
+              background: '#FFF9F3', color: '#FF6B00',
+              fontSize: '11px', fontWeight: 700,
+              padding: '3px 10px', borderRadius: '999px'
+            }}>
+              Top produits &rsaquo;
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            alignItems: 'start',
+          }}>
+            {bestSellers.map(product => (
+              <ProductCard
+                key={product._id || product.id}
+                product={product}
+                onAddToCart={onAddToCart}
+                isForPromoSection={true}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ---- DEAL DU JOUR ---- */}
+        <div style={{ borderLeft: '1px solid #F1F5F9', paddingLeft: '20px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
+              Deal du Jour
+            </h3>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '4px',
+              background: '#FFF0F0', color: '#EF4444',
+              fontSize: '11px', fontWeight: 700,
+              padding: '3px 10px', borderRadius: '999px'
+            }}>
+              {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Meilleures offres'}
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            alignItems: 'start',
+          }}>
+            {deals.map(product => (
+              <ProductCard
+                key={(product._id || product.id) + '-deal'}
+                product={product}
+                onAddToCart={onAddToCart}
+                isForPromoSection={true}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 /* =========================================================
    PRODUCT GRID
 ========================================================= */
@@ -605,6 +774,7 @@ function ProductGrid({
      RENDER
   ======================================================= */
 
+
   return (
     <div className="w-full">
       <div
@@ -626,12 +796,12 @@ function ProductGrid({
         {/* ================================================
             BANNER CAROUSEL SLIDES
         ================================================= */}
-
-        <BannerSlider
+        <PromoSection products={products} onAddToCart={onAddToCart} />
+        {/**<BannerSlider
           activeTab={activeTab}
           onChange={setActiveTab}
           products={products}
-        />
+        /> */}
 
         {/* ================================================
             PRODUCT GRID
