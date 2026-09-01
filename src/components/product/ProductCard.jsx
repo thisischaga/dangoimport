@@ -937,15 +937,19 @@ function ProductCard({
                   <span className="pc2__vendor-name" style={{ 
                     fontWeight: 600, 
                     color: '#475569', 
-                    display: 'inline-flex', 
+                    display: 'flex', 
                     alignItems: 'center', 
                     gap: 3,
                     maxWidth: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    minWidth: 0
                   }}>
-                    {vendorName}
+                    <span style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {vendorName}
+                    </span>
                     {isCertified && (
                       <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }} title="Vendeur Certifié">
                         ✓ Certifié

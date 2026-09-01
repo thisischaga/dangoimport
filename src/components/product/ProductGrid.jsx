@@ -543,15 +543,7 @@ function EmptyState({ onReset }) {
       </div>
 
       {/* Cadre avec bordure */}
-      <div style={{
-        border: '1px solid #E2E8F0',
-        borderRadius: 0,
-        background: 'none',
-        padding: '20px',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px',
-      }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 border border-slate-200 rounded-none bg-transparent">
         {/* ---- MEILLEURES VENTES ---- */}
         <div>
           <div style={{ textAlign: 'center', marginBottom: '14px' }}>
@@ -586,7 +578,7 @@ function EmptyState({ onReset }) {
         </div>
 
         {/* ---- DEAL DU JOUR ---- */}
-        <div style={{ borderLeft: '1px solid #F1F5F9', paddingLeft: '20px' }}>
+        <div className="pt-5 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-5">
           <div style={{ textAlign: 'center', marginBottom: '14px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
               Deal du Jour
