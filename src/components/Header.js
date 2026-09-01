@@ -3,12 +3,11 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
-  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart,
+  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LayoutGrid, LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
 import { getProductImage } from '../utils/imageUrl';
-import logo from '../images/logo.png';
 import { useCart } from '../context/CartContext';
 
 /** Calcule et expose la hauteur du header via la variable CSS --header-h */
@@ -115,10 +114,11 @@ function CategoryMegaMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition ${
+        className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40 ${
           open ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-700 hover:bg-slate-50'
         }`}
       >
+        <LayoutGrid size={14} />
         Toutes les catégories
         <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -273,6 +273,7 @@ const Header = () => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const suggestionTimer = useRef(null);
   const accountRef = useRef(null);
@@ -364,6 +365,15 @@ const Header = () => {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // Ombre du header uniquement une fois qu'on a scrollé, pour ne pas
+  // écraser visuellement le contenu quand on est en haut de page.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Focus auto sur le champ dès qu'il s'ouvre sur mobile
   useEffect(() => {
     if (mobileSearchOpen) {
@@ -451,7 +461,7 @@ const Header = () => {
     <form
       onSubmit={handleSearch}
       data-search-widget
-      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex ${className}`}
+      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex focus-within:border-[#FF6B00]/50 focus-within:ring-2 focus-within:ring-[#FF6B00]/10 transition ${className}`}
     >
       <Search size={16} className="text-slate-500" />
       <input
@@ -464,7 +474,7 @@ const Header = () => {
         onBlur={handleSearchBlur}
       />
       <button
-        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap"
+        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap transition hover:bg-[#E85F00]"
         type="submit"
         onMouseDown={(e) => e.preventDefault()}
       >
@@ -522,7 +532,7 @@ const Header = () => {
         aria-expanded={accountOpen}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40"
       >
         {showAvatarImage ? (
           <img
@@ -532,7 +542,7 @@ const Header = () => {
             onError={() => setAvatarError(true)}
           />
         ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-[#FFF] font-bold text-sm">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
             {user ? userInitial : <User size={18} />}
           </span>
         )}
@@ -556,34 +566,43 @@ const Header = () => {
             onClick={(e) => e.stopPropagation()}
             className="absolute right-0 mt-2 w-72 max-w-[90vw] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
           >
-            <div className="px-4 py-4">
+            <div className="flex items-center gap-3 px-4 py-4">
               {user ? (
                 <>
-                  <p className="text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
-                  <p className="text-sm text-slate-500">{userEmail}</p>
+                  {showAvatarImage ? (
+                    <img src={userAvatar} alt={userDisplayName} className="h-10 w-10 shrink-0 rounded-full object-cover border border-slate-200" />
+                  ) : (
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
+                      {userInitial}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
+                    <p className="truncate text-xs text-slate-500">{userEmail}</p>
+                  </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center">
+                <div className="flex w-full items-center justify-center py-1">
                   <p className="text-sm text-slate-500 text-center">Aucun utilisateur connecté</p>
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-
+            <div className="border-t border-slate-100 px-4 py-3">
               {user ? (
                 <button
                   type="button"
                   onClick={() => { handleLogout(); setAccountOpen(false); }}
-                  className="w-full rounded-2xl bg-[red] px-4 py-3 text-center text-sm font-semibold text-[#fff] hover:text-[gray] cursor-pointer flex justify-center items-center"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
                 >
+                  <LogOut size={15} />
                   Déconnexion
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => { navigate('/login'); setAccountOpen(false); }}
-                  className="w-full rounded-2xl bg-[red] px-4 py-3 text-center text-sm font-semibold text-[#fff] hover:text-[gray] cursor-pointer flex justify-center items-center"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#E85F00] cursor-pointer"
                 >
                   Se connecter
                 </button>
@@ -597,8 +616,13 @@ const Header = () => {
 
   return (
     <>
-    <header ref={headerRef} className="fixed top-0 left-0 right-0 z-40   ">
-      <div className="mx-auto max-w-7xl bg-white sm:px-4 lg:px-5">
+    <header
+      ref={headerRef}
+      className={`fixed top-0 left-0 right-0 z-40 bg-white transition-shadow duration-200 ${
+        scrolled ? 'shadow-sm border-b border-slate-100' : 'border-b border-transparent'
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-5">
         <div className="flex items-center gap-2 py-2.5 sm:gap-3">
           <button
             type="button"
@@ -609,8 +633,16 @@ const Header = () => {
             <Menu size={22} />
           </button>
 
-          <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2.5 min-w-0">
-            <h1>DANGOIMPORT</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="flex shrink-0 items-center gap-1.5 min-w-0 group"
+          >
+            <h1 className="flex items-baseline gap-0.5 text-xl font-black tracking-tight leading-none whitespace-nowrap sm:text-2xl">
+              <span className="text-slate-900">dango</span>
+              <span className="text-[#FF6B00]">import</span>
+            </h1>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B00] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
           </button>
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
@@ -627,7 +659,7 @@ const Header = () => {
               <button
                 type="button"
                 onClick={() => setDesktopSearchOpen(true)}
-                className="flex w-full max-w-xl items-center justify-between gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-slate-300 hover:bg-slate-100"
+                className="flex w-full max-w-xl items-center justify-between gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-slate-300 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/30"
               >
                 <span className="flex items-center gap-2">
                   <Search size={18} className="text-slate-500" />
@@ -651,7 +683,7 @@ const Header = () => {
             <button
               type="button"
               onClick={() => navigate('/cart')}
-              className="relative md:flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
               aria-label="Panier"
             >
               <ShoppingCart size={20} />
