@@ -522,18 +522,18 @@ const Header = () => {
         aria-expanded={accountOpen}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-white px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
       >
         {showAvatarImage ? (
           <img
             src={userAvatar}
             alt={userDisplayName}
-            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-slate-100"
+            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-[#FF6B00]"
             onError={() => setAvatarError(true)}
           />
         ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 font-bold text-sm">
-            {user ? userInitial : <User size={16} />}
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-[#FFF] font-bold text-sm">
+            {user ? userInitial : <User size={18} />}
           </span>
         )}
 
@@ -583,7 +583,7 @@ const Header = () => {
                 <button
                   type="button"
                   onClick={() => { navigate('/login'); setAccountOpen(false); }}
-                  className="w-full rounded-2xl bg-[#FFF7F1] px-4 py-3 text-center text-sm font-semibold text-[#FF6B00] hover:bg-[#FEF1E6] cursor-pointer flex justify-center items-center"
+                  className="w-full rounded-2xl bg-[red] px-4 py-3 text-center text-sm font-semibold text-[#fff] hover:text-[gray] cursor-pointer flex justify-center items-center"
                 >
                   Se connecter
                 </button>
@@ -598,7 +598,7 @@ const Header = () => {
   return (
     <>
     <header ref={headerRef} className="fixed top-0 left-0 right-0 z-40   ">
-      <div className="mx-auto max-w-7xl  border border-slate-200 bg-white sm:px-4 lg:px-5">
+      <div className="mx-auto max-w-7xl bg-white sm:px-4 lg:px-5">
         <div className="flex items-center gap-2 py-2.5 sm:gap-3">
           <button
             type="button"
@@ -630,7 +630,7 @@ const Header = () => {
                 className="flex w-full max-w-xl items-center justify-between gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-slate-300 hover:bg-slate-100"
               >
                 <span className="flex items-center gap-2">
-                  <Search size={16} className="text-slate-500" />
+                  <Search size={18} className="text-slate-500" />
                   <span>Rechercher un produit...</span>
                 </span>
               </button>
@@ -651,7 +651,7 @@ const Header = () => {
             <button
               type="button"
               onClick={() => navigate('/cart')}
-              className="relative hidden md:flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+              className="relative md:flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
               aria-label="Panier"
             >
               <ShoppingCart size={20} />

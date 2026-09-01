@@ -448,7 +448,7 @@ function EmptyState({ onReset }) {
             hover:bg-[#e75b00]
           "
         >
-          Réinitialiser les filtres
+          Réessayer 
         </button>
       ) : null}
     </motion.div>

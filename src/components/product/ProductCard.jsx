@@ -906,11 +906,11 @@ function ProductCard({
 
           {/* DELIVERY */}
 
-          {deliveryInfo && (
+          {/**deliveryInfo && (
             <p className="pc2__delivery-zone">
               Zone : {deliveryInfo}
             </p>
-          )}
+          ) */}
 
           {/* RATING */}
 

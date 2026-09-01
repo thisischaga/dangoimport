@@ -265,7 +265,7 @@ function App() {
                   <Route path='/blog/la prise de risque en entreprenneuriat' element={<ArticleFour/>}/>
                   */}
                 </Routes>
-                <MobileTabBar />
+                {/**<MobileTabBar /> */}
               </Router>
               
             </NotificationProvider>
