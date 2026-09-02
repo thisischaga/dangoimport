@@ -55,6 +55,27 @@ function buildSearchSuggestions(items, query) {
   return Array.from(unique).slice(0, 6).map(String);
 }
 
+/**
+ * Logo "dangoimport" avec un arc + flèche façon Amazon, qui souligne le mot
+ * du "d" jusqu'à la fin de "import".
+ */
+function BrandLogo({ onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex shrink-0 flex-col items-start leading-none"
+      aria-label="dangoimport — accueil"
+    >
+      <span className="flex items-baseline whitespace-nowrap text-xl font-black tracking-tight sm:text-2xl">
+        <span className="text-slate-900">dango</span>
+        <span className="text-[#FF6B00]">import</span>
+      </span>
+
+    </button>
+  );
+}
+
 /** Mega menu catégories (desktop uniquement) */
 function CategoryMegaMenu() {
   const [open, setOpen] = useState(false);
@@ -253,6 +274,181 @@ function MobileCategoryDrawer({ open, onClose }) {
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+/**
+ * IMPORTANT : ce composant vivait auparavant à l'intérieur de Header(),
+ * défini de nouveau à chaque rendu. React voyait alors un nouveau type de
+ * composant à chaque frappe, démontait l'ancien <input>, en remontait un
+ * nouveau et perdait le focus — c'était la cause du bug de saisie.
+ * En le sortant ici, au niveau module, son identité reste stable entre
+ * les rendus : le focus est conservé.
+ */
+function SearchForm({ className = '', inputRef, value, onChange, onSubmit, onFocus, onBlur }) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      data-search-widget
+      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex focus-within:border-[#FF6B00]/50 focus-within:ring-2 focus-within:ring-[#FF6B00]/10 transition ${className}`}
+    >
+      <Search size={16} className="text-slate-500" />
+      <input
+        ref={inputRef}
+        className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
+        placeholder="Cherchez un produit, une marque ou une catégorie"
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />
+      <button
+        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap transition hover:bg-[#E85F00]"
+        type="submit"
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        Rechercher
+      </button>
+    </form>
+  );
+}
+
+function SuggestionsPanel({ suggestionLoading, suggestions, searchQuery, onSelect }) {
+  return (
+    <div data-suggestions-panel className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+      <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+        Suggestions de recherche
+      </div>
+
+      {suggestionLoading ? (
+        <div className="px-4 py-3 text-sm text-slate-500">Recherche...</div>
+      ) : suggestions.length > 0 ? (
+        suggestions.map((term) => (
+          <button
+            key={term}
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onSelect(term)}
+            className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition"
+          >
+            <div className="font-medium">{term}</div>
+          </button>
+        ))
+      ) : (
+        <div className="space-y-2 px-4 py-3">
+          <p className="text-sm text-slate-500">Pas de terme exact, essayez :</p>
+          <div className="flex flex-wrap gap-2">
+            {SEARCH_FALLBACK_TERMS.filter((t) => t.toLowerCase() !== searchQuery.toLowerCase()).map((term) => (
+              <button
+                key={term}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onSelect(term)}
+                className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AccountMenu({
+  accountRef, accountOpen, setAccountOpen, user, showAvatarImage, userAvatar,
+  userDisplayName, userInitial, setAvatarError, userSurname, userEmail,
+  handleLogout, navigate,
+}) {
+  return (
+    <div className="relative shrink-0" ref={accountRef}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={accountOpen}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => setAccountOpen((prev) => !prev)}
+        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40"
+      >
+        {showAvatarImage ? (
+          <img
+            src={userAvatar}
+            alt={userDisplayName}
+            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-[#FF6B00]"
+            onError={() => setAvatarError(true)}
+          />
+        ) : (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
+            {user ? userInitial : <User size={18} />}
+          </span>
+        )}
+
+        {user && (
+          <span className="hidden sm:flex items-center gap-1 truncate max-w-[120px] text-left">
+            {userDisplayName}
+            <ChevronDown size={13} className={`shrink-0 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
+          </span>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {accountOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 mt-2 w-72 max-w-[90vw] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
+          >
+            <div className="flex items-center gap-3 px-4 py-4">
+              {user ? (
+                <>
+                  {showAvatarImage ? (
+                    <img src={userAvatar} alt={userDisplayName} className="h-10 w-10 shrink-0 rounded-full object-cover border border-slate-200" />
+                  ) : (
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
+                      {userInitial}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
+                    <p className="truncate text-xs text-slate-500">{userEmail}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="flex w-full items-center justify-center py-1">
+                  <p className="text-sm text-slate-500 text-center">Aucun utilisateur connecté</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 px-4 py-3">
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => { handleLogout(); setAccountOpen(false); }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
+                >
+                  <LogOut size={15} />
+                  Déconnexion
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { navigate('/login'); setAccountOpen(false); }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#E85F00] cursor-pointer"
+                >
+                  Se connecter
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -457,163 +653,6 @@ const Header = () => {
   const userInitial = (userDisplayName || 'U').charAt(0).toUpperCase();
   const showAvatarImage = Boolean(userAvatar) && !avatarError;
 
-  const SearchForm = ({ className = '', inputRef }) => (
-    <form
-      onSubmit={handleSearch}
-      data-search-widget
-      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex focus-within:border-[#FF6B00]/50 focus-within:ring-2 focus-within:ring-[#FF6B00]/10 transition ${className}`}
-    >
-      <Search size={16} className="text-slate-500" />
-      <input
-        ref={inputRef}
-        className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
-        placeholder="Cherchez un produit, une marque ou une catégorie"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onFocus={() => setShowSuggestions(true)}
-        onBlur={handleSearchBlur}
-      />
-      <button
-        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap transition hover:bg-[#E85F00]"
-        type="submit"
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        Rechercher
-      </button>
-    </form>
-  );
-
-  const SuggestionsPanel = () => (
-    <div data-suggestions-panel className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-      <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
-        Suggestions de recherche
-      </div>
-
-      {suggestionLoading ? (
-        <div className="px-4 py-3 text-sm text-slate-500">Recherche...</div>
-      ) : suggestions.length > 0 ? (
-        suggestions.map((term) => (
-          <button
-            key={term}
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => handleSuggestionSelect(term)}
-            className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition"
-          >
-            <div className="font-medium">{term}</div>
-          </button>
-        ))
-      ) : (
-        <div className="space-y-2 px-4 py-3">
-          <p className="text-sm text-slate-500">Pas de terme exact, essayez :</p>
-          <div className="flex flex-wrap gap-2">
-            {SEARCH_FALLBACK_TERMS.filter((t) => t.toLowerCase() !== searchQuery.toLowerCase()).map((term) => (
-              <button
-                key={term}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleSuggestionSelect(term)}
-                className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-              >
-                {term}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const AccountMenu = () => (
-    <div className="relative shrink-0" ref={accountRef}>
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={accountOpen}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40"
-      >
-        {showAvatarImage ? (
-          <img
-            src={userAvatar}
-            alt={userDisplayName}
-            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-[#FF6B00]"
-            onError={() => setAvatarError(true)}
-          />
-        ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
-            {user ? userInitial : <User size={18} />}
-          </span>
-        )}
-
-        {user && (
-          <span className="hidden sm:flex items-center gap-1 truncate max-w-[120px] text-left">
-            {userDisplayName}
-            <ChevronDown size={13} className={`shrink-0 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
-          </span>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {accountOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            className="absolute right-0 mt-2 w-72 max-w-[90vw] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
-          >
-            <div className="flex items-center gap-3 px-4 py-4">
-              {user ? (
-                <>
-                  {showAvatarImage ? (
-                    <img src={userAvatar} alt={userDisplayName} className="h-10 w-10 shrink-0 rounded-full object-cover border border-slate-200" />
-                  ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
-                      {userInitial}
-                    </span>
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
-                    <p className="truncate text-xs text-slate-500">{userEmail}</p>
-                  </div>
-                </>
-              ) : (
-                <div className="flex w-full items-center justify-center py-1">
-                  <p className="text-sm text-slate-500 text-center">Aucun utilisateur connecté</p>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-slate-100 px-4 py-3">
-              {user ? (
-                <button
-                  type="button"
-                  onClick={() => { handleLogout(); setAccountOpen(false); }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
-                >
-                  <LogOut size={15} />
-                  Déconnexion
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => { navigate('/login'); setAccountOpen(false); }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#E85F00] cursor-pointer"
-                >
-                  Se connecter
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
   return (
     <>
     <header
@@ -633,17 +672,7 @@ const Header = () => {
             <Menu size={22} />
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="flex shrink-0 items-center gap-1.5 min-w-0 group"
-          >
-            <h1 className="flex items-baseline gap-0.5 text-xl font-black tracking-tight leading-none whitespace-nowrap sm:text-2xl">
-              <span className="text-slate-900">dango</span>
-              <span className="text-[#FF6B00]">import</span>
-            </h1>
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B00] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-          </button>
+          <BrandLogo onClick={() => navigate('/')} />
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
             <CategoryMegaMenu />
@@ -652,8 +681,23 @@ const Header = () => {
           <div className="hidden md:flex flex-1 justify-center">
             {desktopSearchOpen ? (
               <div ref={desktopSearchRef} className="relative w-full max-w-2xl">
-                <SearchForm inputRef={desktopSearchInputRef} className="h-11" />
-                {showSuggestions && <SuggestionsPanel />}
+                <SearchForm
+                  inputRef={desktopSearchInputRef}
+                  className="h-11"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onSubmit={handleSearch}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={handleSearchBlur}
+                />
+                {showSuggestions && (
+                  <SuggestionsPanel
+                    suggestionLoading={suggestionLoading}
+                    suggestions={suggestions}
+                    searchQuery={searchQuery}
+                    onSelect={handleSuggestionSelect}
+                  />
+                )}
               </div>
             ) : (
               <button
@@ -694,7 +738,21 @@ const Header = () => {
               )}
             </button>
 
-            <AccountMenu />
+            <AccountMenu
+              accountRef={accountRef}
+              accountOpen={accountOpen}
+              setAccountOpen={setAccountOpen}
+              user={user}
+              showAvatarImage={showAvatarImage}
+              userAvatar={userAvatar}
+              userDisplayName={userDisplayName}
+              userInitial={userInitial}
+              setAvatarError={setAvatarError}
+              userSurname={userSurname}
+              userEmail={userEmail}
+              handleLogout={handleLogout}
+              navigate={navigate}
+            />
           </div>
         </div>
 
@@ -707,8 +765,22 @@ const Header = () => {
               transition={{ duration: 0.2 }}
               className="relative overflow-visible pb-2 md:hidden"
             >
-              <SearchForm inputRef={mobileSearchInputRef} />
-              {showSuggestions && <SuggestionsPanel />}
+              <SearchForm
+                inputRef={mobileSearchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSubmit={handleSearch}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={handleSearchBlur}
+              />
+              {showSuggestions && (
+                <SuggestionsPanel
+                  suggestionLoading={suggestionLoading}
+                  suggestions={suggestions}
+                  searchQuery={searchQuery}
+                  onSelect={handleSuggestionSelect}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>

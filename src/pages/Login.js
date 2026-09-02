@@ -448,12 +448,6 @@ const Login = () => {
                     onClick={() => navigate('/')}
                 >
 
-                    <img
-                        src={logo}
-                        alt="Dangoimport"
-                        className="h-9 w-9 rounded-lg object-cover"
-                    />
-
                     <div>
 
                         <p className="text-[18px] font-black text-gray-900 leading-none">
