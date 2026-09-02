@@ -5,17 +5,14 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   PackageSearch,
   LayoutGrid,
-  Flame,
-  Sparkles,
   Wand2,
-  Zap,
-  Tag,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 
 import ProductCard from './ProductCard';
@@ -375,7 +372,7 @@ function BannerSlider({ activeTab, onChange, products = [] }) {
    EMPTY STATE
 ========================================================= */
 
-function EmptyState({ onReset }) {
+function EmptyState({ onReset, retrying = false }) {
   return (
     <motion.div
       initial={{
@@ -435,8 +432,12 @@ function EmptyState({ onReset }) {
         <button
           type="button"
           onClick={onReset}
+          disabled={retrying}
           className="
             mt-2
+            inline-flex
+            items-center
+            gap-2
             rounded-full
             bg-[#FF6B00]
             px-5
@@ -446,9 +447,12 @@ function EmptyState({ onReset }) {
             text-white
             transition-colors
             hover:bg-[#e75b00]
+            disabled:opacity-70
+            disabled:cursor-not-allowed
           "
         >
-          Réessayer 
+          <RefreshCw size={15} className={retrying ? 'animate-spin' : ''} />
+          {retrying ? 'Actualisation...' : 'Réessayer'}
         </button>
       ) : null}
     </motion.div>
@@ -457,10 +461,14 @@ function EmptyState({ onReset }) {
 
 
  /**=========================================================
-   DEAL DU JOUR / MEILLEURES VENTES
+   DEAL DU JOUR / MEILLEURES VENTES — panneau avec fond dédié
+   et défilement automatique entre les pages de produits
  * =========================================================*/
 
-  function PromoSection({ products = [], onAddToCart }) {
+const PROMO_ITEMS_PER_PAGE = 2;
+const PROMO_AUTOPLAY_MS = 4500;
+
+function PromoSection({ products = [], onAddToCart }) {
   // Identifie les IDs des produits en promo pour les exclure des meilleures ventes
   const promoIds = useMemo(() => {
     const ids = new Set();
@@ -473,7 +481,7 @@ function EmptyState({ onReset }) {
   }, [products]);
 
   // Meilleures ventes : produits SANS promo, triés par ventes/note
-  const bestSellers = useMemo(() => {
+  const bestSellersAll = useMemo(() => {
     return [...products]
       .filter(p => !promoIds.has(p._id || p.id))
       .sort((a, b) => {
@@ -482,11 +490,11 @@ function EmptyState({ onReset }) {
         if (salesB !== salesA) return salesB - salesA;
         return Number(b.rating || 0) - Number(a.rating || 0);
       })
-      .slice(0, 2);
+      .slice(0, 6);
   }, [products, promoIds]);
 
   // Deal du Jour : uniquement les produits en promo, triés par % de remise
-  const deals = useMemo(() => {
+  const dealsAll = useMemo(() => {
     const promos = products.filter(p => {
       const price = Number(p.price || 0);
       const promo = Number(p.promoPrice || p.salePrice || 0);
@@ -499,115 +507,300 @@ function EmptyState({ onReset }) {
           const discB = (Number(b.price) - Number(b.promoPrice || b.salePrice)) / Number(b.price);
           return discB - discA;
         })
-        .slice(0, 2);
+        .slice(0, 6);
     }
     // Simulation avec produits sans promo si aucun deal en DB
     return products
       .filter(p => !promoIds.has(p._id || p.id))
-      .slice(0, 2)
+      .slice(0, 6)
       .map((p, i) => ({
         ...p,
-        promoPrice: Math.round(Number(p.price || 0) * (0.75 - i * 0.05))
+        promoPrice: Math.round(Number(p.price || 0) * (0.75 - (i % 3) * 0.05))
       }));
   }, [products, promoIds]);
 
   // Calcul du % de remise maximum parmi les deals (pour le badge)
   const maxDiscountPercent = useMemo(() => {
-    if (deals.length === 0) return 0;
-    return Math.max(...deals.map(p => {
+    if (dealsAll.length === 0) return 0;
+    return Math.max(...dealsAll.map(p => {
       const price = Number(p.price || 0);
       const promo = Number(p.promoPrice || p.salePrice || 0);
       if (!price || !promo) return 0;
       return Math.round(((price - promo) / price) * 100);
     }));
-  }, [deals]);
+  }, [dealsAll]);
+
+  // Nombre de pages : basé sur la plus petite des deux listes pour que
+  // chaque page affiche toujours du contenu dans les deux colonnes.
+  const totalPages = Math.max(
+    1,
+    Math.ceil(Math.min(bestSellersAll.length, dealsAll.length) / PROMO_ITEMS_PER_PAGE)
+  );
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    if (pageIndex >= totalPages) setPageIndex(0);
+  }, [totalPages, pageIndex]);
+
+  // Défilement automatique — en pause tant que la souris est sur le panneau
+  useEffect(() => {
+    if (totalPages <= 1) return undefined;
+    const id = setInterval(() => {
+      if (!pausedRef.current) {
+        setPageIndex((i) => (i + 1) % totalPages);
+      }
+    }, PROMO_AUTOPLAY_MS);
+    return () => clearInterval(id);
+  }, [totalPages]);
+
+  const bestSellersPage = bestSellersAll.slice(
+    pageIndex * PROMO_ITEMS_PER_PAGE,
+    pageIndex * PROMO_ITEMS_PER_PAGE + PROMO_ITEMS_PER_PAGE
+  );
+  const dealsPage = dealsAll.slice(
+    pageIndex * PROMO_ITEMS_PER_PAGE,
+    pageIndex * PROMO_ITEMS_PER_PAGE + PROMO_ITEMS_PER_PAGE
+  );
+
+  const goPrev = () => setPageIndex((i) => (i - 1 + totalPages) % totalPages);
+  const goNext = () => setPageIndex((i) => (i + 1) % totalPages);
 
   if (products.length === 0) return null;
 
   return (
-    <div style={{
-      width: '100%',
-      maxWidth: '900px',
-      margin: '24px auto 8px auto',
-      padding: '0 12px',
-    }}>
-      {/* Titre principal */}
-      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-        <h1 style={{
-          fontSize: '25px',
-          fontWeight: 'bolder',
-          color: '#111827',
-          margin: 0,
-          letterSpacing: '-0.3px'
-        }}>Offres du jour</h1>
-      </div>
+    <div
+      className="relative w-full max-w-5xl mx-auto mt-6 mb-2 px-2 sm:px-0"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+    >
+      <style>{`
+        .dango-promo-panel {
+          position: relative;
+          overflow: hidden;
+          border-radius: 28px;
+          padding: 32px 22px 26px;
+          background: linear-gradient(135deg, #DCEBFF 0%, #A9CBFF 55%, #DCEBFF 100%);
+          border: 1px solid rgba(37, 99, 235, 0.16);
+          box-shadow: 0 18px 40px -18px rgba(37, 99, 235, 0.32);
+        }
 
-      {/* Cadre avec bordure */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 border border-slate-200 rounded-none bg-transparent">
-        {/* ---- MEILLEURES VENTES ---- */}
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
-              Meilleures ventes
-            </h3>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '4px',
-              background: '#FFF9F3', color: '#FF6B00',
-              fontSize: '11px', fontWeight: 700,
-              padding: '3px 10px', borderRadius: '999px'
-            }}>
-              Top produits &rsaquo;
-            </span>
+        .dango-promo-pattern {
+          position: absolute;
+          inset: 0;
+          opacity: 0.5;
+          background-image: radial-gradient(circle at 1px 1px, rgba(37,99,235,0.16) 1px, transparent 0);
+          background-size: 22px 22px;
+          pointer-events: none;
+        }
+
+        .dango-promo-glow {
+          position: absolute;
+          border-radius: 9999px;
+          filter: blur(55px);
+          pointer-events: none;
+        }
+        .dango-promo-glow--1 {
+          width: 220px; height: 220px;
+          top: -90px; right: -60px;
+          background: rgba(37, 99, 235, 0.32);
+        }
+        .dango-promo-glow--2 {
+          width: 180px; height: 180px;
+          bottom: -70px; left: -50px;
+          background: rgba(14, 165, 233, 0.26);
+        }
+
+        .dango-promo-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          background: #ffffff;
+          color: #2563EB;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.03em;
+          padding: 6px 14px;
+          border-radius: 999px;
+          box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+        }
+
+        .dango-promo-title {
+          margin: 12px 0 0;
+          font-size: clamp(28px, 5.5vw, 38px);
+          font-weight: 900;
+          color: #0f1b30;
+          letter-spacing: -0.02em;
+        }
+
+        .dango-promo-col {
+          background: rgba(255,255,255,0.78);
+          backdrop-filter: blur(6px);
+          border-radius: 18px;
+          padding: 18px 14px 14px;
+          border: 1px solid rgba(255,255,255,0.75);
+          height: 100%;
+        }
+
+        .dango-promo-col-badge {
+          display: inline-flex;
+          align-items: center;
+          font-size: 13px;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 999px;
+        }
+
+        .dango-promo-nav {
+          width: 32px; height: 32px;
+          border-radius: 9999px;
+          border: 1px solid rgba(0,0,0,0.06);
+          background: #ffffff;
+          display: flex; align-items: center; justify-content: center;
+          color: #0f1b30;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .dango-promo-nav:hover { background: #EAF2FF; color: #2563EB; transform: scale(1.06); }
+
+        .dango-promo-dot {
+          width: 7px; height: 7px;
+          border-radius: 9999px;
+          background: rgba(15,27,48,0.2);
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          transition: all 0.2s;
+        }
+        .dango-promo-dot.active {
+          width: 20px;
+          border-radius: 4px;
+          background: #2563EB;
+        }
+
+        @media (max-width: 640px) {
+          .dango-promo-panel { padding: 22px 14px 18px; border-radius: 22px; }
+        }
+      `}</style>
+
+      <div className="dango-promo-panel">
+        <div className="dango-promo-pattern" />
+        <div className="dango-promo-glow dango-promo-glow--1" />
+        <div className="dango-promo-glow dango-promo-glow--2" />
+
+        <div className="relative" style={{ zIndex: 2 }}>
+          {/* Titre principal */}
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <span className="dango-promo-eyebrow">Offres limitées</span>
+            <h1 className="dango-promo-title">Offres du jour</h1>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '8px',
-            alignItems: 'start',
-          }}>
-            {bestSellers.map(product => (
-              <ProductCard
-                key={product._id || product.id}
-                product={product}
-                onAddToCart={onAddToCart}
-                isForPromoSection={true}
-              />
-            ))}
-          </div>
-        </div>
+          {/* Cadre à deux colonnes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ---- MEILLEURES VENTES ---- */}
+            <div className="dango-promo-col">
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#0f1b30', margin: '0 0 8px' }}>
+                  Meilleures ventes
+                </h3>
+                <span
+                  className="dango-promo-col-badge"
+                  style={{ background: '#EAF2FF', color: '#2563EB' }}
+                >
+                  Top produits &rsaquo;
+                </span>
+              </div>
 
-        {/* ---- DEAL DU JOUR ---- */}
-        <div className="pt-5 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-5">
-          <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
-              Deal du Jour
-            </h3>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '4px',
-              background: '#FFF0F0', color: '#EF4444',
-              fontSize: '11px', fontWeight: 700,
-              padding: '3px 10px', borderRadius: '999px'
-            }}>
-              {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Meilleures offres'}
-            </span>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`best-${pageIndex}`}
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '8px',
+                    alignItems: 'start',
+                  }}
+                >
+                  {bestSellersPage.map(product => (
+                    <ProductCard
+                      key={product._id || product.id}
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      isForPromoSection={true}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* ---- DEAL DU JOUR ---- */}
+            <div className="dango-promo-col">
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#0f1b30', margin: '0 0 8px' }}>
+                  Deal du Jour
+                </h3>
+                <span
+                  className="dango-promo-col-badge"
+                  style={{ background: '#EAF2FF', color: '#2563EB' }}
+                >
+                  {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Meilleures offres'}
+                </span>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`deal-${pageIndex}`}
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '8px',
+                    alignItems: 'start',
+                  }}
+                >
+                  {dealsPage.map(product => (
+                    <ProductCard
+                      key={(product._id || product.id) + '-deal'}
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      isForPromoSection={true}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '8px',
-            alignItems: 'start',
-          }}>
-            {deals.map(product => (
-              <ProductCard
-                key={(product._id || product.id) + '-deal'}
-                product={product}
-                onAddToCart={onAddToCart}
-                isForPromoSection={true}
-              />
-            ))}
-          </div>
+          {/* Navigation du carrousel */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 18 }}>
+              <button type="button" className="dango-promo-nav" onClick={goPrev} aria-label="Page précédente">
+                <ChevronLeft size={16} />
+              </button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {Array.from({ length: totalPages }).map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`dango-promo-dot ${idx === pageIndex ? 'active' : ''}`}
+                    onClick={() => setPageIndex(idx)}
+                    aria-label={`Page ${idx + 1}`}
+                  />
+                ))}
+              </div>
+              <button type="button" className="dango-promo-nav" onClick={goNext} aria-label="Page suivante">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -626,10 +819,12 @@ function ProductGrid({
   onAddToCart,
   filters,
   onFiltersChange,
+  onRefresh,
 }) {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [retrying, setRetrying] = useState(false);
 
   const sentinelRef = useRef(null);
 
@@ -741,10 +936,15 @@ function ProductGrid({
   ]);
 
   /* =======================================================
-     RESET FILTERS
+     RETRY / REFRESH
+     Réinitialise les filtres ET redemande les produits au
+     parent (via onRefresh, ex: refetch React Query). Si
+     aucun onRefresh n'est fourni, on recharge la page en
+     dernier recours pour que le bouton fasse toujours quelque
+     chose de concret.
   ======================================================= */
 
-  const handleReset = useCallback(() => {
+  const handleRetry = useCallback(async () => {
     setActiveTab('all');
 
     onFiltersChange?.({
@@ -758,7 +958,18 @@ function ProductGrid({
       brand: '',
       condition: '',
     });
-  }, [onFiltersChange]);
+
+    if (onRefresh) {
+      try {
+        setRetrying(true);
+        await onRefresh();
+      } finally {
+        setRetrying(false);
+      }
+    } else if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  }, [onFiltersChange, onRefresh]);
 
   const skeletonCount = 10;
 
@@ -867,11 +1078,8 @@ function ProductGrid({
             ============================================= */
 
             <EmptyState
-              onReset={
-                onFiltersChange
-                  ? handleReset
-                  : undefined
-              }
+              onReset={handleRetry}
+              retrying={retrying}
             />
           ) : (
             /* ============================================
