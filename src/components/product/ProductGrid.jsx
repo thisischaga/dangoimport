@@ -616,7 +616,6 @@ function PromoSection({ products = [], onAddToCart }) {
           letter-spacing: 0.03em;
           padding: 6px 14px;
           border-radius: 999px;
-          box-shadow: 0 4px 10px rgba(37,99,235,0.2);
         }
 
         .dango-promo-title {
@@ -630,10 +629,11 @@ function PromoSection({ products = [], onAddToCart }) {
         .dango-promo-col {
           background: rgba(255,255,255,0.78);
           backdrop-filter: blur(6px);
-          border-radius: 18px;
-          padding: 18px 14px 14px;
-          border: 1px solid rgba(255,255,255,0.75);
+          border-radius: 5px;
+          padding: 5px;
           height: 100%;
+          border: 1px solid #0000003f
+
         }
 
         .dango-promo-col-badge {
