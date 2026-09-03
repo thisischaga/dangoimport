@@ -579,18 +579,14 @@ function PromoSection({ products = [], onAddToCart }) {
         .dango-promo-panel {
           position: relative;
           overflow: hidden;
-          border-radius: 28px;
+          border-radius: 8px;
           padding: 32px 22px 26px;
-          background: linear-gradient(135deg, #DCEBFF 0%, #A9CBFF 55%, #DCEBFF 100%);
-          border: 1px solid rgba(37, 99, 235, 0.16);
-          box-shadow: 0 18px 40px -18px rgba(37, 99, 235, 0.32);
         }
 
         .dango-promo-pattern {
           position: absolute;
           inset: 0;
           opacity: 0.5;
-          background-image: radial-gradient(circle at 1px 1px, rgba(37,99,235,0.16) 1px, transparent 0);
           background-size: 22px 22px;
           pointer-events: none;
         }
@@ -604,12 +600,10 @@ function PromoSection({ products = [], onAddToCart }) {
         .dango-promo-glow--1 {
           width: 220px; height: 220px;
           top: -90px; right: -60px;
-          background: rgba(37, 99, 235, 0.32);
         }
         .dango-promo-glow--2 {
           width: 180px; height: 180px;
           bottom: -70px; left: -50px;
-          background: rgba(14, 165, 233, 0.26);
         }
 
         .dango-promo-eyebrow {
@@ -692,7 +686,6 @@ function PromoSection({ products = [], onAddToCart }) {
         <div className="relative" style={{ zIndex: 2 }}>
           {/* Titre principal */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <span className="dango-promo-eyebrow">Offres limitées</span>
             <h1 className="dango-promo-title">Offres du jour</h1>
           </div>
 
