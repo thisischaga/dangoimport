@@ -39,7 +39,7 @@ export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['products', 'featured'],
     queryFn: async () => {
-      const res = await axios.get(`${API}/api/products/featured`, { timeout: 15000 });
+      const res = await axios.get(`${API}/api/products/featured`, { timeout: 30000 });
       return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     staleTime: 0,
@@ -54,7 +54,7 @@ export function useProductsCatalog({ search, limit = 200 } = {}) {
     queryFn: async () => {
       const params = new URLSearchParams({ limit: String(limit), page: '1' });
       if (search) params.set('search', search);
-      const res = await axios.get(`${API}/api/products?${params}`, { timeout: 15000 });
+      const res = await axios.get(`${API}/api/products?${params}`, { timeout: 60000 });
       return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },
     staleTime: 0,
@@ -67,7 +67,7 @@ export function useProduct(id) {
   return useQuery({
     queryKey: ['products', id],
     queryFn: async () => {
-      const res = await axios.get(`${API}/api/products/${id}`, { timeout: 15000 });
+      const res = await axios.get(`${API}/api/products/${id}`, { timeout: 30000 });
       const product = normalizeSingleProduct(res.data);
       if (!product) return null;
       if (product.isPublished === false) return null;
@@ -101,7 +101,7 @@ export function useProductReviews(productId, { page = 1, limit = 10 } = {}) {
         limit: String(limit),
       });
       const res = await axios.get(`${API}/api/products/${productId}/reviews?${params}`, {
-        timeout: 15000,
+        timeout: 30000,
       });
       const data = res.data?.data;
       const reviews = Array.isArray(data) ? data : [];

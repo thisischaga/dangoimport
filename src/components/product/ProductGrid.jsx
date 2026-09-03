@@ -571,7 +571,7 @@ function PromoSection({ products = [], onAddToCart }) {
 
   return (
     <div
-      className="relative w-full max-w-5xl mx-auto mt-6 mb-2 px-2 sm:px-0"
+      className="relative w-full max-w-5xl mx-auto px-2 sm:px-0"
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
     >
