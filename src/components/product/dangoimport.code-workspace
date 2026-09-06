@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../dangoimport-server"
+		},
+		{
+			"path": "../../../../admin-panel"
+		},
+		{
+			"path": "../../../../dango-seller"
+		},
+		{
+			"path": "../../../../dangoimport-vitrine"
+		},
+		{
+			"path": "../../../../dango"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "dangoimport-vitrine"
+	}
+}
