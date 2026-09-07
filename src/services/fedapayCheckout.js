@@ -551,6 +551,34 @@ export function buildCartFedapayPayload({
 
       instructions:
         form.instructions || '',
+
+      lat:
+        Number.isFinite(Number(form.lat))
+          ? Number(form.lat)
+          : null,
+
+      lng:
+        Number.isFinite(Number(form.lng))
+          ? Number(form.lng)
+          : null,
+
+      latitude:
+        Number.isFinite(Number(form.lat))
+          ? Number(form.lat)
+          : null,
+
+      longitude:
+        Number.isFinite(Number(form.lng))
+          ? Number(form.lng)
+          : null,
+
+      location:
+        Number.isFinite(Number(form.lat)) && Number.isFinite(Number(form.lng))
+          ? {
+              type: 'Point',
+              coordinates: [Number(form.lng), Number(form.lat)],
+            }
+          : null,
     },
 
     /* -----------------------------------------------------
