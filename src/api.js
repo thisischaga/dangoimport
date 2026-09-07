@@ -12,3 +12,5 @@ export const sendConversationMessage = (conversationId, payload) =>
   client.post(`/conversations/${conversationId}/messages`, payload).then((res) => res.data);
 export const markConversationRead = (conversationId) =>
   client.patch(`/conversations/${conversationId}/read`).then((res) => res.data);
+export const calculateDeliveryOptions = (payload) =>
+  client.post('/vendor-delivery/calculate-option', payload).then((res) => res.data);

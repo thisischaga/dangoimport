@@ -235,7 +235,7 @@ const Footer = () => {
       sellers: [
         {
           label: 'Portail vendeur',
-          href: 'https://seller.dangoimport.com',
+          href: 'https://business.dangoimport.com',
           external: true,
         },
       ],

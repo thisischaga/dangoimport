@@ -1,11 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /checkout
-Disallow: /checkout/result
-Disallow: /cart
-Disallow: /product/
-Disallow: /category/
-Disallow: /shop/
-Disallow: /store/
+
 
 Sitemap: https://dangoimport.com/sitemap.xml

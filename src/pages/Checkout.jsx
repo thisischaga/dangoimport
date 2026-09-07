@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MapPin, User, Mail, Phone, Home, Navigation, Hash, Globe, MessageSquare,
-  Truck, Zap, Crown, Leaf, ShieldCheck, Lock, CreditCard, Check, ChevronLeft,
-  Sparkles, Package, Smartphone, BadgeCheck,
+  MapPin, User, Mail, Phone,
+  Truck, ShieldCheck, Lock, CreditCard, Check, ChevronLeft,
+  Smartphone, BadgeCheck, LocateFixed, AlertCircle,
 } from 'lucide-react';
 import toast from '../utils/toast';
 import QRCode from 'qrcode';
@@ -14,59 +14,9 @@ import API_BASE_URL from '../apiConfig';
 import { useCart } from '../context/CartContext';
 import { initiateFedapayCheckout, buildCartFedapayPayload } from '../services/fedapayCheckout';
 import { fetchOrderQrTokens } from '../services/qrService';
-import { getVendorDeliveryZonesByVendor } from '../api';
+import { calculateDeliveryOptions } from '../api';
 
-/* ─── Données des formules ─── */
-const SHIPPING_PLANS = [
-  {
-    value: 'standard',
-    label: 'Standard',
-    tagline: 'Économique',
-    price: 1500,
-    priceLabel: '1 500 FCFA',
-    delay: '3 à 7 jours ouvrés',
-    color: 'emerald',
-    icon: Leaf,
-    features: [
-      'Commandes regroupées par zone',
-      'Tournées planifiées et optimisées',
-      "Délai communiqué avant l'expédition",
-      'Pas de priorité de traitement',
-    ],
-  },
-  {
-    value: 'express',
-    label: 'Express',
-    tagline: 'Prioritaire',
-    price: 2250,
-    priceLabel: '2 250 FCFA',
-    delay: 'Sous 24 heures',
-    color: 'amber',
-    icon: Zap,
-    features: [
-      'Livreur dédié pour votre commande',
-      'Traitement immédiat à la validation',
-      "Prioritaire dans la file d'attente",
-      'Suivi disponible à la demande',
-    ],
-  },
-  {
-    value: 'premium',
-    label: 'Premium',
-    tagline: 'Ultra-rapide',
-    price: 5000,
-    priceLabel: '5 000 FCFA',
-    delay: 'Immédiate ',
-    color: 'purple',
-    icon: Crown,
-    features: [
-      'Livraison dans la journée garantie',
-      'Livreur exclusivement dédié',
-      'Livraison de nuit possible',
-      'Assistance téléphonique incluse',
-    ],
-  },
-];
+
 
 const STEPS = [
   { id: 1, label: 'Adresse', icon: MapPin },
@@ -126,13 +76,12 @@ function StepperBar({ currentStep }) {
 }
 
 /* ─── Résumé de commande — panneau unique (mobile: repliable / desktop: fixe) ─── */
-function OrderSummaryPanel({ cartItems, itemUnitPrice, subtotal, shippingFee, shippingMethod, preview, previewLoading, variant = 'sticky', isOpen, onToggle }) {
-  const plan = SHIPPING_PLANS.find((p) => p.value === shippingMethod);
+function OrderSummaryPanel({ cartItems, itemUnitPrice, subtotal, shippingFee, preview, previewLoading, variant = 'sticky', isOpen, onToggle }) {
   const discount = Number(preview?.discount || 0);
   const total = Number(preview?.subtotal ?? subtotal) + shippingFee - discount;
   const collapsible = variant === 'collapsible';
 
-  return (  
+  return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       {collapsible ? (
         <button
@@ -155,7 +104,6 @@ function OrderSummaryPanel({ cartItems, itemUnitPrice, subtotal, shippingFee, sh
         </button>
       ) : (
         <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-
           <div>
             <p className="text-sm font-black text-[#282828]">Résumé de commande</p>
             <p className="text-xs text-gray-400">
@@ -203,9 +151,9 @@ function OrderSummaryPanel({ cartItems, itemUnitPrice, subtotal, shippingFee, sh
               <span className="font-semibold text-[#282828]">{subtotal.toLocaleString('fr-FR')} F</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Livraison ({plan?.label || 'Standard'})</span>
+              <span className="text-gray-500">Livraison</span>
               <span className={shippingFee === 0 ? 'font-black text-emerald-600' : 'font-semibold text-[#282828]'}>
-                {shippingFee === 0 ? 'Gratuit' : `${shippingFee.toLocaleString('fr-FR')} F`}
+                {shippingFee === 0 ? 'Calculée à la livraison' : `${shippingFee.toLocaleString('fr-FR')} F`}
               </span>
             </div>
             {discount > 0 && (
@@ -255,285 +203,215 @@ function IconField({ icon: Icon, label, required, error, children }) {
 
 const inputBaseCls = (hasError) =>
   [
-    'w-full rounded-xl border-2 py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200',
+    'w-full rounded-xl border-2 py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200 focus:border-transparent focus:ring-0 focus:shadow-none',
     hasError
       ? 'border-red-300 bg-red-50/50 focus:border-red-300'
-      : 'border-gray-100 bg-gray-50/50 focus:border-orange-200 focus:bg-white focus:shadow-sm focus:ring-4 focus:ring-orange-50',
+      : 'border-gray-100 bg-gray-50/50 focus:bg-white',
   ].join(' ');
 
 const FIELD_ICONS = { firstName: User, lastName: User, email: Mail, phone: Phone };
 
-/* ─── Step 1 : Adresse de livraison ─── */
-function StepAddress({ form, setForm, errors, savedAddresses, selectedAddressId, handleSelectAddress }) {
-  const fields = [
+/* ─── Statuts géolocalisation ─── */
+const GEO_STATUS = { idle: 'idle', loading: 'loading', success: 'success', error: 'error' };
+
+/* ─── Step 1 : Informations de contact + géolocalisation ─── */
+function StepAddress({ form, setForm, errors, geoStatus, geoAddress, onGeolocate, addressQuery, setAddressQuery, addressSuggestions, onSelectSuggestion }) {
+  const contactFields = [
     { key: 'firstName', label: 'Prénom', required: true },
     { key: 'lastName', label: 'Nom', required: true },
     { key: 'email', label: 'Email', type: 'email', required: true },
     { key: 'phone', label: 'Téléphone', type: 'tel', required: true },
+    {
+      key: 'country',
+      label: 'Pays',
+      type: 'select',
+      required: true,
+      options: [
+        { value: '', label: 'Sélectionnez un pays' },
+        { value: 'Bénin', label: 'Bénin' },
+        { value: 'Togo', label: 'Togo' },
+      ],
+    },
   ];
+
+  const geoReady = geoStatus === GEO_STATUS.success;
+  const geoLoading = geoStatus === GEO_STATUS.loading;
+  const geoError = geoStatus === GEO_STATUS.error;
 
   return (
     <div className="space-y-6">
-      {savedAddresses.length > 0 && (
-        <div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">Adresses enregistrées</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {savedAddresses.map((address) => {
-              const id = address._id || address.id || 'default';
-              const isActive = selectedAddressId === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => handleSelectAddress(address)}
-                  className={[
-                    'group rounded-xl border-2 p-4 text-left transition-all duration-200',
-                    isActive
-                      ? 'border-[#F68B1E] bg-gradient-to-br from-orange-50 to-amber-50/30 shadow-sm'
-                      : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm',
-                  ].join(' ')}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="mb-1 flex items-center gap-2">
-                        <MapPin className={`h-3.5 w-3.5 ${isActive ? 'text-[#F68B1E]' : 'text-gray-300'}`} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                          {address.label || 'Adresse'}
-                        </span>
-                        {address.isDefault && (
-                          <span className="rounded-full bg-[#F68B1E] px-2 py-0.5 text-[9px] font-bold text-white">Défaut</span>
-                        )}
-                      </div>
-                      <p className="text-sm font-bold text-[#282828]">{address.city}</p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{address.fullAddress}</p>
-                    </div>
-                    <div
-                      className={[
-                        'mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
-                        isActive ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300',
-                      ].join(' ')}
-                    >
-                      {isActive && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
+      {/* Informations de contact */}
       <div>
-        {savedAddresses.length > 0 && (
-          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">Ou renseigner manuellement</p>
-        )}
+        <p className="mb-3 text-[11px] font-black uppercase tracking-wider text-gray-400">Informations de contact</p>
         <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-          {fields.map(({ key, label, type = 'text', required }) => (
-            <IconField key={key} icon={FIELD_ICONS[key]} label={label} required={required} error={errors[key]}>
-              <input
-                type={type}
-                value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className={inputBaseCls(!!errors[key])}
-                placeholder={label}
-              />
+          {contactFields.map(({ key, label, type = 'text', required, placeholder, options }) => (
+            <IconField key={key} icon={FIELD_ICONS[key] || MapPin} label={label} required={required} error={errors[key]}>
+              {type === 'select' ? (
+                <select
+                  value={form[key]}
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  className={inputBaseCls(!!errors[key])}
+                >
+                  {options.map((option) => (
+                    <option key={option.value || 'empty'} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={type}
+                  value={form[key]}
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  className={inputBaseCls(!!errors[key])}
+                  placeholder={placeholder || label}
+                />
+              )}
             </IconField>
           ))}
-
-          <IconField icon={Globe} label="Pays" required>
-            <select
-              value={form.country}
-              onChange={(e) => setForm({ ...form, country: e.target.value })}
-              className={inputBaseCls(false) + ' cursor-pointer appearance-none'}
-            >
-              <option>Togo</option>
-              <option>Bénin</option>
-            </select>
-          </IconField>
-
-          <IconField icon={MapPin} label="Ville" required error={errors.city}>
-            <input
-              value={form.city}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className={inputBaseCls(!!errors.city)}
-              placeholder="Ville"
-            />
-          </IconField>
-
-          <IconField icon={Navigation} label="Quartier">
-            <input
-              value={form.neighborhood}
-              onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
-              className={inputBaseCls(false)}
-              placeholder="Quartier"
-            />
-          </IconField>
-
-          <IconField icon={Hash} label="Code postal">
-            <input
-              value={form.postalCode}
-              onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-              className={inputBaseCls(false)}
-              placeholder="Code postal"
-            />
-          </IconField>
-
-          <div className="sm:col-span-2">
-            <IconField icon={Home} label="Adresse complète" required error={errors.fullAddress}>
-              <input
-                value={form.fullAddress}
-                onChange={(e) => setForm({ ...form, fullAddress: e.target.value })}
-                className={inputBaseCls(!!errors.fullAddress)}
-                placeholder="Numéro, rue, bâtiment..."
-              />
-            </IconField>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
-              Instructions de livraison
-            </label>
-            <div className="relative">
-              <textarea
-                rows="2"
-                value={form.instructions}
-                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-                className="w-full resize-none rounded-xl border-2 border-gray-100 bg-gray-50/50 py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200 focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-50"
-                placeholder="Bâtiment, code d'accès, remarques..."
-              />
-            </div>
-          </div>
         </div>
+      </div>
+
+      {/* Géolocalisation de livraison */}
+      <div>
+        <p className="mb-3 text-[11px] font-black uppercase tracking-wider text-gray-400">Position de livraison</p>
+
+        <div className="mb-4">
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Rechercher une adresse
+          </label>
+          <div className="relative">
+            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
+            <input
+              type="text"
+              value={addressQuery}
+              onChange={(e) => setAddressQuery(e.target.value)}
+              className={inputBaseCls(!!errors.location)}
+              placeholder="Ex. Cotonou, Rue du 7 novembre..."
+              style={{ paddingLeft: '2.75rem' }}
+            />
+          </div>
+
+          {addressSuggestions.length > 0 && (
+            <div className="mt-2 max-h-52 overflow-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+              {addressSuggestions.map((suggestion) => (
+                <button
+                  key={`${suggestion.place_id}-${suggestion.display_name}`}
+                  type="button"
+                  onClick={() => onSelectSuggestion(suggestion)}
+                  className="flex w-full flex-col border-b border-gray-100 px-3 py-2.5 text-left transition hover:bg-orange-50/60 last:border-b-0"
+                >
+                  <span className="text-sm font-semibold text-[#282828]">{suggestion.display_name}</span>
+                  <span className="mt-0.5 text-[11px] text-gray-500">{suggestion.type || 'Adresse'}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {errors.location && (
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-red-500">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            {errors.location}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-/* ─── Step 2 : Formule de livraison ─── */
-function StepShipping({ shippingMethod, setShippingMethod, vendorZonesByVendor = {}, selectedZonesByVendor = {}, onSelectZone }) {
-  const colorMap = {
-    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', iconWrap: 'bg-emerald-100 text-emerald-600' },
-    amber: { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', iconWrap: 'bg-amber-100 text-amber-600' },
-    purple: { bg: 'bg-purple-50', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', iconWrap: 'bg-purple-100 text-purple-600' },
-  };
-
-  const vendorGroups = Object.entries(vendorZonesByVendor).map(([vendorId, zones]) => ({
-    vendorId,
-    vendorName: zones?.[0]?.vendorName || 'Vendeur',
-    zones: Array.isArray(zones) ? zones : [],
-  }));
+/* ─── Step 2 : Livraison automatique ─── */
+function StepShipping({ deliveryCalculation }) {
+  // Résoudre le ou les responsables de livraison depuis le calcul backend
+  const deliveryGroups = deliveryCalculation?.groups?.length ? deliveryCalculation.groups : null;
+  const overallProvider = deliveryCalculation?.provider || null;
 
   return (
-    <div className="space-y-4">
-      <p className="mb-2 text-sm text-gray-500">Choisissez le mode d'acheminement de votre commande.</p>
+    <div className="space-y-5">
 
-      {vendorGroups.length > 0 && (
-        <div className="space-y-3 rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">Zones de livraison vendeur</p>
-          {vendorGroups.map(({ vendorId, vendorName, zones }) => (
-            <div key={vendorId} className="space-y-2">
-              <p className="text-sm font-bold text-[#282828]">{vendorName}</p>
-              {zones.map((zone) => {
-                const isSelected = selectedZonesByVendor[vendorId]?._id === zone._id;
-                const fee = Number(zone.deliveryFee || zone.fee || 0);
-                const summary = `${zone.zoneName || zone.country || 'Zone'}${zone.city ? ` • ${zone.city}` : ''}${fee > 0 ? ` • ${fee.toLocaleString('fr-FR')} F` : ' • Gratuit'}`;
-                return (
-                  <button
-                    key={`${vendorId}-${zone._id || zone.zoneName || zone.city}`}
-                    type="button"
-                    onClick={() => onSelectZone(vendorId, zone)}
-                    className={[
-                      'flex w-full items-center justify-between gap-4 rounded-xl border-2 px-3 py-2 text-left transition-all',
-                      isSelected ? 'border-[#F68B1E] bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300',
-                    ].join(' ')}
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-[#282828]">{zone.zoneName || zone.country || 'Zone'}</p>
-                      <p className="text-[11px] text-gray-500">{summary}</p>
+      {/* Carte : Responsable(s) de livraison — calculé automatiquement */}
+      <div className="space-y-2">
+        <p className="text-[11px] font-black uppercase tracking-wider text-gray-400">Prise en charge de la livraison</p>
+
+        {deliveryCalculation ? (
+          <>
+            {deliveryGroups ? (
+              <div className="space-y-2">
+                {deliveryGroups.map((grp, idx) => {
+                  const isSeller = grp.provider === 'SELLER';
+                  return (
+                    <div
+                      key={idx}
+                      className={[
+                        'flex items-start gap-3 rounded-2xl border p-4',
+                        isSeller
+                          ? 'border-blue-100 bg-blue-50/60'
+                          : 'border-orange-100 bg-orange-50/60',
+                      ].join(' ')}
+                    >
+                      <div className={['mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl', isSeller ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-[#F68B1E]'].join(' ')}>
+                        <Truck className="h-4 w-4" strokeWidth={2} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-black text-[#282828]">
+                          {isSeller ? 'Livraison par le vendeur' : 'Livraison par DangoImport'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {grp.storeName || 'Vendeur'}
+                          {grp.estimatedDeliveryTime && (
+                            <> &bull; {grp.estimatedDeliveryTime}</>
+                          )}
+                        </p>
+                        {!isSeller && !grp.sellerDeliveryAvailable && (
+                          <p className="mt-1 text-[11px] text-gray-400">
+                            Adresse hors zone vendeur — DangoImport prend le relais automatiquement.
+                          </p>
+                        )}
+                      </div>
+                      <BadgeCheck className={['h-4 w-4 shrink-0', isSeller ? 'text-blue-500' : 'text-[#F68B1E]'].join(' ')} />
                     </div>
-                    <span className={['inline-flex h-5 w-5 items-center justify-center rounded-full border-2', isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300'].join(' ')}>
-                      {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {SHIPPING_PLANS.map((plan) => {
-          const isSelected = shippingMethod === plan.value;
-          const colors = colorMap[plan.color];
-          const Icon = plan.icon;
-
-          return (
-            <button
-              key={plan.value}
-              type="button"
-              onClick={() => setShippingMethod(plan.value)}
-              className={[
-                'group w-full overflow-hidden rounded-2xl border-2 text-left transition-all duration-300',
-                isSelected ? 'border-[#F68B1E] shadow-lg shadow-orange-100/40' : 'border-gray-100 hover:border-gray-200 hover:shadow-sm',
-              ].join(' ')}
-            >
-              <div className="flex items-center gap-4 px-5 py-4">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colors.iconWrap}`}>
-                  <Icon className="h-5 w-5" strokeWidth={2} />
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                className={[
+                  'flex items-start gap-3 rounded-2xl border p-4',
+                  overallProvider === 'SELLER' ? 'border-blue-100 bg-blue-50/60' : 'border-orange-100 bg-orange-50/60',
+                ].join(' ')}
+              >
+                <div className={['mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl', overallProvider === 'SELLER' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-[#F68B1E]'].join(' ')}>
+                  <Truck className="h-4 w-4" strokeWidth={2} />
                 </div>
-
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-black text-[#282828]">{plan.label}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${colors.badge}`}>
-                      {plan.tagline}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-xs text-gray-500">{plan.delay}</p>
+                  <p className="text-sm font-black text-[#282828]">
+                    {overallProvider === 'SELLER' ? 'Livraison par le vendeur' : 'Livraison par DangoImport'}
+                  </p>
+                  <p className="text-xs text-gray-500">Déterminé automatiquement selon votre adresse</p>
                 </div>
-
-                <div className="shrink-0 text-right">
-                  <span className={`text-base font-black ${plan.price === 0 ? 'text-emerald-600' : 'text-[#282828]'}`}>
-                    {plan.priceLabel}
-                  </span>
-                </div>
-
-                <div
-                  className={[
-                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200',
-                    isSelected ? 'border-[#F68B1E] bg-[#F68B1E]' : 'border-gray-300 group-hover:border-gray-400',
-                  ].join(' ')}
-                >
-                  {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
-                </div>
+                <BadgeCheck className={['h-4 w-4 shrink-0', overallProvider === 'SELLER' ? 'text-blue-500' : 'text-[#F68B1E]'].join(' ')} />
               </div>
-
-              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSelected ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="px-5 pb-4 pt-0">
-                  <div className={`rounded-xl ${colors.bg} p-3`}>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {plan.features.map((feat) => (
-                        <div key={feat} className="flex items-start gap-2 text-xs text-gray-600">
-                          <Check className={`mt-0.5 h-3 w-3 shrink-0 ${colors.text}`} strokeWidth={3} />
-                          <span>{feat}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </button>
-          );
-        })}
+            )}
+          </>
+        ) : (
+          /* État chargement */
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+            <div className="h-8 w-8 animate-pulse rounded-xl bg-gray-200" />
+            <div className="space-y-1.5">
+              <div className="h-3 w-32 animate-pulse rounded bg-gray-200" />
+              <div className="h-2.5 w-48 animate-pulse rounded bg-gray-100" />
+            </div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
 
 /* ─── Step 3 : Paiement ─── */
-function StepPayment({ acceptCGV, setAcceptCGV, submitting, handlePlaceOrder, computedTotal, previewLoading, form, shippingMethod }) {
-  const plan = SHIPPING_PLANS.find((p) => p.value === shippingMethod);
+function StepPayment({ acceptCGV, setAcceptCGV, submitting, handlePlaceOrder, computedTotal, previewLoading, form, geoAddress, deliveryCalculation }) {
+  const overallProvider = deliveryCalculation?.provider;
 
   return (
     <div className="space-y-6">
@@ -543,17 +421,19 @@ function StepPayment({ acceptCGV, setAcceptCGV, submitting, handlePlaceOrder, co
           <div className="flex items-start gap-3">
             <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]"><MapPin className="h-3.5 w-3.5" /></div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#282828]">Livraison à</p>
+              <p className="text-xs font-bold text-[#282828]">Position de livraison</p>
               <p className="text-xs text-gray-500">
-                {form.fullAddress}{form.city ? `, ${form.city}` : ''}{form.country ? ` — ${form.country}` : ''}
+                {geoAddress || (form.lat ? `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}` : 'Non définie')}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]"><Truck className="h-3.5 w-3.5" /></div>
             <div>
-              <p className="text-xs font-bold text-[#282828]">Mode de livraison</p>
-              <p className="text-xs text-gray-500">{plan?.label || 'Standard'} {plan?.delay}</p>
+              <p className="text-xs font-bold text-[#282828]">Responsable de livraison</p>
+              <p className="text-xs text-gray-500">
+                {overallProvider === 'SELLER' ? 'Le vendeur' : overallProvider === 'HYBRID' ? 'Vendeur + DangoImport' : 'DangoImport'}
+              </p>
             </div>
           </div>
         </div>
@@ -633,13 +513,8 @@ export default function Checkout() {
   const [acceptCGV, setAcceptCGV] = useState(false);
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(null);
-  const [promoCode, setPromoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
-  const [shippingMethod, setShippingMethod] = useState('standard');
+  const [promoCode] = useState(() => localStorage.getItem('dangoPromoCode') || '');
   const [paymentMethod] = useState('fedapay');
-  const [vendorZonesByVendor, setVendorZonesByVendor] = useState({});
-  const [selectedZonesByVendor, setSelectedZonesByVendor] = useState({});
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState('');
   const [qrTokens, setQrTokens] = useState([]);
   const [qrImages, setQrImages] = useState({});
   const [showQrPanel, setShowQrPanel] = useState(false);
@@ -647,82 +522,117 @@ export default function Checkout() {
   const [qrLoading, setQrLoading] = useState(false);
   const [qrError, setQrError] = useState(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [deliveryCalculation, setDeliveryCalculation] = useState(null);
+  const [geoStatus, setGeoStatus] = useState(GEO_STATUS.idle);
+  const [geoAddress, setGeoAddress] = useState('');
+  const [addressQuery, setAddressQuery] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    country: 'Togo',
-    city: '',
-    neighborhood: '',
-    fullAddress: '',
-    postalCode: '',
-    instructions: '',
+    country: '',
+    lat: null,
+    lng: null,
   });
 
   useEffect(() => {
-    const vendorIds = [...new Set(
-      cartItems
-        .map((item) => item.vendorId || item.vendor_id || item.sellerId || item.vendor)
-        .filter(Boolean)
-    )];
-
-    if (!vendorIds.length) {
-      setVendorZonesByVendor({});
-      setSelectedZonesByVendor({});
-      return undefined;
-    }
+    if (!cartItems.length) return;
 
     let cancelled = false;
+    const clientLocation = form.lat && form.lng ? { lat: form.lat, lng: form.lng } : null;
 
-    Promise.all(
-      vendorIds.map(async (vendorId) => {
-        try {
-          const response = await getVendorDeliveryZonesByVendor(vendorId);
-          return { vendorId, zones: Array.isArray(response?.data) ? response.data : [] };
-        } catch (error) {
-          return { vendorId, zones: [] };
+    calculateDeliveryOptions({ items: cartItems, clientLocation })
+      .then((res) => {
+        if (!cancelled && res?.data) {
+          setDeliveryCalculation(res.data);
         }
       })
-    )
-      .then((results) => {
-        if (cancelled) return;
-        const nextVendorZones = {};
-        results.forEach(({ vendorId, zones }) => {
-          if (zones.length) nextVendorZones[vendorId] = zones;
-        });
-        setVendorZonesByVendor(nextVendorZones);
-
-        setSelectedZonesByVendor((prev) => {
-          const next = { ...prev };
-          Object.entries(nextVendorZones).forEach(([vendorId, zones]) => {
-            if (!next[vendorId]) {
-              const preferred = zones.find((zone) => zone.isDefault || Number(zone.deliveryFee || zone.fee || 0) === 0) || zones[0];
-              if (preferred) next[vendorId] = preferred;
-            }
-          });
-          return next;
-        });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setVendorZonesByVendor({});
-          setSelectedZonesByVendor({});
-        }
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;
     };
-  }, [cartItems]);
+  }, [cartItems, form.lat, form.lng]);
 
-  const shippingFee = useMemo(() => {
-    const zoneFees = Object.values(selectedZonesByVendor).reduce((sum, zone) => sum + Number(zone?.deliveryFee || zone?.fee || 0), 0);
-    if (zoneFees > 0 || Object.keys(vendorZonesByVendor).length > 0) {
-      return zoneFees;
+  /* ─── Géolocalisation GPS ─── */
+  const setLocationFromCoordinates = useCallback(async (latitude, longitude, displayName) => {
+    setForm((prev) => ({ ...prev, lat: latitude, lng: longitude }));
+    setGeoStatus(GEO_STATUS.success);
+
+    const resolvedAddress = displayName || `${Number(latitude).toFixed(5)}, ${Number(longitude).toFixed(5)}`;
+    setGeoAddress(resolvedAddress);
+    setAddressQuery(resolvedAddress);
+
+    try {
+      if (!displayName) {
+        const resp = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+          { headers: { 'Accept-Language': 'fr' } }
+        );
+        const data = await resp.json();
+        const nextAddress = data.display_name || resolvedAddress;
+        setGeoAddress(nextAddress);
+        setAddressQuery(nextAddress);
+      }
+    } catch {
+      // keep resolved fallback
     }
-    return SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.price ?? 0;
-  }, [selectedZonesByVendor, shippingMethod, vendorZonesByVendor]);
+  }, []);
+
+  const handleGeolocate = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGeoStatus(GEO_STATUS.error);
+      return;
+    }
+    setGeoStatus(GEO_STATUS.loading);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        await setLocationFromCoordinates(latitude, longitude);
+      },
+      () => {
+        setGeoStatus(GEO_STATUS.error);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [setLocationFromCoordinates]);
+
+  const handleSelectSuggestion = useCallback((suggestion) => {
+    const latitude = Number(suggestion.lat);
+    const longitude = Number(suggestion.lon);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      setAddressSuggestions([]);
+      return;
+    }
+    setAddressSuggestions([]);
+    setLocationFromCoordinates(latitude, longitude, suggestion.display_name || 'Adresse sélectionnée');
+  }, [setLocationFromCoordinates]);
+
+  useEffect(() => {
+    if (addressQuery.trim().length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=6&q=${encodeURIComponent(addressQuery)}&countrycodes=bj,tg`,
+          { headers: { 'Accept-Language': 'fr' } }
+        );
+        const data = await response.json();
+        setAddressSuggestions(Array.isArray(data) ? data : []);
+      } catch {
+        setAddressSuggestions([]);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [addressQuery]);
+
+  const shippingFee = 0; // Calculé à la livraison selon le fournisseur déterminé automatiquement
 
   /* ─── Helpers ─── */
   const itemUnitPrice = (item) => {
@@ -740,7 +650,7 @@ export default function Checkout() {
     [cartItems]
   );
 
-  const getShippingLabel = () => SHIPPING_PLANS.find((p) => p.value === shippingMethod)?.label || 'Standard';
+  const getShippingLabel = () => deliveryCalculation?.provider === 'SELLER' ? 'Vendeur' : 'DangoImport';
 
   /* ─── Effects ─── */
   useEffect(() => {
@@ -827,9 +737,6 @@ export default function Checkout() {
 
     try {
       const userData = JSON.parse(localStorage.getItem('dangoUser') || '{}');
-      const userAddresses = Array.isArray(userData.addresses) ? userData.addresses : [];
-      setSavedAddresses(userAddresses);
-
       if (userData.userFirstname || userData.firstname) {
         setForm((prev) => ({
           ...prev,
@@ -837,19 +744,6 @@ export default function Checkout() {
           lastName: userData.userSurname || userData.lastName || userData.surname || '',
           email: userData.userEmail || userData.email || '',
           phone: userData.userPhone || userData.phone || '',
-        }));
-      }
-
-      const defaultAddress = userAddresses.find((a) => a.isDefault) || userAddresses[0];
-      if (defaultAddress) {
-        setSelectedAddressId(defaultAddress._id || defaultAddress.id || 'default');
-        setForm((prev) => ({
-          ...prev,
-          country: defaultAddress.country || prev.country,
-          city: defaultAddress.city || prev.city,
-          neighborhood: defaultAddress.neighborhood || prev.neighborhood,
-          fullAddress: defaultAddress.fullAddress || prev.fullAddress,
-          postalCode: defaultAddress.postalCode || prev.postalCode,
         }));
       }
     } catch (error) {
@@ -871,7 +765,6 @@ export default function Checkout() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             items: cartItems.map((item) => ({ productId: item._id || item.id, quantity: item.quantity || 1 })),
-            shippingMethod,
             promoCode,
           }),
         });
@@ -889,7 +782,7 @@ export default function Checkout() {
     };
     const timer = window.setTimeout(loadPreview, 250);
     return () => window.clearTimeout(timer);
-  }, [cartItems, shippingMethod, promoCode]);
+  }, [cartItems, promoCode]);
 
   useEffect(() => {
     if (!qrTokens.length) { setQrImages({}); return; }
@@ -908,33 +801,20 @@ export default function Checkout() {
     if (!form.lastName.trim()) e.lastName = 'Le nom est requis';
     if (!form.email.trim()) e.email = "L'email est requis";
     if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) e.phone = 'Téléphone valide requis';
-    if (!form.country.trim()) e.country = 'Le pays est requis';
-    if (!form.city.trim()) e.city = 'La ville est requise';
-    if (!form.fullAddress.trim()) e.fullAddress = "L'adresse est requise";
+    if (!form.country || !form.country.trim()) e.country = 'Le pays est requis';
+    if (!form.lat || !form.lng) e.location = 'Veuillez autoriser la géolocalisation pour continuer';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSelectAddress = (address) => {
-    setSelectedAddressId(address._id || address.id || 'default');
-    setForm((prev) => ({
-      ...prev,
-      country: address.country || prev.country,
-      city: address.city || prev.city,
-      neighborhood: address.neighborhood || '',
-      fullAddress: address.fullAddress || prev.fullAddress,
-      postalCode: address.postalCode || '',
-    }));
-  };
-
   /* ─── Paiement ─── */
   const handlePlaceOrder = async () => {
-    if (!validateForm()) {
-      toast.error('Veuillez remplir correctement les informations de livraison');
-      return;
-    }
     if (!acceptCGV) {
       toast.error('Veuillez accepter les conditions générales de vente');
+      return;
+    }
+    if (!form.lat || !form.lng) {
+      toast.error('Veuillez partager votre position pour la livraison');
       return;
     }
     setSubmitting(true);
@@ -943,7 +823,12 @@ export default function Checkout() {
     try {
       const computedTotal = Number(preview?.subtotal ?? subtotal) + shippingFee - Number(preview?.discount || 0);
       const payload = buildCartFedapayPayload({
-        form,
+        form: {
+          ...form,
+          fullAddress: geoAddress || `${form.lat}, ${form.lng}`,
+          city: geoAddress ? geoAddress.split(',')[0] : '',
+          country: form.country || 'Togo',
+        },
         cartItems,
         subtotal,
         shippingFee,
@@ -976,7 +861,7 @@ export default function Checkout() {
   const goNext = () => {
     if (currentStep === 1) {
       if (!validateForm()) {
-        toast.error('Veuillez remplir les champs obligatoires.');
+        toast.error('Veuillez renseigner vos informations et activer la géolocalisation.');
         return;
       }
     }
@@ -1020,8 +905,8 @@ export default function Checkout() {
   const computedTotal = Number(preview?.subtotal ?? subtotal) + shippingFee - Number(preview?.discount || 0);
 
   const stepTitles = {
-    1: 'Adresse de livraison',
-    2: 'Formule de livraison',
+    1: 'Informations de contact',
+    2: 'Livraison',
     3: 'Confirmation & paiement',
   };
 
@@ -1062,7 +947,6 @@ export default function Checkout() {
                 itemUnitPrice={itemUnitPrice}
                 subtotal={subtotal}
                 shippingFee={shippingFee}
-                shippingMethod={shippingMethod}
                 preview={preview}
                 previewLoading={previewLoading}
                 isOpen={summaryOpen}
@@ -1095,18 +979,18 @@ export default function Checkout() {
                         form={form}
                         setForm={setForm}
                         errors={errors}
-                        savedAddresses={savedAddresses}
-                        selectedAddressId={selectedAddressId}
-                        handleSelectAddress={handleSelectAddress}
+                        geoStatus={geoStatus}
+                        geoAddress={geoAddress}
+                        onGeolocate={handleGeolocate}
+                        addressQuery={addressQuery}
+                        setAddressQuery={setAddressQuery}
+                        addressSuggestions={addressSuggestions}
+                        onSelectSuggestion={handleSelectSuggestion}
                       />
                     )}
                     {currentStep === 2 && (
                       <StepShipping
-                        shippingMethod={shippingMethod}
-                        setShippingMethod={setShippingMethod}
-                        vendorZonesByVendor={vendorZonesByVendor}
-                        selectedZonesByVendor={selectedZonesByVendor}
-                        onSelectZone={(vendorId, zone) => setSelectedZonesByVendor((prev) => ({ ...prev, [vendorId]: zone }))}
+                        deliveryCalculation={deliveryCalculation}
                       />
                     )}
                     {currentStep === 3 && (
@@ -1118,7 +1002,8 @@ export default function Checkout() {
                         computedTotal={computedTotal}
                         previewLoading={previewLoading}
                         form={form}
-                        shippingMethod={shippingMethod}
+                        geoAddress={geoAddress}
+                        deliveryCalculation={deliveryCalculation}
                       />
                     )}
                   </motion.div>
@@ -1156,7 +1041,6 @@ export default function Checkout() {
               itemUnitPrice={itemUnitPrice}
               subtotal={subtotal}
               shippingFee={shippingFee}
-              shippingMethod={shippingMethod}
               preview={preview}
               previewLoading={previewLoading}
             />

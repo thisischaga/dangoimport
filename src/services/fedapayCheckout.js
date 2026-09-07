@@ -338,7 +338,7 @@ function buildCartBasePayload({
       cartItems.find(
         (item) => item.image
       )?.image ||
-      'https://www.dangoimport.com/logo.png',
+      'https://dangoimport.com/logo.png',
 
     userPref:
       form.instructions ||
