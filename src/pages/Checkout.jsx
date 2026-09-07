@@ -535,6 +535,7 @@ export default function Checkout() {
     country: '',
     lat: null,
     lng: null,
+    addressQuery,
   });
 
   useEffect(() => {
@@ -803,6 +804,7 @@ export default function Checkout() {
     if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) e.phone = 'Téléphone valide requis';
     if (!form.country || !form.country.trim()) e.country = 'Le pays est requis';
     if (!form.lat || !form.lng) e.location = 'Veuillez autoriser la géolocalisation pour continuer';
+    if (!form.addressQuery) e.addressQuery = "Veuillez situer une adresse";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -813,7 +815,7 @@ export default function Checkout() {
       toast.error('Veuillez accepter les conditions générales de vente');
       return;
     }
-    if (!form.lat || !form.lng) {
+    if (!form.lat || !form.lng || addressQuery) {
       toast.error('Veuillez partager votre position pour la livraison');
       return;
     }
@@ -828,6 +830,7 @@ export default function Checkout() {
           fullAddress: geoAddress || `${form.lat}, ${form.lng}`,
           city: geoAddress ? geoAddress.split(',')[0] : '',
           country: form.country || 'Togo',
+          addressQuery,
         },
         cartItems,
         subtotal,
@@ -836,7 +839,9 @@ export default function Checkout() {
         shippingLabel: getShippingLabel(),
         description: 'Commande Dangoimport',
         type: 'cart',
+        
       });
+      console.log(payload)
 
       const data = await initiateFedapayCheckout(payload, token);
       if (!data?.url) throw new Error('URL de paiement FedaPay introuvable.');
