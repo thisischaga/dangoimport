@@ -544,13 +544,29 @@ export function buildCartFedapayPayload({
         form.neighborhood || '',
 
       fullAddress:
-        form.fullAddress || '',
+        form.fullAddress ||
+        form.addressQuery ||
+        '',
 
       postalCode:
         form.postalCode || '',
 
       instructions:
         form.instructions || '',
+
+      latitude:
+        form.lat ?? null,
+
+      longitude:
+        form.lng ?? null,
+
+      location: {
+        type: 'Point',
+        coordinates: [
+          Number(form.lng ?? 0),
+          Number(form.lat ?? 0),
+        ],
+      },
     },
 
     /* -----------------------------------------------------

@@ -17,7 +17,6 @@ import { fetchOrderQrTokens } from '../services/qrService';
 import { calculateDeliveryOptions } from '../api';
 
 
-
 const STEPS = [
   { id: 1, label: 'Adresse', icon: MapPin },
   { id: 2, label: 'Livraison', icon: Truck },
@@ -596,9 +595,18 @@ export default function Checkout() {
       () => {
         setGeoStatus(GEO_STATUS.error);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
     );
   }, [setLocationFromCoordinates]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('dangoToken');
+    if (!token) return;
+
+    if (navigator.geolocation && !form.lat && !form.lng) {
+      handleGeolocate();
+    }
+  }, [form.lat, form.lng, handleGeolocate]);
 
   const handleSelectSuggestion = useCallback((suggestion) => {
     const latitude = Number(suggestion.lat);
@@ -804,7 +812,6 @@ export default function Checkout() {
     if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 8) e.phone = 'Téléphone valide requis';
     if (!form.country || !form.country.trim()) e.country = 'Le pays est requis';
     if (!form.lat || !form.lng) e.location = 'Veuillez autoriser la géolocalisation pour continuer';
-    if (!form.addressQuery) e.addressQuery = "Veuillez situer une adresse";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -815,8 +822,8 @@ export default function Checkout() {
       toast.error('Veuillez accepter les conditions générales de vente');
       return;
     }
-    if (!form.lat || !form.lng || addressQuery) {
-      toast.error('Veuillez partager votre position pour la livraison');
+    if (!form.lat || !form.lng || !addressQuery) {
+      toast.error('Veuillez partager votre position et renseigner votre adresse pour la livraison');
       return;
     }
     setSubmitting(true);
