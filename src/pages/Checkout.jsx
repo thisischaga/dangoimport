@@ -1513,6 +1513,7 @@ export default function Checkout() {
         // If a socket is available, ask the server to recalc delivery
         try {
           if (socket && socket.connected && Array.isArray(cartItems) && cartItems.length) {
+            console.log('[Checkout] emitting calculate_delivery_for_user', { lat: Number(latitude), lng: Number(longitude), items: cartItems.length });
             socket.emit('calculate_delivery_for_user', {
               lat: Number(latitude),
               lng: Number(longitude),
@@ -1637,22 +1638,53 @@ export default function Checkout() {
       withCredentials: true,
     });
 
+
     setSocket(s);
 
     s.on('connect', () => {
+      console.log('[Checkout] socket connected', s.id);
       // Authenticate so server can join user room
       s.emit('authenticate', { token });
     });
 
+    s.on('connect_error', (err) => {
+      console.warn('[Checkout] socket connect_error', err?.message || err);
+    });
+
     s.on('delivery_price_update', (payload) => {
+      console.log('[Checkout] received delivery_price_update', payload);
       if (payload && payload.data) {
+        // Update state
         setDeliveryCalculation(payload.data);
+
+        // Compute a quick total fee from payload (groups or single fee)
+        try {
+          const d = payload.data;
+          let totalFee = 0;
+          if (Array.isArray(d.groups) && d.groups.length) {
+            totalFee = d.groups.reduce((s, g) => s + Number(g.fee || 0), 0);
+          } else if (Number.isFinite(Number(d.fee))) {
+            totalFee = Number(d.fee);
+          } else if (Number.isFinite(Number(d.shippingCost))) {
+            totalFee = Number(d.shippingCost);
+          }
+
+          console.log('[Checkout] computed totalFee from socket payload:', totalFee);
+
+          // Ensure UI uses socket result: update preview.shippingCost so shippingFee useMemo picks it
+          setPreview((prev) => ({ ...(prev || {}), shippingCost: totalFee }));
+
+          if (typeof toast === 'function') {
+            toast.info(`Frais de livraison mis à jour : ${totalFee.toLocaleString('fr-FR')} FCFA`);
+          }
+        } catch (e) {
+          console.warn('[Checkout] error computing fee from payload', e);
+        }
       }
     });
 
     s.on('delivery_price_update_error', (err) => {
-      // Optionally show toast
-      // toast.error(err?.message || 'Erreur calcul livraison via socket');
+      console.warn('[Checkout] delivery_price_update_error', err);
     });
 
     return () => {
