@@ -660,6 +660,11 @@ const Header = () => {
       className={`fixed top-0 left-0 right-0 z-40 bg-white transition-shadow duration-200 ${
         scrolled ? 'shadow-sm border-b border-slate-100' : 'border-b border-transparent'
       }`}
+      style={{ 
+        '--header-h': '72px' ,
+        padding: '10px',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.09)' ,
+      }}
     >
       <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-5">
         <div className="flex items-center gap-2 py-2.5 sm:gap-3">

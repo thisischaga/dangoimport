@@ -114,10 +114,6 @@ function ShopHeader({ store, seller, stats, onContact, onShare }) {
         </div>
 
         <div className="shop-header__actions">
-          <button type="button" className="shop-btn shop-btn--primary" onClick={onContact}>
-            <MessageCircle size={16} />
-            Contacter le vendeur
-          </button>
           <button type="button" className="shop-btn shop-btn--ghost" onClick={onShare}>
             <Share2 size={16} />
             Partager la boutique

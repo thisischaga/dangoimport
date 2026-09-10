@@ -498,14 +498,6 @@ export default function ProductDetail() {
                     </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="product-detail-seller__cta"
-                  onClick={handleContactSeller}
-                >
-                  <MessageCircle size={14} />
-                  {sellerZonesLoading ? 'Chargement…' : 'Contacter le vendeur'}
-                </button>
                 {/**sellerSlug && (
                   <Link to={`/shop/${sellerSlug}`} className="product-detail-seller__link">
                     Visiter la boutique
