@@ -54,7 +54,19 @@ export default function CategoriesSection() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {categories.slice(0, 8).map((cat) => (
+          {(() => {
+            const HEADER_ORDER = ['electronique','mode','maison','beaute','telephones','informatique','accessoires','sport'];
+            const ordered = [];
+            const bySlug = new Map(categories.map(c => [c.slug, c]));
+            for (const slug of HEADER_ORDER) {
+              const c = bySlug.get(slug);
+              if (c) { ordered.push(c); bySlug.delete(slug); }
+            }
+            // append remaining categories that are not in header list
+            for (const c of categories) {
+              if (!HEADER_ORDER.includes(c.slug)) ordered.push(c);
+            }
+            return ordered.map((cat) => (
             <Link
               to={`/category/${cat.slug}`}
               key={cat._id || cat.slug}
@@ -78,7 +90,8 @@ export default function CategoriesSection() {
                 </div>
               </div>
             </Link>
-          ))}
+            ));
+          })()}
         </div>
       )}
     </section>

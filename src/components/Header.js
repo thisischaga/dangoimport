@@ -40,7 +40,7 @@ function useHeaderHeight(headerRef) {
 
 const SEARCH_FALLBACK_TERMS = ['T-shirt', 'Chaussures', 'Sac à dos', 'Smartphone', 'Parfum', 'Montre', 'Chargeur', 'Écouteurs'];
 
-const CATEGORY_LINKS = [
+export const CATEGORY_LINKS = [
   { label: 'Électronique', slug: 'electronique', Icon: Cpu },
   { label: 'Mode', slug: 'mode', Icon: Shirt },
   { label: 'Maison', slug: 'maison', Icon: HomeIcon },

@@ -15,17 +15,16 @@ import ProductFilters from '../components/product/ProductFilters';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import { mockProducts } from '../data/mockData';
-import Header from '../components/Header';
+import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
 
 // Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
 // n'aura jamais la même image que sa voisine — on pioche dans ce pool via un hash stable)
 const CATEGORY_FALLBACK_IMAGES = [
   'https://i.pinimg.com/736x/35/1d/26/351d26f062cf211285ac6a898fa52ada.jpg', // accessoires
-  'https://i.pinimg.com/736x/59/80/5f/59805fdb42bd1c60727aa1aaac06dac3.jpg', // électronique
   'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg', // mode
-  'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg', // divers
-  'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', // shoes
+  'https://i.pinimg.com/736x/59/80/5f/59805fdb42bd1c60727aa1aaac06dac3.jpg', // électronique
+  'https://i.pinimg.com/736x/ec/49/90/ec4990824efc3b6031b05a79a5aa7980.jpg', // sport
   'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80', // watch
   'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', // home
 ];
@@ -39,10 +38,23 @@ function hashString(str) {
   return Math.abs(hash);
 }
 
-// Chaque catégorie reçoit une image propre : celle renvoyée par l'API en priorité,
-// sinon une image de fallback distincte choisie selon son nom/slug (jamais la même pour toutes)
+// Deterministic mapping from known slugs to fallback images so titles match images.
+// API-provided image (`banner` or `image`) still takes precedence.
+const SLUG_IMAGE_MAP = {
+  accessoires: CATEGORY_FALLBACK_IMAGES[0],
+  mode: CATEGORY_FALLBACK_IMAGES[1],
+  electronique: CATEGORY_FALLBACK_IMAGES[2],
+  informatique: CATEGORY_FALLBACK_IMAGES[2],
+  telephones: CATEGORY_FALLBACK_IMAGES[3],
+  sport: CATEGORY_FALLBACK_IMAGES[3],
+  maison: CATEGORY_FALLBACK_IMAGES[5],
+  beaute: CATEGORY_FALLBACK_IMAGES[3],
+};
+
 function getCategoryImage(cat, index) {
   if (cat.banner || cat.image) return cat.banner || cat.image;
+  const slug = String(cat.slug || '').toLowerCase();
+  if (slug && SLUG_IMAGE_MAP[slug]) return SLUG_IMAGE_MAP[slug];
   const key = cat.slug || cat.name || String(index);
   const fallbackIndex = hashString(key) % CATEGORY_FALLBACK_IMAGES.length;
   return CATEGORY_FALLBACK_IMAGES[fallbackIndex];
@@ -84,7 +96,7 @@ function CategoryCard({ cat, index }) {
 }
 
 function CategoriesSection({ categories }) {
-  const list = categories.slice(0, 8);
+  const list = Array.isArray(categories) ? categories : [];
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -206,7 +218,36 @@ function HomeNew({ cartCount: cartCountProp }) {
         )}
 
         {!searchQuery && !loadingCategories && categories.length > 0 && (
-          <CategoriesSection categories={categories} />
+          <CategoriesSection
+            categories={(() => {
+              try {
+                const bySlug = new Map(categories.map(c => [c.slug, c]));
+                const ordered = [];
+                for (const item of Array.isArray(CATEGORY_LINKS) ? CATEGORY_LINKS : []) {
+                  const slug = item.slug;
+                  const label = item.label || slug;
+                  const c = bySlug.get(slug);
+                  if (c) {
+                    ordered.push(c);
+                    bySlug.delete(slug);
+                  } else {
+                    // placeholder so header categories always appear on Home
+                    ordered.push({
+                      _id: `placeholder-${slug}`,
+                      slug,
+                      name: label,
+                      banner: SLUG_IMAGE_MAP[slug] || null,
+                      productCount: 0,
+                      description: '',
+                    });
+                  }
+                }
+                return ordered; // header categories (with placeholders if missing)
+              } catch (e) {
+                return categories;
+              }
+            })()}
+          />
         )}
 
         <section style={{ background: '#f6f6f7', paddingBottom: '24px' }}>
