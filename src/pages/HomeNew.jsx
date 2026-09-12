@@ -23,10 +23,12 @@ import Footer from '../components/Footer';
 const CATEGORY_FALLBACK_IMAGES = [
   'https://i.pinimg.com/736x/35/1d/26/351d26f062cf211285ac6a898fa52ada.jpg', // accessoires
   'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg', // mode
-  'https://i.pinimg.com/736x/59/80/5f/59805fdb42bd1c60727aa1aaac06dac3.jpg', // électronique
-  'https://i.pinimg.com/736x/ec/49/90/ec4990824efc3b6031b05a79a5aa7980.jpg', // sport
-  'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80', // watch
-  'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', // home
+  'https://tse3.mm.bing.net/th/id/OIP.hMARBl1IfPUEBfYAUi7hFgHaE8?r=0&w=1536&h=1024&rs=1&pid=ImgDetMain&o=7&rm=3', // électronique
+  'https://tse2.mm.bing.net/th/id/OIP.F_qtlzc73fefjMftcjPiJQHaEK?r=0&w=1920&h=1080&rs=1&pid=ImgDetMain&o=7&rm=3', // telephone
+  'https://tse3.mm.bing.net/th/id/OIP.TWxhCUJGnQojGn_lJwIfnQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', // informatique
+  'https://tse3.mm.bing.net/th/id/OIP.WjtX-x88LIrJ00rHNHB74QHaFl?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', // sport
+  'https://tse4.mm.bing.net/th/id/OIP.Tl7Gs-RTAqfS_ZOxXNhsOwHaJ4?r=0&w=3120&h=4160&rs=1&pid=ImgDetMain&o=7&rm=3', // home  
+  'https://www.journee-de-la-femme.com/wp-content/uploads/2022/05/accessoires-beaute-indispensables-femme.jpg', //beaute
 ];
 
 function hashString(str) {
@@ -44,11 +46,11 @@ const SLUG_IMAGE_MAP = {
   accessoires: CATEGORY_FALLBACK_IMAGES[0],
   mode: CATEGORY_FALLBACK_IMAGES[1],
   electronique: CATEGORY_FALLBACK_IMAGES[2],
-  informatique: CATEGORY_FALLBACK_IMAGES[2],
   telephones: CATEGORY_FALLBACK_IMAGES[3],
-  sport: CATEGORY_FALLBACK_IMAGES[3],
-  maison: CATEGORY_FALLBACK_IMAGES[5],
-  beaute: CATEGORY_FALLBACK_IMAGES[3],
+  informatique: CATEGORY_FALLBACK_IMAGES[4],
+  sport: CATEGORY_FALLBACK_IMAGES[5],
+  maison: CATEGORY_FALLBACK_IMAGES[6],
+  beaute: CATEGORY_FALLBACK_IMAGES[7],
 };
 
 function getCategoryImage(cat, index) {
