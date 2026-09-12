@@ -1069,6 +1069,7 @@ function StepPayment({
 }) {
   const provider =
     deliveryCalculation?.provider;
+  const isCalculating = previewLoading;
 
   return (
     <div className="space-y-6">
@@ -1181,12 +1182,12 @@ function StepPayment({
         type="button"
         onClick={handlePlaceOrder}
         disabled={
-          submitting || !acceptCGV
+          submitting || !acceptCGV || isCalculating
         }
         className={[
           'group relative w-full overflow-hidden rounded-xl py-4 text-sm font-black tracking-wide transition-all duration-200',
 
-          submitting || !acceptCGV
+          submitting || !acceptCGV || isCalculating
             ? 'cursor-not-allowed bg-gray-200 text-gray-400'
             : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E67A0C]',
         ].join(' ')}
@@ -1198,6 +1199,11 @@ function StepPayment({
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               Redirection vers le paiement...
+            </>
+          ) : isCalculating ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-500" />
+              Calcul en cours...
             </>
           ) : (
             <>
@@ -1214,7 +1220,7 @@ function StepPayment({
         </span>
 
         {!(
-          submitting || !acceptCGV
+          submitting || !acceptCGV || isCalculating
         ) && (
           <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         )}
@@ -3308,9 +3314,15 @@ export default function Checkout() {
                   onClick={
                     goNext
                   }
-                  className="flex items-center gap-2 rounded-xl bg-[#F68B1E] px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200/40 transition-all hover:-translate-y-0.5 hover:bg-[#E67A0C]"
+                  disabled={previewLoading}
+                  className={[
+                    'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
+                    previewLoading
+                      ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                      : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:-translate-y-0.5 hover:bg-[#E67A0C]',
+                  ].join(' ')}
                 >
-                  Continuer
+                  {previewLoading ? 'Calcul...' : 'Continuer'}
                 </button>
               )}
 
@@ -3382,9 +3394,15 @@ export default function Checkout() {
               onClick={
                 goNext
               }
-              className="flex items-center gap-2 rounded-xl bg-[#F68B1E] px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200/40 transition-all hover:bg-[#E67A0C]"
+              disabled={previewLoading}
+              className={[
+                'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
+                previewLoading
+                  ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                  : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E67A0C]',
+              ].join(' ')}
             >
-              Continuer
+              {previewLoading ? 'Calcul...' : 'Continuer'}
             </button>
 
           ) : (
@@ -3396,13 +3414,15 @@ export default function Checkout() {
               }
               disabled={
                 submitting ||
-                !acceptCGV
+                !acceptCGV ||
+                previewLoading
               }
               className={[
                 'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
 
                 submitting ||
-                !acceptCGV
+                !acceptCGV ||
+                previewLoading
                   ? 'cursor-not-allowed bg-gray-200 text-gray-400'
                   : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E67A0C]',
               ].join(' ')}
@@ -3410,6 +3430,8 @@ export default function Checkout() {
 
               {submitting
                 ? 'Paiement...'
+                : previewLoading
+                ? 'Calcul...'
                 : 'Payer'}
 
             </button>

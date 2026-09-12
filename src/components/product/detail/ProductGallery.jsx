@@ -22,12 +22,16 @@ function ProductGallery({ images = [], name }) {
   }, [validImages.length]);
 
   const current = validImages[active];
+  const manyThumbs = validImages.length > 4;
 
   return (
     <>
-      <div className="pdp-gallery">
+      <div className={`pdp-gallery${manyThumbs ? ' pdp-gallery--many-thumbs' : ''}`}>
         {validImages.length > 1 && (
-          <div className="pdp-gallery__thumbs" aria-label="Miniatures produit">
+          <div
+            className={`pdp-gallery__thumbs${manyThumbs ? ' pdp-gallery__thumbs--grid' : ''}`}
+            aria-label="Miniatures produit"
+          >
             {validImages.map((img, i) => (
               <button
                 key={i}
