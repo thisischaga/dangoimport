@@ -5,7 +5,6 @@ import {
   MapPin,
   Calendar,
   Package,
-  MessageCircle,
   Share2,
 } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/imageUrl';

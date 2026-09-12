@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ChevronRight,
   ShoppingCart,
@@ -10,11 +10,12 @@ import {
   ShieldCheck,
   RotateCcw,
   Star,
-  MessageCircle,
+  CreditCard,
+  BadgeCheck,
 } from 'lucide-react';
 import { useProduct, useProductReviews, useSimilarProducts } from '../hooks/useProducts';
 import ProductCard from '../components/product/ProductCard';
-import { getVendorDeliveryZonesByVendor, startConversation } from '../api';
+import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
 import { useCart } from '../context/CartContext';
@@ -27,68 +28,39 @@ import ProductVariants from '../components/product/detail/ProductVariants';
 import ProductReviewsSection from '../components/product/detail/ProductReviewsSection';
 import '../pages/ProductDetail.css';
 
-const SECTIONS = [
+const TABS = [
   { id: 'section-description', label: 'Description' },
-  { id: 'section-specs', label: 'Caractéristiques' },
+  { id: 'section-specs', label: 'Détails' },
   { id: 'section-reviews', label: 'Avis' },
   { id: 'section-delivery', label: 'Livraison' },
 ];
 
-/**
- * Mesure en continu la hauteur réelle du <header> fixe (elle change entre
- * mobile/desktop et quand la barre de recherche mobile s'ouvre) et l'expose
- * via la variable CSS --header-h, utilisée pour décaler tout le contenu.
- */
-
 function QuantitySelector({ value, onChange, max }) {
   const safeMax = Math.max(1, max || 1);
   return (
-    <div className="product-qty">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(1, value - 1))}
-        disabled={value <= 1}
-        aria-label="Diminuer"
-      >
-        <Minus size={14} />
+    <div className="pdp-qty">
+      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} aria-label="Diminuer">
+        <Minus size={16} />
       </button>
       <span>{value}</span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(safeMax, value + 1))}
-        disabled={value >= safeMax}
-        aria-label="Augmenter"
-      >
-        <Plus size={14} />
+      <button type="button" onClick={() => onChange(Math.min(safeMax, value + 1))} disabled={value >= safeMax} aria-label="Augmenter">
+        <Plus size={16} />
       </button>
     </div>
   );
 }
 
-function DetailSkeleton() {
-  return (
-    <div className="product-detail-page">
-      <div className="product-detail-skeleton product-detail-skeleton--gallery" />
-      <div className="product-detail-skeleton product-detail-skeleton--info" />
-    </div>
-  );
-}
-
-function ExpandableText({ text, maxLines = 6 }) {
+function ExpandableText({ text }) {
   const [expanded, setExpanded] = useState(false);
   if (!text) return null;
-  const isLong = text.length > 280 || text.split('\n').length > maxLines;
+  const isLong = text.length > 320 || text.split('\n').length > 8;
 
   return (
-    <div className="product-description">
-      <p className={expanded ? '' : 'product-description--clamped'}>{text}</p>
+    <div className="pdp__desc">
+      <p className={expanded ? '' : 'pdp__desc-clamped'}>{text}</p>
       {isLong && (
-        <button
-          type="button"
-          className="product-description__toggle"
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? 'Afficher moins' : 'Afficher plus'}
+        <button type="button" className="pdp__desc-toggle" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? 'Afficher moins' : 'Lire la suite'}
         </button>
       )}
     </div>
@@ -99,27 +71,21 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, cart } = useCart();
-  const stickyNavRef = useRef(null);
-
-  const location = useLocation();
+  const tabsRef = useRef(null);
 
   const { data: product, isLoading, isError } = useProduct(id);
-  const { data: reviewsData, isLoading: reviewsLoading } = useProductReviews(id, {
-    page: 1,
-    limit: 20,
-  });
+  const { data: reviewsData, isLoading: reviewsLoading } = useProductReviews(id, { page: 1, limit: 20 });
   const { data: similarProducts = [] } = useSimilarProducts(id);
 
   const [qty, setQty] = useState(1);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
-  const [activeSection, setActiveSection] = useState('section-description');
+  const [activeTab, setActiveTab] = useState('section-description');
   const [sellerZones, setSellerZones] = useState([]);
-  const [sellerZonesLoading, setSellerZonesLoading] = useState(false);
 
   useEffect(() => {
-    if (product?.name) document.title = `${product.name} | Dangoimport`;
+    if (product?.name) document.title = `${product.name} | Dango Import`;
     else if (!isLoading && !product) document.title = 'Produit introuvable';
   }, [product?.name, isLoading, product]);
 
@@ -141,8 +107,7 @@ export default function ProductDetail() {
     setSelectedVariantIndex(defaultIdx >= 0 ? defaultIdx : 0);
   }, [variants]);
 
-  const selectedVariant =
-    selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
+  const selectedVariant = selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
 
   const basePrice = Number(product?.price || 0);
   const basePromo = Number(product?.salePrice || product?.promoPrice || 0);
@@ -156,9 +121,7 @@ export default function ProductDetail() {
   const savings = hasPromo ? price - promoPrice : 0;
 
   const stock =
-    selectedVariant?.stock != null
-      ? Number(selectedVariant.stock)
-      : Number(product?.stock ?? 0);
+    selectedVariant?.stock != null ? Number(selectedVariant.stock) : Number(product?.stock ?? 0);
   const minStock = Number(product?.minStock ?? 10) || 10;
   const inStock = stock > 0;
   const isLowStock = inStock && stock <= minStock;
@@ -170,11 +133,10 @@ export default function ProductDetail() {
   const rating = product?.rating != null ? Number(product.rating) : null;
   const reviewCount =
     product?.totalReviews != null ? Number(product.totalReviews) : reviewsData?.pagination?.totalItems || 0;
-
   const soldCount = Number(product?.totalSales ?? 0) || 0;
 
   const badgeLabel = product?.isFeatured
-    ? 'Choix'
+    ? 'Sélection'
     : product?.isBestSeller
       ? 'Best-seller'
       : product?.isPromo || hasPromo
@@ -182,29 +144,30 @@ export default function ProductDetail() {
         : null;
 
   const images = useMemo(() => {
-    const base = getProductImages(product, 5);
+    const base = getProductImages(product, 6);
     if (selectedVariant?.image) {
       const vImg = resolveImageUrl(selectedVariant.image);
-      if (vImg && !base.includes(vImg)) return [vImg, ...base].slice(0, 5);
+      if (vImg && !base.includes(vImg)) return [vImg, ...base].slice(0, 6);
     }
     return base;
   }, [product, selectedVariant]);
 
-  const productDeliveryZones = Array.isArray(product?.deliveryZones) ? product.deliveryZones : [];
-  const deliveryZones = useMemo(
-    () => {
-      const zoneList = [...productDeliveryZones, ...sellerZones];
-      return zoneList.filter((zone, index, arr) => {
-        const key = [zone?.country, zone?.area, zone?.locality, zone?.zoneName, zone?.city].join('|');
-        return key && arr.findIndex((item) => [item?.country, item?.area, item?.locality, item?.zoneName, item?.city].join('|') === key) === index;
-      });
-    },
-    [productDeliveryZones, sellerZones]
+  const productDeliveryZones = useMemo(
+    () => (Array.isArray(product?.deliveryZones) ? product.deliveryZones : []),
+    [product?.deliveryZones]
   );
+
+  const deliveryZones = useMemo(() => {
+    const zoneList = [...productDeliveryZones, ...sellerZones];
+    return zoneList.filter((zone, index, arr) => {
+      const key = [zone?.country, zone?.area, zone?.locality, zone?.zoneName, zone?.city].join('|');
+      return key && arr.findIndex((item) => [item?.country, item?.area, item?.locality, item?.zoneName, item?.city].join('|') === key) === index;
+    });
+  }, [productDeliveryZones, sellerZones]);
+
   const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
   const hasWarranty = Boolean(product?.warranty?.trim());
   const hasDelivery = deliveryZones.length > 0 || hasShippingInfo;
-
   const freeShippingZone = useMemo(
     () => deliveryZones.find((z) => z?.freeShipping || Number(z?.price || 0) === 0),
     [deliveryZones]
@@ -215,41 +178,27 @@ export default function ProductDetail() {
       setSellerZones([]);
       return undefined;
     }
-
     let cancelled = false;
-    setSellerZonesLoading(true);
-
     getVendorDeliveryZonesByVendor(sellerId)
       .then((response) => {
-        if (cancelled) return;
-        setSellerZones(Array.isArray(response?.data) ? response.data : []);
+        if (!cancelled) setSellerZones(Array.isArray(response?.data) ? response.data : []);
       })
       .catch(() => {
         if (!cancelled) setSellerZones([]);
-      })
-      .finally(() => {
-        if (!cancelled) setSellerZonesLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [sellerId]);
 
   const specifications = useMemo(() => {
     const specs = Array.isArray(product?.specifications) ? product.specifications : [];
-    const rows = specs
-      .filter((s) => s?.key && s?.value)
-      .map((s) => ({ key: s.key, value: s.value }));
+    const rows = specs.filter((s) => s?.key && s?.value).map((s) => ({ key: s.key, value: s.value }));
     if (product?.brand && !rows.some((r) => r.key.toLowerCase() === 'marque')) {
       rows.unshift({ key: 'Marque', value: product.brand });
     }
     if (product?.category && !rows.some((r) => r.key.toLowerCase() === 'catégorie')) {
       rows.push({ key: 'Catégorie', value: product.category });
     }
-    if (product?.condition) {
-      rows.push({ key: 'État', value: product.condition });
-    }
+    if (product?.condition) rows.push({ key: 'État', value: product.condition });
     return rows;
   }, [product]);
 
@@ -282,76 +231,29 @@ export default function ProductDetail() {
     navigate('/cart');
   }, [normalizedProduct, inStock, isInCart, addToCart, qty, navigate]);
 
-  const handleContactSeller = useCallback(async () => {
-    if (!sellerId) {
-      toast.error('Ce produit n’a pas de vendeur associé.');
-      return;
-    }
-
-    const token = localStorage.getItem('dangoToken');
-    if (!token) {
-      navigate('/login', { state: { from: location.pathname } });
-      return;
-    }
-
-    try {
-      const response = await startConversation({ sellerId, productId: productId || null });
-      if (!response?.success) {
-        throw new Error(response?.message || 'Impossible de démarrer la conversation.');
-      }
-      toast.success('Conversation démarrée avec le vendeur.');
-    } catch (error) {
-      console.error('[ProductDetail] contact seller error:', error);
-      toast.error(error.message || 'Impossible de démarrer la conversation.');
-    }
-  }, [navigate, productId, sellerId, location.pathname]);
-
-  useEffect(() => {
-    const sectionIds = SECTIONS.map((s) => s.id);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]?.target?.id) {
-          setActiveSection(visible[0].target.id);
-        }
-      },
-      {
-        rootMargin: '-40% 0px -45% 0px',
-        threshold: [0, 0.15, 0.4],
-      }
-    );
-
-    sectionIds.forEach((sectionId) => {
-      const el = document.getElementById(sectionId);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [productId]);
-
   const scrollToSection = useCallback((sectionId) => {
-    setActiveSection(sectionId);
+    setActiveTab(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
-      const headerH = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--header-h')
-      ) || 0;
-      const navH = stickyNavRef.current?.offsetHeight || 0;
-      const top = el.getBoundingClientRect().top + window.scrollY - headerH - navH - 12;
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
+      const tabsH = tabsRef.current?.offsetHeight || 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH - tabsH - 8;
       window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);
 
   const sellerName = product?.vendorName || product?.sellerName || '';
+  const eyebrow = [product?.category, product?.brand].filter(Boolean).join(' · ');
 
   if (isLoading) {
     return (
-      <div className="product-detail-layout">
+      <div className="pdp">
         <Header />
-        <div className="product-detail-container">
-          <DetailSkeleton />
+        <div className="pdp__inner">
+          <div className="pdp__hero">
+            <div className="pdp__skeleton pdp__skeleton--gallery" />
+            <div className="pdp__skeleton pdp__skeleton--panel" />
+          </div>
         </div>
         <Footer />
       </div>
@@ -360,15 +262,13 @@ export default function ProductDetail() {
 
   if (isError || !product) {
     return (
-      <div className="product-detail-layout">
+      <div className="pdp">
         <Header />
-        <div className="product-detail-not-found">
-          <Package size={52} />
+        <div className="pdp__not-found">
+          <Package size={48} strokeWidth={1.5} />
           <h2>Produit introuvable</h2>
-          <p>Le produit recherché est indisponible ou a été suspendu.</p>
-          <button type="button" onClick={() => navigate('/')}>
-            Retour à l&apos;accueil
-          </button>
+          <p>Ce produit n&apos;est plus disponible.</p>
+          <button type="button" onClick={() => navigate('/shopping')}>Retour à la boutique</button>
         </div>
         <Footer />
       </div>
@@ -376,16 +276,16 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="product-detail-layout">
+    <div className="pdp">
       <Header />
 
-      <div className="product-detail-container">
-        <nav className="product-detail-breadcrumb">
+      <div className="pdp__inner">
+        <nav className="pdp__crumbs" aria-label="Fil d'Ariane">
           <Link to="/">Accueil</Link>
           <ChevronRight size={12} />
           {product.category && (
             <>
-              <Link to={`/?category=${encodeURIComponent(product.category)}`}>
+              <Link to={`/category/${encodeURIComponent(String(product.category).toLowerCase())}`}>
                 {product.category}
               </Link>
               <ChevronRight size={12} />
@@ -394,58 +294,48 @@ export default function ProductDetail() {
           <span>{product.name}</span>
         </nav>
 
-        <div className="product-detail-page">
-          <div className="product-detail-gallery-wrap">
-            <ProductGallery images={images} name={product.name} />
-          </div>
+        <div className="pdp__hero">
+          <ProductGallery images={images} name={product.name} />
 
-          <div className="product-detail-buybox">
-            {badgeLabel && (
-              <span className="product-detail-choice-badge">{badgeLabel}</span>
-            )}
+          <aside className="pdp__panel">
+            {badgeLabel && <span className="pdp__badge">{badgeLabel}</span>}
+            {eyebrow && <p className="pdp__eyebrow">{eyebrow}</p>}
 
-            <h1 className="product-detail-title">{product.name}</h1>
+            <h1 className="pdp__title">{product.name}</h1>
 
-            {product.brand && (
-              <p className="product-detail-brand">Marque : {product.brand}</p>
-            )}
-
-            <div className="product-detail-meta-row">
-              <ProductRating rating={rating} reviewCount={reviewCount} size="lg" />
+            <div className="pdp__meta">
+              <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
               {soldCount > 0 && (
-                <span className="product-detail-sold">
-                  <Star size={12} fill="#000" color="#000" />
+                <span className="pdp__sold">
+                  <Star size={12} fill="#FF6B00" color="#FF6B00" />
                   {soldCount > 999 ? `${Math.floor(soldCount / 1000)}k+` : soldCount} vendus
                 </span>
               )}
             </div>
 
-            <div className="product-detail-price">
-              <span className="product-detail-price__current">{formatCFA(displayPrice)}</span>
-              {hasPromo && (
-                <>
-                  <span className="product-detail-price__old">{formatCFA(price)}</span>
-                  {discount > 0 && (
-                    <span className="product-detail-price__discount">-{discount}%</span>
-                  )}
-                </>
+            <div className="pdp__price-block">
+              <div className="pdp__price">
+                <span className="pdp__price-current">{formatCFA(displayPrice)}</span>
+                {hasPromo && (
+                  <>
+                    <span className="pdp__price-old">{formatCFA(price)}</span>
+                    {discount > 0 && <span className="pdp__price-off">-{discount}%</span>}
+                  </>
+                )}
+              </div>
+              {hasPromo && savings > 0 && (
+                <p className="pdp__savings">Économisez {formatCFA(savings)}</p>
               )}
-            </div>
-            {hasPromo && savings > 0 && (
-              <p className="product-detail-savings">
-                Vous économisez {formatCFA(savings)}
+              <p className={`pdp__stock ${!inStock ? 'is-out' : isLowStock ? 'is-low' : 'is-in'}`}>
+                {!inStock
+                  ? 'Rupture de stock'
+                  : isLowStock
+                    ? `Plus que ${stock} en stock`
+                    : 'En stock'}
               </p>
-            )}
-
-            <div className="product-detail-stock">
-              {!inStock ? (
-                <span className="is-out">Rupture de stock</span>
-              ) : isLowStock ? (
-                <span className="is-low">Plus que {stock} disponibles</span>
-              ) : (
-                <span className="is-in">En stock</span>
-              )}
             </div>
+
+            <div className="pdp__divider" />
 
             <ProductVariants
               product={product}
@@ -458,19 +348,17 @@ export default function ProductDetail() {
             />
 
             {inStock && (
-              <div className="product-detail-qty-row">
-                <span className="product-detail-qty-label">Quantité</span>
+              <div className="pdp__qty-row">
+                <span className="pdp__qty-label">Quantité</span>
                 <QuantitySelector value={qty} onChange={setQty} max={stock} />
-                <p className="product-detail-qty-total">
-                  Total : {formatCFA(displayPrice * qty)}
-                </p>
+                <p className="pdp__qty-total">Sous-total : {formatCFA(displayPrice * qty)}</p>
               </div>
             )}
 
-            <div className="product-detail-cta">
+            <div className="pdp__actions">
               <button
                 type="button"
-                className="product-detail-cta__cart"
+                className="pdp__btn pdp__btn--primary"
                 onClick={handleAddToCart}
                 disabled={!inStock}
               >
@@ -479,7 +367,7 @@ export default function ProductDetail() {
               </button>
               <button
                 type="button"
-                className="product-detail-cta__buy"
+                className="pdp__btn pdp__btn--secondary"
                 onClick={handleBuyNow}
                 disabled={!inStock}
               >
@@ -487,77 +375,41 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            {hasDelivery && (
-              <div
-                className={`product-detail-delivery-preview ${
-                  freeShippingZone ? 'is-free' : ''
-                }`}
-              >
-                <Truck size={16} className="shrink-0" />
-                <span>
-                  {freeShippingZone ? 'Livraison gratuite disponible' : 'Livraison disponible sur votre zone'}
-                </span>
-              </div>
-            )}
+            <ul className="pdp__perks">
+              <li>
+                <Truck size={16} />
+                {freeShippingZone ? 'Livraison gratuite disponible' : hasDelivery ? 'Livraison disponible' : 'Livraison selon zone'}
+              </li>
+              <li><ShieldCheck size={16} /> Paiement sécurisé</li>
+              <li><RotateCcw size={16} /> Retours selon conditions</li>
+              <li><CreditCard size={16} /> Mobile Money accepté</li>
+            </ul>
 
             {sellerName && (
-              <div className="product-detail-seller">
-                <p className="product-detail-seller__label">Vendu par</p>
-                <div className="product-detail-seller__row">
-                  <div className="product-detail-seller__avatar">
-                    {(sellerName.charAt(0) || 'V').toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="product-detail-seller__name">
-                      {sellerName}
-                      {(product?.sellerVerified || product?.isVendorCertified || product?.isCertified) && (
-                        <span className="product-detail-seller__badge" title="Vendeur certifié">
-                          ✓ Certifié
-                        </span>
-                      )}
-                    </p>
-                    <div>
-                      {rating != null && reviewCount > 0 && (
-                        <ProductRating rating={rating} reviewCount={reviewCount} />
-                      )}
-                    </div>
-                  </div>
+              <div className="pdp__seller">
+                <div className="pdp__seller-avatar">{(sellerName.charAt(0) || 'V').toUpperCase()}</div>
+                <div>
+                  <p className="pdp__seller-label">Vendu par</p>
+                  <p className="pdp__seller-name">
+                    {sellerName}
+                    {(product?.sellerVerified || product?.isVendorCertified || product?.isCertified) && (
+                      <span className="pdp__seller-badge"><BadgeCheck size={12} /> Certifié</span>
+                    )}
+                  </p>
                 </div>
-                {sellerId && (
-                  <button
-                    type="button"
-                    className="product-detail-seller__cta"
-                    onClick={handleContactSeller}
-                  >
-                    <MessageCircle size={14} />
-                    Contacter le vendeur
-                  </button>
-                )}
               </div>
             )}
-
-            {(hasDelivery || hasWarranty) && (
-              <div className="product-detail-trust">
-                {hasDelivery && (
-                  <span><Truck size={14} /> Livraison</span>
-                )}
-                {hasWarranty && (
-                  <span><ShieldCheck size={14} /> Garantie</span>
-                )}
-                <span><RotateCcw size={14} /> Retours selon conditions</span>
-              </div>
-            )}
-          </div>
+          </aside>
         </div>
 
-        <nav ref={stickyNavRef} className="product-detail-sticky-nav">
-          <div className="product-detail-sticky-nav__inner">
-            {SECTIONS.map(({ id: sectionId, label }) => (
+        <nav ref={tabsRef} className="pdp__tabs" aria-label="Sections produit">
+          <div className="pdp__tabs-inner">
+            {TABS.map(({ id: tabId, label }) => (
               <button
-                key={sectionId}
+                key={tabId}
                 type="button"
-                className={activeSection === sectionId ? 'is-active' : ''}
-                onClick={() => scrollToSection(sectionId)}
+                className={`pdp__tab ${activeTab === tabId ? 'is-active' : ''}`}
+                onClick={() => scrollToSection(tabId)}
               >
                 {label}
               </button>
@@ -565,20 +417,18 @@ export default function ProductDetail() {
           </div>
         </nav>
 
-        <section id="section-description" className="product-detail-section">
-          <h2 className="product-detail-section__title">Description du produit</h2>
-          <ExpandableText
-            text={product.description || product.shortDescription || ''}
-          />
+        <section id="section-description" className="pdp__section">
+          <h2 className="pdp__section-title">Description</h2>
+          <ExpandableText text={product.description || product.shortDescription || ''} />
           {!product.description && !product.shortDescription && (
-            <p className="product-detail-section__empty">Aucune description disponible.</p>
+            <p className="pdp__empty">Aucune description disponible.</p>
           )}
         </section>
 
-        <section id="section-specs" className="product-detail-section">
-          <h2 className="product-detail-section__title">Caractéristiques</h2>
+        <section id="section-specs" className="pdp__section">
+          <h2 className="pdp__section-title">Détails du produit</h2>
           {specifications.length > 0 ? (
-            <table className="product-detail-specs">
+            <table className="pdp__specs">
               <tbody>
                 {specifications.map((row) => (
                   <tr key={row.key}>
@@ -589,7 +439,7 @@ export default function ProductDetail() {
               </tbody>
             </table>
           ) : (
-            <p className="product-detail-section__empty">Aucune caractéristique disponible.</p>
+            <p className="pdp__empty">Aucune caractéristique renseignée.</p>
           )}
         </section>
 
@@ -601,16 +451,15 @@ export default function ProductDetail() {
           loading={reviewsLoading}
         />
 
-        <section id="section-delivery" className="product-detail-section">
-          <h2 className="product-detail-section__title">Informations livraison</h2>
+        <section id="section-delivery" className="pdp__section">
+          <h2 className="pdp__section-title">Livraison</h2>
           {hasDelivery ? (
-            <div className="product-detail-delivery">
+            <div className="pdp__delivery">
               {hasShippingInfo && <p>{product.shippingInfo}</p>}
               {deliveryZones.length > 0 && (
                 <ul>
                   {deliveryZones.map((zone, i) => {
-                    const locality =
-                      zone.locality || zone.area || zone.country || 'Zone';
+                    const locality = zone.locality || zone.area || zone.country || 'Zone';
                     const time = zone.deliveryTime;
                     const priceLabel =
                       zone.freeShipping || Number(zone.price) === 0
@@ -621,8 +470,8 @@ export default function ProductDetail() {
                     return (
                       <li key={i}>
                         <strong>{locality}</strong>
-                        {time && ` Délai : ${time}`}
-                        {priceLabel && ` ${priceLabel}`}
+                        {time && ` · ${time}`}
+                        {priceLabel && ` · ${priceLabel}`}
                       </li>
                     );
                   })}
@@ -630,65 +479,46 @@ export default function ProductDetail() {
               )}
             </div>
           ) : (
-            <p className="product-detail-section__empty">
-              Informations de livraison non disponibles pour ce produit.
-            </p>
+            <p className="pdp__empty">Informations de livraison non disponibles.</p>
           )}
           {hasWarranty && (
-            <p className="product-detail-warranty">
+            <p className="pdp__empty" style={{ marginTop: 12 }}>
               <strong>Garantie :</strong> {product.warranty}
             </p>
           )}
         </section>
 
         {similarProducts.length > 0 && (
-          <section className="product-detail-similar">
-            <div className="product-detail-similar__head">
-              <h2 className="product-detail-similar__title">Produits similaires</h2>
+          <section className="pdp__similar">
+            <div className="pdp__similar-head">
+              <h2 className="pdp__similar-title">Vous aimerez aussi</h2>
               {product.category && (
                 <Link
                   to={`/category/${encodeURIComponent(String(product.category).toLowerCase())}`}
-                  className="product-detail-similar__link"
+                  className="pdp__similar-link"
                 >
-                  Voir plus
+                  Voir tout
                 </Link>
               )}
             </div>
-            <div className="product-detail-similar__grid">
+            <div className="pdp__similar-grid">
               {similarProducts.slice(0, 8).map((item) => (
-                <ProductCard
-                  key={item._id || item.id}
-                  product={item}
-                  onAddToCart={addToCart}
-                />
+                <ProductCard key={item._id || item.id} product={item} onAddToCart={addToCart} />
               ))}
             </div>
           </section>
         )}
       </div>
 
-      <div className="product-detail-mobile-bar">
-        <div className="product-detail-mobile-bar__price">
-          <span className="product-detail-mobile-bar__price-label">Prix</span>
+      <div className="pdp__mobile-bar">
+        <div className="pdp__mobile-price">
           <strong>{formatCFA(displayPrice)}</strong>
-          {hasPromo && (
-            <span className="product-detail-mobile-bar__price-old">{formatCFA(price)}</span>
-          )}
+          {hasPromo && <span className="pdp__mobile-price-old">{formatCFA(price)}</span>}
         </div>
-        <button
-          type="button"
-          className="product-detail-mobile-bar__cart"
-          onClick={handleAddToCart}
-          disabled={!inStock}
-        >
-          {isInCart ? 'Au panier' : 'Panier'}
+        <button type="button" className="pdp__mobile-btn pdp__mobile-btn--cart" onClick={handleAddToCart} disabled={!inStock}>
+          Panier
         </button>
-        <button
-          type="button"
-          className="product-detail-mobile-bar__buy"
-          onClick={handleBuyNow}
-          disabled={!inStock}
-        >
+        <button type="button" className="pdp__mobile-btn pdp__mobile-btn--buy" onClick={handleBuyNow} disabled={!inStock}>
           Acheter
         </button>
       </div>

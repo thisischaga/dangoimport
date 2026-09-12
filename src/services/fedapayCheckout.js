@@ -301,7 +301,7 @@ function buildCartBasePayload({
           .map((item) => item.vendorName)
           .filter(Boolean)
       ),
-    ].join(', ') || 'Dangoimport';
+    ].join(', ') || 'Dango Import';
 
   const totalQty = cartItems.reduce(
     (sum, item) =>
@@ -607,7 +607,7 @@ export function buildCartFedapayPayload({
 
     description:
       description ||
-      `Commande Dangoimport - ${
+      `Commande Dango Import - ${
         base.productSummary
       }`.slice(0, 200),
 

@@ -7,12 +7,12 @@ const SECTIONS = [
   {
     id: "champ",
     title: "1. CHAMP D'APPLICATION",
-    content: `La présente Politique s’applique :\n• aux produits commercialisés sur la Marketplace locale Dangoimport (produits proposés par des vendeurs partenaires référencés au Bénin et au Togo) ;\n• aux services de livraison organisés ou coordonnés par Dangoimport ;\n• aux commandes spécifiques d’importation via le service Import Chine sur devis, sous réserve des dispositions particulières prévues à l’article 11 ci-dessous.`,
+    content: `La présente Politique s’applique :\n• aux produits commercialisés sur la Marketplace locale Dango Import (produits proposés par des vendeurs partenaires référencés au Bénin et au Togo) ;\n• aux services de livraison organisés ou coordonnés par Dango Import ;\n• aux commandes spécifiques d’importation via le service Import Chine sur devis, sous réserve des dispositions particulières prévues à l’article 11 ci-dessous.`,
   },
   {
     id: "delai",
     title: "2. DÉLAI DE RÉCLAMATION ET DE DEMANDE DE RETOUR",
-    content: `Toute demande de retour, de remboursement ou de réclamation relative à un produit livré doit être introduite dans un délai maximum de soixante-douze (72) heures suivant la confirmation de livraison.\n\nPassé ce délai :\n• la commande est réputée acceptée ;\n• le produit est considéré comme conforme ;\n• aucune réclamation ne pourra être garantie, sauf vice caché ou garantie spécifique du vendeur.\n\nLes demandes peuvent être adressées via l’espace client, par email, ou via le canal officiel WhatsApp de Dangoimport.`,
+    content: `Toute demande de retour, de remboursement ou de réclamation relative à un produit livré doit être introduite dans un délai maximum de soixante-douze (72) heures suivant la confirmation de livraison.\n\nPassé ce délai :\n• la commande est réputée acceptée ;\n• le produit est considéré comme conforme ;\n• aucune réclamation ne pourra être garantie, sauf vice caché ou garantie spécifique du vendeur.\n\nLes demandes peuvent être adressées via l’espace client, par email, ou via le canal officiel WhatsApp de Dango Import.`,
   },
   {
     id: "conditions",
@@ -32,7 +32,7 @@ const SECTIONS = [
   {
     id: "remboursement",
     title: "6. MODALITÉS DE REMBOURSEMENT",
-    content: `6.1 Produit défectueux / erreur vendeur\nLe client bénéficie d’un remboursement comprenant le prix du produit et les frais de livraison.\n\n6.2 Commande non livrée\nEn cas de commande non livrée pour une raison imputable à Dangoimport ou au vendeur, le client bénéficie d’un remboursement intégral (100 %).\n\n6.3 Délais de remboursement\nAprès validation, les remboursements Mobile Money sont traités sous quelques jours ouvrés. Les remboursements bancaires dépendent des délais interbancaires.`,
+    content: `6.1 Produit défectueux / erreur vendeur\nLe client bénéficie d’un remboursement comprenant le prix du produit et les frais de livraison.\n\n6.2 Commande non livrée\nEn cas de commande non livrée pour une raison imputable à Dango Import ou au vendeur, le client bénéficie d’un remboursement intégral (100 %).\n\n6.3 Délais de remboursement\nAprès validation, les remboursements Mobile Money sont traités sous quelques jours ouvrés. Les remboursements bancaires dépendent des délais interbancaires.`,
   },
   {
     id: "echec-livraison",
@@ -47,27 +47,27 @@ const SECTIONS = [
   {
     id: "procedure",
     title: "9. PROCÉDURE DE RETOUR",
-    content: `• Contactez le service client via WhatsApp avec le numéro de commande + photos/vidéos explicites.\n• Attendez la validation de Dangoimport.\n• Retournez le produit dans son état d’origine (emballage compris).\n• Une fois le produit vérifié et accepté, le remboursement ou l’échange est traité.`
+    content: `• Contactez le service client via WhatsApp avec le numéro de commande + photos/vidéos explicites.\n• Attendez la validation de Dango Import.\n• Retournez le produit dans son état d’origine (emballage compris).\n• Une fois le produit vérifié et accepté, le remboursement ou l’échange est traité.`
   },
   {
     id: "import",
     title: "10. CAS PARTICULIER – SERVICE IMPORT CHINE (SUR DEVIS)",
-    content: `Les commandes réalisées via le service Import sur devis sont non annulables et non remboursables, sauf en cas de :\n• Défaut majeur ou vice caché\n• Non-conformité substantielle et manifeste\n• Fraude avérée\nLes acomptes versés pour le sourcing et les négociations restent acquis à Dangoimport.`
+    content: `Les commandes réalisées via le service Import sur devis sont non annulables et non remboursables, sauf en cas de :\n• Défaut majeur ou vice caché\n• Non-conformité substantielle et manifeste\n• Fraude avérée\nLes acomptes versés pour le sourcing et les négociations restent acquis à Dango Import.`
   },
   {
     id: "abus",
     title: "11. LUTTE CONTRE LES ABUS",
-    content: `Dangoimport se réserve le droit de refuser toute demande abusive, frauduleuse ou répétée. En cas d’abus constaté, des mesures (refus de retour, suspension de compte) pourront être prises.`
+    content: `Dango Import se réserve le droit de refuser toute demande abusive, frauduleuse ou répétée. En cas d’abus constaté, des mesures (refus de retour, suspension de compte) pourront être prises.`
   },
   {
     id: "role",
-    title: "12. RÔLE DE Dangoimport",
-    content: `Dangoimport agit en tant qu’intermédiaire et coordinateur. Elle facilite le traitement des retours tout en veillant à un équilibre équitable entre clients et vendeurs partenaires.`
+    title: "12. RÔLE DE Dango Import",
+    content: `Dango Import agit en tant qu’intermédiaire et coordinateur. Elle facilite le traitement des retours tout en veillant à un équilibre équitable entre clients et vendeurs partenaires.`
   },
   {
     id: "modification",
     title: "13. MODIFICATION DE LA POLITIQUE",
-    content: `Dangoimport se réserve le droit de modifier cette politique à tout moment. La version en vigueur est celle publiée sur le site.`
+    content: `Dango Import se réserve le droit de modifier cette politique à tout moment. La version en vigueur est celle publiée sur le site.`
   },
   {
     id: "contact",
@@ -92,7 +92,7 @@ export default function PolitiqueRetour() {
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
-            <strong>Important :</strong> Dangoimport place la satisfaction du client au cœur de ses priorités. Cette politique définit de manière claire les règles relatives aux retours, échanges et remboursements.
+            <strong>Important :</strong> Dango Import place la satisfaction du client au cœur de ses priorités. Cette politique définit de manière claire les règles relatives aux retours, échanges et remboursements.
           </p>
           <p className="text-gray-400 text-sm md:text-base">
             Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">12 mai 2026</span>

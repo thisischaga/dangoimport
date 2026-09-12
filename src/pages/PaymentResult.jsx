@@ -62,7 +62,7 @@ const PaymentResult = () => {
           setMessage('Commande confirmée, mais les codes QR ne sont pas encore prêts. Nous réessayons.');
           return false;
         }
-        setMessage('Paiement réussi ! Vos codes QR sont prêts.');
+        setMessage('Paiement réussi ! Vos codes QR sont prêts. Un email récapitulatif avec vos QR codes vient de vous être envoyé — pensez à vérifier votre boîte mail (et vos spams).');
         return true;
       } catch (err) {
         console.error('Erreur de récupération des QR:', err);
@@ -214,12 +214,22 @@ const PaymentResult = () => {
           </div>
 
           {qrTokens.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 text-sm text-orange-900">
+              <p className="font-bold m-0">Email de confirmation envoyé</p>
+              <p className="mt-1 mb-0 leading-relaxed">
+                Vos codes QR et le récapitulatif de commande vous ont été envoyés par email.
+                Vérifiez votre boîte de réception et vos courriers indésirables.
+              </p>
+            </div>
+          )}
+
+          {qrTokens.length > 0 && (
             <div className="mt-8">
               <h2 className="text-xl font-black text-[#282828] mb-4">Vos codes QR</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {qrTokens.map((tokenData) => (
                   <div key={tokenData.token} className="rounded-2xl border border-gray-200 p-4 bg-gray-50">
-                    <p className="text-sm text-gray-600 mb-3">Vendeur : {tokenData.vendorName || tokenData.vendorId || 'Dangoimport'}</p>
+                    <p className="text-sm text-gray-600 mb-3">Vendeur : {tokenData.vendorName || tokenData.vendorId || 'Dango Import'}</p>
                     <div className="aspect-square overflow-hidden rounded-2xl bg-white p-4 flex items-center justify-center">
                       {qrImages[tokenData.token] ? (
                         <img src={qrImages[tokenData.token]} alt="QR code" className="max-w-full max-h-full" />

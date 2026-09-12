@@ -259,14 +259,23 @@ function PaymentResultModal({
             <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500">
               {success
                 ? 'Votre paiement a été confirmé. Votre commande est maintenant prise en charge.'
-                : 'Votre paiement n’a pas pu être confirmé. Aucun montant ne doit être considéré comme validé par DangoImport.'}
+                : 'Votre paiement n’a pas pu être confirmé. Aucun montant ne doit être considéré comme validé par Dango Import.'}
             </p>
 
 
             {/* Success message */}
             {success && (
-              <div className="mt-6 rounded-2xl bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-700">
-                Votre commande a bien été enregistrée.
+              <div className="mt-6 space-y-3 text-left">
+                <div className="rounded-2xl bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-700">
+                  Votre commande a bien été enregistrée.
+                </div>
+                <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-4 text-sm text-orange-900">
+                  <p className="font-bold m-0">Email de confirmation</p>
+                  <p className="mt-1 mb-0 leading-relaxed">
+                    Un email avec vos codes QR et le détail de votre commande vient de vous être envoyé.
+                    Vérifiez votre boîte mail et vos spams.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -920,7 +929,7 @@ function StepShipping({
                       <p className="text-sm font-black text-[#282828]">
                         {isSeller
                           ? 'Livraison par le vendeur'
-                          : 'Livraison par DangoImport'}
+                          : 'Livraison par Dango Import'}
                       </p>
 
                       <p className="text-xs text-gray-500">
@@ -942,7 +951,7 @@ function StepShipping({
                         !group.sellerDeliveryAvailable && (
                           <p className="mt-1 text-[11px] text-gray-400">
                             Adresse hors zone vendeur —
-                            DangoImport prend le relais
+                            Dango Import prend le relais
                             automatiquement.
                           </p>
                         )}
@@ -996,7 +1005,7 @@ function StepShipping({
                 <p className="text-sm font-black text-[#282828]">
                   {overallProvider === 'SELLER'
                     ? 'Livraison par le vendeur'
-                    : 'Livraison par DangoImport'}
+                    : 'Livraison par Dango Import'}
                 </p>
 
                 <p className="text-xs text-gray-500">
@@ -1115,8 +1124,8 @@ function StepPayment({
                 {provider === 'SELLER'
                   ? 'Le vendeur'
                   : provider === 'HYBRID'
-                  ? 'Vendeur + DangoImport'
-                  : 'DangoImport'}
+                  ? 'Vendeur + Dango Import'
+                  : 'Dango Import'}
               </p>
 
             </div>
@@ -1161,7 +1170,7 @@ function StepPayment({
 
         <span className="text-sm leading-relaxed text-gray-600">
           J'ai lu et j'accepte les conditions
-          générales de vente de Dangoimport.
+          générales de vente de Dango Import.
         </span>
 
       </label>
@@ -1998,7 +2007,7 @@ export default function Checkout() {
       deliveryCalculation?.provider ===
       'SELLER'
         ? 'Vendeur'
-        : 'DangoImport';
+        : 'Dango Import';
 
 
   // ==========================================================
@@ -2804,7 +2813,7 @@ export default function Checkout() {
               getShippingLabel(),
 
             description:
-              'Commande Dangoimport',
+              'Commande Dango Import',
 
             type: 'cart',
           });

@@ -163,7 +163,7 @@ const Register = () => {
       <div className="w-full bg-white py-4 px-6 sm:px-10 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <div>
-            <p className="text-[18px] font-black text-gray-900 leading-none">Dangoimport</p>
+            <p className="text-[18px] font-black text-gray-900 leading-none">Dango Import</p>
           </div>
         </div>
         <div className="text-[11px] sm:text-sm text-gray-500 leading-tight text-left sm:text-right">
@@ -177,7 +177,7 @@ const Register = () => {
         <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-b-2xl shadow-xl border border-gray-100 my-auto">
           <div className="flex flex-col items-center">
             <h2 className="text-center text-3xl font-black text-gray-900">{step === 1 ? 'Créer un compte' : 'Vérifiez votre email'}</h2>
-            <p className="mt-2 text-center text-sm text-gray-600">{step === 1 ? 'Rejoignez Dangoimport et commencez à importer.' : `Nous avons envoyé un code à ${formData.userEmail}`}</p>
+            <p className="mt-2 text-center text-sm text-gray-600">{step === 1 ? 'Rejoignez Dango Import et commencez à importer.' : `Nous avons envoyé un code à ${formData.userEmail}`}</p>
           </div>
           {GOOGLE_CLIENT_ID ? (
             <div id="google-signup-button" className="w-full min-h-[44px]" />

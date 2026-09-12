@@ -165,7 +165,7 @@ const SourcingForm = () => {
         body: JSON.stringify({
           amount: 5000,
           currency: 'XOF',
-          description: 'Etude Sourcing Dangoimport',
+          description: 'Etude Sourcing Dango Import',
           callback_url: callbackUrl,
           deliveryCountry: form.country,
           customer: {

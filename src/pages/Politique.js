@@ -78,7 +78,7 @@ export default function Politique() {
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
-            <strong>Votre vie privée compte.</strong> Dangoimport s'engage à protéger vos données personnelles avec le plus grand soin. Cette politique vous explique de manière transparente comment nous les utilisons.
+            <strong>Votre vie privée compte.</strong> Dango Import s'engage à protéger vos données personnelles avec le plus grand soin. Cette politique vous explique de manière transparente comment nous les utilisons.
           </p>
           <p className="text-gray-400 text-sm md:text-base">
             Dernière mise à jour : <span className="text-[#ffdc2b] font-bold">Septembre 2026</span>
@@ -138,7 +138,7 @@ export default function Politique() {
           <p className="text-gray-500 text-sm">
             Voir aussi nos{" "}
             <Link to="/cgu" className="text-[#e6c600] font-bold underline">Conditions Générales d'Utilisation</Link>
-            {" "}— © 2026 Dangoimport Group. Tous droits réservés.
+            {" "}— © 2026 Dango Import Group. Tous droits réservés.
           </p>
         </div>
       </article>

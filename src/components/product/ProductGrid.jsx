@@ -1010,19 +1010,6 @@ function ProductGrid({
             RÉSULTATS — nombre de produits affichés
         ================================================= */}
 
-        {!loading && tabFiltered.length > 0 && (
-          <p
-            className="px-2 sm:px-0"
-            style={{
-              fontSize: '13px',
-              color: '#8a8a8a',
-              fontWeight: 600,
-              margin: '18px 0 12px',
-            }}
-          >
-            {tabFiltered.length} produit{tabFiltered.length > 1 ? 's' : ''}
-          </p>
-        )}
 
         {/* ================================================
             PRODUCT GRID

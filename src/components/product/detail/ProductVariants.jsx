@@ -98,7 +98,7 @@ function ProductVariants({
               <button
                 key={s}
                 type="button"
-                className={`product-variants__chip ${selectedSize === s ? 'is-selected' : ''}`}
+                className={`product-variants__chip product-variants__chip--size ${selectedSize === s ? 'is-selected' : ''}`}
                 onClick={() => onSelectSize?.(s)}
               >
                 {s}

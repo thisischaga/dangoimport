@@ -307,9 +307,9 @@ const Footer = () => {
               <Link
                 to="/"
                 className="inline-flex items-center"
-                aria-label="Dangoimport"
+                aria-label="Dango Import"
               >
-                <h1 className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">Dangoimport</h1>
+                <h1 className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">Dango Import</h1>
 
               </Link>
 
@@ -582,7 +582,7 @@ const Footer = () => {
                 </h4>
 
                 <p className="mt-2 text-sm text-[#6b7280]">
-                  Retrouvez Dangoimport sur nos réseaux sociaux.
+                  Retrouvez Dango Import sur nos réseaux sociaux.
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">

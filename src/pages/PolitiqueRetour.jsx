@@ -8,8 +8,8 @@ const SECTIONS = [
     id: "champ",
     title: "1. Champ d’application",
     content: `La présente Politique s’applique :
-• aux produits commercialisés sur la Marketplace locale Dangoimport (produits proposés par des vendeurs partenaires référencés au Bénin et au Togo) ;
-• aux services de livraison organisés ou coordonnés par Dangoimport ;
+• aux produits commercialisés sur la Marketplace locale Dango Import (produits proposés par des vendeurs partenaires référencés au Bénin et au Togo) ;
+• aux services de livraison organisés ou coordonnés par Dango Import ;
 • aux commandes spécifiques d’importation via le service Import Chine sur devis, sous réserve des dispositions particulières prévues à l’article 11 ci-dessous.`,
   },
   {
@@ -22,7 +22,7 @@ Passé ce délai :
 • le produit est considéré comme conforme ;
 • aucune réclamation ne pourra être garantie, sauf vice caché ou garantie spécifique du vendeur.
 
-Les demandes peuvent être adressées via l’espace client, par email, ou via le canal officiel WhatsApp de Dangoimport.`,
+Les demandes peuvent être adressées via l’espace client, par email, ou via le canal officiel WhatsApp de Dango Import.`,
   },
   {
     id: "conditions",
@@ -65,7 +65,7 @@ Lorsqu’un retour est accepté à titre de geste commercial (hors défaut ou er
 Le client bénéficie d’un remboursement comprenant le prix du produit et les frais de livraison.
 
 6.2 Commande non livrée
-En cas de commande non livrée pour une raison imputable à Dangoimport ou au vendeur, le client bénéficie d’un remboursement intégral (100 %).
+En cas de commande non livrée pour une raison imputable à Dango Import ou au vendeur, le client bénéficie d’un remboursement intégral (100 %).
 
 6.3 Délais de remboursement
 Après validation, les remboursements Mobile Money sont traités sous quelques jours ouvrés. Les remboursements bancaires dépendent des délais interbancaires.`,
@@ -84,7 +84,7 @@ Après validation, les remboursements Mobile Money sont traités sous quelques j
     id: "procedure",
     title: "8. PROCÉDURE DE RETOUR",
     content: `1. Contactez le service client via WhatsApp avec le numéro de commande + photos/vidéos explicites.
-2. Attendez la validation de Dangoimport.
+2. Attendez la validation de Dango Import.
 3. Retournez le produit dans son état d’origine (emballage compris).
 4. Une fois le produit vérifié et accepté, le remboursement ou l’échange est traité.`
   },
@@ -95,22 +95,22 @@ Après validation, les remboursements Mobile Money sont traités sous quelques j
 • Défaut majeur ou vice caché
 • Non-conformité substantielle et manifeste
 • Fraude avérée
-Les acomptes versés pour le sourcing et les négociations restent acquis à Dangoimport.`
+Les acomptes versés pour le sourcing et les négociations restent acquis à Dango Import.`
   },
   {
     id: "abus",
     title: "10. LUTTE CONTRE LES ABUS",
-    content: `Dangoimport se réserve le droit de refuser toute demande abusive, frauduleuse ou répétée. En cas d’abus constaté, des mesures (refus de retour, suspension de compte) pourront être prises.`
+    content: `Dango Import se réserve le droit de refuser toute demande abusive, frauduleuse ou répétée. En cas d’abus constaté, des mesures (refus de retour, suspension de compte) pourront être prises.`
   },
   {
     id: "role",
-    title: "11. RÔLE DE Dangoimport",
-    content: `Dangoimport agit en tant qu’intermédiaire et coordinateur. Elle facilite le traitement des retours tout en veillant à un équilibre équitable entre clients et vendeurs partenaires.`
+    title: "11. RÔLE DE Dango Import",
+    content: `Dango Import agit en tant qu’intermédiaire et coordinateur. Elle facilite le traitement des retours tout en veillant à un équilibre équitable entre clients et vendeurs partenaires.`
   },
   {
     id: "modification",
     title: "12. MODIFICATION DE LA POLITIQUE",
-    content: `Dangoimport se réserve le droit de modifier cette politique à tout moment. La version en vigueur est celle publiée sur le site.`
+    content: `Dango Import se réserve le droit de modifier cette politique à tout moment. La version en vigueur est celle publiée sur le site.`
   },
   {
     id: "contact",

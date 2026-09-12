@@ -172,7 +172,7 @@ const OAuthSuccess = () => {
                     text-gray-500
                     mt-2
                 ">
-                    Préparation de votre compte Dangoimport...
+                    Préparation de votre compte Dango Import...
                 </p>
 
             </div>

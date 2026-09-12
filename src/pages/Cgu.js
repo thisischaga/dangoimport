@@ -8,7 +8,7 @@ const SECTIONS = [
   {
     id: 'prelude',
     title: 'CONDITIONS GÉNÉRALES D’UTILISATION ET DE VENTE (CGU / CGV)',
-    content: `Plateforme : dangoimport.com\nDernière mise à jour : Septembre 2026\n\nLes présentes Conditions Générales d'Utilisation et de Vente visent à définir les droits et obligations des utilisateurs de la marketplace Dangoimport opérée par DANGO HUB. Toute commande implique l'acceptation sans réserve des présentes conditions.`,
+    content: `Plateforme : dangoimport.com\nDernière mise à jour : Septembre 2026\n\nLes présentes Conditions Générales d'Utilisation et de Vente visent à définir les droits et obligations des utilisateurs de la marketplace Dango Import opérée par DANGO HUB. Toute commande implique l'acceptation sans réserve des présentes conditions.`,
   },
   {
     id: 'mentions',
@@ -105,7 +105,7 @@ export default function Cgu() {
       <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="bg-[#fffbeb] border-l-4 border-[#ffdc2b] p-6 rounded-r-2xl">
           <p className="text-sm text-[#2d3748] leading-relaxed font-medium">
-            <strong>Important :</strong> En utilisant la plateforme Dangoimport, vous acceptez les présentes CGU dans leur intégralité. Nous vous encourageons à les lire attentivement. Pour toute question, contactez-nous à{' '}
+            <strong>Important :</strong> En utilisant la plateforme Dango Import, vous acceptez les présentes CGU dans leur intégralité. Nous vous encourageons à les lire attentivement. Pour toute question, contactez-nous à{' '}
             <a href="mailto:contact@dangoimport.com" className="underline font-bold text-[#2d3748]">contact@dangoimport.com</a>.
           </p>
           <p className="text-gray-400 text-sm md:text-base">
@@ -148,7 +148,7 @@ export default function Cgu() {
             <Link to="/cgu-vendeur" className="text-[#e6c600] font-bold underline">CGU Vendeurs</Link>
             {' '}et notre{' '}
             <Link to="/politique-de-confidentialite" className="text-[#e6c600] font-bold underline">Politique de Confidentialité</Link>
-            {' '}— © 2026 Dangoimport Group. Tous droits réservés.
+            {' '}— © 2026 Dango Import Group. Tous droits réservés.
           </p>
         </div>
       </article>

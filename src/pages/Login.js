@@ -451,7 +451,7 @@ const Login = () => {
                     <div>
 
                         <p className="text-[18px] font-black text-gray-900 leading-none">
-                            Dangoimport
+                            Dango Import
                         </p>
 
                     </div>
@@ -490,7 +490,7 @@ const Login = () => {
                             </h1>
 
                             <p className="text-sm text-gray-500 text-center mb-8">
-                                Accédez à votre espace Dangoimport
+                                Accédez à votre espace Dango Import
                             </p>
 
                             {/* GOOGLE */}

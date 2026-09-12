@@ -3,11 +3,12 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
   Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LogOut,
-  Tag, Flame, HelpCircle, ShoppingBag, MessageSquare,
+  Tag, Flame, HelpCircle, ShoppingBag,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
 import { useCart } from '../context/CartContext';
+import PhoneUpdateBanner from './PhoneUpdateBanner';
 
 /* ------------------------------------------------------------------ */
 /* Tokens partagés — un seul jeu de règles pour tout le header, afin   */
@@ -76,7 +77,7 @@ function buildSearchSuggestions(items, query) {
 }
 
 /**
- * Logo "Dango import" — wordmark seul. La distinction entre les deux mots
+ * Logo "Dango Import" — wordmark seul. La distinction entre les deux mots
  * se fait par la graisse ET la couleur (pas juste la couleur), ce qui lit
  * comme un choix typographique plutôt qu'un simple mot souligné en orange.
  */
@@ -86,12 +87,12 @@ function BrandLogo({ onClick }) {
       type="button"
       onClick={onClick}
       className={`flex shrink-0 items-center gap-2 rounded-md ${FOCUS_RING}`}
-      aria-label="Dango import — accueil"
+      aria-label="Dango Import — accueil"
     >
 
       <span className="flex items-baseline gap-0.5 whitespace-nowrap text-lg tracking-tight sm:text-xl">
-        <span className="font-extrabold text-slate-900">Dango</span>
-        <span className="font-semibold text-[#FF6B00]">import</span>
+        <span className="font-extrabold text-slate-900">Dango </span>
+        <span className="font-semibold text-[#FF6B00]">Import</span>
       </span>
     </button>
   );
@@ -143,14 +144,9 @@ function MobileNavDrawer({ open, onClose, user, cartCount, onLogout, navigate })
                 {user ? (
                   <div className="space-y-3">
                     <p className="text-sm font-semibold text-slate-900">Bonjour, {userName}</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button type="button" onClick={() => go('/mes-commandes')} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-700">
-                        <ShoppingBag size={15} /> Commandes
-                      </button>
-                      <button type="button" onClick={() => go('/messages')} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-700">
-                        <MessageSquare size={15} /> Messages
-                      </button>
-                    </div>
+                    <button type="button" onClick={() => go('/mes-commandes')} className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-700">
+                      <ShoppingBag size={15} /> Mes commandes
+                    </button>
                     <button
                       type="button"
                       onClick={() => { onLogout(); onClose(); }}
@@ -395,7 +391,6 @@ function AccountMenu({
               <div className="border-t border-slate-100 py-1">
                 {[
                   { label: 'Mes commandes', to: '/mes-commandes', Icon: ShoppingBag },
-                  { label: 'Messages', to: '/messages', Icon: MessageSquare },
                 ].map(({ label, to, Icon }) => (
                   <button
                     key={to}
@@ -628,6 +623,9 @@ const Header = () => {
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
+        {user && localStorage.getItem('dangoToken') ? (
+          <PhoneUpdateBanner user={user} onUpdated={setUser} />
+        ) : null}
         <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8">
           {/* Ligne principale */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">

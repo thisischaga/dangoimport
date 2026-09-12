@@ -23,7 +23,7 @@ import MentionsLegales from './pages/MentionsLegales';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-import Messages from './pages/Messages';
+import Orders from './pages/Orders';
 import ProductDetail from './pages/ProductDetail';
 import Shop from './pages/Shop';
 import CategoryPage from './pages/CategoryPage';
@@ -45,7 +45,7 @@ import OAuthSuccess from './pages/OAuthSuccess';
 
 function getPageTitle(pathname) {
   const routeTitles = [
-    { regex: /^\/$/, title: 'Dangoimport' },
+    { regex: /^\/$/, title: 'Dango Import' },
     { regex: /^\/shopping$/, title: 'Boutique' },
     { regex: /^\/mes-commandes$/, title: 'Mes commandes' },
     { regex: /^\/toutes-les-categories$/, title: 'Toutes les catégories' },
@@ -76,19 +76,19 @@ function getPageTitle(pathname) {
   ];
 
   const route = routeTitles.find((item) => item.regex.test(pathname));
-  return route ? route.title : 'Dangoimport';
+  return route ? route.title : 'Dango Import';
 }
 
 function getPageDescription(pathname) {
-  const defaultDesc = 'Dangoimport est la marketplace locale de référence au Bénin et au Togo. Découvrez des milliers de produits de vendeurs béninois et togolais. Achetez malin et vendez facilement.';
+  const defaultDesc = 'Dango Import est la marketplace locale de référence au Bénin et au Togo. Découvrez des milliers de produits de vendeurs béninois et togolais. Achetez malin et vendez facilement.';
   const routeDescriptions = [
-    { regex: /^\/$/, description: 'Dangoimport - Achetez des articles de qualité au Bénin et au Togo au meilleur prix.' },
-    { regex: /^\/shopping$/, description: 'Parcourez la boutique en ligne Dangoimport. Produits diversifiés, commandes sécurisées.' },
-    { regex: /^\/mes-commandes$/, description: 'Suivez vos commandes en temps réel et générez vos codes QR de retrait.' },
-    { regex: /^\/toutes-les-categories$/, description: 'Découvrez toutes les catégories de produits disponibles sur Dangoimport.' },
+    { regex: /^\/$/, description: 'Dango Import - Achetez des articles de qualité au Bénin et au Togo au meilleur prix.' },
+    { regex: /^\/shopping$/, description: 'Parcourez la boutique en ligne Dango Import. Produits diversifiés, commandes sécurisées.' },
+    { regex: /^\/mes-commandes$/, description: 'Consultez l\'historique de vos commandes sur Dango Import.' },
+    { regex: /^\/toutes-les-categories$/, description: 'Découvrez toutes les catégories de produits disponibles sur Dango Import.' },
     { regex: /^\/centre-aide$/, description: 'Trouvez des réponses à vos questions et contactez notre assistance clientèle.' },
-    { regex: /^\/checkout$/, description: 'Finalisez votre achat en toute sécurité sur Dangoimport.' },
-    { regex: /^\/cgu$/, description: 'Conditions Générales d’Utilisation de la plateforme Dangoimport.' },
+    { regex: /^\/checkout$/, description: 'Finalisez votre achat en toute sécurité sur Dango Import.' },
+    { regex: /^\/cgu$/, description: 'Conditions Générales d’Utilisation de la plateforme Dango Import.' },
     { regex: /^\/politique-retour$/, description: 'Consultez nos conditions de retour et de remboursement sous 72 heures.' },
     { regex: /^\/a-propos$/, description: 'Découvrez qui nous sommes, notre vision et nos services de sourcing Chine.' },
   ];
@@ -216,7 +216,8 @@ function App() {
                   {/**<Route path='/a-propos' element={<APropos />} /> */}
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
-                  <Route path='/messages' element={<Messages/>}/>
+                  <Route path='/mes-commandes' element={<Orders/>}/>
+                  <Route path='/messages' element={<Navigate to='/centre-aide' replace />} />
                   <Route path='/toutes-les-categories' element={<AllCategories/>}/>
                   <Route path='/selection-vedette' element={<FeaturedSelection/>}/>
                   <Route path='/centre-aide' element={<HelpCenter/>}/>

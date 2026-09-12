@@ -53,7 +53,7 @@ const FAQS = [
   { q: 'Quels sont les délais de livraison ?', a: 'Pour les produits en stock au Bénin/Togo : 1-3 jours. Pour les produits importés de Chine : 7-21 jours selon le mode d\'expédition.' },
   { q: 'Quels moyens de paiement acceptez-vous ?', a: 'Nous acceptons Mobile Money (MTN, Moov), les virements bancaires et les paiements en espèces à Cotonou et Lomé.' },
   { q: 'Est-ce que je peux annuler ma commande ?', a: 'Oui, vous pouvez annuler dans les 2h suivant la commande si elle n\'est pas encore expédiée. Contactez le support immédiatement.' },
-  { q: 'Comment contacter un vendeur ?', a: 'Allez sur la page du produit, cliquez sur le nom du vendeur pour accéder à son profil. Vous trouverez ses coordonnées de contact.' },
+  { q: 'Comment suivre ma commande ?', a: 'Connectez-vous à votre compte, ouvrez « Mes commandes » depuis le menu, puis consultez le statut et le détail de chaque achat.' },
 ];
 
 export default function BuyerCentral() {
@@ -92,7 +92,7 @@ export default function BuyerCentral() {
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-10">
               <span className="text-[12px] font-black text-[#ffdc2b] uppercase tracking-widest">Guides</span>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mt-2">Comment acheter sur Dangoimport ?</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mt-2">Comment acheter sur Dango Import ?</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {GUIDES.map(({ icon: Icon, color, title, steps }) => (
