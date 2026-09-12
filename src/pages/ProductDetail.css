@@ -95,7 +95,7 @@
 @media (min-width: 1024px) {
   .product-detail-buybox {
     position: sticky;
-    top: 16px;
+    top: calc(var(--header-h, 72px) + 16px);
   }
 }
 
@@ -481,7 +481,7 @@
 /* Nav de sections : reste collée au haut de la page sans compensation de header */
 .product-detail-sticky-nav {
   position: sticky;
-  top: 12px;
+  top: var(--header-h, 72px);
   z-index: 40;
   background: #fff;
   border-bottom: 1px solid #ececee;
@@ -1072,19 +1072,97 @@
 /* Barre CTA mobile — placée AU-DESSUS d'une éventuelle bottom-nav
    globale du site (convention existante : #root a 64px de padding-bottom
    en dessous de 768px pour la nav globale) */
+.product-detail-similar {
+  margin-top: 24px;
+  padding-bottom: 8px;
+}
+
+.product-detail-similar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.product-detail-similar__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.product-detail-similar__link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff6b00;
+  text-decoration: none;
+}
+
+.product-detail-similar__link:hover {
+  text-decoration: underline;
+}
+
+.product-detail-similar__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .product-detail-similar__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-detail-similar__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .product-detail-mobile-bar {
   position: fixed;
-  bottom: 64px;
+  bottom: 0;
   left: 0;
   right: 0;
   z-index: 45;
   display: flex;
+  align-items: center;
   gap: 8px;
   padding: 10px 12px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.97);
   border-top: 1px solid #e8e8ea;
   backdrop-filter: blur(8px);
+}
+
+.product-detail-mobile-bar__price {
+  display: flex;
+  flex-direction: column;
+  min-width: 88px;
+  line-height: 1.15;
+}
+
+.product-detail-mobile-bar__price-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9a9a9a;
+}
+
+.product-detail-mobile-bar__price strong {
+  font-size: 15px;
+  font-weight: 900;
+  color: #e02020;
+}
+
+.product-detail-mobile-bar__price-old {
+  font-size: 11px;
+  color: #9a9a9a;
+  text-decoration: line-through;
 }
 
 @media (min-width: 768px) {

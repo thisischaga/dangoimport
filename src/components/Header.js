@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
-  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LayoutGrid, LogOut,
+  Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LogOut,
+  Tag, Flame, HelpCircle, ShoppingBag, MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
-import { getProductImage } from '../utils/imageUrl';
 import { useCart } from '../context/CartContext';
 
 /* ------------------------------------------------------------------ */
@@ -15,8 +14,8 @@ import { useCart } from '../context/CartContext';
 /* que le style reste cohérent d'un composant à l'autre.              */
 /* ------------------------------------------------------------------ */
 
-// Un seul style d'anneau de focus clavier, partout.
-const FOCUS_RING = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/50 focus-visible:ring-offset-1';
+// Pas de ring/bordure visible au focus dans le header
+const FOCUS_RING = 'focus:outline-none focus-visible:outline-none';
 
 // Les panneaux flottants (mega menu, suggestions, compte) partagent la
 // même carte : bordure fine, ombre légère, coins modérément arrondis —
@@ -51,6 +50,14 @@ export const CATEGORY_LINKS = [
   { label: 'Sport', slug: 'sport', Icon: Dumbbell },
 ];
 
+const QUICK_NAV_LINKS = [
+  { label: 'Boutique', to: '/shopping' },
+  { label: 'Promotions', to: '/promotions' },
+  { label: 'Nouveautés', to: '/nouveautes' },
+  { label: 'Meilleures ventes', to: '/best-sellers' },
+  { label: 'Centre d\'aide', to: '/centre-aide' },
+];
+
 function buildSearchSuggestions(items, query) {
   const normalizedQuery = String(query || '').toLowerCase().trim();
   const unique = new Set();
@@ -78,169 +85,27 @@ function BrandLogo({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex shrink-0 items-baseline gap-0.5 whitespace-nowrap rounded-md text-xl tracking-tight sm:text-2xl ${FOCUS_RING}`}
+      className={`flex shrink-0 items-center gap-2 rounded-md ${FOCUS_RING}`}
       aria-label="Dango import — accueil"
     >
-      <span className="font-extrabold text-slate-900">Dango</span>
-      <span className="font-medium text-[#FF6B00]">import</span>
+
+      <span className="flex items-baseline gap-0.5 whitespace-nowrap text-lg tracking-tight sm:text-xl">
+        <span className="font-extrabold text-slate-900">Dango</span>
+        <span className="font-semibold text-[#FF6B00]">import</span>
+      </span>
     </button>
   );
 }
 
-/** Mega menu catégories — déclencheur intégré à la barre de recherche */
-function CategoryMegaMenu() {
-  const [open, setOpen] = useState(false);
-  const [activeSlug, setActiveSlug] = useState(CATEGORY_LINKS[0].slug);
-  const menuRef = useRef(null);
+/** Menu mobile complet — navigation, compte et catégories */
+function MobileNavDrawer({ open, onClose, user, cartCount, onLogout, navigate }) {
+  const userName = user?.userFirstname || user?.firstname || user?.name || 'Mon compte';
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) setOpen(false);
-    };
-    window.addEventListener('pointerdown', handleClickOutside);
-    return () => window.removeEventListener('pointerdown', handleClickOutside);
-  }, []);
+  const go = (path) => {
+    onClose();
+    navigate(path);
+  };
 
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKeyDown = (e) => { if (e.key === 'Escape') setOpen(false); };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open]);
-
-  const { data: activeCategory } = useQuery({
-    queryKey: ['megaMenuCategory', activeSlug],
-    queryFn: async () => (await client.get(`/categories/${activeSlug}`)).data.data,
-    enabled: open,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: activeProductsRaw } = useQuery({
-    queryKey: ['megaMenuProducts', activeSlug],
-    queryFn: async () => {
-      const res = await client.get(`/categories/${activeSlug}/products?limit=6`);
-      return res.data.data || res.data;
-    },
-    enabled: open,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const products = Array.isArray(activeProductsRaw) ? activeProductsRaw : activeProductsRaw?.data || [];
-
-  const brands = useMemo(() => {
-    const seen = new Map();
-    for (const p of products) {
-      const key = p?.brand ? String(p.brand).trim() : '';
-      if (key) seen.set(key, true);
-    }
-    return Array.from(seen.keys()).slice(0, 8);
-  }, [products]);
-
-  const activeLabel = CATEGORY_LINKS.find((c) => c.slug === activeSlug)?.label;
-
-  return (
-    <div className="relative shrink-0" ref={menuRef} onMouseLeave={() => setOpen(false)}>
-      <button
-        type="button"
-        onMouseEnter={() => setOpen(true)}
-        onClick={() => setOpen((v) => !v)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className={`flex h-full items-center gap-1.5 rounded-l-md px-4 text-sm font-medium text-slate-700 transition hover:text-slate-900 ${FOCUS_RING}`}
-      >
-        Catégories
-        <ChevronDown size={14} className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-            onMouseEnter={() => setOpen(true)}
-            className={`absolute left-0 top-full z-40 mt-2 flex w-[720px] max-w-[90vw] overflow-hidden ${PANEL}`}
-          >
-            <div className="w-52 shrink-0 border-r border-slate-100 py-2">
-              {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
-                <Link
-                  key={slug}
-                  to={`/category/${slug}`}
-                  onMouseEnter={() => setActiveSlug(slug)}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 text-sm transition ${
-                    activeSlug === slug ? 'bg-slate-50 font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <Icon size={16} className="text-slate-400" />
-                  {label}
-                </Link>
-              ))}
-            </div>
-
-            <div className="flex-1 p-5">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-slate-900">{activeCategory?.name || activeLabel}</h4>
-                <Link to={`/category/${activeSlug}`} onClick={() => setOpen(false)} className="text-xs font-medium text-[#FF6B00] hover:underline">
-                  Voir tout
-                </Link>
-              </div>
-
-              {activeCategory?.description && <p className="mt-1 text-xs text-slate-500">{activeCategory.description}</p>}
-
-              {products.length > 0 ? (
-                <div className="mt-4 grid grid-cols-3 gap-3">
-                  {products.slice(0, 6).map((p) => {
-                    const image = getProductImage(p) || '';
-                    const price = Number(p.promoPrice || p.price || 0);
-                    return (
-                      <Link
-                        key={p._id || p.id}
-                        to={`/category/${activeSlug}`}
-                        onClick={() => setOpen(false)}
-                        className="group rounded-md border border-transparent p-1.5 transition hover:border-slate-200"
-                      >
-                        <div className="aspect-square w-full overflow-hidden rounded-md bg-slate-100">
-                          {image && <img src={image} alt={p.name} className="h-full w-full object-cover transition group-hover:scale-105" />}
-                        </div>
-                        <p className="mt-1.5 truncate text-xs text-slate-700">{p.name}</p>
-                        {price > 0 && <p className="text-xs font-semibold text-slate-900">{price.toLocaleString('fr-FR')} FCFA</p>}
-                      </Link>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="mt-4 text-xs text-slate-400">Aucun produit à afficher pour le moment.</p>
-              )}
-
-              {brands.length > 0 && (
-                <div className="mt-5 border-t border-slate-100 pt-4">
-                  <p className="text-xs font-medium text-slate-400">Marques disponibles</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {brands.map((b) => (
-                      <Link
-                        key={b}
-                        to={`/category/${activeSlug}`}
-                        onClick={() => setOpen(false)}
-                        className="rounded-md border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:text-slate-900"
-                      >
-                        {b}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-/** Tiroir catégories pour mobile */
-function MobileCategoryDrawer({ open, onClose }) {
   return (
     <AnimatePresence>
       {open && (
@@ -250,44 +115,139 @@ function MobileCategoryDrawer({ open, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[110] bg-black/30 md:hidden"
+            className="fixed inset-0 z-[110] bg-black/40 backdrop-blur-[2px] md:hidden"
           />
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.22 }}
-            className="fixed left-0 top-0 z-[120] h-full w-[80vw] max-w-sm overflow-y-auto bg-white shadow-xl md:hidden"
+            className="fixed left-0 top-0 z-[120] flex h-full w-[min(88vw,320px)] flex-col overflow-hidden bg-white shadow-2xl md:hidden"
+            style={{ paddingTop: 'env(safe-area-inset-top)' }}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-4">
-              <span className="text-sm font-semibold text-slate-900">Catégories</span>
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-4">
+              <BrandLogo onClick={() => go('/')} />
               <button
                 type="button"
                 onClick={onClose}
-                className={`rounded-md p-1.5 text-slate-500 hover:bg-slate-100 ${FOCUS_RING}`}
-                aria-label="Fermer"
+                className={`rounded-lg p-2 text-slate-500 hover:bg-slate-100 ${FOCUS_RING}`}
+                aria-label="Fermer le menu"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <nav className="py-2">
-              {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
-                <Link
-                  key={slug}
-                  to={`/category/${slug}`}
-                  onClick={onClose}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  <Icon size={18} className="text-slate-400" />
-                  {label}
-                </Link>
-              ))}
-            </nav>
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              {/* Compte */}
+              <div className="border-b border-slate-100 px-4 py-4">
+                {user ? (
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-slate-900">Bonjour, {userName}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => go('/mes-commandes')} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-700">
+                        <ShoppingBag size={15} /> Commandes
+                      </button>
+                      <button type="button" onClick={() => go('/messages')} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-700">
+                        <MessageSquare size={15} /> Messages
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { onLogout(); onClose(); }}
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-600"
+                    >
+                      <LogOut size={14} /> Déconnexion
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => go('/login')}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FF6B00] px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    <User size={16} /> Se connecter
+                  </button>
+                )}
+              </div>
+
+              {/* Navigation rapide */}
+              <div className="border-b border-slate-100 px-2 py-2">
+                <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Navigation</p>
+                {[
+                  { label: 'Accueil', to: '/', Icon: HomeIcon },
+                  { label: 'Boutique', to: '/shopping', Icon: ShoppingBag },
+                  { label: 'Promotions', to: '/promotions', Icon: Tag },
+                  { label: 'Nouveautés', to: '/nouveautes', Icon: Sparkles },
+                  { label: 'Meilleures ventes', to: '/best-sellers', Icon: Flame },
+                  { label: 'Panier', to: '/cart', Icon: ShoppingCart, badge: cartCount },
+                  { label: 'Centre d\'aide', to: '/centre-aide', Icon: HelpCircle },
+                ].map(({ label, to, Icon, badge }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={onClose}
+                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    <Icon size={18} className="text-slate-400" />
+                    <span className="flex-1">{label}</span>
+                    {badge > 0 && (
+                      <span className="rounded-full bg-[#FF6B00] px-2 py-0.5 text-[10px] font-bold text-white">
+                        {badge > 99 ? '99+' : badge}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Catégories */}
+              <div className="px-2 py-2 pb-6">
+                <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Catégories</p>
+                {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
+                  <Link
+                    key={slug}
+                    to={`/category/${slug}`}
+                    onClick={onClose}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <Icon size={17} className="text-slate-400" />
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+/** Bandeau de liens rapides — desktop uniquement */
+function DesktopQuickNav({ pathname }) {
+  return (
+    <nav
+      className="hidden border-t border-slate-100 bg-slate-50/80 md:block"
+      aria-label="Navigation rapide"
+    >
+      <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 sm:px-6 lg:px-8">
+        {QUICK_NAV_LINKS.map(({ label, to }) => {
+          const active = pathname === to || pathname.startsWith(`${to}/`);
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                active
+                  ? 'bg-white text-[#FF6B00] shadow-sm ring-1 ring-slate-200'
+                  : 'text-slate-600 hover:bg-white hover:text-slate-900'
+              }`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -430,6 +390,25 @@ function AccountMenu({
                 <p className="w-full py-1 text-center text-sm text-slate-500">Aucun utilisateur connecté</p>
               )}
             </div>
+
+            {user && (
+              <div className="border-t border-slate-100 py-1">
+                {[
+                  { label: 'Mes commandes', to: '/mes-commandes', Icon: ShoppingBag },
+                  { label: 'Messages', to: '/messages', Icon: MessageSquare },
+                ].map(({ label, to, Icon }) => (
+                  <button
+                    key={to}
+                    type="button"
+                    onClick={() => { navigate(to); setAccountOpen(false); }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
+                  >
+                    <Icon size={15} className="text-slate-400" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="border-t border-slate-100 px-4 py-3">
               {user ? (
@@ -644,37 +623,38 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className={`fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white transition-shadow duration-200 ${
-          scrolled ? 'shadow-sm shadow-slate-900/[0.05]' : ''
+        className={`dango-header fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white/95 transition-all duration-200 ${
+          scrolled ? 'shadow-md shadow-slate-900/[0.06] backdrop-blur-md' : 'backdrop-blur-sm'
         }`}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-          {/* Ligne principale : logo, barre Catégories + recherche (desktop), panier, compte */}
-          <div className="flex items-center gap-3 lg:gap-6">
+        <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8">
+          {/* Ligne principale */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 md:hidden ${FOCUS_RING}`}
-              aria-label="Ouvrir les catégories"
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 md:hidden ${FOCUS_RING}`}
+              aria-label="Ouvrir le menu"
             >
               <Menu size={22} />
             </button>
 
             <BrandLogo onClick={() => navigate('/')} />
 
-            {/* Barre Catégories + recherche fusionnée — desktop/tablette */}
-            <div className="hidden flex-1 md:flex md:justify-center">
-              <div className="relative flex h-11 w-full max-w-2xl items-stretch rounded-md border border-slate-300 bg-white ">
-                <CategoryMegaMenu />
-                <div className="my-2.5 w-px shrink-0 self-stretch bg-slate-200" />
-                <SearchForm
-                  inputRef={searchInputRef}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onSubmit={handleSearch}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={handleSearchBlur}
-                />
+            {/* Recherche desktop */}
+            <div className="hidden flex-1 items-center justify-center md:flex">
+              <div className="relative w-full max-w-2xl">
+                <div className="flex h-11 items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm">
+                  <SearchForm
+                    inputRef={searchInputRef}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onSubmit={handleSearch}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={handleSearchBlur}
+                  />
+                </div>
                 {showSuggestions && (
                   <SuggestionsPanel
                     suggestionLoading={suggestionLoading}
@@ -686,16 +666,16 @@ const Header = () => {
               </div>
             </div>
 
-            <div className="ml-auto flex shrink-0 items-center gap-1">
+            <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
               <button
                 type="button"
                 onClick={() => navigate('/cart')}
-                className={`relative flex h-10 w-10 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 ${FOCUS_RING}`}
+                className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 ${FOCUS_RING}`}
                 aria-label="Panier"
               >
                 <ShoppingCart size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[10px] font-semibold text-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[10px] font-bold text-white ring-2 ring-white">
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
@@ -719,25 +699,18 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Barre Catégories + recherche — mobile, toujours visible sous le logo */}
-          <div className="relative mt-3 flex h-11 items-stretch rounded-md border border-slate-300 bg-white md:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-l-md pl-4 pr-3 text-slate-600 ${FOCUS_RING}`}
-              aria-label="Ouvrir les catégories"
-            >
-              <LayoutGrid size={18} />
-            </button>
-            <div className="my-2.5 w-px shrink-0 self-stretch bg-slate-200" />
-            <SearchForm
-              showLabel={false}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onSubmit={handleSearch}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={handleSearchBlur}
-            />
+          {/* Recherche mobile — pleine largeur, sans bouton catégories dupliqué */}
+          <div className="relative mt-2.5 md:hidden">
+            <div className="flex h-11 items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm">
+              <SearchForm
+                showLabel={false}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSubmit={handleSearch}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={handleSearchBlur}
+              />
+            </div>
             {showSuggestions && (
               <SuggestionsPanel
                 suggestionLoading={suggestionLoading}
@@ -749,7 +722,16 @@ const Header = () => {
           </div>
         </div>
 
-        <MobileCategoryDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <DesktopQuickNav pathname={location.pathname} />
+
+        <MobileNavDrawer
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          user={user}
+          cartCount={cartCount}
+          onLogout={handleLogout}
+          navigate={navigate}
+        />
       </header>
       {/* Espaceur dynamique : pousse le contenu sous le header fixe */}
       <div aria-hidden="true" style={{ height: 'var(--header-h, 64px)' }} />

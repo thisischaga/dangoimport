@@ -7,12 +7,13 @@ import {
   Package,
   Minus,
   Plus,
-  BadgeCheck,
+  ShieldCheck,
   RotateCcw,
   Star,
   MessageCircle,
 } from 'lucide-react';
-import { useProduct, useProductReviews } from '../hooks/useProducts';
+import { useProduct, useProductReviews, useSimilarProducts } from '../hooks/useProducts';
+import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor, startConversation } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
@@ -107,6 +108,7 @@ export default function ProductDetail() {
     page: 1,
     limit: 20,
   });
+  const { data: similarProducts = [] } = useSimilarProducts(id);
 
   const [qty, setQty] = useState(1);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
@@ -302,7 +304,32 @@ export default function ProductDetail() {
       console.error('[ProductDetail] contact seller error:', error);
       toast.error(error.message || 'Impossible de démarrer la conversation.');
     }
-  }, [navigate, productId, sellerId]);
+  }, [navigate, productId, sellerId, location.pathname]);
+
+  useEffect(() => {
+    const sectionIds = SECTIONS.map((s) => s.id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]?.target?.id) {
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: '-40% 0px -45% 0px',
+        threshold: [0, 0.15, 0.4],
+      }
+    );
+
+    sectionIds.forEach((sectionId) => {
+      const el = document.getElementById(sectionId);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [productId]);
 
   const scrollToSection = useCallback((sectionId) => {
     setActiveSection(sectionId);
@@ -318,11 +345,6 @@ export default function ProductDetail() {
   }, []);
 
   const sellerName = product?.vendorName || product?.sellerName || '';
-  const sellerSlug =
-    product?.vendorSlug ||
-    product?.storeSlug ||
-    product?.sellerSlug ||
-    (sellerName ? encodeURIComponent(sellerName) : null);
 
   if (isLoading) {
     return (
@@ -439,7 +461,9 @@ export default function ProductDetail() {
               <div className="product-detail-qty-row">
                 <span className="product-detail-qty-label">Quantité</span>
                 <QuantitySelector value={qty} onChange={setQty} max={stock} />
-                <p className='text-sm text-gray-500 mt-2'>Total : {hasPromo ? formatCFA(promoPrice * qty) : formatCFA(price * qty)} </p>
+                <p className="product-detail-qty-total">
+                  Total : {formatCFA(displayPrice * qty)}
+                </p>
               </div>
             )}
 
@@ -469,8 +493,9 @@ export default function ProductDetail() {
                   freeShippingZone ? 'is-free' : ''
                 }`}
               >
+                <Truck size={16} className="shrink-0" />
                 <span>
-                  {freeShippingZone ? 'Livraison gratuite disponible' : 'Livraison disponible'}
+                  {freeShippingZone ? 'Livraison gratuite disponible' : 'Livraison disponible sur votre zone'}
                 </span>
               </div>
             )}
@@ -483,10 +508,10 @@ export default function ProductDetail() {
                     {(sellerName.charAt(0) || 'V').toUpperCase()}
                   </div>
                   <div>
-                    <p className="product-detail-seller__name" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <p className="product-detail-seller__name">
                       {sellerName}
                       {(product?.sellerVerified || product?.isVendorCertified || product?.isCertified) && (
-                        <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Vendeur Certifié">
+                        <span className="product-detail-seller__badge" title="Vendeur certifié">
                           ✓ Certifié
                         </span>
                       )}
@@ -498,22 +523,28 @@ export default function ProductDetail() {
                     </div>
                   </div>
                 </div>
-                {/**sellerSlug && (
-                  <Link to={`/shop/${sellerSlug}`} className="product-detail-seller__link">
-                    Visiter la boutique
-                  </Link>
-                ) */}
+                {sellerId && (
+                  <button
+                    type="button"
+                    className="product-detail-seller__cta"
+                    onClick={handleContactSeller}
+                  >
+                    <MessageCircle size={14} />
+                    Contacter le vendeur
+                  </button>
+                )}
               </div>
             )}
 
             {(hasDelivery || hasWarranty) && (
               <div className="product-detail-trust">
                 {hasDelivery && (
-                  <span> Livraison</span>
+                  <span><Truck size={14} /> Livraison</span>
                 )}
                 {hasWarranty && (
-                  <span> Garantie</span>
+                  <span><ShieldCheck size={14} /> Garantie</span>
                 )}
+                <span><RotateCcw size={14} /> Retours selon conditions</span>
               </div>
             )}
           </div>
@@ -609,16 +640,48 @@ export default function ProductDetail() {
             </p>
           )}
         </section>
+
+        {similarProducts.length > 0 && (
+          <section className="product-detail-similar">
+            <div className="product-detail-similar__head">
+              <h2 className="product-detail-similar__title">Produits similaires</h2>
+              {product.category && (
+                <Link
+                  to={`/category/${encodeURIComponent(String(product.category).toLowerCase())}`}
+                  className="product-detail-similar__link"
+                >
+                  Voir plus
+                </Link>
+              )}
+            </div>
+            <div className="product-detail-similar__grid">
+              {similarProducts.slice(0, 8).map((item) => (
+                <ProductCard
+                  key={item._id || item.id}
+                  product={item}
+                  onAddToCart={addToCart}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <div className="product-detail-mobile-bar">
+        <div className="product-detail-mobile-bar__price">
+          <span className="product-detail-mobile-bar__price-label">Prix</span>
+          <strong>{formatCFA(displayPrice)}</strong>
+          {hasPromo && (
+            <span className="product-detail-mobile-bar__price-old">{formatCFA(price)}</span>
+          )}
+        </div>
         <button
           type="button"
           className="product-detail-mobile-bar__cart"
           onClick={handleAddToCart}
           disabled={!inStock}
         >
-          {isInCart ? 'Au panier' : 'Ajouter au panier'}
+          {isInCart ? 'Au panier' : 'Panier'}
         </button>
         <button
           type="button"
@@ -626,7 +689,7 @@ export default function ProductDetail() {
           onClick={handleBuyNow}
           disabled={!inStock}
         >
-          Acheter maintenant
+          Acheter
         </button>
       </div>
 

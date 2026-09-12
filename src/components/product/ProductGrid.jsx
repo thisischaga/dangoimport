@@ -18,6 +18,12 @@ import {
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import { applyProductFilters } from '../../utils/productFilters';
+import {
+  isProductOnPromo,
+  isProductNewArrival,
+  isProductBestSeller,
+  getDiscountPercent,
+} from '../../utils/productPromo';
 
 const PAGE_SIZE = 12;
 
@@ -44,48 +50,65 @@ const BANNER_SLIDES = [
    TAB FILTER
 ========================================================= */
 
+const CATALOG_TABS = [
+  { key: 'all', label: 'Tous' },
+  { key: 'promo', label: 'Promotions' },
+  { key: 'new', label: 'Nouveautés' },
+  { key: 'bestseller', label: 'Meilleures ventes' },
+];
+
 function matchesTab(product, tabKey) {
   if (tabKey === 'all') return true;
 
   switch (tabKey) {
     case 'bestseller':
-      return Boolean(
-        product?.isBestSeller ??
-          product?.bestSeller ??
-          product?.bestseller
-      );
+      return isProductBestSeller(product);
 
     case 'recommended':
-      return Boolean(
-        product?.isRecommended ??
-          product?.recommended
-      );
+      return Boolean(product?.isRecommended ?? product?.recommended);
 
     case 'forYou':
-      return Boolean(
-        product?.isForYou ??
-          product?.forYou ??
-          product?.recommendedForUser
-      );
+      return Boolean(product?.isForYou ?? product?.forYou ?? product?.recommendedForUser);
 
     case 'new':
-      return Boolean(
-        product?.isNewArrival ??
-          product?.newArrival ??
-          product?.isNew
-      );
+      return isProductNewArrival(product);
 
     case 'promo':
-      return Boolean(
-        product?.promoPrice ||
-          product?.isPromo ||
-          product?.discount ||
-          product?.onSale
-      );
+      return isProductOnPromo(product);
 
     default:
       return true;
   }
+}
+
+function CatalogTabs({ activeTab, onChange }) {
+  return (
+    <div
+      className="mb-4 flex gap-2 overflow-x-auto px-2 pb-1 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      role="tablist"
+      aria-label="Filtrer les produits"
+    >
+      {CATALOG_TABS.map(({ key, label }) => {
+        const active = activeTab === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(key)}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              active
+                ? 'bg-[#FF6B00] text-white shadow-sm'
+                : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 /* =========================================================
@@ -469,21 +492,17 @@ const PROMO_ITEMS_PER_PAGE = 2;
 const PROMO_AUTOPLAY_MS = 4500;
 
 function PromoSection({ products = [], onAddToCart }) {
-  // Identifie les IDs des produits en promo pour les exclure des meilleures ventes
   const promoIds = useMemo(() => {
     const ids = new Set();
-    products.forEach(p => {
-      const price = Number(p.price || 0);
-      const promo = Number(p.promoPrice || p.salePrice || 0);
-      if (promo > 0 && promo < price) ids.add(p._id || p.id);
+    products.forEach((p) => {
+      if (isProductOnPromo(p)) ids.add(p._id || p.id);
     });
     return ids;
   }, [products]);
 
-  // Meilleures ventes : produits SANS promo, triés par ventes/note
   const bestSellersAll = useMemo(() => {
     return [...products]
-      .filter(p => !promoIds.has(p._id || p.id))
+      .filter((p) => isProductBestSeller(p) && !promoIds.has(p._id || p.id))
       .sort((a, b) => {
         const salesA = Number(a.totalSales || a.soldCount || a.sales || 0);
         const salesB = Number(b.totalSales || b.soldCount || b.sales || 0);
@@ -493,48 +512,23 @@ function PromoSection({ products = [], onAddToCart }) {
       .slice(0, 6);
   }, [products, promoIds]);
 
-  // Deal du Jour : uniquement les produits en promo, triés par % de remise
   const dealsAll = useMemo(() => {
-    const promos = products.filter(p => {
-      const price = Number(p.price || 0);
-      const promo = Number(p.promoPrice || p.salePrice || 0);
-      return promo > 0 && promo < price;
-    });
-    if (promos.length > 0) {
-      return promos
-        .sort((a, b) => {
-          const discA = (Number(a.price) - Number(a.promoPrice || a.salePrice)) / Number(a.price);
-          const discB = (Number(b.price) - Number(b.promoPrice || b.salePrice)) / Number(b.price);
-          return discB - discA;
-        })
-        .slice(0, 6);
-    }
-    // Simulation avec produits sans promo si aucun deal en DB
     return products
-      .filter(p => !promoIds.has(p._id || p.id))
-      .slice(0, 6)
-      .map((p, i) => ({
-        ...p,
-        promoPrice: Math.round(Number(p.price || 0) * (0.75 - (i % 3) * 0.05))
-      }));
-  }, [products, promoIds]);
+      .filter((p) => isProductOnPromo(p))
+      .sort((a, b) => getDiscountPercent(b) - getDiscountPercent(a))
+      .slice(0, 6);
+  }, [products]);
 
-  // Calcul du % de remise maximum parmi les deals (pour le badge)
   const maxDiscountPercent = useMemo(() => {
     if (dealsAll.length === 0) return 0;
-    return Math.max(...dealsAll.map(p => {
-      const price = Number(p.price || 0);
-      const promo = Number(p.promoPrice || p.salePrice || 0);
-      if (!price || !promo) return 0;
-      return Math.round(((price - promo) / price) * 100);
-    }));
+    return Math.max(...dealsAll.map((p) => getDiscountPercent(p)));
   }, [dealsAll]);
 
-  // Nombre de pages : basé sur la plus petite des deux listes pour que
-  // chaque page affiche toujours du contenu dans les deux colonnes.
   const totalPages = Math.max(
     1,
-    Math.ceil(Math.min(bestSellersAll.length, dealsAll.length) / PROMO_ITEMS_PER_PAGE)
+    Math.ceil(
+      Math.max(bestSellersAll.length, dealsAll.length, 1) / PROMO_ITEMS_PER_PAGE
+    )
   );
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -567,7 +561,7 @@ function PromoSection({ products = [], onAddToCart }) {
   const goPrev = () => setPageIndex((i) => (i - 1 + totalPages) % totalPages);
   const goNext = () => setPageIndex((i) => (i + 1) % totalPages);
 
-  if (products.length === 0) return null;
+  if (bestSellersAll.length === 0 && dealsAll.length === 0) return null;
 
   return (
     <div
@@ -728,14 +722,20 @@ function PromoSection({ products = [], onAddToCart }) {
                     alignItems: 'start',
                   }}
                 >
-                  {bestSellersPage.map(product => (
-                    <ProductCard
-                      key={product._id || product.id}
-                      product={product}
-                      onAddToCart={onAddToCart}
-                      isForPromoSection={true}
-                    />
-                  ))}
+                  {bestSellersPage.length > 0 ? (
+                    bestSellersPage.map((product) => (
+                      <ProductCard
+                        key={product._id || product.id}
+                        product={product}
+                        onAddToCart={onAddToCart}
+                        isForPromoSection={true}
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-2 flex min-h-[120px] items-center justify-center rounded-xl border border-dashed border-slate-300/70 bg-white/60 px-4 text-center text-sm text-slate-500">
+                      Pas encore de meilleures ventes.
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -766,18 +766,60 @@ function PromoSection({ products = [], onAddToCart }) {
                     alignItems: 'start',
                   }}
                 >
-                  {dealsPage.map(product => (
-                    <ProductCard
-                      key={(product._id || product.id) + '-deal'}
-                      product={product}
-                      onAddToCart={onAddToCart}
-                      isForPromoSection={true}
-                    />
-                  ))}
+                  {dealsPage.length > 0 ? (
+                    dealsPage.map((product) => (
+                      <ProductCard
+                        key={(product._id || product.id) + '-deal'}
+                        product={product}
+                        onAddToCart={onAddToCart}
+                        isForPromoSection={true}
+                      />
+                    ))
+                  ) : (
+                    <div
+                      className="col-span-2 flex min-h-[120px] items-center justify-center rounded-xl border border-dashed border-slate-300/70 bg-white/60 px-4 text-center text-sm text-slate-500"
+                    >
+                      Aucune promotion active pour le moment.
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
+
+          {totalPages > 1 && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={goPrev}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                aria-label="Page précédente"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <div className="flex gap-1.5">
+                {Array.from({ length: totalPages }).map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setPageIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === pageIndex ? 'w-6 bg-[#FF6B00]' : 'w-2 bg-slate-300'
+                    }`}
+                    aria-label={`Page ${idx + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                aria-label="Page suivante"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -797,10 +839,13 @@ function ProductGrid({
   filters,
   onFiltersChange,
   onRefresh,
+  showPromoSection = false,
+  showTabs = false,
+  initialTab = 'all',
 }) {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [retrying, setRetrying] = useState(false);
 
   const sentinelRef = useRef(null);
@@ -957,12 +1002,9 @@ function ProductGrid({
         {/* ================================================
             BANNER CAROUSEL SLIDES
         ================================================= */}
-        <PromoSection products={products} onAddToCart={onAddToCart} />
-        {/**<BannerSlider
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          products={products}
-        /> */}
+        {showPromoSection && (
+          <PromoSection products={products} onAddToCart={onAddToCart} />
+        )}
 
         {/* ================================================
             RÉSULTATS — nombre de produits affichés

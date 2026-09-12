@@ -14,7 +14,6 @@ import ProductGrid from '../components/product/ProductGrid';
 import ProductFilters from '../components/product/ProductFilters';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
-import { mockProducts } from '../data/mockData';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -133,7 +132,7 @@ function HomeNew({ cartCount: cartCountProp }) {
   const buildParams = useCallback(() => {
     return {
       page: 1,
-      limit: 40,
+      limit: 60,
       search: searchQuery || undefined,
       ...filters,
     };
@@ -259,7 +258,7 @@ function HomeNew({ cartCount: cartCountProp }) {
             loading={loading}
             onAddToCart={addToCart}
             filters={filters}
-            showFilters={false}
+            showTabs
           />
         </section>
 

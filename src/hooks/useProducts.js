@@ -48,12 +48,23 @@ export function useFeaturedProducts() {
   });
 }
 
-export function useProductsCatalog({ search, limit = 200 } = {}) {
+export function useProductsCatalog({
+  search,
+  limit = 200,
+  promo = false,
+  newArrival = false,
+  bestSeller = false,
+  sort,
+} = {}) {
   return useQuery({
-    queryKey: ['products', 'catalog', { search: search || '', limit }],
+    queryKey: ['products', 'catalog', { search: search || '', limit, promo, newArrival, bestSeller, sort: sort || '' }],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: String(limit), page: '1' });
       if (search) params.set('search', search);
+      if (promo) params.set('promo', 'true');
+      if (newArrival) params.set('newArrival', 'true');
+      if (bestSeller) params.set('bestSeller', 'true');
+      if (sort) params.set('sort', sort);
       const res = await axios.get(`${API}/api/products?${params}`, { timeout: 60000 });
       return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
     },

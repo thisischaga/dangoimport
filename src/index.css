@@ -506,6 +506,17 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Header : pas de bordure jaune au focus */
+.dango-header input:focus,
+.dango-header input:focus-visible,
+.dango-header button:focus,
+.dango-header button:focus-visible,
+.dango-header a:focus,
+.dango-header a:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* ─── Smooth page transitions ────────────────── */
 .page-enter {
   animation: fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
