@@ -467,13 +467,13 @@ function OrderSummaryPanel({
 
               <span
                 className={
-                  shippingFee === 0
+                  shippingFee === 0 && !previewLoading
                     ? 'font-black text-emerald-600'
                     : 'font-semibold text-[#282828]'
                 }
               >
                 {previewLoading
-                  ? '...'
+                  ? 'Calcul en cours...'
                   : shippingFee === 0
                   ? 'Gratuite'
                   : `${shippingFee.toLocaleString('fr-FR')} F`}
@@ -1356,7 +1356,6 @@ export default function Checkout() {
   // ==========================================================
 
   useEffect(() => {
-
     if (!cartItems.length) {
       return;
     }
@@ -1364,59 +1363,70 @@ export default function Checkout() {
     let cancelled = false;
 
     const clientLocation =
-      form.lat !== null &&
-      form.lng !== null
+      form.lat !== null && form.lng !== null
         ? {
-            lat: form.lat,
-            lng: form.lng,
+            lat: Number(form.lat),
+            lng: Number(form.lng),
           }
         : null;
 
+    const run = async () => {
+      setPreviewLoading(true);
+      try {
+        const response = await calculateDeliveryOptions({
+          items: cartItems,
+          clientLocation,
+        });
 
-    const run =
-      async () => {
+        if (!cancelled && response?.data) {
+          setDeliveryCalculation(response.data);
+        }
 
-        try {
-
-          const response =
-            await calculateDeliveryOptions({
-              items: cartItems,
+        const token = localStorage.getItem('dangoToken');
+        if (token) {
+          const previewRes = await fetch(`${API_BASE_URL}/orders/preview`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              items: cartItems.map((it) => ({
+                productId: it.productId || it._id || it.id,
+                quantity: it.quantity,
+              })),
               clientLocation,
-            });
-
-
-          if (
-            !cancelled &&
-            response?.data
-          ) {
-            setDeliveryCalculation(
-              response.data
-            );
-          }
-
-        } catch (error) {
-
-          if (!cancelled) {
-            console.error(
-              'Erreur calcul livraison:',
-              error?.message || error
-            );
+              promoCode,
+            }),
+          });
+          if (!cancelled && previewRes.ok) {
+            const previewData = await previewRes.json();
+            if (previewData.success && previewData.data) {
+              setPreview(previewData.data);
+            }
           }
         }
-      };
-
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Erreur calcul livraison / preview:', error?.message || error);
+        }
+      } finally {
+        if (!cancelled) {
+          setPreviewLoading(false);
+        }
+      }
+    };
 
     run();
-
 
     return () => {
       cancelled = true;
     };
-
   }, [
     cartItems,
     form.lat,
     form.lng,
+    promoCode,
   ]);
 
 
@@ -1672,7 +1682,12 @@ export default function Checkout() {
           console.log('[Checkout] computed totalFee from socket payload:', totalFee);
 
           // Ensure UI uses socket result: update preview.shippingCost so shippingFee useMemo picks it
-          setPreview((prev) => ({ ...(prev || {}), shippingCost: totalFee }));
+          setPreview((prev) => ({
+            ...(prev || {}),
+            shippingCost: totalFee,
+            total:
+              Number(prev?.subtotal ?? subtotal) + totalFee - Number(prev?.discount || 0),
+          }));
 
           if (typeof toast === 'function') {
             toast.info(`Frais de livraison mis à jour : ${totalFee.toLocaleString('fr-FR')} FCFA`);
@@ -1780,11 +1795,22 @@ export default function Checkout() {
               await response.json();
 
 
-            setAddressSuggestions(
-              Array.isArray(data)
-                ? data
-                : []
-            );
+            const suggestions = Array.isArray(data) ? data : [];
+            setAddressSuggestions(suggestions);
+
+            if (suggestions.length > 0) {
+              const top = suggestions[0];
+              const lat = Number(top.lat);
+              const lon = Number(top.lon);
+              if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                setForm((prev) => ({
+                  ...prev,
+                  lat,
+                  lng: lon,
+                }));
+                setGeoAddress(top.display_name || query);
+              }
+            }
 
           } catch {
 
@@ -2722,13 +2748,21 @@ export default function Checkout() {
 
 
       try {
+        const finalShippingFee =
+          Number(shippingFee) ||
+          Number(
+            deliveryCalculation?.shippingCost ||
+              preview?.shippingCost ||
+              0
+          ) ||
+          0;
 
         const total =
           Number(
             preview?.subtotal ??
               subtotal
           ) +
-          shippingFee -
+          finalShippingFee -
           Number(
             preview?.discount || 0
           );
@@ -2761,7 +2795,8 @@ export default function Checkout() {
 
             subtotal,
 
-            shippingFee,
+            shippingFee:
+              finalShippingFee,
 
             total,
 

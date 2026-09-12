@@ -579,14 +579,16 @@ function PromoSection({ products = [], onAddToCart }) {
         .dango-promo-panel {
           position: relative;
           overflow: hidden;
-          border-radius: 8px;
-          padding: 32px 22px 26px;
+          border-radius: 0;
+          padding: 36px 24px 30px;
+          background: linear-gradient(155deg, #FFF6ED 0%, #FFE1BE 60%, #FFEEDE 100%);
         }
 
         .dango-promo-pattern {
           position: absolute;
           inset: 0;
           opacity: 0.5;
+          background-image: radial-gradient(circle at 1px 1px, rgba(15, 27, 48, 0.07) 1px, transparent 0);
           background-size: 22px 22px;
           pointer-events: none;
         }
@@ -594,87 +596,95 @@ function PromoSection({ products = [], onAddToCart }) {
         .dango-promo-glow {
           position: absolute;
           border-radius: 9999px;
-          filter: blur(55px);
+          filter: blur(60px);
           pointer-events: none;
         }
         .dango-promo-glow--1 {
-          width: 220px; height: 220px;
-          top: -90px; right: -60px;
+          width: 260px; height: 260px;
+          top: -110px; right: -70px;
+          background: rgba(255, 107, 0, 0.25);
         }
         .dango-promo-glow--2 {
-          width: 180px; height: 180px;
-          bottom: -70px; left: -50px;
+          width: 200px; height: 200px;
+          bottom: -80px; left: -60px;
+          background: rgba(37, 99, 235, 0.14);
         }
 
-        .dango-promo-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          background: #ffffff;
-          color: #2563EB;
-          font-size: 13px;
-          font-weight: 800;
-          letter-spacing: 0.03em;
-          padding: 6px 14px;
-          border-radius: 999px;
+        .dango-promo-heading {
+          text-align: center;
+          margin-bottom: 26px;
         }
 
         .dango-promo-title {
-          margin: 12px 0 0;
-          font-size: clamp(28px, 5.5vw, 38px);
+          margin: 0;
+          font-size: clamp(24px, 4.5vw, 34px);
           font-weight: 900;
           color: #0f1b30;
           letter-spacing: -0.02em;
+          line-height: 1.05;
+        }
+
+        .dango-promo-subtitle {
+          margin: 6px 0 0;
+          font-size: 13px;
+          font-weight: 600;
+          color: rgba(15, 27, 48, 0.55);
+        }
+
+        .dango-promo-columns {
+          display: grid;
+          grid-template-columns: 1fr;
         }
 
         .dango-promo-col {
-          background: rgba(255,255,255,0.78);
-          backdrop-filter: blur(6px);
-          border-radius: 5px;
-          padding: 5px;
-          height: 100%;
-          border: 1px solid #0000003f
+          padding: 0;
+        }
 
+        .dango-promo-col + .dango-promo-col {
+          margin-top: 26px;
+          padding-top: 26px;
+          border-top: 1px dashed rgba(15, 27, 48, 0.16);
+        }
+
+        @media (min-width: 768px) {
+          .dango-promo-columns {
+            grid-template-columns: 1fr 1fr;
+            column-gap: 32px;
+          }
+          .dango-promo-col + .dango-promo-col {
+            margin-top: 0;
+            padding-top: 0;
+            padding-left: 32px;
+            border-top: none;
+            border-left: 1px dashed rgba(15, 27, 48, 0.16);
+          }
+        }
+
+        .dango-promo-col-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+        }
+
+        .dango-promo-col-label {
+          font-size: 17px;
+          font-weight: 800;
+          color: #0f1b30;
+          margin: 0;
         }
 
         .dango-promo-col-badge {
           display: inline-flex;
           align-items: center;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
-          padding: 4px 12px;
+          padding: 4px 11px;
           border-radius: 999px;
         }
 
-        .dango-promo-nav {
-          width: 32px; height: 32px;
-          border-radius: 9999px;
-          border: 1px solid rgba(0,0,0,0.06);
-          background: #ffffff;
-          display: flex; align-items: center; justify-content: center;
-          color: #0f1b30;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-        .dango-promo-nav:hover { background: #EAF2FF; color: #2563EB; transform: scale(1.06); }
-
-        .dango-promo-dot {
-          width: 7px; height: 7px;
-          border-radius: 9999px;
-          background: rgba(15,27,48,0.2);
-          border: none;
-          cursor: pointer;
-          padding: 0;
-          transition: all 0.2s;
-        }
-        .dango-promo-dot.active {
-          width: 20px;
-          border-radius: 4px;
-          background: #2563EB;
-        }
-
         @media (max-width: 640px) {
-          .dango-promo-panel { padding: 22px 14px 18px; border-radius: 22px; }
+          .dango-promo-panel { padding: 26px 16px 22px; }
         }
       `}</style>
 
@@ -684,19 +694,18 @@ function PromoSection({ products = [], onAddToCart }) {
         <div className="dango-promo-glow dango-promo-glow--2" />
 
         <div className="relative" style={{ zIndex: 2 }}>
-          {/* Titre principal */}
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          {/* Titre */}
+          <div className="dango-promo-heading">
             <h1 className="dango-promo-title">Offres du jour</h1>
+            <p className="dango-promo-subtitle">Sélection renouvelée chaque jour</p>
           </div>
 
-          {/* Cadre à deux colonnes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Cadre à deux colonnes, séparées par un simple filet */}
+          <div className="dango-promo-columns">
             {/* ---- MEILLEURES VENTES ---- */}
             <div className="dango-promo-col">
-              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#0f1b30', margin: '0 0 8px' }}>
-                  Meilleures ventes
-                </h3>
+              <div className="dango-promo-col-head">
+                <h3 className="dango-promo-col-label">Meilleures ventes</h3>
                 <span
                   className="dango-promo-col-badge"
                   style={{ background: '#EAF2FF', color: '#2563EB' }}
@@ -715,7 +724,7 @@ function PromoSection({ products = [], onAddToCart }) {
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '8px',
+                    gap: '10px',
                     alignItems: 'start',
                   }}
                 >
@@ -733,13 +742,11 @@ function PromoSection({ products = [], onAddToCart }) {
 
             {/* ---- DEAL DU JOUR ---- */}
             <div className="dango-promo-col">
-              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#0f1b30', margin: '0 0 8px' }}>
-                  Deal du Jour
-                </h3>
+              <div className="dango-promo-col-head">
+                <h3 className="dango-promo-col-label">Deal du Jour</h3>
                 <span
                   className="dango-promo-col-badge"
-                  style={{ background: '#EAF2FF', color: '#2563EB' }}
+                  style={{ background: '#FFEDDC', color: '#FF6B00' }}
                 >
                   {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Meilleures offres'}
                 </span>
@@ -755,7 +762,7 @@ function PromoSection({ products = [], onAddToCart }) {
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '8px',
+                    gap: '10px',
                     alignItems: 'start',
                   }}
                 >
@@ -771,29 +778,6 @@ function PromoSection({ products = [], onAddToCart }) {
               </AnimatePresence>
             </div>
           </div>
-
-          {/* Navigation du carrousel */}
-          {totalPages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 18 }}>
-              <button type="button" className="dango-promo-nav" onClick={goPrev} aria-label="Page précédente">
-                <ChevronLeft size={16} />
-              </button>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {Array.from({ length: totalPages }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`dango-promo-dot ${idx === pageIndex ? 'active' : ''}`}
-                    onClick={() => setPageIndex(idx)}
-                    aria-label={`Page ${idx + 1}`}
-                  />
-                ))}
-              </div>
-              <button type="button" className="dango-promo-nav" onClick={goNext} aria-label="Page suivante">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -849,25 +833,6 @@ function ProductGrid({
       ),
     [filtered, activeTab]
   );
-
-  /* =======================================================
-     TAB COUNTS
-  ======================================================= */
-
-  /*const tabCounts = useMemo(() => {
-    const counts = {};
-
-    BANNER_SLIDES.forEach(({ key }) => {
-      counts[key] =
-        key === 'all'
-          ? filtered.length
-          : filtered.filter((product) =>
-              matchesTab(product, key)
-            ).length;
-    });
-
-    return counts;
-  }, [filtered]);
 
   /* =======================================================
      PAGINATION
@@ -998,6 +963,24 @@ function ProductGrid({
           onChange={setActiveTab}
           products={products}
         /> */}
+
+        {/* ================================================
+            RÉSULTATS — nombre de produits affichés
+        ================================================= */}
+
+        {!loading && tabFiltered.length > 0 && (
+          <p
+            className="px-2 sm:px-0"
+            style={{
+              fontSize: '13px',
+              color: '#8a8a8a',
+              fontWeight: 600,
+              margin: '18px 0 12px',
+            }}
+          >
+            {tabFiltered.length} produit{tabFiltered.length > 1 ? 's' : ''}
+          </p>
+        )}
 
         {/* ================================================
             PRODUCT GRID

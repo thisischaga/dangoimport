@@ -7,12 +7,12 @@ const SECTIONS = [
   {
     id: "edition",
     title: "1. ÉDITION DU SITE",
-    content: `Le site internet dangoimport.com est édité par :\nDANGO HUB Entreprise Individuelle\nReprésentée par : Ayatoulaye Dango Nadey\nSiège social : Îlot : CSB, AGONKANMEY, ABOMEY- CALAVI, GODOMEY, République du Bénin\nTéléphone : +229 01 58 26 63 42 / +229 01 59 38 71 80\nEmail : contact@dangoimport.com\nNuméro d’identification RCCM : RB/ABC/26 A 140935\nNuméro IFU : 0202350716611`
+    content: `ARTICLE 1 : ÉDITEUR DU SITE ET EXPLOITANT\n\nLes sites internet accessibles aux adresses suivantes :\n• Site Institutionnel : https://site.dangoimport.com\n• Marketplace Clients : https://dangoimport.com\n• Espace Business / Vendeurs : https://business.dangoimport.com\n\nsont édités et exploités par l'entreprise individuelle (Établissement) DANGO HUB, opérant sous le nom commercial Dango Import.\n\n• Forme juridique : Entreprise Individuelle (Établissement)\n• Siège social : Îlot : CSB, Parcelle n° CSB, Maison : Sahidou DANGO NADEY, Atlantique, Abomey-Calavi, Godomey, Agonkanmey – Bénin\n• Numéro RCCM : RB/ABC/26 A 140935\n• Numéro IFU : 0202350716611\n• Directeur de la Publication : Ayatoulaye DANGO NADEY\n• Contact Support Client : contact@dangoimport.com\n• Contact Protection des Données (DPO) : privacy@dangoimport.com`
   },
   {
     id: "hebergement",
     title: "2. HÉBERGEMENT",
-    content: `Hébergement du Frontend (Site Web) :\n• Vercel Inc. (hébergement principal et déploiement)\n• Hostinger (domaine)\nHébergement du Backend et Base de Données :\n• MongoDB Atlas (base de données cloud)\n• Render.com (Serveur de secours/backend)`
+    content: `ARTICLE 2 : HÉBERGEMENT DES SITES ET INFRASTRUCTURE TECHNIQUE\n\nL’infrastructure technique de la plateforme est hébergée par des prestataires garantissant la sécurité et la haute disponibilité des services :\n\n2.1 Hébergement du Frontend (Interface Utilisateur & Site Web)\n• Hébergeur Principal et Déploiement : Vercel Inc. 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis — https://vercel.com\n• Serveur de Secours / Backup : Hostinger International Ltd. 61 Lordou Vironos Street, 6023 Larnaca, Chypre — https://hostinger.com\n\n2.2 Hébergement du Backend et Base de Données Cloud\n• Base de données et Services applicatifs : MongoDB Atlas (MongoDB, Inc.) 1633 Broadway, 38th Floor, New York, NY 10019, États-Unis — https://www.mongodb.com/cloud/atlas` 
   },
   {
     id: "activite",
@@ -22,7 +22,7 @@ const SECTIONS = [
   {
     id: "propriete",
     title: "4. PROPRIÉTÉ INTELLECTUELLE",
-    content: `L’ensemble du site (structure, design, logos, textes, images, vidéos, charte graphique, etc.) est la propriété exclusive de Dango HUB. Toute reproduction, représentation, modification, publication, adaptation ou exploitation, totale ou partielle, des éléments du site, par quelque procédé et sur quelque support que ce soit, sans autorisation préalable et écrite de Dango HUB, est strictement interdite.`
+    content: `ARTICLE 3 : PROPRIÉTÉ INTELLECTUELLE\n\n1. Signes Distinctifs et Marques : La dénomination sociale DANGO HUB, le nom commercial Dango Import, ainsi que les logos, chartes graphiques, slogans, visuels et éléments d'interface présents sur l'ensemble des sous-domaines de dangoimport.com sont la propriété exclusive de l'entreprise DANGO HUB ou font l'objet d'un droit d'utilisation concédé par ses partenaires/vendeurs.\n\n2. Droits d'Auteur : Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments des sites, quel que soit le moyen ou le procédé utilisé, est strictement interdite sans l'autorisation écrite préalable du Directeur de la publication (Ayatoulaye DANGO NADEY).\n\n3. Produits des Vendeurs Tiers : Les marques, logos et visuels de produits mis en ligne par les vendeurs partenaires restent la propriété exclusive de leurs titulaires respectifs.`
   },
   {
     id: "responsabilite",
@@ -37,12 +37,12 @@ const SECTIONS = [
   {
     id: "donnees",
     title: "7. DONNÉES PERSONNELLES",
-    content: `Le traitement des données personnelles est régi par notre Politique de Confidentialité, disponible sur le site.`
+    content: `ARTICLE 4 : PROTECTION DES DONNÉES PERSONNELLES ET COOKIES\n\nConformément au Livre V du Code du Numérique en République du Bénin (Loi n° 201720) et aux standards internationaux du RGPD, l'entreprise DANGO HUB a mis en place une politique rigoureuse de traitement et de protection des données personnelles. Pour en savoir plus sur la collecte, la conservation et l'exercice de vos droits d'accès, de rectification ou de suppression des données, veuillez consulter notre Politique de Confidentialité accessible sur les sites du groupe.`
   },
   {
     id: "droit",
     title: "8. DROIT APPLICABLE",
-    content: `Les présentes mentions légales sont régies par le droit en vigueur en République du Bénin. Tout litige relatif à l’utilisation du site sera soumis à la compétence exclusive des tribunaux de Cotonou.`
+    content: `ARTICLE 5 : RÈGLEMENT DES LITIGES ET JURIDICTION COMPÉTENTE\n\nLes présentes mentions légales sont régies par le droit béninois. En cas de litige relatif à l'utilisation de la plateforme ou aux services fournis par l'éditeur, et à défaut de résolution amiable via la procédure de médiation interne de DANGO HUB, les Tribunaux compétents de Cotonou ou d'Abomey-Calavi (République du Bénin) seront seuls compétents.`
   },
   {
     id: "contact",

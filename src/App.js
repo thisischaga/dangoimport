@@ -14,22 +14,15 @@ import TopSellers from './pages/TopSellers';
 import FAQ from './pages/FAQ';
 import Contact from './pages/Contact';
 import Livraison from './pages/Livraison';
-import Retours from './pages/Retours';
-import Cookies from './pages/Policies/Cookies';
+
 import './App.css';
 import Cgu from './pages/Cgu';
 import PolitiqueRetour from './pages/PolitiqueRetour';
 import MentionsLegales from './pages/MentionsLegales';
-import APropos from './pages/APropos';
-import PerFinance from './blog/PerFinance';
-import Epargne from './blog/Epargne';
-import Blog from './blog/Blog';
-import ArticleThree from './blog/ArticleThree';
-import ArticleFour from './blog/ArticleFour';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ClientActivity from './pages/ClientActivity';
-import Orders from './pages/Orders';
+
 import Messages from './pages/Messages';
 import ProductDetail from './pages/ProductDetail';
 import Shop from './pages/Shop';
@@ -48,6 +41,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
 import MobileTabBar from './components/mobiletabbar';
 import OAuthSuccess from './pages/OAuthSuccess';
+
 
 function getPageTitle(pathname) {
   const routeTitles = [
@@ -68,9 +62,6 @@ function getPageTitle(pathname) {
     { regex: /^\/politique-confidentialite$/, title: 'Politique de confidentialité' },
     { regex: /^\/politique-retour$/, title: 'Politique de retour' },
     { regex: /^\/mentions-legales$/, title: 'Mentions légales' },
-    { regex: /^\/a-propos$/, title: 'À propos' },
-    { regex: /^\/services$/, title: 'Services' },
-    { regex: /^\/sourcing$/, title: 'Sourcing' },
     { regex: /^\/sourcing\/form$/, title: 'Formulaire de sourcing' },
     { regex: /^\/cart$/, title: 'Panier' },
     { regex: /^\/checkout$/, title: 'Paiement' },

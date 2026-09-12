@@ -10,6 +10,19 @@ import client from '../apiClient';
 import { getProductImage } from '../utils/imageUrl';
 import { useCart } from '../context/CartContext';
 
+/* ------------------------------------------------------------------ */
+/* Tokens partagés — un seul jeu de règles pour tout le header, afin   */
+/* que le style reste cohérent d'un composant à l'autre.              */
+/* ------------------------------------------------------------------ */
+
+// Un seul style d'anneau de focus clavier, partout.
+const FOCUS_RING = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/50 focus-visible:ring-offset-1';
+
+// Les panneaux flottants (mega menu, suggestions, compte) partagent la
+// même carte : bordure fine, ombre légère, coins modérément arrondis —
+// pas de glow ni de rayon extrême, pour rester sobre.
+const PANEL = 'rounded-lg border border-slate-200 bg-white shadow-md shadow-slate-900/[0.06]';
+
 /** Calcule et expose la hauteur du header via la variable CSS --header-h */
 function useHeaderHeight(headerRef) {
   useEffect(() => {
@@ -56,27 +69,25 @@ function buildSearchSuggestions(items, query) {
 }
 
 /**
- * Logo "dangoimport" avec un arc + flèche façon Amazon, qui souligne le mot
- * du "d" jusqu'à la fin de "import".
+ * Logo "Dango import" — wordmark seul. La distinction entre les deux mots
+ * se fait par la graisse ET la couleur (pas juste la couleur), ce qui lit
+ * comme un choix typographique plutôt qu'un simple mot souligné en orange.
  */
 function BrandLogo({ onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group flex shrink-0 flex-col items-start leading-none"
-      aria-label="dangoimport — accueil"
+      className={`flex shrink-0 items-baseline gap-0.5 whitespace-nowrap rounded-md text-xl tracking-tight sm:text-2xl ${FOCUS_RING}`}
+      aria-label="Dango import — accueil"
     >
-      <span className="flex items-baseline whitespace-nowrap text-xl font-black tracking-tight sm:text-2xl">
-        <span className="text-slate-900">dango</span>
-        <span className="text-[#FF6B00]">import</span>
-      </span>
-
+      <span className="font-extrabold text-slate-900">Dango</span>
+      <span className="font-medium text-[#FF6B00]">import</span>
     </button>
   );
 }
 
-/** Mega menu catégories (desktop uniquement) */
+/** Mega menu catégories — déclencheur intégré à la barre de recherche */
 function CategoryMegaMenu() {
   const [open, setOpen] = useState(false);
   const [activeSlug, setActiveSlug] = useState(CATEGORY_LINKS[0].slug);
@@ -128,43 +139,41 @@ function CategoryMegaMenu() {
   const activeLabel = CATEGORY_LINKS.find((c) => c.slug === activeSlug)?.label;
 
   return (
-    <div className="relative" ref={menuRef} onMouseLeave={() => setOpen(false)}>
+    <div className="relative shrink-0" ref={menuRef} onMouseLeave={() => setOpen(false)}>
       <button
         type="button"
         onMouseEnter={() => setOpen(true)}
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40 ${
-          open ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-700 hover:bg-slate-50'
-        }`}
+        className={`flex h-full items-center gap-1.5 rounded-l-md px-4 text-sm font-medium text-slate-700 transition hover:text-slate-900 ${FOCUS_RING}`}
       >
-        <LayoutGrid size={14} />
-        Toutes les catégories
-        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        Catégories
+        <ChevronDown size={14} className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
             onMouseEnter={() => setOpen(true)}
-            className="absolute left-0 top-full z-40 mt-2 flex w-[720px] max-w-[90vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+            className={`absolute left-0 top-full z-40 mt-2 flex w-[720px] max-w-[90vw] overflow-hidden ${PANEL}`}
           >
-            <div className="w-56 shrink-0 border-r border-slate-100 bg-slate-50/60 py-2">
+            <div className="w-52 shrink-0 border-r border-slate-100 py-2">
               {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
                 <Link
                   key={slug}
                   to={`/category/${slug}`}
                   onMouseEnter={() => setActiveSlug(slug)}
                   onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold transition ${
-                    activeSlug === slug ? 'bg-white text-[#FF6B00]' : 'text-slate-700 hover:bg-white/70'
+                  className={`flex items-center gap-3 px-4 py-2.5 text-sm transition ${
+                    activeSlug === slug ? 'bg-slate-50 font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon size={16} className={activeSlug === slug ? 'text-[#FF6B00]' : 'text-slate-400'} />
+                  <Icon size={16} className="text-slate-400" />
                   {label}
                 </Link>
               ))}
@@ -172,8 +181,8 @@ function CategoryMegaMenu() {
 
             <div className="flex-1 p-5">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-black text-slate-900">{activeCategory?.name || activeLabel}</h4>
-                <Link to={`/category/${activeSlug}`} onClick={() => setOpen(false)} className="text-xs font-bold text-[#FF6B00] hover:underline">
+                <h4 className="text-sm font-semibold text-slate-900">{activeCategory?.name || activeLabel}</h4>
+                <Link to={`/category/${activeSlug}`} onClick={() => setOpen(false)} className="text-xs font-medium text-[#FF6B00] hover:underline">
                   Voir tout
                 </Link>
               </div>
@@ -190,13 +199,13 @@ function CategoryMegaMenu() {
                         key={p._id || p.id}
                         to={`/category/${activeSlug}`}
                         onClick={() => setOpen(false)}
-                        className="group rounded-lg border border-slate-100 p-2 transition hover:border-slate-200 hover:shadow-sm"
+                        className="group rounded-md border border-transparent p-1.5 transition hover:border-slate-200"
                       >
                         <div className="aspect-square w-full overflow-hidden rounded-md bg-slate-100">
                           {image && <img src={image} alt={p.name} className="h-full w-full object-cover transition group-hover:scale-105" />}
                         </div>
-                        <p className="mt-1.5 truncate text-[11px] font-semibold text-slate-700">{p.name}</p>
-                        {price > 0 && <p className="text-[11px] font-black text-[#FF6B00]">{price.toLocaleString('fr-FR')} FCFA</p>}
+                        <p className="mt-1.5 truncate text-xs text-slate-700">{p.name}</p>
+                        {price > 0 && <p className="text-xs font-semibold text-slate-900">{price.toLocaleString('fr-FR')} FCFA</p>}
                       </Link>
                     );
                   })}
@@ -207,14 +216,14 @@ function CategoryMegaMenu() {
 
               {brands.length > 0 && (
                 <div className="mt-5 border-t border-slate-100 pt-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Marques disponibles</p>
+                  <p className="text-xs font-medium text-slate-400">Marques disponibles</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {brands.map((b) => (
                       <Link
                         key={b}
                         to={`/category/${activeSlug}`}
                         onClick={() => setOpen(false)}
-                        className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#FF6B00] hover:text-[#FF6B00]"
+                        className="rounded-md border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:text-slate-900"
                       >
                         {b}
                       </Link>
@@ -241,18 +250,23 @@ function MobileCategoryDrawer({ open, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[110] bg-black/40 md:hidden"
+            className="fixed inset-0 z-[110] bg-black/30 md:hidden"
           />
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'tween', duration: 0.25 }}
-            className="fixed left-0 top-0 z-[120] h-full w-[80vw] max-w-xs overflow-y-auto bg-white shadow-2xl md:hidden"
+            transition={{ type: 'tween', duration: 0.22 }}
+            className="fixed left-0 top-0 z-[120] h-full w-[80vw] max-w-sm overflow-y-auto bg-white shadow-xl md:hidden"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-              <span className="text-sm font-black text-slate-900">Catégories</span>
-              <button type="button" onClick={onClose} className="rounded-full p-1 text-slate-500 hover:bg-slate-100">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-4">
+              <span className="text-sm font-semibold text-slate-900">Catégories</span>
+              <button
+                type="button"
+                onClick={onClose}
+                className={`rounded-md p-1.5 text-slate-500 hover:bg-slate-100 ${FOCUS_RING}`}
+                aria-label="Fermer"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -263,7 +277,7 @@ function MobileCategoryDrawer({ open, onClose }) {
                   key={slug}
                   to={`/category/${slug}`}
                   onClick={onClose}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   <Icon size={18} className="text-slate-400" />
                   {label}
@@ -278,36 +292,31 @@ function MobileCategoryDrawer({ open, onClose }) {
 }
 
 /**
- * IMPORTANT : ce composant vivait auparavant à l'intérieur de Header(),
- * défini de nouveau à chaque rendu. React voyait alors un nouveau type de
- * composant à chaque frappe, démontait l'ancien <input>, en remontait un
- * nouveau et perdait le focus — c'était la cause du bug de saisie.
- * En le sortant ici, au niveau module, son identité reste stable entre
- * les rendus : le focus est conservé.
+ * Défini au niveau module (et non dans Header) pour garder une identité de
+ * composant stable entre les rendus : sinon React démonte/remonte l'input
+ * à chaque frappe et le focus saute.
  */
-function SearchForm({ className = '', inputRef, value, onChange, onSubmit, onFocus, onBlur }) {
+function SearchForm({ className = '', inputRef, value, onChange, onSubmit, onFocus, onBlur, showLabel = true }) {
   return (
-    <form
-      onSubmit={onSubmit}
-      data-search-widget
-      className={`w-full items-center rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm flex focus-within:border-[#FF6B00]/50 focus-within:ring-2 focus-within:ring-[#FF6B00]/10 transition ${className}`}
-    >
-      <Search size={16} className="text-slate-500" />
+    <form onSubmit={onSubmit} data-search-widget className={`flex h-full flex-1 items-center gap-2 px-3 ${className}`}>
+      <Search size={17} className="shrink-0 text-slate-400" />
       <input
         ref={inputRef}
-        className="ml-2 min-w-0 flex-1 border-none bg-transparent text-sm text-slate-700 outline-none focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-slate-400"
-        placeholder="Cherchez un produit, une marque ou une catégorie"
+        className="min-w-0 flex-1 border-none bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+        placeholder="Rechercher un produit, une marque..."
         value={value}
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
       />
       <button
-        className="rounded-full bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white cursor-pointer whitespace-nowrap transition hover:bg-[#E85F00]"
+        className={`flex shrink-0 items-center gap-1.5 rounded-md bg-[#FF6B00] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#E85F00] ${FOCUS_RING}`}
         type="submit"
         onMouseDown={(e) => e.preventDefault()}
+        aria-label="Rechercher"
       >
-        Rechercher
+        <Search size={15} className={showLabel ? 'hidden' : ''} />
+        {showLabel && 'Rechercher'}
       </button>
     </form>
   );
@@ -315,10 +324,8 @@ function SearchForm({ className = '', inputRef, value, onChange, onSubmit, onFoc
 
 function SuggestionsPanel({ suggestionLoading, suggestions, searchQuery, onSelect }) {
   return (
-    <div data-suggestions-panel className="absolute left-0 right-0 top-full z-20 mt-1 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-      <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
-        Suggestions de recherche
-      </div>
+    <div data-suggestions-panel className={`absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden ${PANEL}`}>
+      <div className="border-b border-slate-100 px-4 py-2 text-xs font-medium text-slate-400">Suggestions</div>
 
       {suggestionLoading ? (
         <div className="px-4 py-3 text-sm text-slate-500">Recherche...</div>
@@ -329,9 +336,9 @@ function SuggestionsPanel({ suggestionLoading, suggestions, searchQuery, onSelec
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onSelect(term)}
-            className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition"
+            className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
           >
-            <div className="font-medium">{term}</div>
+            {term}
           </button>
         ))
       ) : (
@@ -344,7 +351,7 @@ function SuggestionsPanel({ suggestionLoading, suggestions, searchQuery, onSelec
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onSelect(term)}
-                className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50"
               >
                 {term}
               </button>
@@ -369,25 +376,25 @@ function AccountMenu({
         aria-expanded={accountOpen}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setAccountOpen((prev) => !prev)}
-        className="flex h-10 w-10 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full px-0 sm:px-3 text-sm font-semibold text-slate-700 cursor-pointer transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/40"
+        className={`flex h-10 w-10 items-center justify-center gap-2 rounded-md transition hover:bg-slate-100 sm:w-auto sm:justify-start sm:px-2 ${FOCUS_RING}`}
       >
         {showAvatarImage ? (
           <img
             src={userAvatar}
             alt={userDisplayName}
-            className="h-8 w-8 rounded-full object-cover border border-slate-200 bg-[#FF6B00]"
+            className="h-8 w-8 rounded-full border border-slate-200 object-cover"
             onError={() => setAvatarError(true)}
           />
         ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
-            {user ? userInitial : <User size={18} />}
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+            {user ? userInitial : <User size={17} />}
           </span>
         )}
 
         {user && (
-          <span className="hidden sm:flex items-center gap-1 truncate max-w-[120px] text-left">
+          <span className="hidden max-w-[110px] items-center gap-1 truncate text-sm text-slate-700 sm:flex">
             {userDisplayName}
-            <ChevronDown size={13} className={`shrink-0 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={13} className={`shrink-0 text-slate-400 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
           </span>
         )}
       </button>
@@ -395,33 +402,32 @@ function AccountMenu({
       <AnimatePresence>
         {accountOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.12 }}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="absolute right-0 mt-2 w-72 max-w-[90vw] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
+            className={`absolute right-0 z-50 mt-2 w-72 max-w-[90vw] overflow-hidden ${PANEL}`}
           >
             <div className="flex items-center gap-3 px-4 py-4">
               {user ? (
                 <>
                   {showAvatarImage ? (
-                    <img src={userAvatar} alt={userDisplayName} className="h-10 w-10 shrink-0 rounded-full object-cover border border-slate-200" />
+                    <img src={userAvatar} alt={userDisplayName} className="h-10 w-10 shrink-0 rounded-full border border-slate-200 object-cover" />
                   ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FF6B00] text-white font-bold text-sm">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
                       {userInitial}
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900">{userDisplayName} {userSurname}</p>
+                    <p className="truncate text-sm font-medium text-slate-900">{userDisplayName} {userSurname}</p>
                     <p className="truncate text-xs text-slate-500">{userEmail}</p>
                   </div>
                 </>
               ) : (
-                <div className="flex w-full items-center justify-center py-1">
-                  <p className="text-sm text-slate-500 text-center">Aucun utilisateur connecté</p>
-                </div>
+                <p className="w-full py-1 text-center text-sm text-slate-500">Aucun utilisateur connecté</p>
               )}
             </div>
 
@@ -430,7 +436,7 @@ function AccountMenu({
                 <button
                   type="button"
                   onClick={() => { handleLogout(); setAccountOpen(false); }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
+                  className={`flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 ${FOCUS_RING}`}
                 >
                   <LogOut size={15} />
                   Déconnexion
@@ -439,7 +445,7 @@ function AccountMenu({
                 <button
                   type="button"
                   onClick={() => { navigate('/login'); setAccountOpen(false); }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF6B00] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#E85F00] cursor-pointer"
+                  className={`flex w-full items-center justify-center gap-2 rounded-md bg-[#FF6B00] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#E85F00] ${FOCUS_RING}`}
                 >
                   Se connecter
                 </button>
@@ -466,16 +472,13 @@ const Header = () => {
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const suggestionTimer = useRef(null);
+  const suggestionRequestRef = useRef(0);
   const accountRef = useRef(null);
-  const desktopSearchRef = useRef(null);
-  const mobileSearchInputRef = useRef(null);
-  const desktopSearchInputRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const loadUser = () => {
@@ -502,16 +505,20 @@ const Header = () => {
     const trimmed = searchQuery.trim();
 
     if (trimmed.length < 2) {
+      suggestionRequestRef.current += 1;
       setSuggestions([]);
       setSuggestionLoading(false);
       return;
     }
 
     setSuggestionLoading(true);
+    const requestId = ++suggestionRequestRef.current;
 
     suggestionTimer.current = window.setTimeout(async () => {
       try {
         const response = await client.get(`/products?limit=10&search=${encodeURIComponent(trimmed)}`);
+        if (requestId !== suggestionRequestRef.current) return;
+
         const items = Array.isArray(response?.data?.data) ? response.data.data : [];
         const terms = buildSearchSuggestions(items, trimmed).filter((t) => typeof t === 'string');
 
@@ -523,15 +530,19 @@ const Header = () => {
               )
         );
       } catch {
+        if (requestId !== suggestionRequestRef.current) return;
+
         setSuggestions(
           SEARCH_FALLBACK_TERMS.filter(
             (t) => t.toLowerCase().includes(trimmed.toLowerCase()) && t.toLowerCase() !== trimmed.toLowerCase()
           )
         );
       } finally {
-        setSuggestionLoading(false);
+        if (requestId === suggestionRequestRef.current) {
+          setSuggestionLoading(false);
+        }
       }
-    }, 250);
+    }, 280);
 
     return () => {
       if (suggestionTimer.current) clearTimeout(suggestionTimer.current);
@@ -541,21 +552,24 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (accountRef.current && !accountRef.current.contains(event.target)) setAccountOpen(false);
-      if (desktopSearchOpen && desktopSearchRef.current && !desktopSearchRef.current.contains(event.target)) {
-        setDesktopSearchOpen(false);
-      }
     };
     window.addEventListener('pointerdown', handleClickOutside);
     return () => window.removeEventListener('pointerdown', handleClickOutside);
-  }, [desktopSearchOpen]);
+  }, []);
 
-  // Ferme le tiroir + la recherche mobile si on repasse en desktop
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
+  // Ferme le tiroir mobile si on repasse en desktop
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth >= 768) {
-        setMobileMenuOpen(false);
-        setMobileSearchOpen(false);
-      }
+      if (window.innerWidth >= 768) setMobileMenuOpen(false);
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -569,23 +583,6 @@ const Header = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  // Focus auto sur le champ dès qu'il s'ouvre sur mobile
-  useEffect(() => {
-    if (mobileSearchOpen) {
-      const t = window.setTimeout(() => mobileSearchInputRef.current?.focus(), 150);
-      return () => window.clearTimeout(t);
-    }
-    return undefined;
-  }, [mobileSearchOpen]);
-
-  useEffect(() => {
-    if (desktopSearchOpen) {
-      const t = window.setTimeout(() => desktopSearchInputRef.current?.focus(), 150);
-      return () => window.clearTimeout(t);
-    }
-    return undefined;
-  }, [desktopSearchOpen]);
 
   // Si l'utilisateur change (nouvelle connexion, avatar mis à jour...),
   // on redonne sa chance à la nouvelle image avant de retomber sur le repli.
@@ -605,8 +602,7 @@ const Header = () => {
     if (e) e.preventDefault();
     const q = searchQuery.trim();
     setShowSuggestions(false);
-    setMobileSearchOpen(false);
-    setDesktopSearchOpen(false);
+    searchInputRef.current?.blur();
     navigate(q ? `/shopping?q=${encodeURIComponent(q)}` : '/shopping');
   };
 
@@ -615,8 +611,6 @@ const Header = () => {
     if (!normalizedTerm) return;
     setSearchQuery(normalizedTerm);
     setShowSuggestions(false);
-    setMobileSearchOpen(false);
-    setDesktopSearchOpen(false);
     navigate(`/shopping?q=${encodeURIComponent(normalizedTerm)}`);
   };
 
@@ -624,15 +618,10 @@ const Header = () => {
     const nextTarget = event?.relatedTarget;
     const currentInput = event?.currentTarget;
     const searchWidget = currentInput?.closest?.('[data-search-widget]');
-    const suggestionPanel = searchWidget?.querySelector?.('[data-suggestions-panel]');
+    const suggestionPanel = searchWidget?.parentElement?.querySelector?.('[data-suggestions-panel]');
 
-    if (nextTarget && searchWidget && searchWidget.contains(nextTarget)) {
-      return;
-    }
-
-    if (nextTarget && suggestionPanel && suggestionPanel.contains(nextTarget)) {
-      return;
-    }
+    if (nextTarget && searchWidget && searchWidget.contains(nextTarget)) return;
+    if (nextTarget && suggestionPanel && suggestionPanel.contains(nextTarget)) return;
 
     window.setTimeout(() => {
       const currentActive = document.activeElement;
@@ -640,9 +629,7 @@ const Header = () => {
         (searchWidget && searchWidget.contains(currentActive)) ||
         (suggestionPanel && suggestionPanel.contains(currentActive));
 
-      if (!stillInsideSearch) {
-        setShowSuggestions(false);
-      }
+      if (!stillInsideSearch) setShowSuggestions(false);
     }, 120);
   };
 
@@ -655,40 +642,33 @@ const Header = () => {
 
   return (
     <>
-    <header
-      ref={headerRef}
-      className={`fixed top-0 left-0 right-0 z-40 bg-white transition-shadow duration-200 ${
-        scrolled ? 'shadow-sm border-b border-slate-100' : 'border-b border-transparent'
-      }`}
-      style={{ 
-        '--header-h': '72px' ,
-        padding: '10px',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.09)' ,
-      }}
-    >
-      <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-5">
-        <div className="flex items-center gap-2 py-2.5 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
-            aria-label="Catégories"
-          >
-            <Menu size={22} />
-          </button>
+      <header
+        ref={headerRef}
+        className={`fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white transition-shadow duration-200 ${
+          scrolled ? 'shadow-sm shadow-slate-900/[0.05]' : ''
+        }`}
+      >
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          {/* Ligne principale : logo, barre Catégories + recherche (desktop), panier, compte */}
+          <div className="flex items-center gap-3 lg:gap-6">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 md:hidden ${FOCUS_RING}`}
+              aria-label="Ouvrir les catégories"
+            >
+              <Menu size={22} />
+            </button>
 
-          <BrandLogo onClick={() => navigate('/')} />
+            <BrandLogo onClick={() => navigate('/')} />
 
-          <div className="hidden md:flex items-center gap-2 shrink-0">
-            <CategoryMegaMenu />
-          </div>
-
-          <div className="hidden md:flex flex-1 justify-center">
-            {desktopSearchOpen ? (
-              <div ref={desktopSearchRef} className="relative w-full max-w-2xl">
+            {/* Barre Catégories + recherche fusionnée — desktop/tablette */}
+            <div className="hidden flex-1 md:flex md:justify-center">
+              <div className="relative flex h-11 w-full max-w-2xl items-stretch rounded-md border border-slate-300 bg-white ">
+                <CategoryMegaMenu />
+                <div className="my-2.5 w-px shrink-0 self-stretch bg-slate-200" />
                 <SearchForm
-                  inputRef={desktopSearchInputRef}
-                  className="h-11"
+                  inputRef={searchInputRef}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onSubmit={handleSearch}
@@ -704,97 +684,75 @@ const Header = () => {
                   />
                 )}
               </div>
-            ) : (
+            </div>
+
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                onClick={() => setDesktopSearchOpen(true)}
-                className="flex w-full max-w-xl items-center justify-between gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-slate-300 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]/30"
+                onClick={() => navigate('/cart')}
+                className={`relative flex h-10 w-10 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 ${FOCUS_RING}`}
+                aria-label="Panier"
               >
-                <span className="flex items-center gap-2">
-                  <Search size={18} className="text-slate-500" />
-                  <span>Rechercher un produit...</span>
-                </span>
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[10px] font-semibold text-white">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </button>
-            )}
+
+              <AccountMenu
+                accountRef={accountRef}
+                accountOpen={accountOpen}
+                setAccountOpen={setAccountOpen}
+                user={user}
+                showAvatarImage={showAvatarImage}
+                userAvatar={userAvatar}
+                userDisplayName={userDisplayName}
+                userInitial={userInitial}
+                setAvatarError={setAvatarError}
+                userSurname={userSurname}
+                userEmail={userEmail}
+                handleLogout={handleLogout}
+                navigate={navigate}
+              />
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Barre Catégories + recherche — mobile, toujours visible sous le logo */}
+          <div className="relative mt-3 flex h-11 items-stretch rounded-md border border-slate-300 bg-white md:hidden">
             <button
               type="button"
-              onClick={() => setMobileSearchOpen((v) => !v)}
-              className="md:hidden flex h-10 w-10 items-center justify-center rounded-full transition text-slate-700 hover:bg-slate-100"
-              aria-label="Rechercher"
-              aria-expanded={mobileSearchOpen}
+              onClick={() => setMobileMenuOpen(true)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-l-md pl-4 pr-3 text-slate-600 ${FOCUS_RING}`}
+              aria-label="Ouvrir les catégories"
             >
-              {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+              <LayoutGrid size={18} />
             </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/cart')}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
-              aria-label="Panier"
-            >
-              <ShoppingCart size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6B00] text-[10px] font-black text-white">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </button>
-
-            <AccountMenu
-              accountRef={accountRef}
-              accountOpen={accountOpen}
-              setAccountOpen={setAccountOpen}
-              user={user}
-              showAvatarImage={showAvatarImage}
-              userAvatar={userAvatar}
-              userDisplayName={userDisplayName}
-              userInitial={userInitial}
-              setAvatarError={setAvatarError}
-              userSurname={userSurname}
-              userEmail={userEmail}
-              handleLogout={handleLogout}
-              navigate={navigate}
+            <div className="my-2.5 w-px shrink-0 self-stretch bg-slate-200" />
+            <SearchForm
+              showLabel={false}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSubmit={handleSearch}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={handleSearchBlur}
             />
+            {showSuggestions && (
+              <SuggestionsPanel
+                suggestionLoading={suggestionLoading}
+                suggestions={suggestions}
+                searchQuery={searchQuery}
+                onSelect={handleSuggestionSelect}
+              />
+            )}
           </div>
         </div>
 
-        <AnimatePresence initial={false}>
-          {mobileSearchOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="relative overflow-visible pb-2 md:hidden"
-            >
-              <SearchForm
-                inputRef={mobileSearchInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSubmit={handleSearch}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={handleSearchBlur}
-              />
-              {showSuggestions && (
-                <SuggestionsPanel
-                  suggestionLoading={suggestionLoading}
-                  suggestions={suggestions}
-                  searchQuery={searchQuery}
-                  onSelect={handleSuggestionSelect}
-                />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <MobileCategoryDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-    </header>
-    {/* Espaceur dynamique : pousse le contenu sous le header fixe */}
-    <div aria-hidden="true" style={{ height: 'var(--header-h, 72px)' }} />
+        <MobileCategoryDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      </header>
+      {/* Espaceur dynamique : pousse le contenu sous le header fixe */}
+      <div aria-hidden="true" style={{ height: 'var(--header-h, 64px)' }} />
     </>
   );
 };
