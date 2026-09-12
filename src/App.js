@@ -2,9 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useLocatio
 import axios from 'axios';
 import About from "./pages/About";
 import Home from "./pages/HomeNew";
-import Services from "./pages/Services";
-import SourcingLanding from "./pages/SourcingLanding";
-import SourcingForm from "./pages/SourcingForm";
 import AllCategories from "./pages/AllCategories";
 import FeaturedSelection from "./pages/FeaturedSelection";
 import HelpCenter from "./pages/HelpCenter";
@@ -62,11 +59,9 @@ function getPageTitle(pathname) {
     { regex: /^\/politique-confidentialite$/, title: 'Politique de confidentialité' },
     { regex: /^\/politique-retour$/, title: 'Politique de retour' },
     { regex: /^\/mentions-legales$/, title: 'Mentions légales' },
-    { regex: /^\/sourcing\/form$/, title: 'Formulaire de sourcing' },
     { regex: /^\/cart$/, title: 'Panier' },
     { regex: /^\/checkout$/, title: 'Paiement' },
     { regex: /^\/checkout\/result$/, title: 'Résultat de paiement' },
-    { regex: /^\/checkout-sourcing$/, title: 'Checkout sourcing' },
     { regex: /^\/login$/, title: 'Connexion' },
     { regex: /^\/register$/, title: 'Inscription' },
     { regex: /^\/product\/[A-Za-z0-9_-]+$/, title: 'Produit' },
@@ -90,7 +85,7 @@ function getPageDescription(pathname) {
     { regex: /^\/checkout$/, description: 'Finalisez votre achat en toute sécurité sur Dango Import.' },
     { regex: /^\/cgu$/, description: 'Conditions Générales d’Utilisation de la plateforme Dango Import.' },
     { regex: /^\/politique-retour$/, description: 'Consultez nos conditions de retour et de remboursement sous 72 heures.' },
-    { regex: /^\/a-propos$/, description: 'Découvrez qui nous sommes, notre vision et nos services de sourcing Chine.' },
+    { regex: /^\/a-propos$/, description: 'Découvrez qui nous sommes et notre vision marketplace locale.' },
   ];
 
   const route = routeDescriptions.find((item) => item.regex.test(pathname));
@@ -206,9 +201,9 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   {/*<Route path="/about" element={<About />} />*/}
-                  <Route path='/services' element={<Services/>}/>
-                  <Route path='/sourcing' element={<SourcingLanding/>}/>
-                  <Route path='/sourcing/form' element={<SourcingForm/>}/>
+                  <Route path='/services' element={<Navigate to='/' replace />} />
+                  <Route path='/sourcing/*' element={<Navigate to='/' replace />} />
+                  <Route path='/checkout-sourcing' element={<Navigate to='/' replace />} />
                   <Route path='/cgu' element={<Cgu/>}/>
                   <Route path='/politique-confidentialite' element={<Politique />}/>
                   <Route path='/politique-retour' element={<PolitiqueRetour/>}/>
@@ -241,7 +236,6 @@ function App() {
                   <Route path='/cart' element={<CartPage/>}/>
                   <Route path='/checkout' element={<Checkout/>}/>
                   <Route path='/checkout/result' element={<PaymentResult/>}/>
-                  <Route path='/checkout-sourcing' element={<SourcingForm/>}/>
 
                   <Route path='/login' element={<Login/>}/>
                   <Route path='/register' element={<Register/>}/>

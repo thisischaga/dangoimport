@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import API_BASE_URL from '../apiConfig';
 import { toast } from '../utils/toast';
 
@@ -22,7 +22,7 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
         const id = recipientType === 'admin' ? 'admin' : userId;
         if (!id) return;
 
-        const res = await axios.get(`${API_BASE_URL}/api/notifications?recipient=${id}`);
+        const res = await apiClient.get(`/notifications?recipient=${id}`);
         setNotifications(res.data);
         setUnreadCount(res.data.filter(n => !n.isRead).length);
       } catch (error) {
@@ -68,7 +68,7 @@ export const NotificationProvider = ({ children, recipientType, userId }) => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`${API_BASE_URL}/api/notifications/${id}/read`);
+      await apiClient.put(`/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {

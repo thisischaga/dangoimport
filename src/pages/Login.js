@@ -91,11 +91,6 @@ const Login = () => {
     const handleGoogleLogin = useCallback(
         async (response) => {
 
-            console.log(
-                '🔵 Réponse Google :',
-                response
-            );
-
             // Vérification du credential Google
             if (!response?.credential) {
 
@@ -114,10 +109,6 @@ const Login = () => {
 
             try {
 
-                console.log(
-                    '📤 Envoi du token Google au backend...'
-                );
-
                 const { data } = await axios.post(
                     `${API_BASE_URL}/api/auth/google`,
                     {
@@ -129,11 +120,6 @@ const Login = () => {
                                 'application/json'
                         }
                     }
-                );
-
-                console.log(
-                    '🟢 Réponse backend :',
-                    data
                 );
 
                 saveAuthentication(data);
@@ -176,10 +162,6 @@ const Login = () => {
     // =========================================================
 
     const initializeGoogle = useCallback(() => {
-
-        console.log(
-            '🔵 Initialisation Google...'
-        );
 
         // Vérifier Google
         if (!window.google?.accounts?.id) {
@@ -254,10 +236,6 @@ const Login = () => {
             }
         );
 
-        console.log(
-            '✅ Bouton Google affiché.'
-        );
-
         return true;
 
     }, [handleGoogleLogin]);
@@ -268,10 +246,6 @@ const Login = () => {
 
     useEffect(() => {
 
-        console.log(
-            '🔵 Vérification configuration Google...'
-        );
-
         // Vérifier Client ID
         if (!GOOGLE_CLIENT_ID) {
 
@@ -281,10 +255,6 @@ const Login = () => {
 
             return;
         }
-
-        console.log(
-            '✅ Google Client ID détecté.'
-        );
 
         // -----------------------------------------------------
         // GOOGLE DÉJÀ CHARGÉ
@@ -314,10 +284,6 @@ const Login = () => {
 
         if (script) {
 
-            console.log(
-                '🟡 Script Google déjà présent.'
-            );
-
             script.addEventListener(
                 'load',
                 initializeGoogle
@@ -337,10 +303,6 @@ const Login = () => {
         // CRÉER SCRIPT
         // -----------------------------------------------------
 
-        console.log(
-            '🔵 Chargement du script Google...'
-        );
-
         script =
             document.createElement('script');
 
@@ -351,10 +313,6 @@ const Login = () => {
         script.defer = true;
 
         script.onload = () => {
-
-            console.log(
-                '✅ Google Identity Services chargé.'
-            );
 
             initializeGoogle();
 

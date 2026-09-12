@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTools, FaHome, FaGlobe, FaEnvelope, FaSpinner, FaArrowLeft } from 'react-icons/fa';
+import { FaTools, FaHome, FaEnvelope, FaSpinner, FaArrowLeft } from 'react-icons/fa';
 import logo from '../images/logo.jpeg';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
@@ -76,10 +76,7 @@ const Maintenance = () => {
           </h1>
 
           <p className="text-slate-300 text-center text-base leading-relaxed mb-8">
-            Nous effectuons actuellement des améliorations techniques pour optimiser notre plateforme d'achat et vente locale. 
-            <span className="block mt-2 text-slate-400 text-sm">
-              Le service de Sourcing Chine ainsi que la soumission de devis restent opérationnels.
-            </span>
+            Nous effectuons actuellement des améliorations techniques pour optimiser notre plateforme d'achat et vente locale.
           </p>
 
           {/* Formulaire d'inscription newsletter */}
@@ -112,20 +109,13 @@ const Maintenance = () => {
           </div>
 
           {/* Actions alternatives */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex justify-center">
             <button
               onClick={() => navigate('/')}
-              className="bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 text-slate-200 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
+              className="bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 text-slate-200 py-3 px-6 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
             >
               <FaHome className="text-slate-400" />
               Retour à l'accueil
-            </button>
-            <button
-              onClick={() => navigate('/', { state: { openSourcing: true } })}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:text-white"
-            >
-              <FaGlobe className="text-[#ffdc2b] animate-pulse" />
-              Sourcing Chine / Devis
             </button>
           </div>
 
