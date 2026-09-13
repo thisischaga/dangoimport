@@ -126,18 +126,16 @@ function DailyDealsSection({ products, onAddToCart }) {
 
   return (
     <section className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-2">
-      <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-red-200/80 bg-gradient-to-br from-red-950 via-slate-900 to-slate-950 p-4 sm:p-6 text-white shadow-xl relative">
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-[#FF6B00]/20 blur-[90px] rounded-full pointer-events-none" />
-
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 relative z-10 border-b border-slate-800/80 pb-4">
+      <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 text-slate-900 shadow-sm relative">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 relative z-10 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-white sm:text-4xl uppercase">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl uppercase">
               OFFRE DU JOUR
             </h2>
           </div>
           <Link
             to="/promotions"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-white/20 shadow-sm"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-white transition-colors bg-[#FF6B00] hover:bg-[#E85F00] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-sm"
           >
             <span className="text-white">Voir toutes les promotions</span>
             <ArrowRight size={16} className="text-white" />
@@ -163,29 +161,29 @@ function DailyDealsSection({ products, onAddToCart }) {
                 className="
                   snap-start shrink-0
                   w-[200px] sm:w-[240px]
-                  rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden
+                  rounded-2xl border border-slate-200 bg-white overflow-hidden
                   flex flex-col justify-between
-                  hover:border-[#FF6B00]/50 transition-all duration-300 shadow-md group
+                  hover:border-[#FF6B00]/50 hover:shadow-md transition-all duration-300 group
                 "
               >
-                <div className="relative aspect-square overflow-hidden bg-slate-800">
+                <div className="relative aspect-square overflow-hidden bg-slate-50">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-md">
+                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-sm">
                     -{discount}%
                   </span>
                 </div>
 
                 <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
                   <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 leading-snug">
                       {product.name}
                     </h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{product.sellerName || 'Dango Market'}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{product.sellerName || 'Dango Market'}</p>
                   </div>
 
                   <div>
@@ -194,7 +192,7 @@ function DailyDealsSection({ products, onAddToCart }) {
                         {promo.toLocaleString('fr-FR')} FCFA
                       </span>
                       {price > promo && (
-                        <span className="text-xs text-slate-500 line-through">
+                        <span className="text-xs text-slate-400 line-through">
                           {price.toLocaleString('fr-FR')} FCFA
                         </span>
                       )}
