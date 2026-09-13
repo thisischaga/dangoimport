@@ -8,6 +8,9 @@ import {
   ShieldCheck,
   Truck,
   Sparkles,
+  ChevronRight,
+  Clock,
+  Star,
 } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import ProductGrid from '../components/product/ProductGrid';
@@ -124,92 +127,227 @@ function CategoriesSection({ categories }) {
 function DailyDealsSection({ products, onAddToCart }) {
   if (!products || products.length === 0) return null;
 
+  // 1. Identify Deals of the Day (products with promo prices or discount)
+  const promoProducts = products.filter(
+    (p) =>
+      (p.promoPrice && Number(p.promoPrice) < Number(p.price)) ||
+      (p.salePrice && Number(p.salePrice) < Number(p.price)) ||
+      (p.discountPercent && Number(p.discountPercent) > 0)
+  );
+
+  const dealsOfDay = (promoProducts.length >= 3 ? promoProducts : products).slice(0, 3);
+  const dealIds = new Set(dealsOfDay.map((d) => String(d.id || d._id)));
+
+  // 2. Identify Best Sellers (excluding items already in dealsOfDay)
+  const remainingProducts = products.filter((p) => !dealIds.has(String(p.id || p._id)));
+
+  const sortedBestSellers = [...(remainingProducts.length > 0 ? remainingProducts : products)].sort(
+    (a, b) => {
+      const salesA = Number(a.soldCount || a.sales || a.totalSold || 0);
+      const salesB = Number(b.soldCount || b.sales || b.totalSold || 0);
+      if (salesB !== salesA) return salesB - salesA;
+      const ratingA = Number(a.rating || a.averageRating || 0);
+      const ratingB = Number(b.rating || b.averageRating || 0);
+      return ratingB - ratingA;
+    }
+  );
+
+  const bestSellers = sortedBestSellers.slice(0, 3);
+
+  const formatPrice = (amount) => {
+    const n = Number(amount || 0);
+    return `XOF${n.toLocaleString('fr-FR')}`;
+  };
+
   return (
-    <section className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-2">
-      <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 text-slate-900 shadow-sm relative">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 relative z-10 border-b border-slate-100 pb-4">
+    <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-6">
+      {/* Top Header Centered */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          Offres du jour
+        </h2>
+      </div>
+
+      {/* Grid containing 2 Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ---------------- CARD 1: Meilleures ventes ---------------- */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl uppercase">
-              OFFRE DU JOUR
-            </h2>
-          </div>
-          <Link
-            to="/promotions"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-white transition-colors bg-[#FF6B00] hover:bg-[#E85F00] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-sm"
-          >
-            <span className="text-white">Voir toutes les promotions</span>
-            <ArrowRight size={16} className="text-white" />
-          </Link>
-        </div>
-
-        <div
-          className="
-            flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-1 px-1
-            snap-x snap-mandatory scroll-smooth
-            [-ms-overflow-style:none] [scrollbar-width:none]
-          "
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          {products.map((product) => {
-            const price = Number(product.price || 0);
-            const promo = Number(product.promoPrice || price * 0.8);
-            const discount = product.discountPercent || (price > promo ? Math.round((1 - promo / price) * 100) : 20);
-
-            return (
-              <div
-                key={product.id || product._id}
-                className="
-                  snap-start shrink-0
-                  w-[200px] sm:w-[240px]
-                  rounded-2xl border border-slate-200 bg-white overflow-hidden
-                  flex flex-col justify-between
-                  hover:border-[#FF6B00]/50 hover:shadow-md transition-all duration-300 group
-                "
+            {/* Box Header */}
+            <div className="text-center sm:text-left mb-5">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                Meilleures ventes
+              </h3>
+              <Link
+                to="/best-sellers"
+                className="inline-flex items-center gap-1.5 bg-[#FFF5EA] text-[#D97706] border border-[#FDE68A] hover:bg-[#FFEEDD] px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors shadow-2xs"
               >
-                <div className="relative aspect-square overflow-hidden bg-slate-50">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-sm">
-                    -{discount}%
-                  </span>
-                </div>
+                <span>De super prix et choix de qualité</span>
+                <ChevronRight size={14} className="stroke-[2.5]" />
+              </Link>
+            </div>
 
-                <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 leading-snug">
-                      {product.name}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{product.sellerName || 'Dango Market'}</p>
-                  </div>
+            {/* Products Grid (3 items) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {bestSellers.map((item, idx) => {
+                const rawPrice = Number(item.price || 0);
+                const rawPromo = Number(item.promoPrice || item.salePrice || 0);
+                const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
+                const currentPrice = hasPromo ? rawPromo : rawPrice;
+                const oldPrice = hasPromo ? rawPrice : null;
 
-                  <div>
-                    <div className="flex flex-wrap items-baseline gap-1.5">
-                      <span className="text-base sm:text-lg font-black text-[#FF6B00]">
-                        {promo.toLocaleString('fr-FR')} FCFA
-                      </span>
-                      {price > promo && (
-                        <span className="text-xs text-slate-400 line-through">
-                          {price.toLocaleString('fr-FR')} FCFA
-                        </span>
-                      )}
+                const rating = item.rating != null ? Number(item.rating) : null;
+                const sales = Number(item.soldCount || item.sales || item.totalSold || 0);
+
+                return (
+                  <Link
+                    key={item.id || item._id || idx}
+                    to={`/product/${item.id || item._id}`}
+                    className="group flex flex-col justify-between h-full cursor-pointer"
+                  >
+                    <div>
+                      {/* Product Image */}
+                      <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
+                        <img
+                          src={
+                            item.image ||
+                            item.images?.[0]?.url ||
+                            item.images?.[0] ||
+                            'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
+                          }
+                          alt={item.name || 'Produit'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Product Title */}
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 mt-2 leading-snug group-hover:text-[#FF6B00] transition-colors">
+                        {item.name || 'Produit'}
+                      </h4>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => onAddToCart && onAddToCart(product)}
-                      className="mt-3 w-full bg-[#FF6B00] hover:bg-[#E85F00] active:scale-[0.98] text-white text-xs font-black py-2.5 px-3 rounded-xl transition-all shadow-sm cursor-pointer"
-                    >
-                      Ajouter au panier
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                    {/* Price & Real Meta */}
+                    <div className="mt-2">
+                      <div className="text-sm sm:text-base font-black text-[#E60012] leading-tight">
+                        {formatPrice(currentPrice)}
+                      </div>
+                      {oldPrice && (
+                        <div className="text-[11px] text-slate-400 line-through leading-tight">
+                          {formatPrice(oldPrice)}
+                        </div>
+                      )}
+                      {(rating > 0 || sales > 0) && (
+                        <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium flex items-center gap-1 mt-1">
+                          {rating > 0 && (
+                            <>
+                              <Star
+                                size={11}
+                                className="fill-amber-400 text-amber-400 shrink-0"
+                              />
+                              <span>{rating.toFixed(1)}</span>
+                            </>
+                          )}
+                          {rating > 0 && sales > 0 && (
+                            <span className="text-slate-300">|</span>
+                          )}
+                          {sales > 0 && (
+                            <span>
+                              + {sales >= 1000 ? `${Math.floor(sales / 1000)} 000` : sales} vendu(s)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ---------------- CARD 2: Deal du Jour ---------------- */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            {/* Box Header */}
+            <div className="text-center sm:text-left mb-5">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                Deal du Jour
+              </h3>
+              <Link
+                to="/promotions"
+                className="inline-flex items-center gap-1.5 bg-[#FFF0F2] text-[#E60012] border border-[#FECDD3] hover:bg-[#FFE4E8] px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors shadow-2xs"
+              >
+                <Clock size={14} className="stroke-[2.5]" />
+                <span>Jusqu'à -80%</span>
+                <ChevronRight size={14} className="stroke-[2.5]" />
+              </Link>
+            </div>
+
+            {/* Products Grid (3 items) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {dealsOfDay.map((item, idx) => {
+                const rawPrice = Number(item.price || 0);
+                const rawPromo = Number(item.promoPrice || item.salePrice || 0);
+                const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
+                const currentPrice = hasPromo ? rawPromo : rawPrice;
+                const oldPrice = hasPromo ? rawPrice : null;
+
+                const discount =
+                  item.discountPercent ||
+                  (oldPrice && currentPrice < oldPrice
+                    ? Math.round((1 - currentPrice / oldPrice) * 100)
+                    : null);
+
+                return (
+                  <Link
+                    key={item.id || item._id || idx}
+                    to={`/product/${item.id || item._id}`}
+                    className="group flex flex-col justify-between h-full cursor-pointer"
+                  >
+                    <div>
+                      {/* Product Image */}
+                      <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
+                        <img
+                          src={
+                            item.image ||
+                            item.images?.[0]?.url ||
+                            item.images?.[0] ||
+                            'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
+                          }
+                          alt={item.name || 'Produit'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Product Title */}
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 mt-2 leading-snug group-hover:text-[#FF6B00] transition-colors">
+                        {item.name || 'Produit'}
+                      </h4>
+                    </div>
+
+                    {/* Price & Discount Tag */}
+                    <div className="mt-2">
+                      <div className="text-sm sm:text-base font-black text-[#E60012] leading-tight">
+                        {formatPrice(currentPrice)}
+                      </div>
+                      {oldPrice && (
+                        <div className="text-[11px] text-slate-400 line-through leading-tight">
+                          {formatPrice(oldPrice)}
+                        </div>
+                      )}
+                      {discount > 0 && (
+                        <div className="bg-[#E60012] text-[#ffffff] text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded shadow-2xs w-max mt-1.5">
+                          -{discount}%
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </section>
