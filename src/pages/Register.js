@@ -241,7 +241,7 @@ const Register = () => {
                 </div>
               </div>
 
-              <button disabled={loading} type="submit" className="w-full py-3 px-4 text-sm font-bold rounded-xl bg-[#F68B1E] text-white">{loading ? 'ENVOI DU CODE...' : 'CONTINUER'}</button>
+              <button disabled={loading} type="submit" className="w-full py-4 px-6 text-base font-black rounded-xl bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] flex items-center justify-center gap-2 shadow-md shadow-[#F68B1E]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>ENVOI DU CODE...</span></>) : 'CONTINUER'}</button>
             </form>
           ) : (
             <form className="mt-8 space-y-6" onSubmit={handleVerifyAndSignup}>
@@ -253,7 +253,7 @@ const Register = () => {
                 </div>
                 <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-bold text-[#F68B1E] uppercase tracking-widest">Modifier l'email</button>
               </div>
-              <button disabled={loading} type="submit" className="w-full flex justify-center py-3 px-4 text-sm font-bold rounded-xl bg-[#F68B1E] text-white">{loading ? 'VÉRIFICATION...' : "VÉRIFIER ET S'INSCRIRE"}</button>
+              <button disabled={loading} type="submit" className="w-full flex justify-center items-center gap-2 py-4 px-6 text-base font-black rounded-xl bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] shadow-md shadow-[#F68B1E]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>VÉRIFICATION...</span></>) : "VÉRIFIER ET S'INSCRIRE"}</button>
             </form>
           )}
           <div className="bg-gray-50 p-4 border-t border-gray-100 text-center">

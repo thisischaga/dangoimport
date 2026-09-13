@@ -4,8 +4,9 @@ import './index.css';
 import App from './App';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
-
-
+if (typeof window !== 'undefined' && typeof window.service === 'undefined') {
+  window.service = {};
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

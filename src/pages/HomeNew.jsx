@@ -121,6 +121,103 @@ function CategoriesSection({ categories }) {
   );
 }
 
+function DailyDealsSection({ products, onAddToCart }) {
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-2">
+      <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-red-200/80 bg-gradient-to-br from-red-950 via-slate-900 to-slate-950 p-4 sm:p-6 text-white shadow-xl relative">
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-[#FF6B00]/20 blur-[90px] rounded-full pointer-events-none" />
+
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 relative z-10 border-b border-slate-800/80 pb-4">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-white sm:text-4xl uppercase">
+              OFFRE DU JOUR
+            </h2>
+          </div>
+          <Link
+            to="/promotions"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-white/20 shadow-sm"
+          >
+            <span className="text-white">Voir toutes les promotions</span>
+            <ArrowRight size={16} className="text-white" />
+          </Link>
+        </div>
+
+        <div
+          className="
+            flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-1 px-1
+            snap-x snap-mandatory scroll-smooth
+            [-ms-overflow-style:none] [scrollbar-width:none]
+          "
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {products.map((product) => {
+            const price = Number(product.price || 0);
+            const promo = Number(product.promoPrice || price * 0.8);
+            const discount = product.discountPercent || (price > promo ? Math.round((1 - promo / price) * 100) : 20);
+
+            return (
+              <div
+                key={product.id || product._id}
+                className="
+                  snap-start shrink-0
+                  w-[200px] sm:w-[240px]
+                  rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden
+                  flex flex-col justify-between
+                  hover:border-[#FF6B00]/50 transition-all duration-300 shadow-md group
+                "
+              >
+                <div className="relative aspect-square overflow-hidden bg-slate-800">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-md">
+                    -{discount}%
+                  </span>
+                </div>
+
+                <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug">
+                      {product.name}
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{product.sellerName || 'Dango Market'}</p>
+                  </div>
+
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-1.5">
+                      <span className="text-base sm:text-lg font-black text-[#FF6B00]">
+                        {promo.toLocaleString('fr-FR')} FCFA
+                      </span>
+                      {price > promo && (
+                        <span className="text-xs text-slate-500 line-through">
+                          {price.toLocaleString('fr-FR')} FCFA
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onAddToCart && onAddToCart(product)}
+                      className="mt-3 w-full bg-[#FF6B00] hover:bg-[#E85F00] active:scale-[0.98] text-white text-xs font-black py-2.5 px-3 rounded-xl transition-all shadow-sm cursor-pointer"
+                    >
+                      Ajouter au panier
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomeNew({ cartCount: cartCountProp }) {
   const location = useLocation();
   const { addToCart, cartCount: contextCount } = useCart();
@@ -248,6 +345,25 @@ function HomeNew({ cartCount: cartCountProp }) {
                 return categories;
               }
             })()}
+          />
+        )}
+
+        {!searchQuery && !loading && allProducts.length > 0 && (
+          <DailyDealsSection
+            products={(() => {
+              const promos = allProducts.filter(p => p.promoPrice || p.isPromo || p.salePrice < p.price);
+              if (promos.length >= 3) return promos.slice(0, 10);
+              return allProducts.slice(0, 8).map((p, idx) => {
+                const disc = [15, 20, 25, 30, 35][idx % 5];
+                const calc = p.promoPrice || Math.round(p.price * (1 - disc / 100));
+                return {
+                  ...p,
+                  promoPrice: calc < p.price ? calc : Math.round(p.price * 0.8),
+                  discountPercent: disc,
+                };
+              });
+            })()}
+            onAddToCart={addToCart}
           />
         )}
 

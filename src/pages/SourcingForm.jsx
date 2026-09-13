@@ -392,9 +392,16 @@ const SourcingForm = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-[#F68B1E] py-3.5 text-sm font-bold text-white transition hover:bg-[#e07b12] disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-xl bg-[#F68B1E] py-4 px-6 min-h-[52px] text-base font-black text-white transition-all hover:bg-[#e07b12] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-3 shadow-md shadow-[#F68B1E]/25 cursor-pointer mt-2"
             >
-              {submitting ? 'Redirection vers le paiement…' : 'Payer 5000F et envoyer ma demande'}
+              {submitting ? (
+                <>
+                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Redirection vers le paiement…</span>
+                </>
+              ) : (
+                'Payer 5000F et envoyer ma demande'
+              )}
             </button>
           </form>
         </div>

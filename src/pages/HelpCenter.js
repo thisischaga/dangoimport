@@ -92,13 +92,17 @@ export default function HelpCenter() {
           <span className="font-semibold text-slate-800">Centre d&apos;aide</span>
         </p>
 
-        <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
-          <div className="absolute pointer-events-none" aria-hidden />
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            Comment pouvons-nous vous aider ?
+        <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] p-8 text-white shadow-xl sm:p-10 relative">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-block bg-[#F68B1E] text-white text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+              TICKETS & ASSISTANCE
+            </span>
+          </div>
+          <h1 className="text-2xl font-black tracking-tight sm:text-4xl text-white">
+            Bonjour ! Comment pouvons-nous vous aider ?
           </h1>
-          <p className="mt-2 max-w-2xl text-slate-600">
-            Commandes, livraison, paiements — trouvez rapidement une réponse.
+          <p className="mt-2 max-w-2xl text-slate-300 text-sm sm:text-base leading-relaxed">
+            Trouvez instantanément des réponses à vos questions ou ouvrez un ticket d&apos;assistance auprès de notre équipe.
           </p>
 
           <div className="relative mt-6 max-w-xl">

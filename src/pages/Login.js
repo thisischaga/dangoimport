@@ -587,20 +587,20 @@ const Login = () => {
                                 <button
                                     disabled={loading}
                                     type="submit"
-                                    className="w-full bg-[#F68B1E] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 mt-2"
+                                    className="w-full bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white font-black py-4 px-6 rounded-xl min-h-[52px] text-base flex items-center justify-center gap-3 mt-4 transition-all shadow-md shadow-[#F68B1E]/25 cursor-pointer"
                                 >
 
                                     {loading ? (
                                         <>
-                                            <div className="w-4 h-4 border-2 border-[#111]/30 border-t-[#111] rounded-full animate-spin" />
+                                            <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
 
-                                            Connexion...
+                                            <span className="tracking-wide">Connexion en cours...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <FaSignInAlt size={14} />
+                                            <FaSignInAlt size={16} />
 
-                                            Se connecter
+                                            <span>Se connecter</span>
                                         </>
                                     )}
 
