@@ -127,7 +127,7 @@ function CategoriesSection({ categories }) {
 function DailyDealsSection({ products, onAddToCart }) {
   if (!products || products.length === 0) return null;
 
-  // 1. Identify Deals of the Day (products with promo prices or discount)
+  // 1. Identify Deals of the Day (3 products with promo prices or discount)
   const promoProducts = products.filter(
     (p) =>
       (p.promoPrice && Number(p.promoPrice) < Number(p.price)) ||
@@ -152,7 +152,19 @@ function DailyDealsSection({ products, onAddToCart }) {
     }
   );
 
+  // Guarantee bestSellers has 3 products if available
   const bestSellers = sortedBestSellers.slice(0, 3);
+  if (bestSellers.length < 3 && products.length > bestSellers.length) {
+    const existingIds = new Set(bestSellers.map((b) => String(b.id || b._id)));
+    for (const p of products) {
+      if (bestSellers.length >= 3) break;
+      const pid = String(p.id || p._id);
+      if (!existingIds.has(pid)) {
+        bestSellers.push(p);
+        existingIds.add(pid);
+      }
+    }
+  }
 
   const formatPrice = (amount) => {
     const n = Number(amount || 0);
@@ -173,14 +185,14 @@ function DailyDealsSection({ products, onAddToCart }) {
         {/* ---------------- CARD 1: Meilleures ventes ---------------- */}
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            {/* Box Header */}
-            <div className="text-center sm:text-left mb-5">
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+            {/* Box Header - Horizontal Flex */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                 Meilleures ventes
               </h3>
               <Link
                 to="/best-sellers"
-                className="inline-flex items-center gap-1.5 bg-[#FFF5EA] text-[#D97706] border border-[#FDE68A] hover:bg-[#FFEEDD] px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1 bg-[#FFF5EA] text-[#D97706] border border-[#FDE68A] hover:bg-[#FFEEDD] px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
               >
                 <span>De super prix et choix de qualité</span>
                 <ChevronRight size={14} className="stroke-[2.5]" />
@@ -269,14 +281,14 @@ function DailyDealsSection({ products, onAddToCart }) {
         {/* ---------------- CARD 2: Deal du Jour ---------------- */}
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            {/* Box Header */}
-            <div className="text-center sm:text-left mb-5">
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+            {/* Box Header - Horizontal Flex */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                 Deal du Jour
               </h3>
               <Link
                 to="/promotions"
-                className="inline-flex items-center gap-1.5 bg-[#FFF0F2] text-[#E60012] border border-[#FECDD3] hover:bg-[#FFE4E8] px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1 bg-[#FFF0F2] text-[#E60012] border border-[#FECDD3] hover:bg-[#FFE4E8] px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
               >
                 <Clock size={14} className="stroke-[2.5]" />
                 <span>Jusqu'à -80%</span>
@@ -486,19 +498,7 @@ function HomeNew({ cartCount: cartCountProp }) {
 
         {!searchQuery && !loading && allProducts.length > 0 && (
           <DailyDealsSection
-            products={(() => {
-              const promos = allProducts.filter(p => p.promoPrice || p.isPromo || p.salePrice < p.price);
-              if (promos.length >= 3) return promos.slice(0, 10);
-              return allProducts.slice(0, 8).map((p, idx) => {
-                const disc = [15, 20, 25, 30, 35][idx % 5];
-                const calc = p.promoPrice || Math.round(p.price * (1 - disc / 100));
-                return {
-                  ...p,
-                  promoPrice: calc < p.price ? calc : Math.round(p.price * 0.8),
-                  discountPercent: disc,
-                };
-              });
-            })()}
+            products={allProducts}
             onAddToCart={addToCart}
           />
         )}
