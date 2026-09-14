@@ -19,6 +19,7 @@ import MentionsLegales from './pages/MentionsLegales';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerificationSuccess from './pages/VerificationSuccess';
 
 import Orders from './pages/Orders';
 import ProductDetail from './pages/ProductDetail';
@@ -239,6 +240,7 @@ function App() {
 
                   <Route path='/login' element={<Login/>}/>
                   <Route path='/register' element={<Register/>}/>
+                  <Route path='/verification-success' element={<VerificationSuccess/>}/>
                   <Route
                       path="/oauth-success"
                       element={<OAuthSuccess />}

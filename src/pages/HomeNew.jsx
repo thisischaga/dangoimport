@@ -166,6 +166,19 @@ function DailyDealsSection({ products, onAddToCart }) {
     }
   }
 
+  // Compute dynamic max discount percentage among dealsOfDay
+  const maxPromoPercent = dealsOfDay.reduce((max, d) => {
+    const price = Number(d.price || 0);
+    const promo = Number(d.promoPrice || d.salePrice || 0);
+    let disc = d.discountPercent || 0;
+    if (!disc && price > 0 && promo > 0 && promo < price) {
+      disc = Math.round((1 - promo / price) * 100);
+    }
+    return disc > max ? disc : max;
+  }, 0);
+
+  const promoBadgeText = maxPromoPercent > 0 ? `Jusqu'à -${maxPromoPercent}%` : "Jusqu'à -50%";
+
   const formatPrice = (amount) => {
     const n = Number(amount || 0);
     return `XOF${n.toLocaleString('fr-FR')}`;
@@ -192,7 +205,7 @@ function DailyDealsSection({ products, onAddToCart }) {
               </h3>
               <Link
                 to="/best-sellers"
-                className="inline-flex items-center gap-1 bg-[#FFF5EA] text-[#D97706] border border-[#FDE68A] hover:bg-[#FFEEDD] px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
+                className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200 px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
               >
                 <span>De super prix et choix de qualité</span>
                 <ChevronRight size={14} className="stroke-[2.5]" />
@@ -241,7 +254,7 @@ function DailyDealsSection({ products, onAddToCart }) {
 
                     {/* Price & Real Meta */}
                     <div className="mt-2">
-                      <div className="text-sm sm:text-base font-black text-[#E60012] leading-tight">
+                      <div className="text-sm sm:text-base font-black text-[#C50012] leading-tight">
                         {formatPrice(currentPrice)}
                       </div>
                       {oldPrice && (
@@ -288,10 +301,10 @@ function DailyDealsSection({ products, onAddToCart }) {
               </h3>
               <Link
                 to="/promotions"
-                className="inline-flex items-center gap-1 bg-[#FFF0F2] text-[#E60012] border border-[#FECDD3] hover:bg-[#FFE4E8] px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
+                className="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
               >
                 <Clock size={14} className="stroke-[2.5]" />
-                <span>Jusqu'à -80%</span>
+                <span>{promoBadgeText}</span>
                 <ChevronRight size={14} className="stroke-[2.5]" />
               </Link>
             </div>
@@ -341,7 +354,7 @@ function DailyDealsSection({ products, onAddToCart }) {
 
                     {/* Price & Discount Tag */}
                     <div className="mt-2">
-                      <div className="text-sm sm:text-base font-black text-[#E60012] leading-tight">
+                      <div className="text-sm sm:text-base font-black text-[#C50012] leading-tight">
                         {formatPrice(currentPrice)}
                       </div>
                       {oldPrice && (
@@ -350,7 +363,7 @@ function DailyDealsSection({ products, onAddToCart }) {
                         </div>
                       )}
                       {discount > 0 && (
-                        <div className="bg-[#E60012] text-[#ffffff] text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded shadow-2xs w-max mt-1.5">
+                        <div className="bg-[#C50012] text-[#ffffff] text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded shadow-2xs w-max mt-1.5">
                           -{discount}%
                         </div>
                       )}
