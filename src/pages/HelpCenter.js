@@ -93,11 +93,7 @@ export default function HelpCenter() {
         </p>
 
         <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] p-8 text-white shadow-xl sm:p-10 relative">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-block bg-[#F68B1E] text-white text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
-              TICKETS & ASSISTANCE
-            </span>
-          </div>
+
           <h1 className="text-2xl font-black tracking-tight sm:text-4xl text-white">
             Bonjour ! Comment pouvons-nous vous aider ?
           </h1>
