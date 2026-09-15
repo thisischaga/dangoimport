@@ -375,15 +375,6 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            <ul className="pdp__perks">
-              <li>
-                <Truck size={16} />
-                {freeShippingZone ? 'Livraison gratuite disponible' : hasDelivery ? 'Livraison disponible' : 'Livraison selon zone'}
-              </li>
-              <li><ShieldCheck size={16} /> Paiement sécurisé</li>
-              <li><RotateCcw size={16} /> Retours selon conditions</li>
-              <li><CreditCard size={16} /> Mobile Money accepté</li>
-            </ul>
 
             {sellerName && (
               <div className="pdp__seller">
