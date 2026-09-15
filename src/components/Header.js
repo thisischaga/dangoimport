@@ -77,22 +77,35 @@ function buildSearchSuggestions(items, query) {
 }
 
 /**
- * Logo "Dango Import" — wordmark seul. La distinction entre les deux mots
- * se fait par la graisse ET la couleur (pas juste la couleur), ce qui lit
- * comme un choix typographique plutôt qu'un simple mot souligné en orange.
+ * Logo "DANGO import" — wordmark typographique premium.
+ * Inter Black (900) majuscules pour « DANGO », Inter Medium (500)
+ * pour « import » en orange vif. Rendu premium, minimaliste, distinctif.
  */
 function BrandLogo({ onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-2 rounded-md ${FOCUS_RING}`}
+      className={`group flex shrink-0 items-center rounded-lg px-1 py-1 transition-all duration-200 ${FOCUS_RING}`}
       aria-label="Dango Import — accueil"
     >
-
-      <span className="flex items-baseline gap-0.5 whitespace-nowrap text-lg tracking-tight sm:text-xl">
-        <span className="font-extrabold text-slate-900">Dango </span>
-        <span className="font-semibold text-[#FF6B00]">Import</span>
+      <span
+        className="flex items-baseline whitespace-nowrap"
+        style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', system-ui, sans-serif" }}
+      >
+        <span
+          className="text-[17px] font-black uppercase leading-none tracking-[-0.04em] text-slate-900 sm:text-[22px] md:text-[24px]"
+        >
+          Dango
+        </span>
+        <span
+          className="relative text-[17px] font-medium uppercase leading-none tracking-[0.02em] text-[#FF6B00] sm:text-[22px] md:text-[24px]"
+        >
+          Import
+          <span
+            className="absolute bottom-[-2px] left-0 h-[2px] w-full rounded-full bg-[#FF6B00] opacity-60 sm:bottom-[-3px] sm:h-[2.5px]"
+          />
+        </span>
       </span>
     </button>
   );
@@ -222,20 +235,20 @@ function MobileNavDrawer({ open, onClose, user, cartCount, onLogout, navigate })
 function DesktopQuickNav({ pathname }) {
   return (
     <nav
-      className="hidden border-t border-slate-100 bg-slate-50/80 md:block"
+      className="hidden border-t border-slate-100 bg-gradient-to-b from-slate-50/90 to-white md:block"
       aria-label="Navigation rapide"
     >
-      <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-4 py-1.5 sm:px-6 lg:px-8">
         {QUICK_NAV_LINKS.map(({ label, to }) => {
           const active = pathname === to || pathname.startsWith(`${to}/`);
           return (
             <Link
               key={to}
               to={to}
-              className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition sm:text-sm ${
+              className={`shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-200 sm:text-[13px] ${
                 active
-                  ? 'bg-white text-[#FF6B00] shadow-sm ring-1 ring-slate-200'
-                  : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                  ? 'bg-white text-[#FF6B00] shadow-sm ring-1 ring-orange-100'
+                  : 'text-slate-500 hover:bg-white/80 hover:text-slate-800'
               }`}
             >
               {label}
@@ -266,7 +279,8 @@ function SearchForm({ className = '', inputRef, value, onChange, onSubmit, onFoc
         onBlur={onBlur}
       />
       <button
-        className={`flex shrink-0 items-center gap-1.5 rounded-md bg-[#FF6B00] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#E85F00] ${FOCUS_RING}`}
+        className={`flex shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-orange-500/20 transition-all duration-200 hover:shadow-md hover:shadow-orange-500/25 hover:brightness-110 ${FOCUS_RING}`}
+        style={{ background: 'linear-gradient(135deg, #FF6B00, #FF8C33)' }}
         type="submit"
         onMouseDown={(e) => e.preventDefault()}
         aria-label="Rechercher"
@@ -618,21 +632,21 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className={`dango-header fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white/95 transition-all duration-200 ${
-          scrolled ? 'shadow-md shadow-slate-900/[0.06] backdrop-blur-md' : 'backdrop-blur-sm'
+        className={`dango-header fixed left-0 right-0 top-0 z-40 bg-white/95 transition-all duration-300 ${
+          scrolled ? 'shadow-lg shadow-slate-900/[0.08] backdrop-blur-xl border-b border-slate-200/60' : 'backdrop-blur-sm border-b border-slate-100'
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {user && localStorage.getItem('dangoToken') ? (
           <PhoneUpdateBanner user={user} onUpdated={setUser} />
         ) : null}
-        <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8">
+        <div className="mx-auto max-w-7xl px-2.5 py-2 sm:px-6 sm:py-3 lg:px-8">
           {/* Ligne principale */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">
+          <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-6">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 md:hidden ${FOCUS_RING}`}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 sm:h-10 sm:w-10 md:hidden ${FOCUS_RING}`}
               aria-label="Ouvrir le menu"
             >
               <Menu size={22} />
@@ -643,7 +657,7 @@ const Header = () => {
             {/* Recherche desktop */}
             <div className="hidden flex-1 items-center justify-center md:flex">
               <div className="relative w-full max-w-2xl">
-                <div className="flex h-11 items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm">
+                <div className="flex h-11 items-stretch overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 shadow-sm transition-all duration-200 focus-within:border-[#FF6B00]/40 focus-within:bg-white focus-within:shadow-md focus-within:shadow-orange-500/10 focus-within:ring-2 focus-within:ring-[#FF6B00]/10">
                   <SearchForm
                     inputRef={searchInputRef}
                     value={searchQuery}
@@ -698,8 +712,8 @@ const Header = () => {
           </div>
 
           {/* Recherche mobile — pleine largeur, sans bouton catégories dupliqué */}
-          <div className="relative mt-2.5 md:hidden">
-            <div className="flex h-11 items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm">
+          <div className="relative mt-2 md:hidden">
+            <div className="flex h-10 items-stretch overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 shadow-sm transition-all duration-200 focus-within:border-[#FF6B00]/40 focus-within:bg-white focus-within:shadow-md focus-within:shadow-orange-500/10 focus-within:ring-2 focus-within:ring-[#FF6B00]/10">
               <SearchForm
                 showLabel={false}
                 value={searchQuery}

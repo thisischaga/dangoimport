@@ -514,11 +514,13 @@ function ProductCard({
 
           color: #111827;
 
-          /*
-           * Pas de hauteur fixe.
-           */
           height: auto;
           min-height: 0;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
 
           overflow-wrap: anywhere;
         }
@@ -767,35 +769,60 @@ function ProductCard({
 
         @media (max-width: 639px) {
           .pc2__body {
-            padding-top: 7px;
-            padding-left: 1px;
-            padding-right: 1px;
-            padding-bottom: 3px;
+            padding: 5px 3px 4px;
           }
 
           .pc2__title {
-            font-size: 13px;
-            line-height: 1.35;
+            font-size: 11px;
+            line-height: 1.3;
           }
 
           .pc2__price {
-            font-size: 15px;
+            font-size: 13px;
           }
 
           .pc2__price-old {
-            font-size: 11px;
+            font-size: 9px;
+          }
+
+          .pc2__price-row {
+            gap: 3px;
+            margin-top: 3px;
+          }
+
+          .pc2__feature {
+            font-size: 9px;
+          }
+
+          .pc2__feature--promo {
+            font-size: 9px;
+            padding: 1px 5px;
           }
 
           .pc2__moq-sold,
           .pc2__delivery-zone {
-            font-size: 10px;
+            font-size: 9px;
+          }
+
+          .pc2__vendor-meta {
+            font-size: 9px;
           }
 
           .pc2__quick-add-btn {
-            bottom: 6px;
-            right: 6px;
-            width: 28px;
-            height: 28px;
+            bottom: 4px;
+            right: 4px;
+            width: 26px;
+            height: 26px;
+          }
+
+          .pc2-rating__star-btn {
+            width: 11px;
+            height: 11px;
+          }
+
+          .pc2-rating__star-btn svg {
+            width: 11px;
+            height: 11px;
           }
         }
 

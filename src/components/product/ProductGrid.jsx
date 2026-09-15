@@ -1017,32 +1017,16 @@ function ProductGrid({
 
         <style>{`
           #product-grid-main {
-            display: block;
-            column-count: 2;
-            column-gap: 10px;
-          }
-
-          #product-grid-main > * {
-            display: inline-block;
-            width: 100%;
-            break-inside: avoid;
-            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            align-items: start;
           }
 
           @media (min-width: 640px) {
             #product-grid-main {
-              display: grid;
               grid-template-columns: repeat(3, minmax(0, 1fr));
               gap: 10px;
-              align-items: start;
-            }
-
-            #product-grid-main > * {
-              display: block;
-              width: auto;
-              break-inside: auto;
-              margin-bottom: 0;
-              align-self: start;
             }
           }
 
@@ -1062,7 +1046,7 @@ function ProductGrid({
         <div
           id="product-grid-main"
 
-          className="px-2 sm:px-0"
+          className="px-1 sm:px-0"
         >
 
           {/* ==============================================
