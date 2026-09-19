@@ -68,7 +68,7 @@ async function generateSitemap() {
   console.log('📄 Ajout des pages principales...');
   urls += createUrlEntry(SITE_URL, 'daily', 1.0);
   urls += createUrlEntry(`${SITE_URL}/contact`, 'monthly', 0.7);
-  urls += createUrlEntry("business.dangoimport.com", 'monthly', 0.8);
+  urls += createUrlEntry('https://business.dangoimport.com', 'monthly', 0.8);
 
   // 2. Récupérer les catégories
   try {

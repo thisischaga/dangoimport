@@ -203,7 +203,6 @@ function App() {
                   <Route path="/" element={<Home />} />
                   {/*<Route path="/about" element={<About />} />*/}
                   <Route path='/services' element={<Navigate to='/' replace />} />
-                  <Route path='/sourcing/*' element={<Navigate to='/' replace />} />
                   <Route path='/checkout-sourcing' element={<Navigate to='/' replace />} />
                   <Route path='/cgu' element={<Cgu/>}/>
                   <Route path='/politique-confidentialite' element={<Politique />}/>
