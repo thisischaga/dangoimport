@@ -18,6 +18,7 @@ import {
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import { applyProductFilters } from '../../utils/productFilters';
+import { normalizeCatalogProductStock } from '../../utils/publicProduct';
 import {
   isProductOnPromo,
   isProductNewArrival,
@@ -850,21 +851,26 @@ function ProductGrid({
 
   const sentinelRef = useRef(null);
 
+  const catalogProducts = useMemo(
+    () => (products || []).map((p) => normalizeCatalogProductStock(p)),
+    [products],
+  );
+
   /* =======================================================
      RESET PAGE WHEN DATA / FILTER / TAB CHANGES
   ======================================================= */
 
   useEffect(() => {
     setPage(1);
-  }, [filters, products, activeTab]);
+  }, [filters, catalogProducts, activeTab]);
 
   /* =======================================================
      FILTERS
   ======================================================= */
 
   const filtered = useMemo(
-    () => applyProductFilters(products, filters),
-    [products, filters]
+    () => applyProductFilters(catalogProducts, filters),
+    [catalogProducts, filters]
   );
 
   /* =======================================================
@@ -1003,7 +1009,7 @@ function ProductGrid({
             BANNER CAROUSEL SLIDES
         ================================================= */}
         {showPromoSection && (
-          <PromoSection products={products} onAddToCart={onAddToCart} />
+          <PromoSection products={catalogProducts} onAddToCart={onAddToCart} />
         )}
 
         {/* ================================================

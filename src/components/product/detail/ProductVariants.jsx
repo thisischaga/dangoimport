@@ -1,5 +1,13 @@
 import React, { useMemo } from 'react';
 
+const INTERNAL_VARIANT_ATTR_KEYS = new Set([
+  'externalvariantid',
+  'variantkey',
+  'supplierpriceusd',
+  'vid',
+  'pid',
+]);
+
 function ProductVariants({
   product,
   selectedVariantIndex,
@@ -13,12 +21,16 @@ function ProductVariants({
   const colors = Array.isArray(product?.color) ? product.color.filter(Boolean) : [];
   const sizes = Array.isArray(product?.size) ? product.size.filter(Boolean) : [];
 
+  const INTERNAL_ATTR_KEYS = INTERNAL_VARIANT_ATTR_KEYS;
+
   const variantGroups = useMemo(() => {
     if (variants.length === 0) return null;
     const attrKeys = new Set();
     variants.forEach((v) => {
       const attrs = v.attributes || {};
-      Object.keys(attrs).forEach((k) => attrKeys.add(k));
+      Object.keys(attrs).forEach((k) => {
+        if (!INTERNAL_ATTR_KEYS.has(String(k).toLowerCase())) attrKeys.add(k);
+      });
     });
     if (attrKeys.size === 0) return null;
     return Array.from(attrKeys).map((key) => ({

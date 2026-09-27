@@ -1,3 +1,5 @@
+import { getProductSellableStock } from './publicProduct';
+
 export const SORT_OPTIONS = [
   { value: 'relevance', label: 'Pertinence' },
   { value: 'newest', label: 'Nouveautés' },
@@ -72,7 +74,7 @@ export function applyProductFilters(products, filters = {}) {
   }
 
   if (filters.inStock) {
-    result = result.filter((p) => Number(p.stock ?? 0) > 0);
+    result = result.filter((p) => getProductSellableStock(p) > 0);
   }
 
   if (filters.newArrival) {

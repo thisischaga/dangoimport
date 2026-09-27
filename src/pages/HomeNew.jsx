@@ -19,6 +19,7 @@ import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
+import { getProductSellableStock } from '../utils/publicProduct';
 
 // Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
 // n'aura jamais la même image que sa voisine — on pioche dans ce pool via un hash stable)
@@ -551,7 +552,7 @@ function normalizeProduct(product) {
     category: product?.category || 'Produit',
     sellerName,
     sellerVerified: Boolean(product?.sellerVerified || product?.vendorName),
-    stock: Number(product?.stock ?? 0) || 0,
+    stock: getProductSellableStock(product),
     isFeatured: Boolean(product?.isFeatured),
     isBoosted: Boolean(product?.isFeatured || product?.isBestSeller || product?.isBoosted),
   };

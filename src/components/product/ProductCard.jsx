@@ -4,6 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
+import { getProductSellableStock } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 
@@ -228,10 +229,7 @@ function ProductCard({
      STOCK
   ======================================================= */
 
-  const stock =
-    Number(
-      product?.stock ?? 0
-    ) || 0;
+  const stock = getProductSellableStock(product);
 
   const initialStock =
     Number(

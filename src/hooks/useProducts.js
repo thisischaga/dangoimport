@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import API_BASE_URL from '../apiConfig';
+import { sanitizeProductForDisplay, sanitizeProductsForDisplay } from '../utils/publicProduct';
 
 const API = API_BASE_URL;
 
@@ -11,13 +12,16 @@ function normalizeProducts(payload) {
       ? payload.data
       : [];
 
-  return list.filter((item) => item && typeof item === 'object' && (item._id || item.id || item.slug || item.name));
+  return list.filter((item) => item && typeof item === 'object' && (item._id || item.id || item.slug || item.name))
+    .map(sanitizeProductForDisplay);
 }
 
 function normalizeSingleProduct(payload) {
   if (!payload) return null;
-  if (typeof payload === 'object' && payload.data && typeof payload.data === 'object') return payload.data;
-  return payload;
+  if (typeof payload === 'object' && payload.data && typeof payload.data === 'object') {
+    return sanitizeProductForDisplay(payload.data);
+  }
+  return sanitizeProductForDisplay(payload);
 }
 
 function isApprovedStatus(product) {
