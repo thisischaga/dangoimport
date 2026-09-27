@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import API_BASE_URL from '../apiConfig';
 import client from '../apiClient';
+import { isDropshippingProduct } from '../utils/publicProduct';
 
 const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
 
@@ -118,6 +119,16 @@ const CartPage = () => {
     if (!user) {
       toast.warning('Veuillez vous connecter pour passer au checkout.');
       navigate('/login', { state: { from: '/cart' } });
+      return;
+    }
+    const hasDrop = cart.some((item) => isDropshippingProduct(item));
+    const hasLocal = cart.some((item) => !isDropshippingProduct(item));
+    if (hasDrop && hasLocal) {
+      toast.error('Panier mixte : retirez les produits locaux ou dropshipping pour finaliser en une seule commande.');
+      return;
+    }
+    if (hasDrop) {
+      navigate('/checkout/dropshipping');
       return;
     }
     navigate('/checkout');

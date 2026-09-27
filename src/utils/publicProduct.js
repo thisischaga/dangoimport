@@ -22,6 +22,24 @@ export function isDropshippingProduct(product) {
   return product?.sourceType === 'DROPSHIPPING';
 }
 
+function isInvalidTranslationText(text) {
+  const s = String(text || '').trim();
+  if (!s) return true;
+  const upper = s.toUpperCase();
+  return upper.includes('MYMEMORY WARNING')
+    || upper.includes('YOU USED ALL AVAILABLE FREE TRANSLATION')
+    || upper.includes('QUERY LENGTH LIMIT');
+}
+
+function resolveDisplayProductName(product) {
+  const candidates = [
+    product?.name,
+    product?.shortDescription,
+  ].map((c) => String(c || '').trim()).filter(Boolean);
+  const valid = candidates.filter((c) => !isInvalidTranslationText(c));
+  return valid[0] || 'Produit';
+}
+
 /** Stock affichable (aligné fiche produit : max stock produit, variantes, entrepôts CJ). */
 export function getProductSellableStock(product) {
   if (!product) return 0;
@@ -71,6 +89,13 @@ export function sanitizeProductForDisplay(product) {
   });
 
   sanitized.stock = getProductSellableStock(product);
+  sanitized.name = resolveDisplayProductName(product);
+  if (isInvalidTranslationText(sanitized.description)) {
+    sanitized.description = sanitized.name;
+  }
+  if (isInvalidTranslationText(sanitized.shortDescription)) {
+    sanitized.shortDescription = String(sanitized.description || sanitized.name).slice(0, 220);
+  }
 
   if (isDropshippingProduct(product)) {
     sanitized.vendorName = PLATFORM_VENDOR_NAME;

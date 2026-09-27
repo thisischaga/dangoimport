@@ -11,9 +11,11 @@ import { useCart } from '../context/CartContext';
 const PaymentResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { restoreCart } = useCart();
+  const { restoreCart, clearCart } = useCart();
   const [status, setStatus] = useState('pending');
   const [orderId, setOrderId] = useState(null);
+  const [dropshipMode, setDropshipMode] = useState(false);
+  const [dropshipSummary, setDropshipSummary] = useState(null);
   const [transactionId, setTransactionId] = useState(null);
   const [message, setMessage] = useState('Chargement du résultat de paiement...');
   const [loading, setLoading] = useState(true);
@@ -26,10 +28,29 @@ const PaymentResult = () => {
     const statusParam = (params.get('status') || 'success').toLowerCase();
     const orderIdParam = params.get('orderId');
     const transactionIdParam = params.get('transactionId') || params.get('id');
+    const checkoutModeParam = (params.get('checkoutMode') || '').toLowerCase();
 
     setStatus(statusParam);
     setOrderId(orderIdParam);
     setTransactionId(transactionIdParam);
+
+    const pendingRaw = localStorage.getItem('pendingFedapay');
+    let pendingMode = checkoutModeParam === 'dropshipping';
+    try {
+      if (pendingRaw) {
+        const pending = JSON.parse(pendingRaw);
+        if (pending.checkoutMode === 'dropshipping') pendingMode = true;
+      }
+    } catch {
+      /* ignore */
+    }
+    setDropshipMode(pendingMode);
+    try {
+      const summaryRaw = localStorage.getItem('pendingDropshipCheckoutSummary');
+      if (summaryRaw) setDropshipSummary(JSON.parse(summaryRaw));
+    } catch {
+      /* ignore */
+    }
 
     const token = localStorage.getItem('dangoToken');
     let mounted = true;
@@ -53,7 +74,39 @@ const PaymentResult = () => {
       }
     };
 
-    const fetchQrTokensForOrder = async (currentOrderId) => {
+    const finishDropshipSuccess = (resolvedOrderId, resolvedOrderNumber) => {
+      clearCart();
+      let summary = null;
+      try {
+        summary = JSON.parse(localStorage.getItem('pendingDropshipCheckoutSummary') || 'null');
+      } catch {
+        summary = null;
+      }
+      localStorage.removeItem('pendingDropshipCheckoutSummary');
+      const totalLabel = summary?.total
+        ? `${Number(summary.total).toLocaleString('fr-FR')} FCFA`
+        : null;
+      const eta = summary?.estimatedDelivery;
+      const ref = resolvedOrderNumber || resolvedOrderId;
+      setMessage(
+        [
+          '✓ Commande confirmée',
+          '',
+          'Merci pour votre commande.',
+          ref ? `Votre commande ${ref} a bien été enregistrée.` : 'Votre commande a bien été enregistrée.',
+          'Notre équipe va maintenant la traiter et préparer son expédition.',
+          eta ? `Livraison estimée : ${eta}` : null,
+          totalLabel ? `Total : ${totalLabel}` : null,
+        ].filter(Boolean).join('\n'),
+      );
+      setLoading(false);
+      return true;
+    };
+
+    const fetchQrTokensForOrder = async (currentOrderId, isDropship) => {
+      if (isDropship) {
+        return finishDropshipSuccess(currentOrderId, null);
+      }
       try {
         const qrResponse = await fetchOrderQrTokens(currentOrderId, token);
         const tokens = qrResponse.qrTokens || [];
@@ -102,7 +155,7 @@ const PaymentResult = () => {
           setOrderId(currentOrderId);
           localStorage.removeItem('pendingFedapay');
           localStorage.removeItem('pendingFedapayCartBackup');
-          return await fetchQrTokensForOrder(currentOrderId);
+          return await fetchQrTokensForOrder(currentOrderId, pendingMode);
         }
 
         const remoteStatus = (data.data?.status || '').toLowerCase();
@@ -169,7 +222,7 @@ const PaymentResult = () => {
       mounted = false;
       if (timerId) clearTimeout(timerId);
     };
-  }, [location.search, restoreCart]);
+  }, [location.search, restoreCart, clearCart]);
 
   useEffect(() => {
     if (!qrTokens.length) {
@@ -200,7 +253,12 @@ const PaymentResult = () => {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
           <div className="space-y-4 text-gray-700">
-            <p className="text-base leading-7">{message}</p>
+            <p className="text-base leading-7 whitespace-pre-line">{message}</p>
+            {dropshipMode && !loading && orderId && (
+              <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 px-4 py-3 m-0">
+                Vous recevrez des nouvelles par email ou téléphone. Aucune action n’est requise de votre côté chez un fournisseur externe.
+              </p>
+            )}
             {loading && <p className="text-sm text-gray-500">Chargement en cours...</p>}
             {!loading && transactionId && (
               <p className="text-sm text-gray-500">Transaction FedaPay : <span className="font-semibold">{transactionId}</span></p>

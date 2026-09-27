@@ -27,6 +27,7 @@ import Shop from './pages/Shop';
 import CategoryPage from './pages/CategoryPage';
 import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
+import DropshippingCheckout from './pages/DropshippingCheckout';
 import PaymentResult from './pages/PaymentResult';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -62,6 +63,7 @@ function getPageTitle(pathname) {
     { regex: /^\/mentions-legales$/, title: 'Mentions légales' },
     { regex: /^\/cart$/, title: 'Panier' },
     { regex: /^\/checkout$/, title: 'Paiement' },
+    { regex: /^\/checkout\/dropshipping$/, title: 'Checkout dropshipping' },
     { regex: /^\/checkout\/result$/, title: 'Résultat de paiement' },
     { regex: /^\/login$/, title: 'Connexion' },
     { regex: /^\/register$/, title: 'Inscription' },
@@ -235,6 +237,7 @@ function App() {
                   {/**<Route path='/store/:slug' element={<StoreRedirect />} /> */}
                   <Route path='/cart' element={<CartPage/>}/>
                   <Route path='/checkout' element={<Checkout/>}/>
+                  <Route path='/checkout/dropshipping' element={<DropshippingCheckout/>}/>
                   <Route path='/checkout/result' element={<PaymentResult/>}/>
 
                   <Route path='/login' element={<Login/>}/>

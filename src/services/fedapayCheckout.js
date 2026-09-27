@@ -430,6 +430,11 @@ export function buildCartFedapayPayload({
   description,
   type,
   promoCode,
+  checkoutMode,
+  estimatedDeliveryLabel,
+  shippingCost,
+  shippingOptionId,
+  callbackUrl,
 }) {
   const base =
     buildCartBasePayload({
@@ -541,12 +546,18 @@ export function buildCartFedapayPayload({
         form.city || '',
 
       neighborhood:
-        form.neighborhood || '',
+        form.neighborhood || form.district || '',
+
+      district:
+        form.district || form.neighborhood || '',
 
       fullAddress:
         form.fullAddress ||
         form.addressQuery ||
         '',
+
+      landmark:
+        form.landmark || '',
 
       postalCode:
         form.postalCode || '',
@@ -587,6 +598,7 @@ export function buildCartFedapayPayload({
     ----------------------------------------------------- */
 
     callback_url:
+      callbackUrl ||
       `${window.location.origin}/checkout`,
 
     /* -----------------------------------------------------
@@ -616,11 +628,32 @@ export function buildCartFedapayPayload({
     ----------------------------------------------------- */
 
     shippingMethod:
+      shippingOptionId ||
       shippingLabel ||
       'standard',
 
+    shippingOptionId:
+      shippingOptionId || null,
+
     shippingFee:
       Number(shippingFee) || 0,
+
+    shippingCost:
+      Number(shippingCost ?? shippingFee) || 0,
+
+    deliveryFee:
+      Number(shippingCost ?? shippingFee) || 0,
+
+    checkoutMode:
+      checkoutMode || (type === 'dropshipping' ? 'dropshipping' : 'local'),
+
+    estimatedDeliveryLabel:
+      estimatedDeliveryLabel || null,
+
+    orderType:
+      checkoutMode === 'dropshipping' || type === 'dropshipping'
+        ? 'dropshipping'
+        : 'local',
 
     /* -----------------------------------------------------
        PROMO
