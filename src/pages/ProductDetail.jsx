@@ -410,8 +410,12 @@ export default function ProductDetail() {
         <div className="pd-empty">
           <Package size={48} strokeWidth={1.25} />
           <h1>Produit introuvable</h1>
-          <p>Ce produit n&apos;est plus disponible.</p>
-          <Link to="/shopping" className="pd-btn pd-btn--primary">Retour à la boutique</Link>
+          <p>Ce produit n&apos;est plus disponible ou le lien n&apos;est pas valide.</p>
+          <div className="pd-empty__actions">
+            <Link to="/shopping" className="pd-btn pd-btn--primary">Retour à la boutique</Link>
+            <Link to="/a-importer" className="pd-btn pd-btn--ghost">À importer</Link>
+            <Link to="/marketplace" className="pd-btn pd-btn--ghost">Marketplace</Link>
+          </div>
         </div>
         <Footer />
       </div>

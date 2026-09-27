@@ -39,6 +39,42 @@ function isApprovedStatus(product) {
   );
 }
 
+function isHiddenPublicStatus(product) {
+  const raw = String(product?.validationStatus || product?.status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+  return ['rejected', 'disabled', 'draft', 'archived'].includes(raw);
+}
+
+function isPubliclyVisibleProduct(product) {
+  if (!product) return false;
+  if (product.isPublished === false) return false;
+  if (isHiddenPublicStatus(product)) return false;
+  const raw = String(product.validationStatus || product.status || '').trim();
+  if (!raw) return true;
+  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
+}
+
+function isHiddenPublicStatus(product) {
+  const raw = String(product?.validationStatus || product?.status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+  return ['rejected', 'disabled', 'draft', 'archived'].includes(raw);
+}
+
+function isPubliclyVisibleProduct(product) {
+  if (!product) return false;
+  if (product.isPublished === false) return false;
+  if (isHiddenPublicStatus(product)) return false;
+  const raw = String(product.validationStatus || product.status || '').trim();
+  if (!raw) return true;
+  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
+}
+
 export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['products', 'featured'],
@@ -84,9 +120,7 @@ export function useProduct(id) {
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/${id}`, { timeout: 30000 });
       const product = normalizeSingleProduct(res.data);
-      if (!product) return null;
-      if (product.isPublished === false) return null;
-      if (String(product.validationStatus || '').toLowerCase() !== 'approved') return null;
+      if (!isPubliclyVisibleProduct(product)) return null;
       return product;
     },
     enabled: !!id,
