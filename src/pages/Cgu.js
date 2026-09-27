@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FaArrowUp } from "react-icons/fa";
+import { pageTitle } from "../utils/pageTitle";
 
 const SECTIONS = [
   {
@@ -87,7 +88,7 @@ export default function Cgu() {
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
-    document.title = "Conditions générales d'utilisation";
+    document.title = pageTitle("Conditions générales d'utilisation");
     const onScroll = () => setShowTop(window.scrollY > 400);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);

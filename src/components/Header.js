@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
   Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LogOut,
-  Tag, Flame, HelpCircle, ShoppingBag,
+  Tag, Flame, HelpCircle, ShoppingBag, Store, Package,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
@@ -53,10 +53,11 @@ export const CATEGORY_LINKS = [
 
 const QUICK_NAV_LINKS = [
   { label: 'Boutique', to: '/shopping' },
-  { label: 'Promotions', to: '/promotions' },
+  { label: 'À importer', to: '/a-importer' },
+  { label: 'Marketplace', to: '/marketplace' },
   { label: 'Nouveautés', to: '/nouveautes' },
   { label: 'Meilleures ventes', to: '/best-sellers' },
-  { label: 'Centre d\'aide', to: '/centre-aide' },
+  { label: 'Aide', to: '/centre-aide' },
 ];
 
 function buildSearchSuggestions(items, query) {
@@ -185,9 +186,11 @@ function MobileNavDrawer({ open, onClose, user, cartCount, onLogout, navigate })
                 {[
                   { label: 'Accueil', to: '/', Icon: HomeIcon },
                   { label: 'Boutique', to: '/shopping', Icon: ShoppingBag },
-                  { label: 'Promotions', to: '/promotions', Icon: Tag },
+                  { label: 'À importer', to: '/a-importer', Icon: Package },
+                  { label: 'Marketplace', to: '/marketplace', Icon: Store },
                   { label: 'Nouveautés', to: '/nouveautes', Icon: Sparkles },
                   { label: 'Meilleures ventes', to: '/best-sellers', Icon: Flame },
+                  { label: 'Promotions', to: '/promotions', Icon: Tag },
                   { label: 'Panier', to: '/cart', Icon: ShoppingCart, badge: cartCount },
                   { label: 'Centre d\'aide', to: '/centre-aide', Icon: HelpCircle },
                 ].map(({ label, to, Icon, badge }) => (

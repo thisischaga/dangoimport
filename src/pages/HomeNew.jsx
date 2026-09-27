@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -9,7 +9,6 @@ import {
   Truck,
   Sparkles,
   ChevronRight,
-  Clock,
   Star,
 } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
@@ -20,6 +19,7 @@ import client from '../apiClient';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
 import { getProductSellableStock } from '../utils/publicProduct';
+import { isProductOnPromo, isProductBestSeller, getDiscountPercent } from '../utils/productPromo';
 
 // Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
 // n'aura jamais la même image que sa voisine — on pioche dans ce pool via un hash stable)
@@ -125,256 +125,144 @@ function CategoriesSection({ categories }) {
   );
 }
 
-function DailyDealsSection({ products, onAddToCart }) {
-  if (!products || products.length === 0) return null;
-
-  // 1. Identify Deals of the Day (3 products with promo prices or discount)
-  const promoProducts = products.filter(
-    (p) =>
-      (p.promoPrice && Number(p.promoPrice) < Number(p.price)) ||
-      (p.salePrice && Number(p.salePrice) < Number(p.price)) ||
-      (p.discountPercent && Number(p.discountPercent) > 0)
-  );
-
-  const dealsOfDay = (promoProducts.length >= 3 ? promoProducts : products).slice(0, 3);
-  const dealIds = new Set(dealsOfDay.map((d) => String(d.id || d._id)));
-
-  // 2. Identify Best Sellers (excluding items already in dealsOfDay)
-  const remainingProducts = products.filter((p) => !dealIds.has(String(p.id || p._id)));
-
-  const sortedBestSellers = [...(remainingProducts.length > 0 ? remainingProducts : products)].sort(
-    (a, b) => {
-      const salesA = Number(a.soldCount || a.sales || a.totalSold || 0);
-      const salesB = Number(b.soldCount || b.sales || b.totalSold || 0);
-      if (salesB !== salesA) return salesB - salesA;
-      const ratingA = Number(a.rating || a.averageRating || 0);
-      const ratingB = Number(b.rating || b.averageRating || 0);
-      return ratingB - ratingA;
-    }
-  );
-
-  // Guarantee bestSellers has 3 products if available
-  const bestSellers = sortedBestSellers.slice(0, 3);
-  if (bestSellers.length < 3 && products.length > bestSellers.length) {
-    const existingIds = new Set(bestSellers.map((b) => String(b.id || b._id)));
-    for (const p of products) {
-      if (bestSellers.length >= 3) break;
-      const pid = String(p.id || p._id);
-      if (!existingIds.has(pid)) {
-        bestSellers.push(p);
-        existingIds.add(pid);
-      }
-    }
-  }
-
-  // Compute dynamic max discount percentage among dealsOfDay
-  const maxPromoPercent = dealsOfDay.reduce((max, d) => {
-    const price = Number(d.price || 0);
-    const promo = Number(d.promoPrice || d.salePrice || 0);
-    let disc = d.discountPercent || 0;
-    if (!disc && price > 0 && promo > 0 && promo < price) {
-      disc = Math.round((1 - promo / price) * 100);
-    }
-    return disc > max ? disc : max;
-  }, 0);
-
-  const promoBadgeText = maxPromoPercent > 0 ? `Jusqu'à -${maxPromoPercent}%` : "Jusqu'à -50%";
-
-  const formatPrice = (amount) => {
-    const n = Number(amount || 0);
-    return `XOF${n.toLocaleString('fr-FR')}`;
-  };
+function MiniCatalogCard({ item }) {
+  const rawPrice = Number(item.price || 0);
+  const rawPromo = Number(item.promoPrice || item.salePrice || 0);
+  const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
+  const currentPrice = hasPromo ? rawPromo : rawPrice;
+  const oldPrice = hasPromo ? rawPrice : null;
+  const discount = hasPromo ? getDiscountPercent(item) : 0;
+  const rating = item.rating != null ? Number(item.rating) : null;
+  const sales = Number(item.soldCount || item.sales || item.totalSold || 0);
+  const formatPrice = (amount) => `${Number(amount || 0).toLocaleString('fr-FR')} F`;
 
   return (
-    <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-6">
-      {/* Top Header Centered */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          Offres du jour
+    <Link
+      to={`/product/${item.id || item._id}`}
+      className="group flex h-full cursor-pointer flex-col justify-between"
+    >
+      <div>
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+          <img
+            src={
+              item.image
+              || item.images?.[0]?.url
+              || item.images?.[0]
+              || 'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
+            }
+            alt={item.name || 'Produit'}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+        <h4 className="mt-2 line-clamp-2 text-xs font-semibold leading-snug text-slate-800 group-hover:text-[#FF6B00] sm:text-sm">
+          {item.name || 'Produit'}
+        </h4>
+      </div>
+      <div className="mt-2">
+        <div className="text-sm font-black leading-tight text-[#C50012] sm:text-base">
+          {formatPrice(currentPrice)}
+        </div>
+        {oldPrice ? (
+          <div className="text-[11px] leading-tight text-slate-400 line-through">{formatPrice(oldPrice)}</div>
+        ) : null}
+        {discount > 0 ? (
+          <div className="mt-1.5 w-max rounded bg-[#C50012] px-1.5 py-0.5 text-[10px] font-black text-white sm:text-xs">
+            -{discount}%
+          </div>
+        ) : null}
+        {(rating > 0 || sales > 0) && discount <= 0 ? (
+          <div className="mt-1 flex items-center gap-1 text-[10px] font-medium text-slate-500 sm:text-[11px]">
+            {rating > 0 ? (
+              <>
+                <Star size={11} className="shrink-0 fill-amber-400 text-amber-400" />
+                <span>{rating.toFixed(1)}</span>
+              </>
+            ) : null}
+            {sales > 0 ? <span>+ {sales} vendu(s)</span> : null}
+          </div>
+        ) : null}
+      </div>
+    </Link>
+  );
+}
+
+function DailyDealsSection({ products }) {
+  if (!products || products.length === 0) return null;
+
+  const promoProducts = products.filter(isProductOnPromo).slice(0, 3);
+  const bestSellers = [...products]
+    .filter(isProductBestSeller)
+    .sort((a, b) => {
+      const salesA = Number(a.soldCount || a.sales || a.totalSold || 0);
+      const salesB = Number(b.soldCount || b.sales || b.totalSold || 0);
+      return salesB - salesA;
+    })
+    .slice(0, 3);
+
+  const showDeals = promoProducts.length > 0;
+  const showBest = bestSellers.length > 0;
+  if (!showDeals && !showBest) return null;
+
+  const maxPromoPercent = promoProducts.reduce((max, d) => Math.max(max, getDiscountPercent(d)), 0);
+  const sectionTitle = showDeals && showBest
+    ? 'Offres du jour'
+    : showDeals
+      ? 'Promotions'
+      : 'Meilleures ventes';
+
+  return (
+    <section className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
+      <div className="mb-6 text-center">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+          {sectionTitle}
         </h2>
       </div>
 
-      {/* Grid containing 2 Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* ---------------- CARD 1: Meilleures ventes ---------------- */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            {/* Box Header - Horizontal Flex */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                Meilleures ventes
-              </h3>
-              <Link
-                to="/best-sellers"
-                className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200 px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
-              >
-                <span>De super prix et choix de qualité</span>
-                <ChevronRight size={14} className="stroke-[2.5]" />
-              </Link>
-            </div>
-
-            {/* Products Grid (3 items) */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              {bestSellers.map((item, idx) => {
-                const rawPrice = Number(item.price || 0);
-                const rawPromo = Number(item.promoPrice || item.salePrice || 0);
-                const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
-                const currentPrice = hasPromo ? rawPromo : rawPrice;
-                const oldPrice = hasPromo ? rawPrice : null;
-
-                const rating = item.rating != null ? Number(item.rating) : null;
-                const sales = Number(item.soldCount || item.sales || item.totalSold || 0);
-
-                return (
-                  <Link
-                    key={item.id || item._id || idx}
-                    to={`/product/${item.id || item._id}`}
-                    className="group flex flex-col justify-between h-full cursor-pointer"
-                  >
-                    <div>
-                      {/* Product Image */}
-                      <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
-                        <img
-                          src={
-                            item.image ||
-                            item.images?.[0]?.url ||
-                            item.images?.[0] ||
-                            'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
-                          }
-                          alt={item.name || 'Produit'}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-
-                      {/* Product Title */}
-                      <h4 className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 mt-2 leading-snug group-hover:text-[#FF6B00] transition-colors">
-                        {item.name || 'Produit'}
-                      </h4>
-                    </div>
-
-                    {/* Price & Real Meta */}
-                    <div className="mt-2">
-                      <div className="text-sm sm:text-base font-black text-[#C50012] leading-tight">
-                        {formatPrice(currentPrice)}
-                      </div>
-                      {oldPrice && (
-                        <div className="text-[11px] text-slate-400 line-through leading-tight">
-                          {formatPrice(oldPrice)}
-                        </div>
-                      )}
-                      {(rating > 0 || sales > 0) && (
-                        <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium flex items-center gap-1 mt-1">
-                          {rating > 0 && (
-                            <>
-                              <Star
-                                size={11}
-                                className="fill-amber-400 text-amber-400 shrink-0"
-                              />
-                              <span>{rating.toFixed(1)}</span>
-                            </>
-                          )}
-                          {rating > 0 && sales > 0 && (
-                            <span className="text-slate-300">|</span>
-                          )}
-                          {sales > 0 && (
-                            <span>
-                              + {sales >= 1000 ? `${Math.floor(sales / 1000)} 000` : sales} vendu(s)
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+      <div className={`grid grid-cols-1 gap-6 ${showDeals && showBest ? 'lg:grid-cols-2' : ''}`}>
+        {showBest ? (
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6">
+            <div>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">Meilleures ventes</h3>
+                <Link
+                  to="/best-sellers"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-200"
+                >
+                  Voir tout
+                  <ChevronRight size={14} className="stroke-[2.5]" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                {bestSellers.map((item) => (
+                  <MiniCatalogCard key={item.id || item._id} item={item} />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
 
-        {/* ---------------- CARD 2: Deal du Jour ---------------- */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            {/* Box Header - Horizontal Flex */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                Deal du Jour
-              </h3>
-              <Link
-                to="/promotions"
-                className="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 px-3 py-1 rounded-full text-xs font-semibold transition-colors shadow-2xs shrink-0"
-              >
-                <Clock size={14} className="stroke-[2.5]" />
-                <span>{promoBadgeText}</span>
-                <ChevronRight size={14} className="stroke-[2.5]" />
-              </Link>
-            </div>
-
-            {/* Products Grid (3 items) */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              {dealsOfDay.map((item, idx) => {
-                const rawPrice = Number(item.price || 0);
-                const rawPromo = Number(item.promoPrice || item.salePrice || 0);
-                const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
-                const currentPrice = hasPromo ? rawPromo : rawPrice;
-                const oldPrice = hasPromo ? rawPrice : null;
-
-                const discount =
-                  item.discountPercent ||
-                  (oldPrice && currentPrice < oldPrice
-                    ? Math.round((1 - currentPrice / oldPrice) * 100)
-                    : null);
-
-                return (
-                  <Link
-                    key={item.id || item._id || idx}
-                    to={`/product/${item.id || item._id}`}
-                    className="group flex flex-col justify-between h-full cursor-pointer"
-                  >
-                    <div>
-                      {/* Product Image */}
-                      <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
-                        <img
-                          src={
-                            item.image ||
-                            item.images?.[0]?.url ||
-                            item.images?.[0] ||
-                            'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
-                          }
-                          alt={item.name || 'Produit'}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-
-                      {/* Product Title */}
-                      <h4 className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 mt-2 leading-snug group-hover:text-[#FF6B00] transition-colors">
-                        {item.name || 'Produit'}
-                      </h4>
-                    </div>
-
-                    {/* Price & Discount Tag */}
-                    <div className="mt-2">
-                      <div className="text-sm sm:text-base font-black text-[#C50012] leading-tight">
-                        {formatPrice(currentPrice)}
-                      </div>
-                      {oldPrice && (
-                        <div className="text-[11px] text-slate-400 line-through leading-tight">
-                          {formatPrice(oldPrice)}
-                        </div>
-                      )}
-                      {discount > 0 && (
-                        <div className="bg-[#C50012] text-[#ffffff] text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded shadow-2xs w-max mt-1.5">
-                          -{discount}%
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+        {showDeals ? (
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6">
+            <div>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">Deal du jour</h3>
+                <Link
+                  to="/promotions"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100"
+                >
+                  {maxPromoPercent > 0 ? `Jusqu’à -${maxPromoPercent}%` : 'Promotions'}
+                  <ChevronRight size={14} className="stroke-[2.5]" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                {promoProducts.map((item) => (
+                  <MiniCatalogCard key={item.id || item._id} item={item} />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );
@@ -511,10 +399,7 @@ function HomeNew({ cartCount: cartCountProp }) {
         )}
 
         {!searchQuery && !loading && allProducts.length > 0 && (
-          <DailyDealsSection
-            products={allProducts}
-            onAddToCart={addToCart}
-          />
+          <DailyDealsSection products={allProducts} />
         )}
 
         <section style={{ background: '#f6f6f7', paddingBottom: '24px' }}>

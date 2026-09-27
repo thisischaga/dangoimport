@@ -207,7 +207,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (product?.name) document.title = `${product.name} | Dango Import`;
-    else if (!isLoading && !product) document.title = 'Produit introuvable';
+    else if (!isLoading && !product) document.title = 'Produit introuvable | Dango Import';
   }, [product?.name, isLoading, product]);
 
   useEffect(() => {

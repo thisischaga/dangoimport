@@ -226,8 +226,9 @@ const Footer = () => {
     () => ({
       marketplace: [
         { label: 'Accueil', to: '/' },
-        { label: 'Produits', to: '/shopping' },
-        { label: 'Promotions', to: '/promotions' },
+        { label: 'Boutique', to: '/shopping' },
+        { label: 'À importer', to: '/a-importer' },
+        { label: 'Marketplace', to: '/marketplace' },
         { label: 'Nouveautés', to: '/nouveautes' },
         { label: 'Meilleures ventes', to: '/best-sellers' },
       ],

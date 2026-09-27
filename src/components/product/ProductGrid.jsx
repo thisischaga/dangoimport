@@ -18,7 +18,7 @@ import {
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import { applyProductFilters } from '../../utils/productFilters';
-import { normalizeCatalogProductStock } from '../../utils/publicProduct';
+import { normalizeCatalogProductStock, isCjCatalogProduct, isMarketplaceProduct } from '../../utils/publicProduct';
 import {
   isProductOnPromo,
   isProductNewArrival,
@@ -53,9 +53,11 @@ const BANNER_SLIDES = [
 
 const CATALOG_TABS = [
   { key: 'all', label: 'Tous' },
-  { key: 'promo', label: 'Promotions' },
+  { key: 'import', label: 'À importer' },
+  { key: 'marketplace', label: 'Marketplace' },
   { key: 'new', label: 'Nouveautés' },
   { key: 'bestseller', label: 'Meilleures ventes' },
+  { key: 'promo', label: 'Promotions' },
 ];
 
 function matchesTab(product, tabKey) {
@@ -71,6 +73,12 @@ function matchesTab(product, tabKey) {
     case 'forYou':
       return Boolean(product?.isForYou ?? product?.forYou ?? product?.recommendedForUser);
 
+    case 'import':
+      return isCjCatalogProduct(product);
+
+    case 'marketplace':
+      return isMarketplaceProduct(product);
+
     case 'new':
       return isProductNewArrival(product);
 
@@ -82,14 +90,14 @@ function matchesTab(product, tabKey) {
   }
 }
 
-function CatalogTabs({ activeTab, onChange }) {
+function CatalogTabs({ activeTab, onChange, tabs = CATALOG_TABS }) {
   return (
     <div
       className="mb-4 flex gap-2 overflow-x-auto px-2 pb-1 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="tablist"
       aria-label="Filtrer les produits"
     >
-      {CATALOG_TABS.map(({ key, label }) => {
+      {tabs.map(({ key, label }) => {
         const active = activeTab === key;
         return (
           <button
@@ -691,13 +699,22 @@ function PromoSection({ products = [], onAddToCart }) {
         <div className="relative" style={{ zIndex: 2 }}>
           {/* Titre */}
           <div className="dango-promo-heading">
-            <h1 className="dango-promo-title">Offres du jour</h1>
-            <p className="dango-promo-subtitle">Sélection renouvelée chaque jour</p>
+            <h1 className="dango-promo-title">
+              {dealsAll.length > 0 && bestSellersAll.length > 0
+                ? 'Offres du jour'
+                : dealsAll.length > 0
+                  ? 'Promotions'
+                  : 'Meilleures ventes'}
+            </h1>
+            <p className="dango-promo-subtitle">
+              {dealsAll.length > 0
+                ? 'Promotions réellement en cours'
+                : 'Les produits les plus achetés'}
+            </p>
           </div>
 
-          {/* Cadre à deux colonnes, séparées par un simple filet */}
           <div className="dango-promo-columns">
-            {/* ---- MEILLEURES VENTES ---- */}
+            {bestSellersAll.length > 0 ? (
             <div className="dango-promo-col">
               <div className="dango-promo-col-head">
                 <h3 className="dango-promo-col-label">Meilleures ventes</h3>
@@ -740,8 +757,9 @@ function PromoSection({ products = [], onAddToCart }) {
                 </motion.div>
               </AnimatePresence>
             </div>
+            ) : null}
 
-            {/* ---- DEAL DU JOUR ---- */}
+            {dealsAll.length > 0 ? (
             <div className="dango-promo-col">
               <div className="dango-promo-col-head">
                 <h3 className="dango-promo-col-label">Deal du Jour</h3>
@@ -749,7 +767,7 @@ function PromoSection({ products = [], onAddToCart }) {
                   className="dango-promo-col-badge"
                   style={{ background: '#FFEDDC', color: '#FF6B00' }}
                 >
-                  {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Meilleures offres'}
+                  {maxDiscountPercent > 0 ? `Jusqu'à -${maxDiscountPercent}%` : 'Promotions'}
                 </span>
               </div>
 
@@ -786,6 +804,7 @@ function PromoSection({ products = [], onAddToCart }) {
                 </motion.div>
               </AnimatePresence>
             </div>
+            ) : null}
           </div>
 
           {totalPages > 1 && (
@@ -884,6 +903,29 @@ function ProductGrid({
       ),
     [filtered, activeTab]
   );
+
+  const visibleTabs = useMemo(() => {
+    const hasPromo = filtered.some(isProductOnPromo);
+    const hasNew = filtered.some(isProductNewArrival);
+    const hasBest = filtered.some(isProductBestSeller);
+    const hasImport = filtered.some(isCjCatalogProduct);
+    const hasMarket = filtered.some(isMarketplaceProduct);
+    return CATALOG_TABS.filter((tab) => {
+      if (tab.key === 'all') return true;
+      if (tab.key === 'promo') return hasPromo;
+      if (tab.key === 'new') return hasNew;
+      if (tab.key === 'bestseller') return hasBest;
+      if (tab.key === 'import') return hasImport;
+      if (tab.key === 'marketplace') return hasMarket;
+      return true;
+    });
+  }, [filtered]);
+
+  useEffect(() => {
+    if (!visibleTabs.some((tab) => tab.key === activeTab)) {
+      setActiveTab('all');
+    }
+  }, [visibleTabs, activeTab]);
 
   /* =======================================================
      PAGINATION
@@ -1011,6 +1053,14 @@ function ProductGrid({
         {showPromoSection && (
           <PromoSection products={catalogProducts} onAddToCart={onAddToCart} />
         )}
+
+        {showTabs ? (
+          <CatalogTabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            tabs={visibleTabs}
+          />
+        ) : null}
 
         {/* ================================================
             RÉSULTATS — nombre de produits affichés

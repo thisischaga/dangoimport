@@ -149,6 +149,13 @@ export function getDisplayVendorName(product) {
   return product?.vendorName || product?.sellerName || 'Vendeur indépendant';
 }
 
+export function isMarketplaceProduct(product) {
+  if (!product) return false;
+  if (isCjCatalogProduct(product) || isDropshippingProduct(product)) return false;
+  const source = String(product.sourceType || 'LOCAL_SELLER');
+  return source === 'LOCAL_SELLER';
+}
+
 export function sanitizeProductForCart(product) {
   if (!product) return null;
 

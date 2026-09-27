@@ -39,13 +39,17 @@ import { queryClient } from './lib/queryClient';
 import ScrollToTop from './components/ScrollToTop';
 import Politique from './pages/Politique';
 import MobileTabBar from './components/mobiletabbar';
+import CatalogSourcePage from './pages/CatalogSourcePage';
+import { pageTitle, SITE_NAME } from './utils/pageTitle';
 import OAuthSuccess from './pages/OAuthSuccess';
 
 
 function getPageTitle(pathname) {
   const routeTitles = [
-    { regex: /^\/$/, title: 'Dango Import' },
+    { regex: /^\/$/, title: SITE_NAME },
     { regex: /^\/shopping$/, title: 'Boutique' },
+    { regex: /^\/a-importer$/, title: 'À importer' },
+    { regex: /^\/marketplace$/, title: 'Marketplace' },
     { regex: /^\/mes-commandes$/, title: 'Mes commandes' },
     { regex: /^\/toutes-les-categories$/, title: 'Toutes les catégories' },
     { regex: /^\/selection-vedette$/, title: 'Sélection vedette' },
@@ -74,7 +78,8 @@ function getPageTitle(pathname) {
   ];
 
   const route = routeTitles.find((item) => item.regex.test(pathname));
-  return route ? route.title : 'Dango Import';
+  if (!route) return SITE_NAME;
+  return route.title === SITE_NAME ? SITE_NAME : pageTitle(route.title);
 }
 
 function getPageDescription(pathname) {
@@ -219,6 +224,8 @@ function App() {
                   <Route path='/selection-vedette' element={<FeaturedSelection/>}/>
                   <Route path='/centre-aide' element={<HelpCenter/>}/>
                   <Route path='/promotions' element={<Promotions/>}/>
+                  <Route path='/a-importer' element={<CatalogSourcePage mode="import" />}/>
+                  <Route path='/marketplace' element={<CatalogSourcePage mode="marketplace" />}/>
                   <Route path='/nouveautes' element={<NewArrivals/>}/>
                   <Route path='/best-sellers' element={<TopSellers/>}/> 
                   <Route path='/faq' element={<FAQ/>}/>
