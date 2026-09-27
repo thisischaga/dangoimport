@@ -22,7 +22,7 @@ import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
-import { isDropshippingProduct, getDisplayVendorName } from '../utils/publicProduct';
+import { isDropshippingProduct, getDisplayVendorName, CJ_CATALOG_VENDOR_LABEL } from '../utils/publicProduct';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
 import Header from '../components/Header';
@@ -550,7 +550,7 @@ export default function ProductDetail() {
                 <span className="pd-label">Vendeur</span>
                 <span className="pd-seller__name">
                   {sellerName}
-                  {(product?.isVendorCertified || product?.sellerVerified) && (
+                  {sellerName !== CJ_CATALOG_VENDOR_LABEL && (product?.isVendorCertified || product?.sellerVerified) && (
                     <BadgeCheck size={14} className="pd-seller__badge" aria-label="Certifié" />
                   )}
                 </span>

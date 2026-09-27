@@ -1,4 +1,5 @@
 export const PLATFORM_VENDOR_NAME = 'DANGO IMPORT';
+export const CJ_CATALOG_VENDOR_LABEL = 'À importer';
 
 const INTERNAL_FIELDS = [
   'costPrice',
@@ -22,6 +23,15 @@ export function isDropshippingProduct(product) {
   return product?.sourceType === 'DROPSHIPPING';
 }
 
+export function isCjCatalogProduct(product) {
+  if (String(product?.vendorName || '').trim() === CJ_CATALOG_VENDOR_LABEL) return true;
+  const platform = String(product?.supplier?.platform || '').toLowerCase();
+  if (platform === 'cj') return true;
+  if (product?.importSourceType === 'CJ_API') return true;
+  if (/^cj:/i.test(String(product?.externalSourceKey || ''))) return true;
+  return false;
+}
+
 function isInvalidTranslationText(text) {
   const s = String(text || '').trim();
   if (!s) return true;
@@ -31,13 +41,23 @@ function isInvalidTranslationText(text) {
     || upper.includes('QUERY LENGTH LIMIT');
 }
 
+function isGenericProductPlaceholder(text) {
+  const s = String(text || '').trim().toLowerCase();
+  return !s || s === 'produit' || s === 'produit cj' || s === 'product';
+}
+
 function resolveDisplayProductName(product) {
   const candidates = [
     product?.name,
     product?.shortDescription,
-  ].map((c) => String(c || '').trim()).filter(Boolean);
-  const valid = candidates.filter((c) => !isInvalidTranslationText(c));
-  return valid[0] || 'Produit';
+    product?.supplier?.productNameEn,
+    product?.supplier?.nameEn,
+  ]
+    .map((c) => String(c || '').trim())
+    .filter(Boolean)
+    .filter((c) => !isInvalidTranslationText(c))
+    .filter((c) => !isGenericProductPlaceholder(c));
+  return candidates[0] || String(product?.name || '').trim() || 'Article Dango Import';
 }
 
 /** Stock affichable (aligné fiche produit : max stock produit, variantes, entrepôts CJ). */
@@ -98,8 +118,8 @@ export function sanitizeProductForDisplay(product) {
   }
 
   if (isDropshippingProduct(product)) {
-    sanitized.vendorName = PLATFORM_VENDOR_NAME;
-    sanitized.isVendorCertified = true;
+    sanitized.vendorName = isCjCatalogProduct(product) ? CJ_CATALOG_VENDOR_LABEL : PLATFORM_VENDOR_NAME;
+    sanitized.isVendorCertified = !isCjCatalogProduct(product);
     sanitized.fulfillmentType = product.fulfillmentType || 'DANGO_IMPORT';
     if (product.estimatedDeliveryDays != null) {
       sanitized.estimatedDeliveryDays = product.estimatedDeliveryDays;
@@ -124,6 +144,7 @@ export function sanitizeProductsForDisplay(products = []) {
 }
 
 export function getDisplayVendorName(product) {
+  if (isCjCatalogProduct(product)) return CJ_CATALOG_VENDOR_LABEL;
   if (isDropshippingProduct(product)) return PLATFORM_VENDOR_NAME;
   return product?.vendorName || product?.sellerName || 'Vendeur indépendant';
 }

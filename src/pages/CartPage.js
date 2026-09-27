@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import API_BASE_URL from '../apiConfig';
 import client from '../apiClient';
-import { isDropshippingProduct } from '../utils/publicProduct';
+import { isDropshippingProduct, CJ_CATALOG_VENDOR_LABEL } from '../utils/publicProduct';
 
 const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
 
@@ -325,7 +325,8 @@ const CartPage = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-base font-black text-slate-900">{group.vendorName}</p>
-                          {group.items.some((i) => i.isVendorCertified || i.isCertified) && (
+                          {group.vendorName !== CJ_CATALOG_VENDOR_LABEL
+                            && group.items.some((i) => i.isVendorCertified || i.isCertified) && (
                             <span className="inline-flex items-center gap-1 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-extrabold text-white" title="Vendeur Certifié">
                               <BadgeCheck className="h-3 w-3" /> Certifié
                             </span>

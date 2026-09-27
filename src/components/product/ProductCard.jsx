@@ -4,7 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock } from '../../utils/publicProduct';
+import { getProductSellableStock, getDisplayVendorName, CJ_CATALOG_VENDOR_LABEL } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 
@@ -257,6 +257,7 @@ function ProductCard({
   ======================================================= */
 
   const vendorName =
+    getDisplayVendorName(product) ||
     product?.vendorName ||
     product?.vendor ||
     '';
@@ -276,7 +277,8 @@ function ProductCard({
     false;
 
   const isCertified =
-    Boolean(
+    vendorName !== CJ_CATALOG_VENDOR_LABEL
+    && Boolean(
       product?.isVendorCertified ??
       product?.isCertified ??
       product?.vendorIsCertified ??
