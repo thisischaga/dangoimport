@@ -75,6 +75,24 @@ function isPubliclyVisibleProduct(product) {
   return isApprovedStatus(product) || !isHiddenPublicStatus(product);
 }
 
+function isHiddenPublicStatus(product) {
+  const raw = String(product?.validationStatus || product?.status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+  return ['rejected', 'disabled', 'draft', 'archived'].includes(raw);
+}
+
+function isPubliclyVisibleProduct(product) {
+  if (!product) return false;
+  if (product.isPublished === false) return false;
+  if (isHiddenPublicStatus(product)) return false;
+  const raw = String(product.validationStatus || product.status || '').trim();
+  if (!raw) return true;
+  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
+}
+
 export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['products', 'featured'],
