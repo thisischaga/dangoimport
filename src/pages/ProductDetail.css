@@ -287,6 +287,20 @@
   line-height: 1.35;
 }
 
+.pd-origin-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  vertical-align: middle;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .pd-rating-row {
   display: flex;
   flex-wrap: wrap;

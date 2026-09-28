@@ -22,7 +22,7 @@ import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
-import { isDropshippingProduct, getDisplayVendorName, CJ_CATALOG_VENDOR_LABEL } from '../utils/publicProduct';
+import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel } from '../utils/publicProduct';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
 import Header from '../components/Header';
@@ -366,6 +366,7 @@ export default function ProductDetail() {
   }, []);
 
   const sellerName = getDisplayVendorName(product) || product?.vendorName || product?.sellerName || '';
+  const originLabel = getProductOriginLabel(product);
   const categoryLabel = product?.category;
   const titleText = String(product?.name || '').trim();
   const titleIsLong = titleText.length > 72;
@@ -459,7 +460,10 @@ export default function ProductDetail() {
               {product.brand && <span className="pd-meta">{product.brand}</span>}
             </div>
 
-            <h1 className={`pd-title${titleIsLong ? ' pd-title--long' : ''}`}>{product.name}</h1>
+            <h1 className={`pd-title${titleIsLong ? ' pd-title--long' : ''}`}>
+              {product.name}
+              {originLabel ? <span className="pd-origin-tag">{originLabel}</span> : null}
+            </h1>
 
             <div className="pd-rating-row">
               <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
@@ -554,7 +558,7 @@ export default function ProductDetail() {
                 <span className="pd-label">Vendeur</span>
                 <span className="pd-seller__name">
                   {sellerName}
-                  {sellerName !== CJ_CATALOG_VENDOR_LABEL && (product?.isVendorCertified || product?.sellerVerified) && (
+                  {(product?.isVendorCertified || product?.sellerVerified) && (
                     <BadgeCheck size={14} className="pd-seller__badge" aria-label="Certifié" />
                   )}
                 </span>

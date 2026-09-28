@@ -118,8 +118,9 @@ export function sanitizeProductForDisplay(product) {
   }
 
   if (isDropshippingProduct(product)) {
-    sanitized.vendorName = isCjCatalogProduct(product) ? CJ_CATALOG_VENDOR_LABEL : PLATFORM_VENDOR_NAME;
-    sanitized.isVendorCertified = !isCjCatalogProduct(product);
+    sanitized.vendorName = PLATFORM_VENDOR_NAME;
+    sanitized.isVendorCertified = true;
+    sanitized.originLabel = 'Chine';
     sanitized.fulfillmentType = product.fulfillmentType || 'DANGO_IMPORT';
     if (product.estimatedDeliveryDays != null) {
       sanitized.estimatedDeliveryDays = product.estimatedDeliveryDays;
@@ -134,6 +135,8 @@ export function sanitizeProductForDisplay(product) {
     if (Array.isArray(product.specifications)) sanitized.specifications = product.specifications;
     delete sanitized.country;
     delete sanitized.origin;
+  } else if (!sanitized.originLabel) {
+    sanitized.originLabel = resolveLocalOriginLabel(product);
   }
 
   return sanitized;
@@ -144,9 +147,37 @@ export function sanitizeProductsForDisplay(products = []) {
 }
 
 export function getDisplayVendorName(product) {
-  if (isCjCatalogProduct(product)) return CJ_CATALOG_VENDOR_LABEL;
-  if (isDropshippingProduct(product)) return PLATFORM_VENDOR_NAME;
+  if (isDropshippingProduct(product) || isCjCatalogProduct(product)) return PLATFORM_VENDOR_NAME;
   return product?.vendorName || product?.sellerName || 'Vendeur indépendant';
+}
+
+export function resolveLocalOriginLabel(product = {}) {
+  const zones = Array.isArray(product.deliveryZones) ? product.deliveryZones : [];
+  const parts = [
+    product.originLabel,
+    product.country,
+    product.origin,
+    product.vendorCountry,
+    product.sellerCountry,
+    product.shippingOrigin?.countryName,
+    product.shippingOrigin?.countryCode,
+    ...zones.map((zone) => zone?.country),
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  if (/\btogo\b|\btg\b/.test(parts)) return 'Togo';
+  if (/\bbenin\b|\bbj\b/.test(parts)) return 'Bénin';
+  return '';
+}
+
+export function getProductOriginLabel(product) {
+  if (isDropshippingProduct(product) || isCjCatalogProduct(product)) return 'Chine';
+  return product?.originLabel || resolveLocalOriginLabel(product);
 }
 
 export function isMarketplaceProduct(product) {

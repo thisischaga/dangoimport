@@ -4,7 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock, getDisplayVendorName, CJ_CATALOG_VENDOR_LABEL } from '../../utils/publicProduct';
+import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 
@@ -277,13 +277,14 @@ function ProductCard({
     false;
 
   const isCertified =
-    vendorName !== CJ_CATALOG_VENDOR_LABEL
-    && Boolean(
+    Boolean(
       product?.isVendorCertified ??
       product?.isCertified ??
       product?.vendorIsCertified ??
       false
     );
+
+  const originLabel = getProductOriginLabel(product);
 
   /* =======================================================
      SALES
@@ -528,6 +529,21 @@ function ProductCard({
         .pc2__title-link:hover
         .pc2__title {
           color: #000000;
+        }
+
+        .pc2__origin-tag {
+          display: inline-flex;
+          align-items: center;
+          margin-top: 4px;
+          padding: 1px 6px;
+          border-radius: 4px;
+          background: #f1f5f9;
+          color: #475569;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          line-height: 1.4;
+          width: max-content;
         }
 
         /* =================================================
@@ -885,6 +901,9 @@ function ProductCard({
             >
               {product?.name || ''}
             </h3>
+            {originLabel ? (
+              <span className="pc2__origin-tag">{originLabel}</span>
+            ) : null}
           </Link>
 
           {/* FEATURE */}
@@ -1028,7 +1047,7 @@ function ProductCard({
                   </span>
                 )}
 
-              {country && (
+              {country && !originLabel && (
                 <span className="pc2__country">
                   {country}
                 </span>

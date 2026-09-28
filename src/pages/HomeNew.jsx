@@ -18,7 +18,7 @@ import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
-import { getProductSellableStock } from '../utils/publicProduct';
+import { getProductSellableStock, getProductOriginLabel } from '../utils/publicProduct';
 import { isProductOnPromo, isProductBestSeller, getDiscountPercent } from '../utils/productPromo';
 
 // Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
@@ -409,7 +409,6 @@ function HomeNew({ cartCount: cartCountProp }) {
             loading={loading}
             onAddToCart={addToCart}
             filters={filters}
-            showTabs
           />
         </section>
 
@@ -436,6 +435,7 @@ function normalizeProduct(product) {
     image,
     category: product?.category || 'Produit',
     sellerName,
+    originLabel: getProductOriginLabel(product),
     sellerVerified: Boolean(product?.sellerVerified || product?.vendorName),
     stock: getProductSellableStock(product),
     isFeatured: Boolean(product?.isFeatured),
