@@ -292,6 +292,12 @@ const DropshippingCheckout = () => {
             <span>Poids facturé</span>
             <span>{breakdown.billedWeight} kg</span>
           </div>
+          {(breakdown.items || []).length > 1 && breakdown.items.map((row, index) => (
+            <div key={`w-${index}`} className="ds-summary__line ds-summary__line--muted">
+              <span>Produit {index + 1} × {row.quantity}</span>
+              <span>{row.billedWeight} kg</span>
+            </div>
+          ))}
           <div className="ds-summary__line ds-summary__line--muted">
             <span>Tarif</span>
             <span>{formatCFA(breakdown.ratePerKg)} / kg</span>
@@ -487,9 +493,15 @@ const DropshippingCheckout = () => {
                   {breakdown && (
                     <div className="ds-import-details">
                       <div className="ds-summary__line">
-                        <span>Poids</span>
+                        <span>Poids total</span>
                         <span>{breakdown.billedWeight} kg</span>
                       </div>
+                      {(breakdown.items || []).map((row, index) => (
+                        <div key={`item-w-${index}`} className="ds-summary__line ds-summary__line--muted">
+                          <span>Poids produit {index + 1} (×{row.quantity})</span>
+                          <span>{row.billedWeight} kg</span>
+                        </div>
+                      ))}
                       <div className="ds-summary__line">
                         <span>Tarif au kg</span>
                         <span>{formatCFA(breakdown.ratePerKg)}</span>
