@@ -482,7 +482,7 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Importation / livraison</h2>
                   <p className="text-sm text-gray-600 m-0 mb-3">
-                    Tarif Dango import : 100 000 FCFA / kg + 3 000 FCFA de majoration.
+                    Tarif Dango import : 10 000 FCFA / kg + 3 000 FCFA de majoration.
                   </p>
                   {breakdown && (
                     <div className="ds-import-details">
