@@ -4,7 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel } from '../../utils/publicProduct';
+import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel, getDisplayProductName } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 
@@ -173,7 +173,7 @@ function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     if (onAddToCart) {
-      onAddToCart(product);
+      onAddToCart({ ...product, name: displayName });
     }
   };
 
@@ -285,6 +285,7 @@ function ProductCard({
     );
 
   const originLabel = getProductOriginLabel(product);
+  const displayName = getDisplayProductName(product);
 
   /* =======================================================
      SALES
@@ -868,7 +869,7 @@ function ProductCard({
               src={primaryImage}
               hoverSrc={hoverImage}
               alt={
-                product?.name ||
+                displayName ||
                 'Produit'
               }
               isOutOfStock={
@@ -905,9 +906,9 @@ function ProductCard({
               ) : null}
               <h3
                 className="pc2__title"
-                title={product?.name}
+                title={displayName}
               >
-                {product?.name || ''}
+                {displayName}
               </h3>
             </Link>
             <div className="pc2__rating-row">

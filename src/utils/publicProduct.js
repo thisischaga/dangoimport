@@ -140,6 +140,10 @@ export function normalizeCatalogProductStock(product) {
   return { ...product, stock, variants: variants ?? product.variants };
 }
 
+export function getDisplayProductName(product) {
+  return resolveDisplayProductName(product);
+}
+
 export function sanitizeProductForDisplay(product) {
   if (!product) return null;
 
