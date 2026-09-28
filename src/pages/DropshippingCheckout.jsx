@@ -82,8 +82,9 @@ const DropshippingCheckout = () => {
     [quote, shippingOptionId],
   );
 
-  const shippingFee = Number(selectedShipping?.cost ?? 0);
-  const total = Math.round(subtotal + shippingFee);
+  const shippingFee = Number(quote?.shippingCost ?? selectedShipping?.cost ?? 0);
+  const productTotal = Number(quote?.subtotal ?? subtotal);
+  const total = Number(quote?.total ?? Math.round(productTotal + shippingFee));
   const estimatedDelivery = selectedShipping?.estimatedDelivery || null;
 
   const checkoutLines = useMemo(
@@ -162,9 +163,10 @@ const DropshippingCheckout = () => {
         },
       });
       setQuote(data);
-      setShippingOptionId('');
+      const optionId = data.options?.[0]?.id || 'dango-import:transit';
+      setShippingOptionId(optionId);
       if (!data.options?.length) {
-        setError(data.message || 'Aucun mode de livraison disponible pour cette destination.');
+        setError(data.message || 'Impossible de calculer les frais d’importation.');
         return;
       }
       setStep(2);
@@ -273,11 +275,11 @@ const DropshippingCheckout = () => {
         );
       })}
       <div className="ds-summary__line">
-        <span>Sous-total</span>
-        <span>{formatCFA(subtotal)}</span>
+        <span>Produit</span>
+        <span>{formatCFA(productTotal)}</span>
       </div>
       <div className="ds-summary__line">
-        <span>Livraison</span>
+        <span>Importation / livraison</span>
         <span>{quote ? formatCFA(shippingFee) : '—'}</span>
       </div>
       {estimatedDelivery && (
@@ -442,7 +444,7 @@ const DropshippingCheckout = () => {
                   disabled={quoteLoading}
                   onClick={loadQuote}
                 >
-                  {quoteLoading ? 'Recherche des modes de livraison…' : 'Continuer vers la livraison'}
+                  {quoteLoading ? 'Calcul des frais d’importation…' : 'Continuer vers le paiement'}
                 </button>
               </>
             )}
@@ -450,20 +452,22 @@ const DropshippingCheckout = () => {
             {step === 2 && (
               <>
                 <section className="ds-section">
-                  <h2>Livraison</h2>
-                  <p className="text-sm text-gray-600 m-0 mb-3">Choisissez votre mode de livraison</p>
+                  <h2>Importation / livraison</h2>
+                  <p className="text-sm text-gray-600 m-0 mb-3">
+                    Transit Dango Import. Les modes d’expédition fournisseur ne sont pas proposés.
+                  </p>
                   {(quote?.options || []).map((opt) => (
                     <label key={opt.id} className="ds-shipping-option">
                       <input
                         type="radio"
                         name="shipping"
                         checked={shippingOptionId === opt.id}
-                        onChange={() => setShippingOptionId(opt.id)}
+                        readOnly
                       />
-                      <span className="ds-shipping-option__title">{opt.logisticName || opt.label}</span>
+                      <span className="ds-shipping-option__title">{opt.label || 'Importation / livraison'}</span>
                       {opt.estimatedDelivery && (
                         <div className="ds-shipping-option__meta">
-                          Livraison estimée : {opt.estimatedDelivery}
+                          Délai estimé : {opt.estimatedDelivery}
                         </div>
                       )}
                       <div className="ds-shipping-option__meta font-semibold text-gray-800">
@@ -471,9 +475,6 @@ const DropshippingCheckout = () => {
                       </div>
                     </label>
                   ))}
-                  {!shippingOptionId && (quote?.options?.length > 0) && (
-                    <p className="text-xs text-amber-800 m-0">Sélectionnez une option pour continuer.</p>
-                  )}
                 </section>
 
                 <section className="ds-section">

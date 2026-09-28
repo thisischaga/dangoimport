@@ -280,7 +280,11 @@ export default function ProductDetail() {
     [deliveryZones],
   );
   const isDropship = isDropshippingProduct(product);
-  const estimatedDeliveryDays = Number(product?.estimatedDeliveryDays ?? 0) || 0;
+  const importDays = product?.estimatedImportDays || {};
+  const estimatedDeliveryDays = Number(importDays.max || product?.estimatedDeliveryDays || 0) || 0;
+  const importDaysLabel = importDays.min && importDays.max
+    ? `${importDays.min}–${importDays.max} jours`
+    : (estimatedDeliveryDays > 0 ? `${estimatedDeliveryDays} j.` : '20–30 jours');
   const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
   const hasWarranty = Boolean(product?.warranty?.trim());
   const hasDelivery = deliveryZones.length > 0 || hasShippingInfo || estimatedDeliveryDays > 0 || isDropship;
@@ -306,24 +310,14 @@ export default function ProductDetail() {
       rows.push({ key: 'Sous-catégorie', value: product.subCategory });
     }
     if (estimatedDeliveryDays > 0 && !rows.some((r) => r.key.toLowerCase().includes('délai'))) {
-      rows.push({ key: 'Délai de livraison', value: `${estimatedDeliveryDays} jour(s) ouvrés (estimation)` });
-    }
-    const origin = product?.shippingOrigin;
-    if (origin?.countryName && !rows.some((r) => r.key.toLowerCase().includes('expédition'))) {
-      rows.push({
-        key: "Pays d'expédition",
-        value: [origin.countryName, origin.warehouseName].filter(Boolean).join(' · '),
-      });
-    }
-    if (product?.fulfillmentSupplierName && !rows.some((r) => r.key.toLowerCase().includes('expéditeur'))) {
-      rows.push({ key: 'Expéditeur (fournisseur CJ)', value: product.fulfillmentSupplierName });
+      rows.push({ key: 'Délai d’importation', value: importDaysLabel });
     }
     if (isDropshippingProduct(product) && stock > 0 && !rows.some((r) => r.key.toLowerCase() === 'stock')) {
-      rows.push({ key: 'Stock disponible', value: `${stock} unité(s) (inventaire CJ)` });
+      rows.push({ key: 'Stock disponible', value: `${stock} unité(s)` });
     }
     if (product?.condition) rows.push({ key: 'État', value: product.condition });
     return rows;
-  }, [product, estimatedDeliveryDays, stock]);
+  }, [product, estimatedDeliveryDays, importDaysLabel, stock]);
 
   const normalizedProduct = useMemo(() => {
     if (!product) return null;
@@ -372,14 +366,10 @@ export default function ProductDetail() {
   const titleIsLong = titleText.length > 72;
   const tagLabel = product?.isFeatured ? 'Sélection' : product?.isBestSeller ? 'Populaire' : hasPromo ? 'Promo' : null;
 
-  const shippingOrigin = product?.shippingOrigin;
-  const fulfillmentSupplierName = product?.fulfillmentSupplierName;
-  const shipFromDisplay = [shippingOrigin?.countryName, shippingOrigin?.warehouseName].filter(Boolean).join(' · ');
-
   const stockLabel = !inStock
     ? 'Rupture de stock'
     : isDropship
-      ? `${stock} en stock (inventaire CJ)`
+      ? `${stock} en stock`
       : isLowStock
         ? `Stock limité · ${stock} restants`
         : `${stock} en stock`;
@@ -480,6 +470,11 @@ export default function ProductDetail() {
               <span className="pd-price__now">{formatCFA(displayPrice)}</span>
               {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
             </div>
+            {isDropship && (
+              <p className="pd-muted" style={{ marginTop: 6 }}>
+                Frais d&apos;importation calculés au checkout
+              </p>
+            )}
 
             <p className={`pd-stock ${!inStock ? 'pd-stock--out' : isLowStock ? 'pd-stock--low' : ''}`}>
               {stockLabel}
@@ -487,23 +482,10 @@ export default function ProductDetail() {
 
             {isDropship && (
               <ul className="pd-facts">
-                {shipFromDisplay && (
-                  <li>
-                    <Truck size={15} />
-                    Pays d&apos;expédition · <strong>{shipFromDisplay}</strong>
-                    {shippingOrigin?.countryCode ? ` (${shippingOrigin.countryCode})` : ''}
-                  </li>
-                )}
-                {fulfillmentSupplierName && (
-                  <li>
-                    <Package size={15} />
-                    Expéditeur (fournisseur CJ) · <strong>{fulfillmentSupplierName}</strong>
-                  </li>
-                )}
-                {estimatedDeliveryDays > 0 && (
-                  <li><Truck size={15} /> Délai estimé · <strong>{estimatedDeliveryDays} j. ouvrés</strong></li>
-                )}
-                {hasShippingInfo && <li>{product.shippingInfo}</li>}
+                <li>
+                  <Truck size={15} />
+                  Délai d&apos;importation estimé · <strong>{importDaysLabel}</strong>
+                </li>
                 <li><ShieldCheck size={15} /> Vente et SAV · <strong>Dango Import</strong></li>
               </ul>
             )}
@@ -638,8 +620,8 @@ export default function ProductDetail() {
                 <p>Délai estimé : <strong>{estimatedDeliveryDays} jour(s) ouvrés</strong>.</p>
               )}
               {isDropship && (
-                <p className="pd-muted">
-                  Commande préparée par Dango Import. Numéro de suivi envoyé dès expédition.
+                <p>
+                  Frais d&apos;importation calculés au checkout. Délai estimé : <strong>{importDaysLabel}</strong>.
                 </p>
               )}
               {deliveryZones.length > 0 && (

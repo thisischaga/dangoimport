@@ -4,7 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel, getDisplayProductName } from '../../utils/publicProduct';
+import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel, getDisplayProductName, isDropshippingProduct } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 
@@ -198,6 +198,7 @@ function ProductCard({
     ) || 0;
 
   const hasPromo =
+    !isDropshippingProduct(product) &&
     promoPrice > 0 &&
     promoPrice < price;
 
@@ -597,6 +598,13 @@ function ProductCard({
           min-height: 0;
         }
 
+        .pc2__import-note {
+          margin: 4px 0 0;
+          font-size: 10px;
+          line-height: 1.3;
+          color: #64748b;
+        }
+
         .pc2__price {
           font-size: 17px;
           line-height: 1.2;
@@ -952,6 +960,12 @@ function ProductCard({
             
 
           </div>
+
+          {(isDropshippingProduct(product) || product?.importFeesAtCheckout) && (
+            <p className="pc2__import-note">
+              Frais d&apos;importation calculés au checkout
+            </p>
+          )}
 
           {/* SALES */}
 
