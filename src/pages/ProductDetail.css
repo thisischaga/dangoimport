@@ -718,6 +718,24 @@
   text-align: center;
 }
 
+.pd-empty h1 {
+  margin: 16px 0 8px;
+  font-size: 1.35rem;
+}
+
+.pd-empty p {
+  margin: 0 0 20px;
+  color: #64748b;
+  max-width: 28rem;
+}
+
+.pd-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
 .pd-skeleton {
   display: grid;
   gap: 32px;

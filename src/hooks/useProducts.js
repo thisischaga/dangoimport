@@ -24,21 +24,6 @@ function normalizeSingleProduct(payload) {
   return sanitizeProductForDisplay(payload);
 }
 
-function isApprovedStatus(product) {
-  const raw = String(product?.validationStatus || product?.status || '') || '';
-  const normalized = raw
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-  return (
-    normalized === 'approved' ||
-    normalized === 'approuve' ||
-    normalized === 'approuvee' ||
-    normalized.includes('approve') ||
-    normalized.includes('appr')
-  );
-}
-
 function isHiddenPublicStatus(product) {
   const raw = String(product?.validationStatus || product?.status || '')
     .normalize('NFD')
@@ -52,45 +37,7 @@ function isPubliclyVisibleProduct(product) {
   if (!product) return false;
   if (product.isPublished === false) return false;
   if (isHiddenPublicStatus(product)) return false;
-  const raw = String(product.validationStatus || product.status || '').trim();
-  if (!raw) return true;
-  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
-}
-
-function isHiddenPublicStatus(product) {
-  const raw = String(product?.validationStatus || product?.status || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-  return ['rejected', 'disabled', 'draft', 'archived'].includes(raw);
-}
-
-function isPubliclyVisibleProduct(product) {
-  if (!product) return false;
-  if (product.isPublished === false) return false;
-  if (isHiddenPublicStatus(product)) return false;
-  const raw = String(product.validationStatus || product.status || '').trim();
-  if (!raw) return true;
-  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
-}
-
-function isHiddenPublicStatus(product) {
-  const raw = String(product?.validationStatus || product?.status || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-  return ['rejected', 'disabled', 'draft', 'archived'].includes(raw);
-}
-
-function isPubliclyVisibleProduct(product) {
-  if (!product) return false;
-  if (product.isPublished === false) return false;
-  if (isHiddenPublicStatus(product)) return false;
-  const raw = String(product.validationStatus || product.status || '').trim();
-  if (!raw) return true;
-  return isApprovedStatus(product) || !isHiddenPublicStatus(product);
+  return true;
 }
 
 export function useFeaturedProducts() {
@@ -98,7 +45,7 @@ export function useFeaturedProducts() {
     queryKey: ['products', 'featured'],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/featured`, { timeout: 30000 });
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
+      return normalizeProducts(res.data).filter(isPubliclyVisibleProduct);
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
@@ -124,7 +71,7 @@ export function useProductsCatalog({
       if (bestSeller) params.set('bestSeller', 'true');
       if (sort) params.set('sort', sort);
       const res = await axios.get(`${API}/api/products?${params}`, { timeout: 60000 });
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
+      return normalizeProducts(res.data).filter(isPubliclyVisibleProduct);
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
@@ -153,7 +100,7 @@ export function useSimilarProducts(id) {
     queryKey: ['products', 'similar', id],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/similar/${id}`);
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
+      return normalizeProducts(res.data).filter(isPubliclyVisibleProduct);
     },
     enabled: !!id,
   });
@@ -186,7 +133,7 @@ export function useVendorProducts(vendorName) {
     queryKey: ['products', 'vendor', vendorName],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/vendor/${encodeURIComponent(vendorName)}`);
-      return normalizeProducts(res.data).filter((p) => p?.isPublished !== false && isApprovedStatus(p));
+      return normalizeProducts(res.data).filter(isPubliclyVisibleProduct);
     },
     enabled: !!vendorName,
   });
