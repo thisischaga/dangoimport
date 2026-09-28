@@ -457,7 +457,9 @@ export default function ProductDetail() {
             <div className="pd-buy__head">
               {tagLabel && <span className="pd-tag">{tagLabel}</span>}
               {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}
-              {product.brand && <span className="pd-meta">{product.brand}</span>}
+              {product.brand && !/cj\s*drop/i.test(String(product.brand)) && (
+                <span className="pd-meta">{product.brand}</span>
+              )}
             </div>
 
             <h1 className={`pd-title${titleIsLong ? ' pd-title--long' : ''}`}>

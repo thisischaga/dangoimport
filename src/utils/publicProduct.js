@@ -47,21 +47,41 @@ function isInvalidTranslationText(text) {
 
 function isGenericProductPlaceholder(text) {
   const s = String(text || '').trim().toLowerCase();
-  return !s || s === 'produit' || s === 'produit cj' || s === 'product';
+  return !s
+    || s === 'produit'
+    || s === 'produit cj'
+    || s === 'product'
+    || s === 'article'
+    || s === 'article dango import';
+}
+
+function titleFromSlug(slug) {
+  const raw = String(slug || '').trim();
+  if (!raw) return '';
+  const withoutPid = raw.replace(/-[a-f0-9]{6,}$/i, '').replace(/-/g, ' ').trim();
+  if (withoutPid.length < 4) return '';
+  return withoutPid.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function resolveDisplayProductName(product) {
+  const variantNames = (Array.isArray(product?.variants) ? product.variants : [])
+    .map((v) => String(v?.name || v?.attributes?.variantKey || v?.sku || '').trim())
+    .filter((n) => n && !isInvalidTranslationText(n) && !isGenericProductPlaceholder(n));
+  const storedName = String(product?.name || '').trim();
+  const storedIsBad = isInvalidTranslationText(storedName) || isGenericProductPlaceholder(storedName);
   const candidates = [
-    product?.name,
-    product?.shortDescription,
+    storedIsBad ? '' : storedName,
     product?.supplier?.productNameEn,
     product?.supplier?.nameEn,
+    ...variantNames,
+    product?.shortDescription,
+    titleFromSlug(product?.slug),
   ]
     .map((c) => String(c || '').trim())
     .filter(Boolean)
     .filter((c) => !isInvalidTranslationText(c))
     .filter((c) => !isGenericProductPlaceholder(c));
-  return candidates[0] || 'Article Dango Import';
+  return candidates[0] || variantNames[0] || 'Article Dango Import';
 }
 
 function sanitizeVariantsForDisplay(variants = []) {
