@@ -461,8 +461,8 @@ export default function ProductDetail() {
             </div>
 
             <h1 className={`pd-title${titleIsLong ? ' pd-title--long' : ''}`}>
-              {product.name}
               {originLabel ? <span className="pd-origin-tag">{originLabel}</span> : null}
+              <span className="pd-title__text">{product.name}</span>
             </h1>
 
             <div className="pd-rating-row">

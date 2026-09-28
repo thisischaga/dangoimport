@@ -273,11 +273,18 @@
 }
 
 .pd-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0 0 12px;
   font-size: clamp(1.35rem, 2.5vw, 1.75rem);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
+}
+
+.pd-title__text {
+  min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -290,15 +297,16 @@
 .pd-origin-tag {
   display: inline-flex;
   align-items: center;
-  margin-left: 8px;
-  vertical-align: middle;
+  flex-shrink: 0;
+  margin-top: 0.35em;
   padding: 2px 8px;
   border-radius: 6px;
-  background: #f1f5f9;
-  color: #475569;
+  background: #ffdc2b;
+  color: #111827;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .pd-rating-row {

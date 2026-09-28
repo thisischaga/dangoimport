@@ -497,33 +497,37 @@ function ProductCard({
            TITLE
         ================================================= */
 
-        .pc2__title-link {
-          display: block;
+        .pc2__headline {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+          width: 100%;
+        }
 
+        .pc2__title-link {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+          flex: 1;
           color: inherit;
           text-decoration: none;
-
           margin: 0;
           padding: 0;
         }
 
         .pc2__title {
           margin: 0;
-
+          flex: 1;
+          min-width: 0;
           font-size: 12px;
           line-height: 1.35;
-
+          font-weight: 600;
           color: #111827;
-
-          height: auto;
-          min-height: 0;
-
           overflow: hidden;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-
-          overflow-wrap: anywhere;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .pc2__title-link:hover
@@ -534,16 +538,16 @@ function ProductCard({
         .pc2__origin-tag {
           display: inline-flex;
           align-items: center;
-          margin-top: 4px;
+          flex-shrink: 0;
           padding: 1px 6px;
           border-radius: 4px;
-          background: #f1f5f9;
-          color: #475569;
+          background: #ffdc2b;
+          color: #111827;
           font-size: 10px;
-          font-weight: 700;
+          font-weight: 800;
           letter-spacing: 0.02em;
           line-height: 1.4;
-          width: max-content;
+          white-space: nowrap;
         }
 
         /* =================================================
@@ -660,9 +664,8 @@ function ProductCard({
         .pc2__rating-row {
           display: flex;
           align-items: center;
-
-          margin-top: 4px;
-
+          flex-shrink: 0;
+          margin: 0;
           min-height: 0;
         }
 
@@ -718,11 +721,7 @@ function ProductCard({
         }
 
         .pc2-rating__count {
-          margin-left: 4px;
-
-          color: #64748b;
-
-          font-size: 10px;
+          display: none;
         }
 
         .pc2-rating__toast {
@@ -791,6 +790,11 @@ function ProductCard({
           .pc2__title {
             font-size: 11px;
             line-height: 1.3;
+          }
+
+          .pc2__origin-tag {
+            font-size: 9px;
+            padding: 1px 5px;
           }
 
           .pc2__price {
@@ -891,20 +895,29 @@ function ProductCard({
 
           {/* PRODUCT NAME */}
 
-          <Link
-            to={`/product/${productId}`}
-            className="pc2__title-link"
-          >
-            <h3
-              className="pc2__title"
-              title={product?.name}
+          <div className="pc2__headline">
+            <Link
+              to={`/product/${productId}`}
+              className="pc2__title-link"
             >
-              {product?.name || ''}
-            </h3>
-            {originLabel ? (
-              <span className="pc2__origin-tag">{originLabel}</span>
-            ) : null}
-          </Link>
+              {originLabel ? (
+                <span className="pc2__origin-tag">{originLabel}</span>
+              ) : null}
+              <h3
+                className="pc2__title"
+                title={product?.name}
+              >
+                {product?.name || ''}
+              </h3>
+            </Link>
+            <div className="pc2__rating-row">
+              <InteractiveRating
+                productId={productId}
+                rating={rating}
+                count={reviewCount}
+              />
+            </div>
+          </div>
 
           {/* FEATURE */}
 
@@ -957,18 +970,6 @@ function ProductCard({
               Zone : {deliveryInfo}
             </p>
           ) */}
-
-          {/* RATING */}
-
-          <div className="pc2__rating-row">
-            <InteractiveRating
-              productId={
-                productId
-              }
-              rating={rating}
-              count={reviewCount}
-            />
-          </div>
 
           {/* VENDOR */}
 
