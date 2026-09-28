@@ -85,7 +85,8 @@ const DropshippingCheckout = () => {
   const shippingFee = Number(quote?.shippingCost ?? selectedShipping?.cost ?? 0);
   const productTotal = Number(quote?.subtotal ?? subtotal);
   const total = Number(quote?.total ?? Math.round(productTotal + shippingFee));
-  const estimatedDelivery = selectedShipping?.estimatedDelivery || null;
+  const estimatedDelivery = selectedShipping?.estimatedDelivery || quote?.estimatedDeliveryLabel || null;
+  const breakdown = quote?.importBreakdown || null;
 
   const checkoutLines = useMemo(
     () => dropItems.map(mapCartItemToCheckoutLine),
@@ -240,6 +241,12 @@ const DropshippingCheckout = () => {
           total,
           estimatedDelivery,
           phone: phoneFull,
+          productTotal,
+          billedWeight: breakdown?.billedWeight,
+          ratePerKg: breakdown?.ratePerKg,
+          shippingBaseCost: breakdown?.shippingBaseCost,
+          shippingMarkup: breakdown?.shippingMarkup,
+          shippingCost: shippingFee,
         }),
       );
 
@@ -278,6 +285,27 @@ const DropshippingCheckout = () => {
         <span>Produit</span>
         <span>{formatCFA(productTotal)}</span>
       </div>
+      {breakdown ? (
+        <div className="ds-summary__import">
+          <p className="ds-summary__import-title">Détail importation</p>
+          <div className="ds-summary__line ds-summary__line--muted">
+            <span>Poids facturé</span>
+            <span>{breakdown.billedWeight} kg</span>
+          </div>
+          <div className="ds-summary__line ds-summary__line--muted">
+            <span>Tarif</span>
+            <span>{formatCFA(breakdown.ratePerKg)} / kg</span>
+          </div>
+          <div className="ds-summary__line ds-summary__line--muted">
+            <span>Base ({breakdown.billedWeight} × {formatCFA(breakdown.ratePerKg)})</span>
+            <span>{formatCFA(breakdown.shippingBaseCost)}</span>
+          </div>
+          <div className="ds-summary__line ds-summary__line--muted">
+            <span>Majoration Dango import</span>
+            <span>{formatCFA(breakdown.shippingMarkup)}</span>
+          </div>
+        </div>
+      ) : null}
       <div className="ds-summary__line">
         <span>Importation / livraison</span>
         <span>{quote ? formatCFA(shippingFee) : '—'}</span>
@@ -454,8 +482,37 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Importation / livraison</h2>
                   <p className="text-sm text-gray-600 m-0 mb-3">
-                    Transit Dango Import. Les modes d’expédition fournisseur ne sont pas proposés.
+                    Tarif Dango import : 100 000 FCFA / kg + 3 000 FCFA de majoration.
                   </p>
+                  {breakdown && (
+                    <div className="ds-import-details">
+                      <div className="ds-summary__line">
+                        <span>Poids</span>
+                        <span>{breakdown.billedWeight} kg</span>
+                      </div>
+                      <div className="ds-summary__line">
+                        <span>Tarif au kg</span>
+                        <span>{formatCFA(breakdown.ratePerKg)}</span>
+                      </div>
+                      <div className="ds-summary__line">
+                        <span>Frais de base</span>
+                        <span>{formatCFA(breakdown.shippingBaseCost)}</span>
+                      </div>
+                      <div className="ds-summary__line">
+                        <span>Majoration</span>
+                        <span>{formatCFA(breakdown.shippingMarkup)}</span>
+                      </div>
+                      <div className="ds-summary__line">
+                        <span>Importation / livraison</span>
+                        <span>{formatCFA(breakdown.shippingCost)}</span>
+                      </div>
+                      {breakdown.estimatedDeliveryLabel && (
+                        <p className="text-xs text-gray-600 mt-2 mb-0">
+                          Délai estimé : {breakdown.estimatedDeliveryLabel}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {(quote?.options || []).map((opt) => (
                     <label key={opt.id} className="ds-shipping-option">
                       <input

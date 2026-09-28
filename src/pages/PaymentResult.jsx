@@ -25,7 +25,7 @@ const PaymentResult = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const statusParam = (params.get('status') || 'success').toLowerCase();
+    const statusParam = String(params.get('status') || 'pending').toLowerCase();
     const orderIdParam = params.get('orderId');
     const transactionIdParam = params.get('transactionId') || params.get('id');
     const checkoutModeParam = (params.get('checkoutMode') || '').toLowerCase();
@@ -88,6 +88,7 @@ const PaymentResult = () => {
         : null;
       const eta = summary?.estimatedDelivery;
       const ref = resolvedOrderNumber || resolvedOrderId;
+      setStatus('success');
       setMessage(
         [
           '✓ Commande confirmée',
@@ -103,9 +104,18 @@ const PaymentResult = () => {
       return true;
     };
 
-    const fetchQrTokensForOrder = async (currentOrderId, isDropship) => {
+    const finishPaymentFailed = (text) => {
+      setStatus('failed');
+      setOrderId(null);
+      setMessage(text);
+      restoreBackupCart();
+      setLoading(false);
+      return true;
+    };
+
+    const fetchQrTokensForOrder = async (currentOrderId, isDropship, orderNumber) => {
       if (isDropship) {
-        return finishDropshipSuccess(currentOrderId, null);
+        return finishDropshipSuccess(currentOrderId, orderNumber);
       }
       try {
         const qrResponse = await fetchOrderQrTokens(currentOrderId, token);
@@ -133,12 +143,6 @@ const PaymentResult = () => {
       }
 
       try {
-        // Route réelle confirmée dans routes/fedapayRoutes.js : GET /transaction/:id,
-        // qui renvoie { success: true, data: transaction } — `transaction` étant le
-        // document Mongo brut (transactionId, status, orderId, ...), pas de forme
-        // imbriquée { local, remote }. `orderId` n'est renseigné qu'une fois le
-        // webhook FedaPay traité (transaction.approved) ; avant ça il vaut null,
-        // d'où le polling.
         const response = await fetch(`${API_BASE_URL}/api/fedapay/transaction/${currentTransactionId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -150,26 +154,37 @@ const PaymentResult = () => {
           return false;
         }
 
-        const currentOrderId = data.data?.orderId || null;
-        if (currentOrderId) {
+        const payload = data.data || {};
+        const paid = payload.paid === true;
+        const localStatus = String(payload.status || '').toLowerCase();
+        const providerStatus = String(payload.providerStatus || '').toLowerCase();
+        const paymentStatus = String(payload.paymentStatus || '').toLowerCase();
+        const currentOrderId = paid ? (payload.orderId || null) : null;
+
+        if (paid && currentOrderId) {
           setOrderId(currentOrderId);
           localStorage.removeItem('pendingFedapay');
           localStorage.removeItem('pendingFedapayCartBackup');
-          return await fetchQrTokensForOrder(currentOrderId, pendingMode);
+          return await fetchQrTokensForOrder(
+            currentOrderId,
+            pendingMode,
+            payload.orderNumber,
+          );
         }
 
-        const remoteStatus = (data.data?.status || '').toLowerCase();
-        if (remoteStatus === 'approved') {
-          setMessage('Paiement validé, la commande est en cours de création. Patientez encore quelques instants.');
+        if (localStatus === 'approved' && paymentStatus !== 'completed') {
+          setMessage('Paiement validé, la commande est en cours de finalisation. Patientez encore quelques instants.');
           return false;
         }
-        if (remoteStatus === 'failed' || remoteStatus === 'canceled') {
-          setMessage('Le paiement a échoué ou a été annulé.');
-          restoreBackupCart();
-          return true;
+
+        if (
+          ['failed', 'canceled', 'cancelled'].includes(localStatus)
+          || ['failed', 'canceled', 'cancelled'].includes(providerStatus)
+        ) {
+          return finishPaymentFailed('Le paiement n’a pas abouti. Aucune commande n’a été confirmée. Votre panier a été restauré.');
         }
 
-        setMessage('Vérification du paiement en cours. Patientez...');
+        setMessage('Vérification du paiement en cours. Ne fermez pas cette page…');
         return false;
       } catch (err) {
         console.error('Erreur lors de la vérification de paiement', err);
@@ -190,8 +205,7 @@ const PaymentResult = () => {
         }
 
         if (attempts >= maxAttempts) {
-          setLoading(false);
-          setMessage('La commande met trop de temps à se valider. Vérifiez votre espace commandes ou contactez le support.');
+          finishPaymentFailed('Le paiement n’a pas abouti dans les délais. Aucune commande n’a été confirmée. Votre panier a été restauré.');
           return;
         }
 
@@ -200,23 +214,16 @@ const PaymentResult = () => {
       await poll();
     };
 
-    if (['failed', 'cancelled', 'error'].includes(statusParam)) {
-      setMessage('Le paiement a échoué ou a été annulé. Votre panier a été restauré.');
-      restoreBackupCart();
-      setLoading(false);
+    if (['failed', 'cancelled', 'canceled', 'error', 'declined', 'rejected'].includes(statusParam)) {
+      finishPaymentFailed('Le paiement a échoué ou a été annulé. Votre panier a été restauré.');
       return () => {
         mounted = false;
         if (timerId) clearTimeout(timerId);
       };
     }
 
-    if (['success', 'approved', 'completed', 'paid'].includes(statusParam)) {
-      setMessage('Paiement reçu. Nous vérifions votre commande.');
-      startPolling();
-    } else {
-      setMessage('Statut de paiement en attente. Nous vérifions l’état de la transaction.');
-      startPolling();
-    }
+    setMessage('Vérification du paiement FedaPay. Nous confirmons uniquement si le paiement a réellement abouti.');
+    startPolling();
 
     return () => {
       mounted = false;
@@ -254,9 +261,14 @@ const PaymentResult = () => {
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
           <div className="space-y-4 text-gray-700">
             <p className="text-base leading-7 whitespace-pre-line">{message}</p>
-            {dropshipMode && !loading && orderId && (
+            {dropshipMode && !loading && status === 'success' && orderId && (
               <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 px-4 py-3 m-0">
                 Vous recevrez des nouvelles par email ou téléphone. Aucune action n’est requise de votre côté chez un fournisseur externe.
+              </p>
+            )}
+            {!loading && status === 'failed' && (
+              <p className="text-sm text-rose-800 bg-rose-50 border border-rose-200 px-4 py-3 m-0">
+                Le paiement FedaPay n’a pas été validé. Vous pouvez réessayer depuis le panier.
               </p>
             )}
             {loading && <p className="text-sm text-gray-500">Chargement en cours...</p>}
