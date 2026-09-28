@@ -15,6 +15,7 @@ import { useStore, useStoreProducts } from '../hooks/useStore';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../components/ui/ToastProvider';
 import { getProductImage } from '../utils/imageUrl';
+import { sanitizeProductForDisplay } from '../utils/publicProduct';
 import './Shop.css';
 
 const LIMIT = 24;
@@ -40,13 +41,14 @@ function SkeletonGrid({ count = 8 }) {
 
 function normalizeProduct(p, sellerVerified) {
   if (!p) return null;
+  const sanitized = sanitizeProductForDisplay(p) || p;
   return {
-    ...p,
-    image: getProductImage(p) || p.image,
-    promoPrice: p.promoPrice ?? p.salePrice,
-    sellerName: p.sellerName || p.vendorName,
-    sellerVerified: p.sellerVerified ?? sellerVerified,
-    isNew: p.isNew ?? p.isNewArrival,
+    ...sanitized,
+    image: getProductImage(sanitized) || sanitized.image,
+    promoPrice: sanitized.promoPrice ?? sanitized.salePrice,
+    sellerName: sanitized.sellerName || sanitized.vendorName,
+    sellerVerified: sanitized.sellerVerified ?? sellerVerified,
+    isNew: sanitized.isNew ?? sanitized.isNewArrival,
   };
 }
 

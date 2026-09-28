@@ -36,9 +36,13 @@ function isInvalidTranslationText(text) {
   const s = String(text || '').trim();
   if (!s) return true;
   const upper = s.toUpperCase();
-  return upper.includes('MYMEMORY WARNING')
-    || upper.includes('YOU USED ALL AVAILABLE FREE TRANSLATION')
-    || upper.includes('QUERY LENGTH LIMIT');
+  return upper.includes('MYMEMORY')
+    || upper.includes('TRANSLATED.NET')
+    || upper.includes('YOU USED ALL AVAILABLE')
+    || upper.includes('FREE TRANSLATION')
+    || upper.includes('QUERY LENGTH')
+    || upper.includes('USAGE LIMITS')
+    || upper.includes('TO TRANSLATE MORE');
 }
 
 function isGenericProductPlaceholder(text) {
@@ -57,7 +61,23 @@ function resolveDisplayProductName(product) {
     .filter(Boolean)
     .filter((c) => !isInvalidTranslationText(c))
     .filter((c) => !isGenericProductPlaceholder(c));
-  return candidates[0] || String(product?.name || '').trim() || 'Article Dango Import';
+  return candidates[0] || 'Article Dango Import';
+}
+
+function sanitizeVariantsForDisplay(variants = []) {
+  if (!Array.isArray(variants)) return [];
+  return variants.map((variant, index) => {
+    const raw = String(variant?.name || '').trim();
+    const fallbacks = [
+      variant?.attributes?.variantKey,
+      variant?.sku,
+      `Option ${index + 1}`,
+    ];
+    const name = (!isInvalidTranslationText(raw) && !isGenericProductPlaceholder(raw))
+      ? raw
+      : (fallbacks.map((c) => String(c || '').trim()).find((c) => c && !isInvalidTranslationText(c)) || `Option ${index + 1}`);
+    return { ...variant, name };
+  });
 }
 
 /** Stock affichable (aligné fiche produit : max stock produit, variantes, entrepôts CJ). */
@@ -115,6 +135,9 @@ export function sanitizeProductForDisplay(product) {
   }
   if (isInvalidTranslationText(sanitized.shortDescription)) {
     sanitized.shortDescription = String(sanitized.description || sanitized.name).slice(0, 220);
+  }
+  if (Array.isArray(product.variants)) {
+    sanitized.variants = sanitizeVariantsForDisplay(product.variants);
   }
 
   if (isDropshippingProduct(product)) {

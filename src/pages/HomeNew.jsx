@@ -18,7 +18,7 @@ import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
-import { getProductSellableStock, getProductOriginLabel } from '../utils/publicProduct';
+import { getProductSellableStock, getProductOriginLabel, sanitizeProductForDisplay } from '../utils/publicProduct';
 import { isProductOnPromo, isProductBestSeller, getDiscountPercent } from '../utils/productPromo';
 
 // Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
@@ -420,26 +420,27 @@ function HomeNew({ cartCount: cartCountProp }) {
 }
 
 function normalizeProduct(product) {
-  const price = Number(product?.price ?? 0) || 0;
-  const promoPrice = Number(product?.salePrice ?? product?.promoPrice ?? 0) || 0;
-  const image = product?.image || product?.images?.[0]?.url || product?.images?.[0] || 'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg';
-  const sellerName = product?.vendorName || product?.sellerName || 'Vendeur indépendant';
+  const sanitized = sanitizeProductForDisplay(product) || product || {};
+  const price = Number(sanitized?.price ?? 0) || 0;
+  const promoPrice = Number(sanitized?.salePrice ?? sanitized?.promoPrice ?? 0) || 0;
+  const image = sanitized?.image || sanitized?.images?.[0]?.url || sanitized?.images?.[0] || 'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg';
+  const sellerName = sanitized?.vendorName || sanitized?.sellerName || 'Vendeur indépendant';
 
   return {
-    ...product,
-    id: product?._id || product?.id,
-    name: product?.name || 'Produit premium',
-    description: product?.shortDescription || product?.description || '',
+    ...sanitized,
+    id: sanitized?._id || sanitized?.id,
+    name: sanitized?.name || 'Article Dango Import',
+    description: sanitized?.shortDescription || sanitized?.description || '',
     price,
     promoPrice: promoPrice > 0 && promoPrice < price ? promoPrice : null,
     image,
-    category: product?.category || 'Produit',
+    category: sanitized?.category || 'Produit',
     sellerName,
-    originLabel: getProductOriginLabel(product),
-    sellerVerified: Boolean(product?.sellerVerified || product?.vendorName),
-    stock: getProductSellableStock(product),
-    isFeatured: Boolean(product?.isFeatured),
-    isBoosted: Boolean(product?.isFeatured || product?.isBestSeller || product?.isBoosted),
+    originLabel: getProductOriginLabel(sanitized),
+    sellerVerified: Boolean(sanitized?.sellerVerified || sanitized?.vendorName),
+    stock: getProductSellableStock(sanitized),
+    isFeatured: Boolean(sanitized?.isFeatured),
+    isBoosted: Boolean(sanitized?.isFeatured || sanitized?.isBestSeller || sanitized?.isBoosted),
   };
 }
 
