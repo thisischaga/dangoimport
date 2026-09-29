@@ -301,9 +301,11 @@ export default function ProductDetail() {
   );
   const importDays = product?.estimatedImportDays || {};
   const estimatedDeliveryDays = Number(importDays.max || product?.estimatedDeliveryDays || 0) || 0;
-  const importDaysLabel = importDays.min && importDays.max
-    ? `${importDays.min}–${importDays.max} jours`
-    : (estimatedDeliveryDays > 0 ? `${estimatedDeliveryDays} j.` : '20–30 jours');
+  const importDaysLabel = isDropship
+    ? (Number(importDays.min) >= 15 && Number(importDays.max) >= 15
+      ? `${importDays.min}–${importDays.max} jours`
+      : '20–30 jours')
+    : (estimatedDeliveryDays > 0 ? `${estimatedDeliveryDays} j.` : '');
   const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
   const hasWarranty = Boolean(product?.warranty?.trim());
   const hasDelivery = deliveryZones.length > 0 || hasShippingInfo || estimatedDeliveryDays > 0 || isDropship;
@@ -649,13 +651,13 @@ export default function ProductDetail() {
           {hasDelivery ? (
             <div className="pd-delivery">
               {hasShippingInfo && <p>{product.shippingInfo}</p>}
-              {estimatedDeliveryDays > 0 && !hasShippingInfo && (
-                <p>Délai estimé : <strong>{estimatedDeliveryDays} jour(s) ouvrés</strong>.</p>
-              )}
               {isDropship && (
                 <p>
-                  Frais d&apos;importation calculés au checkout. Délai estimé : <strong>{importDaysLabel}</strong>.
+                  Frais d&apos;importation calculés au checkout. Délai estimé : <strong>20–30 jours</strong>.
                 </p>
+              )}
+              {!isDropship && estimatedDeliveryDays > 0 && !hasShippingInfo && (
+                <p>Délai estimé : <strong>{estimatedDeliveryDays} jour(s) ouvrés</strong>.</p>
               )}
               {deliveryZones.length > 0 && (
                 <ul className="pd-zones">

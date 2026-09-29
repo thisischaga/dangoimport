@@ -12,11 +12,20 @@ import client from '../apiClient';
 import { isDropshippingProduct } from '../utils/publicProduct';
 import { getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 
-const isImportCartItem = (item) =>
-  isDropshippingProduct(item)
-  || item?.importFeesAtCheckout
-  || item?.fulfillmentType === 'DANGO_IMPORT'
-  || String(item?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
+
+const isImportCartItem = (item) => {
+  if (!item) return false;
+  if (isDropshippingProduct(item) || item.importFeesAtCheckout || item.fulfillmentType === 'DANGO_IMPORT') {
+    return true;
+  }
+  const vendor = String(item.vendorName || item.vendor || '').toUpperCase();
+  if (vendor.includes('DANGO')) return true;
+  const brand = String(item.brand || '').toLowerCase();
+  if (brand.includes('cjdrop') || brand.includes('alibaba')) return true;
+  const platform = String(item.supplier?.platform || item.supplierPlatform || '').toLowerCase();
+  return platform === 'cj' || platform === 'alibaba';
+};
 
 const quantitySelectorButton =
   'h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100';
@@ -58,7 +67,7 @@ const CartPage = () => {
   }, [cart]);
 
   const isImportCart = useMemo(
-    () => cart.length > 0 && cart.every(isImportCartItem),
+    () => cart.length > 0 && cart.some(isImportCartItem),
     [cart],
   );
 
@@ -540,17 +549,11 @@ const CartPage = () => {
                   <span className="font-bold text-slate-900">{formatMoney(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>{isImportCart ? 'Importation' : 'Livraison estimée'}</span>
-                  <span className={`font-bold ${isImportCart ? 'text-slate-500' : 'text-slate-900'}`}>
-                    {isImportCart ? 'Au checkout' : estimatedDelivery}
+                  <span>Délai de livraison</span>
+                  <span className="font-bold text-slate-900">
+                    {isImportCart ? '20–30 jours' : estimatedDelivery}
                   </span>
                 </div>
-                {isImportCart && (
-                  <div className="flex justify-between text-slate-600">
-                    <span>Délai estimé</span>
-                    <span className="font-bold text-slate-900">{estimatedDelivery}</span>
-                  </div>
-                )}
                 {Number(promoPreview?.tax || 0) > 0 && (
                   <div className="flex justify-between text-slate-600">
                     <span>Taxes</span>
