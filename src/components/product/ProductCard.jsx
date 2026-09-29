@@ -7,6 +7,7 @@ import { formatSoftS } from '../../utils/formatPrice';
 import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel, getDisplayProductName, isDropshippingProduct } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
+import { getCardDisplayPrice, getMoqRules, getUnitPrice } from '../../utils/importMoq';
 
 /* =========================================================
    INTERACTIVE RATING
@@ -185,10 +186,9 @@ function ProductCard({
     product?._id ||
     product?.id;
 
-  const price =
-    Number(
-      product?.price ?? 0
-    ) || 0;
+  const price = getUnitPrice(product);
+  const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
+  const { soldAsLot, packSize } = getMoqRules(product);
 
   const promoPrice =
     Number(
@@ -198,14 +198,16 @@ function ProductCard({
     ) || 0;
 
   const hasPromo =
-    !isDropshippingProduct(product) &&
+    !isDropship &&
     promoPrice > 0 &&
     promoPrice < price;
 
   const displayPrice =
-    hasPromo
-      ? promoPrice
-      : price;
+    isDropship
+      ? getCardDisplayPrice(product)
+      : hasPromo
+        ? promoPrice
+        : price;
 
   /* =======================================================
      IMAGES
@@ -961,7 +963,18 @@ function ProductCard({
 
           </div>
 
-          {(isDropshippingProduct(product) || product?.importFeesAtCheckout) && (
+          {isDropship && soldAsLot && packSize > 1 && (
+            <p className="pc2__import-note">
+              Lot de {packSize} · soit {formatSoftS(price)} / unité
+            </p>
+          )}
+          {isDropship && !soldAsLot && Number(product?.minimumOrderQuantity) > 1 && (
+            <p className="pc2__import-note">
+              Minimum {product.minimumOrderQuantity} unités
+            </p>
+          )}
+
+          {(isDropship) && (
             <p className="pc2__import-note">
               Frais d&apos;importation calculés au checkout
             </p>

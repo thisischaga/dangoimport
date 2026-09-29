@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext';
 import API_BASE_URL from '../apiConfig';
 import client from '../apiClient';
 import { isDropshippingProduct } from '../utils/publicProduct';
+import { getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 
 const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
 
@@ -37,14 +38,7 @@ const CartPage = () => {
     }
   });
 
-  const getItemPrice = (item) => {
-    const price = Number(item.promoPrice) > 0 && Number(item.promoPrice) < Number(item.price || 0)
-      ? Number(item.promoPrice)
-      : Number(item.salePrice) > 0
-      ? Number(item.salePrice)
-      : Number(item.price || 0);
-    return Number.isFinite(price) ? price : 0;
-  };
+  const getItemPrice = (item) => getUnitPrice(item);
 
   const groupedByVendor = useMemo(() => {
     const groups = {};
@@ -345,6 +339,7 @@ const CartPage = () => {
                       const lineTotal = getItemPrice(item) * quantity;
                       const stockBadge = getStockBadge(item.stock);
                       const atMax = Number.isFinite(Number(item.stock)) && quantity >= Number(item.stock);
+                      const moq = getMoqRules(item);
 
                       return (
                         <motion.div layout key={itemId} className="p-4 sm:p-5">
@@ -378,6 +373,9 @@ const CartPage = () => {
                                   {quantity > 1 && (
                                     <p className="text-xs text-slate-400">{formatMoney(getItemPrice(item))} / unité</p>
                                   )}
+                                  {moq.soldAsLot && (
+                                    <p className="text-xs text-slate-500">Lot de {moq.packSize}</p>
+                                  )}
                                 </div>
                               </div>
 
@@ -388,8 +386,8 @@ const CartPage = () => {
                               <div className="mt-4 flex flex-wrap items-center gap-2">
                                 <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
                                   <button
-                                    onClick={() => updateQuantity(itemId, quantity - 1)}
-                                    disabled={quantity <= 1}
+                                    onClick={() => updateQuantity(itemId, quantity - moq.increment)}
+                                    disabled={quantity <= moq.moq}
                                     className={quantitySelectorButton}
                                     aria-label="Diminuer la quantité"
                                   >
@@ -397,7 +395,7 @@ const CartPage = () => {
                                   </button>
                                   <span className="w-8 text-center text-sm font-black text-slate-900">{quantity}</span>
                                   <button
-                                    onClick={() => updateQuantity(itemId, quantity + 1)}
+                                    onClick={() => updateQuantity(itemId, snapQuantity(item, quantity + moq.increment))}
                                     disabled={atMax}
                                     className={quantitySelectorButton}
                                     aria-label="Augmenter la quantité"

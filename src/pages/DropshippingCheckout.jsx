@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import { isDropshippingProduct } from '../utils/publicProduct';
 import { formatCFA } from '../utils/formatPrice';
+import { getUnitPrice, getMoqRules } from '../utils/importMoq';
 import { getProductImage } from '../utils/imageUrl';
 import toast from '../utils/toast';
 import {
@@ -37,13 +38,7 @@ const emptyForm = {
 };
 
 function getItemPrice(item) {
-  const price =
-    Number(item.promoPrice) > 0 && Number(item.promoPrice) < Number(item.price || 0)
-      ? Number(item.promoPrice)
-      : Number(item.salePrice) > 0
-        ? Number(item.salePrice)
-        : Number(item.price || 0);
-  return Number.isFinite(price) ? price : 0;
+  return getUnitPrice(item);
 }
 
 function formatPhoneFull(countryCode, localDigits) {
@@ -245,7 +240,6 @@ const DropshippingCheckout = () => {
           billedWeight: breakdown?.billedWeight,
           ratePerKg: breakdown?.ratePerKg,
           shippingBaseCost: breakdown?.shippingBaseCost,
-          shippingMarkup: breakdown?.shippingMarkup,
           shippingCost: shippingFee,
         }),
       );
@@ -273,7 +267,14 @@ const DropshippingCheckout = () => {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold m-0 leading-snug">{item.name}</p>
               {variant && <p className="text-xs text-gray-600 m-0 mt-0.5">{variant}</p>}
-              <p className="text-xs text-gray-500 m-0 mt-1">Qté {item.quantity || 1}</p>
+              <p className="text-xs text-gray-500 m-0 mt-1">
+                {getMoqRules(item).soldAsLot
+                  ? `Lot de ${getMoqRules(item).packSize} · Qté ${item.quantity || 1}`
+                  : `Qté ${item.quantity || 1}`}
+              </p>
+              {Number(item.quantity) > 1 && (
+                <p className="text-xs text-gray-500 m-0">Soit {formatCFA(getItemPrice(item))} / unité</p>
+              )}
               <p className="text-sm font-bold m-0 mt-1">
                 {formatCFA(getItemPrice(item) * (item.quantity || 1))}
               </p>
@@ -303,12 +304,8 @@ const DropshippingCheckout = () => {
             <span>{formatCFA(breakdown.ratePerKg)} / kg</span>
           </div>
           <div className="ds-summary__line ds-summary__line--muted">
-            <span>Base ({breakdown.billedWeight} × {formatCFA(breakdown.ratePerKg)})</span>
-            <span>{formatCFA(breakdown.shippingBaseCost)}</span>
-          </div>
-          <div className="ds-summary__line ds-summary__line--muted">
-            <span>Majoration Dango import</span>
-            <span>{formatCFA(breakdown.shippingMarkup)}</span>
+            <span>Frais d&apos;importation ({breakdown.billedWeight} × {formatCFA(breakdown.ratePerKg)})</span>
+            <span>{formatCFA(breakdown.shippingCost)}</span>
           </div>
         </div>
       ) : null}
@@ -488,7 +485,7 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Importation / livraison</h2>
                   <p className="text-sm text-gray-600 m-0 mb-3">
-                    Tarif Dango import : 10 000 FCFA / kg + 3 000 FCFA de majoration.
+                    Tarif Dango import : {formatCFA(breakdown?.ratePerKg || 13500)} / kg, calculé sur le poids total de la commande. Sans coefficient 1.30.
                   </p>
                   {breakdown && (
                     <div className="ds-import-details">
@@ -507,15 +504,7 @@ const DropshippingCheckout = () => {
                         <span>{formatCFA(breakdown.ratePerKg)}</span>
                       </div>
                       <div className="ds-summary__line">
-                        <span>Frais de base</span>
-                        <span>{formatCFA(breakdown.shippingBaseCost)}</span>
-                      </div>
-                      <div className="ds-summary__line">
-                        <span>Majoration</span>
-                        <span>{formatCFA(breakdown.shippingMarkup)}</span>
-                      </div>
-                      <div className="ds-summary__line">
-                        <span>Importation / livraison</span>
+                        <span>Frais d&apos;importation</span>
                         <span>{formatCFA(breakdown.shippingCost)}</span>
                       </div>
                       {breakdown.estimatedDeliveryLabel && (

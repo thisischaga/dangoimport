@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from '../utils/toast';
+import { getMoqRules, snapQuantity, getUnitPrice } from '../utils/importMoq';
 
 const CartContext = createContext();
 
@@ -12,7 +13,11 @@ export const CartProvider = ({ children }) => {
       try {
         const parsed = JSON.parse(savedCart);
         return Array.isArray(parsed)
-          ? parsed.map((item) => ({ ...item, _id: item._id || item.id }))
+          ? parsed.map((item) => ({
+            ...item,
+            _id: item._id || item.id,
+            quantity: snapQuantity(item, item.quantity || 1),
+          }))
           : [];
       } catch (e) {
         return [];
@@ -26,7 +31,8 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = useCallback((product, qty = 1) => {
-    const quantityToAdd = Math.max(1, parseInt(qty, 10) || 1);
+    const { moq } = getMoqRules(product);
+    const quantityToAdd = snapQuantity(product, qty || moq);
     const productId = product._id || product.id;
     const stock = Number(product.stock ?? 999);
 
@@ -43,7 +49,7 @@ export const CartProvider = ({ children }) => {
 
       if (existing) {
         const currentQty = existing.quantity || 0;
-        const newQty = currentQty + quantityToAdd;
+        const newQty = snapQuantity(product, currentQty + quantityToAdd);
 
         // Dépassement du stock
         if (newQty > stock) {
@@ -69,7 +75,7 @@ export const CartProvider = ({ children }) => {
       }
 
       // Nouveau produit
-      const addQty = Math.min(quantityToAdd, stock);
+      const addQty = snapQuantity(product, Math.min(quantityToAdd, stock));
       toastToTrigger = { type: 'success', message: `${product.name} ajouté au panier` };
       return [...prevCart, { ...product, _id: productId, quantity: addQty }];
     });
@@ -89,8 +95,10 @@ export const CartProvider = ({ children }) => {
     setCart((prev) =>
       prev.map((item) => {
         if ((item._id || item.id) !== productId) return item;
+        const { moq } = getMoqRules(item);
         const stock = Number(item.stock ?? 999);
-        const clamped = Math.max(1, Math.min(newQuantity, stock));
+        const snapped = snapQuantity(item, newQuantity);
+        const clamped = Math.max(moq, Math.min(snapped, stock));
         return { ...item, quantity: clamped };
       })
     );
@@ -116,12 +124,7 @@ export const CartProvider = ({ children }) => {
   const subtotal = useMemo(
     () =>
       cart.reduce((total, item) => {
-        const itemPrice =
-          Number(item.promoPrice) > 0 && Number(item.promoPrice) < Number(item.price)
-            ? Number(item.promoPrice)
-            : Number(item.salePrice) > 0
-            ? Number(item.salePrice)
-            : Number(item.price || 0);
+        const itemPrice = getUnitPrice(item);
         return total + itemPrice * (Number(item.quantity) || 1);
       }, 0),
     [cart]

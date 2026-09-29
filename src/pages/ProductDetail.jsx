@@ -23,6 +23,7 @@ import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
 import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel } from '../utils/publicProduct';
+import { getCardDisplayPrice, getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
 import Header from '../components/Header';
@@ -32,15 +33,27 @@ import ProductVariants from '../components/product/detail/ProductVariants';
 import ProductReviewsSection from '../components/product/detail/ProductReviewsSection';
 import './ProductDetail.css';
 
-function QtyControl({ value, onChange, max }) {
-  const cap = Math.max(1, max || 1);
+function QtyControl({ value, onChange, min = 1, step = 1, max }) {
+  const cap = Math.max(min, max || min);
   return (
     <div className="pd-qty" role="group" aria-label="Quantité">
-      <button type="button" className="pd-qty__btn" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} aria-label="Diminuer">
+      <button
+        type="button"
+        className="pd-qty__btn"
+        onClick={() => onChange(Math.max(min, value - step))}
+        disabled={value <= min}
+        aria-label="Diminuer"
+      >
         <Minus size={14} />
       </button>
       <span className="pd-qty__val">{value}</span>
-      <button type="button" className="pd-qty__btn" onClick={() => onChange(Math.min(cap, value + 1))} disabled={value >= cap} aria-label="Augmenter">
+      <button
+        type="button"
+        className="pd-qty__btn"
+        onClick={() => onChange(Math.min(cap, value + step))}
+        disabled={value >= cap}
+        aria-label="Augmenter"
+      >
         <Plus size={14} />
       </button>
     </div>
@@ -211,11 +224,15 @@ export default function ProductDetail() {
   }, [product?.name, isLoading, product]);
 
   useEffect(() => {
-    setQty(1);
     setSelectedVariantIndex(null);
     setSelectedColor(null);
     setSelectedSize(null);
   }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+    setQty(snapQuantity(product, product.minimumOrderQuantity || 1));
+  }, [product?._id]);
 
   const variants = useMemo(() => (Array.isArray(product?.variants) ? product.variants : []), [product?.variants]);
   useEffect(() => {
@@ -225,13 +242,16 @@ export default function ProductDetail() {
   }, [variants]);
 
   const selectedVariant = selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
-  const basePrice = Number(product?.price || 0);
+  const unitPrice = getUnitPrice(product);
+  const basePrice = Number(product?.price || unitPrice || 0);
   const basePromo = Number(product?.salePrice || product?.promoPrice || 0);
   const variantPrice = selectedVariant?.price != null ? Number(selectedVariant.price) : null;
   const price = variantPrice ?? basePrice;
-  const promoPrice = variantPrice == null && basePromo > 0 && basePromo < basePrice ? basePromo : 0;
+  const isDropship = isDropshippingProduct(product);
+  const moqRules = getMoqRules(product);
+  const promoPrice = !isDropship && variantPrice == null && basePromo > 0 && basePromo < basePrice ? basePromo : 0;
   const hasPromo = promoPrice > 0 && promoPrice < price;
-  const displayPrice = hasPromo ? promoPrice : price;
+  const displayPrice = isDropship ? getCardDisplayPrice(product) : (hasPromo ? promoPrice : price);
   const discount = hasPromo ? calcDiscountPercent(price, promoPrice) : 0;
 
   const productStock = Number(product?.stock ?? 0);
@@ -279,7 +299,6 @@ export default function ProductDetail() {
     () => deliveryZones.find((z) => z?.freeShipping || Number(z?.price || 0) === 0),
     [deliveryZones],
   );
-  const isDropship = isDropshippingProduct(product);
   const importDays = product?.estimatedImportDays || {};
   const estimatedDeliveryDays = Number(importDays.max || product?.estimatedDeliveryDays || 0) || 0;
   const importDaysLabel = importDays.min && importDays.max
@@ -470,6 +489,16 @@ export default function ProductDetail() {
               <span className="pd-price__now">{formatCFA(displayPrice)}</span>
               {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
             </div>
+            {isDropship && moqRules.soldAsLot && (
+              <p className="pd-muted" style={{ marginTop: 6 }}>
+                Lot de {moqRules.packSize} · soit {formatCFA(price)} / unité
+              </p>
+            )}
+            {isDropship && !moqRules.soldAsLot && moqRules.moq > 1 && (
+              <p className="pd-muted" style={{ marginTop: 6 }}>
+                Minimum {moqRules.moq} unités
+              </p>
+            )}
             {isDropship && (
               <p className="pd-muted" style={{ marginTop: 6 }}>
                 Frais d&apos;importation calculés au checkout
@@ -505,7 +534,13 @@ export default function ProductDetail() {
             {inStock && (
               <div className="pd-qty-row">
                 <span className="pd-label">Quantité</span>
-                <QtyControl value={qty} onChange={setQty} max={stock} />
+                <QtyControl
+                  value={qty}
+                  onChange={(next) => setQty(snapQuantity(product, next))}
+                  min={moqRules.moq}
+                  step={moqRules.increment}
+                  max={stock}
+                />
               </div>
             )}
 
