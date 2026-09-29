@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { toast } from '../utils/toast';
 import { getMoqRules, snapQuantity, getUnitPrice } from '../utils/importMoq';
 
+function isImportItem(item) {
+  return item?.sourceType === 'DROPSHIPPING'
+    || item?.importFeesAtCheckout
+    || item?.fulfillmentType === 'DANGO_IMPORT'
+    || String(item?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+}
+
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
@@ -145,7 +152,10 @@ export const CartProvider = ({ children }) => {
     [cart]
   );
 
-  const shipping = useMemo(() => (subtotal >= 50000 ? 0 : 2000), [subtotal]);
+  const shipping = useMemo(() => {
+    if (cart.length > 0 && cart.every(isImportItem)) return 0;
+    return subtotal >= 50000 ? 0 : 2000;
+  }, [cart, subtotal]);
 
   const total = useMemo(() => subtotal + shipping, [subtotal, shipping]);
 

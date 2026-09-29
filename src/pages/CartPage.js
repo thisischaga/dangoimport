@@ -12,7 +12,11 @@ import client from '../apiClient';
 import { isDropshippingProduct } from '../utils/publicProduct';
 import { getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 
-const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
+const isImportCartItem = (item) =>
+  isDropshippingProduct(item)
+  || item?.importFeesAtCheckout
+  || item?.fulfillmentType === 'DANGO_IMPORT'
+  || String(item?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
 
 const quantitySelectorButton =
   'h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100';
@@ -53,10 +57,21 @@ const CartPage = () => {
     return Object.values(groups);
   }, [cart]);
 
+  const isImportCart = useMemo(
+    () => cart.length > 0 && cart.every(isImportCartItem),
+    [cart],
+  );
+
   const estimatedDelivery = useMemo(() => {
+    if (isImportCart) return '20–30 jours';
     if (subtotal >= 50000) return 'Livraison gratuite · 1 à 4 jours';
-    return 'Livraison estimée · 1 à 4 jours';
-  }, [subtotal]);
+    return '1 à 4 jours';
+  }, [isImportCart, subtotal]);
+
+  const displayShipping = isImportCart ? 0 : shipping;
+  const displayTotal = isImportCart
+    ? subtotal - Number(promoPreview?.discount || 0)
+    : Number(promoPreview?.total || subtotal + displayShipping);
 
   const amountToFreeShipping = Math.max(0, 50000 - subtotal);
   const freeShippingProgress = Math.min(100, (subtotal / 50000) * 100);
@@ -64,6 +79,8 @@ const CartPage = () => {
 
   useEffect(() => {
     if (!cart.length) return;
+    const hasDrop = cart.some(isImportCartItem);
+    if (hasDrop) return;
 
     const token = localStorage.getItem('dangoToken');
     if (!token) return;
@@ -115,8 +132,8 @@ const CartPage = () => {
       navigate('/login', { state: { from: '/cart' } });
       return;
     }
-    const hasDrop = cart.some((item) => isDropshippingProduct(item));
-    const hasLocal = cart.some((item) => !isDropshippingProduct(item));
+    const hasDrop = cart.some(isImportCartItem);
+    const hasLocal = cart.some((item) => !isImportCartItem(item));
     if (hasDrop && hasLocal) {
       toast.error('Panier mixte : retirez les produits locaux ou dropshipping pour finaliser en une seule commande.');
       return;
@@ -274,7 +291,8 @@ const CartPage = () => {
           </div>
         </div>
 
-        {/* Free shipping progress */}
+        {/* Free shipping progress — produits locaux uniquement */}
+        {!isImportCart && (
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           {amountToFreeShipping > 0 ? (
             <p className="text-sm font-semibold text-slate-700">
@@ -294,6 +312,12 @@ const CartPage = () => {
             />
           </div>
         </div>
+        )}
+        {isImportCart && (
+          <div className="mb-6 rounded-2xl border border-orange-100 bg-[#FFF7F1] p-4 text-sm font-semibold text-slate-700 shadow-sm sm:p-5">
+            Produits Dango Import : les frais d&apos;importation sont calculés au checkout selon le poids total (délai estimé 20–30 jours).
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-5">
@@ -516,9 +540,17 @@ const CartPage = () => {
                   <span className="font-bold text-slate-900">{formatMoney(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Livraison estimée</span>
-                  <span className="font-bold text-slate-900">{estimatedDelivery}</span>
+                  <span>{isImportCart ? 'Importation' : 'Livraison estimée'}</span>
+                  <span className={`font-bold ${isImportCart ? 'text-slate-500' : 'text-slate-900'}`}>
+                    {isImportCart ? 'Au checkout' : estimatedDelivery}
+                  </span>
                 </div>
+                {isImportCart && (
+                  <div className="flex justify-between text-slate-600">
+                    <span>Délai estimé</span>
+                    <span className="font-bold text-slate-900">{estimatedDelivery}</span>
+                  </div>
+                )}
                 {Number(promoPreview?.tax || 0) > 0 && (
                   <div className="flex justify-between text-slate-600">
                     <span>Taxes</span>
@@ -536,7 +568,7 @@ const CartPage = () => {
               <div className="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
                 <div className="flex items-center justify-between text-sm text-slate-600">
                   <span>Montant final</span>
-                  <span className="text-2xl font-black text-[#FF6B00]">{formatMoney(Number(promoPreview?.total || total))}</span>
+                  <span className="text-2xl font-black text-[#FF6B00]">{formatMoney(displayTotal)}</span>
                 </div>
               </div>
 
@@ -572,7 +604,7 @@ const CartPage = () => {
       <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between border-t border-slate-200 bg-white/95 px-4 py-3.5 shadow-lg backdrop-blur-[6px]">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total ({cartCount})</p>
-          <p className="mt-0.5 text-xl font-black text-[#FF6B00]">{formatMoney(Number(promoPreview?.total || total))}</p>
+          <p className="mt-0.5 text-xl font-black text-[#FF6B00]">{formatMoney(displayTotal)}</p>
         </div>
         <button
           onClick={handleCheckout}

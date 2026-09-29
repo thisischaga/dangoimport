@@ -35,7 +35,14 @@ export function snapQuantity(product, quantity) {
 
 export function getUnitPrice(item = {}) {
   const unit = Number(item.unitPrice ?? item.price ?? 0);
-  return Number.isFinite(unit) ? unit : 0;
+  const n = Number.isFinite(unit) ? unit : 0;
+  const isImport = item?.sourceType === 'DROPSHIPPING'
+    || item?.importFeesAtCheckout
+    || item?.fulfillmentType === 'DANGO_IMPORT'
+    || String(item?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+  if (!isImport) return n;
+  const floor = Math.max(0, Math.round(Number(item.minimumProductPrice) || 1000));
+  return Math.max(n, floor);
 }
 
 export function getCardDisplayPrice(product = {}) {
