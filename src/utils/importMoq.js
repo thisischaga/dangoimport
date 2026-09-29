@@ -1,9 +1,39 @@
+export function parseWeightKg(product = {}) {
+  const raw = product.weightKg ?? product.weight;
+  if (raw == null || raw === '') return 0;
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    if (raw <= 0) return 0;
+    return raw > 30 ? Math.round((raw / 1000) * 1000) / 1000 : Math.round(raw * 1000) / 1000;
+  }
+  const text = String(raw).trim().toLowerCase().replace(',', '.');
+  const match = text.match(/([\d.]+)\s*(kg|kgs|kilo|kilogrammes?|g|gr|grammes?|lbs?)?/);
+  if (!match) return 0;
+  const n = Number(match[1]);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  const unit = String(match[2] || '');
+  if (unit === 'g' || unit === 'gr' || unit.startsWith('gram')) return Math.round((n / 1000) * 1000) / 1000;
+  if (unit.startsWith('kg') || unit.startsWith('kilo')) return Math.round(n * 1000) / 1000;
+  return n > 30 ? Math.round((n / 1000) * 1000) / 1000 : Math.round(n * 1000) / 1000;
+}
+
+export function lightProductMoqFromWeight(weightKg, thresholdKg = 1) {
+  const weight = Number(weightKg);
+  const threshold = Number(thresholdKg) || 1;
+  if (!(weight > 0) || weight >= threshold) return 1;
+  return Math.max(2, Math.ceil((threshold / weight) - 1e-9));
+}
+
 export function getMoqRules(product = {}) {
-  const moq = Math.max(1, Math.round(Number(product.minimumOrderQuantity) || 1));
+  const explicitMoq = Math.max(1, Math.round(Number(product.minimumOrderQuantity) || 1));
+  const autoMoq = lightProductMoqFromWeight(parseWeightKg(product), Number(product.lightProductMaxWeightKg) || 1);
+  const moq = Math.max(explicitMoq, autoMoq);
   const hasIncrement = product.quantityIncrement != null && product.quantityIncrement !== '';
-  const increment = Math.max(1, Math.round(Number(
-    hasIncrement ? product.quantityIncrement : moq,
-  ) || moq));
+  const explicitIncrement = hasIncrement
+    ? Math.max(1, Math.round(Number(product.quantityIncrement) || moq))
+    : null;
+  const increment = explicitIncrement && explicitIncrement !== explicitMoq
+    ? explicitIncrement
+    : moq;
   return {
     moq,
     increment,
