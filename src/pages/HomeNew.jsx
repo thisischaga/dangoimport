@@ -279,7 +279,7 @@ function HomeNew({ cartCount: cartCountProp }) {
   const buildParams = useCallback(() => {
     return {
       page: 1,
-      limit: 60,
+      limit: 200,
       search: searchQuery || undefined,
       ...filters,
     };

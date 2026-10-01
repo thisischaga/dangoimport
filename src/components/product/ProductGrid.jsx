@@ -18,6 +18,7 @@ import {
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import { applyProductFilters } from '../../utils/productFilters';
+import { mixProductsForDisplay } from '../../utils/mixCatalogDisplay';
 import { normalizeCatalogProductStock, isCjCatalogProduct, isMarketplaceProduct } from '../../utils/publicProduct';
 import {
   isProductOnPromo,
@@ -904,6 +905,12 @@ function ProductGrid({
     [filtered, activeTab]
   );
 
+  const displayProducts = useMemo(() => {
+    const sort = filters?.sort || 'relevance';
+    if (sort && sort !== 'relevance') return tabFiltered;
+    return mixProductsForDisplay(tabFiltered);
+  }, [tabFiltered, filters?.sort]);
+
   const visibleTabs = useMemo(() => {
     const hasPromo = filtered.some(isProductOnPromo);
     const hasNew = filtered.some(isProductNewArrival);
@@ -933,15 +940,15 @@ function ProductGrid({
 
   const visible = useMemo(
     () =>
-      tabFiltered.slice(
+      displayProducts.slice(
         0,
         page * PAGE_SIZE
       ),
-    [tabFiltered, page]
+    [displayProducts, page]
   );
 
   const hasMore =
-    visible.length < tabFiltered.length;
+    visible.length < displayProducts.length;
 
   /* =======================================================
      INFINITE SCROLL
