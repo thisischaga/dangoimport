@@ -300,11 +300,7 @@ const DropshippingCheckout = () => {
             </div>
           ))}
           <div className="ds-summary__line ds-summary__line--muted">
-            <span>Tarif</span>
-            <span>{formatCFA(breakdown.ratePerKg)} / kg</span>
-          </div>
-          <div className="ds-summary__line ds-summary__line--muted">
-            <span>Frais d&apos;importation ({breakdown.billedWeight} × {formatCFA(breakdown.ratePerKg)})</span>
+            <span>Frais d&apos;importation</span>
             <span>{formatCFA(breakdown.shippingCost)}</span>
           </div>
         </div>
@@ -485,7 +481,7 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Importation / livraison</h2>
                   <p className="text-sm text-gray-600 m-0 mb-3">
-                    Tarif Dango import : {formatCFA(breakdown?.ratePerKg || 13500)} / kg, calculé sur le poids total de la commande. Sans coefficient 1.30.
+                    Les frais d&apos;importation sont calculés sur le poids total de la commande.
                   </p>
                   {breakdown && (
                     <div className="ds-import-details">
@@ -499,10 +495,6 @@ const DropshippingCheckout = () => {
                           <span>{row.billedWeight} kg</span>
                         </div>
                       ))}
-                      <div className="ds-summary__line">
-                        <span>Tarif au kg</span>
-                        <span>{formatCFA(breakdown.ratePerKg)}</span>
-                      </div>
                       <div className="ds-summary__line">
                         <span>Frais d&apos;importation</span>
                         <span>{formatCFA(breakdown.shippingCost)}</span>
