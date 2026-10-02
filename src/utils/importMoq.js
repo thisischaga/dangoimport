@@ -25,11 +25,20 @@ export function getMoqRules(product = {}) {
   const unit = Number(product.unitPrice ?? product.price ?? 0);
   const weight = parseWeightKg(product);
 
-  // MOQ 20 uniquement pour les produits import à la fois légers (< 0.5 kg) ET bon marché (< 2000 F)
-  const isLightAndCheap = isImport && weight > 0 && weight < 0.5 && Number.isFinite(unit) && unit > 0 && unit < 2000;
-  const defaultMoq = isLightAndCheap ? 20 : 1;
+  let dynamicMoq = 1;
+  if (isImport) {
+    const TARGET_VALUE = 3000; // Objectif ~3000 F par commande de lot
+    const TARGET_WEIGHT = 0.2; // Objectif ~0.2 kg (200g) par commande de lot
+    const MAX_MOQ_CAP = 8;     // Plafond maximum pour avantager le client (jamais plus de 8)
 
-  const explicitMoq = Math.max(defaultMoq, Math.round(Number(product.minimumOrderQuantity) || defaultMoq));
+    const moqFromVal = (Number.isFinite(unit) && unit > 0 && unit < TARGET_VALUE) ? Math.ceil(TARGET_VALUE / unit) : 1;
+    const moqFromWgt = (weight > 0 && weight < TARGET_WEIGHT) ? Math.ceil(TARGET_WEIGHT / weight) : 1;
+
+    const rawMoq = Math.max(moqFromVal, moqFromWgt);
+    dynamicMoq = Math.min(MAX_MOQ_CAP, Math.max(1, rawMoq));
+  }
+
+  const explicitMoq = Math.max(dynamicMoq, Math.round(Number(product.minimumOrderQuantity) || dynamicMoq));
   const moq = explicitMoq;
 
   const hasIncrement = product.quantityIncrement != null && product.quantityIncrement !== '';
