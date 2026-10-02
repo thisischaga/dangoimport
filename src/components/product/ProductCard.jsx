@@ -188,7 +188,7 @@ function ProductCard({
 
   const price = getUnitPrice(product);
   const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
-  const { soldAsLot, packSize } = getMoqRules(product);
+  const { moq, soldAsLot, packSize } = getMoqRules(product);
 
   const promoPrice =
     Number(
@@ -968,9 +968,9 @@ function ProductCard({
               Lot de {packSize} unités
             </p>
           )}
-          {isDropship && !soldAsLot && Number(product?.minimumOrderQuantity) > 1 && (
+          {isDropship && !soldAsLot && moq > 1 && (
             <p className="pc2__import-note">
-              Minimum {product.minimumOrderQuantity} unités
+              Minimum {moq} unités
             </p>
           )}
 
