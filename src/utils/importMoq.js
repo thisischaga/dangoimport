@@ -24,7 +24,12 @@ export function lightProductMoqFromWeight(weightKg, thresholdKg = 1) {
 }
 
 export function getMoqRules(product = {}) {
-  const explicitMoq = Math.max(1, Math.round(Number(product.minimumOrderQuantity) || 1));
+  const isImport = product?.sourceType === 'DROPSHIPPING'
+    || product?.importFeesAtCheckout
+    || product?.fulfillmentType === 'DANGO_IMPORT'
+    || String(product?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+  const defaultMoq = isImport ? 20 : 1;
+  const explicitMoq = Math.max(defaultMoq, Math.round(Number(product.minimumOrderQuantity) || defaultMoq));
   const unit = Number(product.unitPrice ?? product.price ?? 0);
   const weight = parseWeightKg(product);
   const underWeight = weight > 0 && weight < 1;
@@ -81,11 +86,5 @@ export function getUnitPrice(item = {}) {
 }
 
 export function getCardDisplayPrice(product = {}) {
-  const { soldAsLot, packSize } = getMoqRules(product);
-  const unit = getUnitPrice(product);
-  const packPrice = Number(product.packPrice || 0);
-  if (soldAsLot && packSize > 1) {
-    return packPrice > 0 ? packPrice : unit * packSize;
-  }
-  return unit;
+  return getUnitPrice(product);
 }

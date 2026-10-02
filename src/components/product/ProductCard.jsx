@@ -963,20 +963,14 @@ function ProductCard({
 
           </div>
 
-          {isDropship && soldAsLot && packSize > 1 && (
+          {isDropship && (soldAsLot || packSize > 1) && (
             <p className="pc2__import-note">
-              Lot de {packSize} · soit {formatSoftS(price)} / unité
+              Lot de {packSize} unités
             </p>
           )}
           {isDropship && !soldAsLot && Number(product?.minimumOrderQuantity) > 1 && (
             <p className="pc2__import-note">
               Minimum {product.minimumOrderQuantity} unités
-            </p>
-          )}
-
-          {(isDropship) && (
-            <p className="pc2__import-note">
-              Frais d&apos;importation calculés au checkout
             </p>
           )}
 

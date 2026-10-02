@@ -489,9 +489,9 @@ export default function ProductDetail() {
               <span className="pd-price__now">{formatCFA(displayPrice)}</span>
               {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
             </div>
-            {isDropship && moqRules.soldAsLot && (
+            {isDropship && (moqRules.soldAsLot || moqRules.packSize > 1) && (
               <p className="pd-muted" style={{ marginTop: 6 }}>
-                Lot de {moqRules.packSize} · soit {formatCFA(price)} / unité
+                Lot de {moqRules.packSize} unités
               </p>
             )}
             {isDropship && !moqRules.soldAsLot && moqRules.moq > 1 && (
