@@ -95,7 +95,6 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = useCallback((productId) => {
     setCart((prev) => prev.filter((item) => (item._id || item.id) !== productId));
-    toast.warn('Article retiré du panier');
   }, []);
 
   const updateQuantity = useCallback((productId, newQuantity) => {
@@ -124,7 +123,7 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   const cartCount = useMemo(
-    () => cart.reduce((n, item) => n + (item.quantity || 1), 0),
+    () => cart.length,
     [cart]
   );
 

@@ -16,28 +16,22 @@ export function parseWeightKg(product = {}) {
   return n > 30 ? Math.round((n / 1000) * 1000) / 1000 : Math.round(n * 1000) / 1000;
 }
 
-export function lightProductMoqFromWeight(weightKg, thresholdKg = 1) {
-  const weight = Number(weightKg);
-  const threshold = Number(thresholdKg) || 1;
-  if (!(weight > 0) || weight >= threshold) return 1;
-  return Math.max(2, Math.ceil((threshold / weight) - 1e-9));
-}
-
 export function getMoqRules(product = {}) {
   const isImport = product?.sourceType === 'DROPSHIPPING'
     || product?.importFeesAtCheckout
     || product?.fulfillmentType === 'DANGO_IMPORT'
     || String(product?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
-  const defaultMoq = isImport ? 20 : 1;
-  const explicitMoq = Math.max(defaultMoq, Math.round(Number(product.minimumOrderQuantity) || defaultMoq));
+
   const unit = Number(product.unitPrice ?? product.price ?? 0);
   const weight = parseWeightKg(product);
-  const underWeight = weight > 0 && weight < 1;
-  const underPrice = Number.isFinite(unit) && unit > 0 && unit < 2000;
-  const autoMoq = (underWeight && underPrice)
-    ? lightProductMoqFromWeight(weight, 1)
-    : 1;
-  const moq = Math.max(explicitMoq, autoMoq);
+
+  // MOQ 20 uniquement pour les produits import légers (< 0.6 kg) ET bon marché (< 2000 F)
+  const isLightAndCheap = isImport && weight > 0 && weight < 0.6 && Number.isFinite(unit) && unit > 0 && unit < 2000;
+  const defaultMoq = isLightAndCheap ? 20 : 1;
+
+  const explicitMoq = Math.max(defaultMoq, Math.round(Number(product.minimumOrderQuantity) || defaultMoq));
+  const moq = explicitMoq;
+
   const hasIncrement = product.quantityIncrement != null && product.quantityIncrement !== '';
   const explicitIncrement = hasIncrement
     ? Math.max(1, Math.round(Number(product.quantityIncrement) || moq))
