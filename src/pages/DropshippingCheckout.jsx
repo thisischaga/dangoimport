@@ -12,6 +12,7 @@ import {
   buildCartFedapayPayload,
   initiateFedapayCheckout,
 } from '../services/fedapayCheckout';
+import MobileMoneyPicker from '../components/MobileMoneyPicker';
 import {
   fetchDropshippingShippingOptions,
   getVariantLabel,
@@ -61,6 +62,8 @@ const DropshippingCheckout = () => {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMode, setPaymentMode] = useState('mobile_money');
+  const [paymentNetwork, setPaymentNetwork] = useState('');
 
   const dropItems = useMemo(
     () => cart.filter((item) => isDropshippingProduct(item)),
@@ -178,6 +181,10 @@ const DropshippingCheckout = () => {
       setError('Choisissez un mode de livraison.');
       return;
     }
+    if (paymentMode === 'mobile_money' && !paymentNetwork) {
+      setError('Choisissez votre opérateur Mobile Money.');
+      return;
+    }
     setPayLoading(true);
     setError('');
     const token = localStorage.getItem('dangoToken');
@@ -217,6 +224,9 @@ const DropshippingCheckout = () => {
         estimatedDeliveryLabel: estimatedDelivery,
         shippingCost: shippingFee,
         callbackUrl: `${window.location.origin}/checkout/result?checkoutMode=dropshipping`,
+        countryCode: form.countryCode,
+        network: paymentMode === 'mobile_money' ? paymentNetwork : '',
+        paymentMode,
       });
 
       const data = await initiateFedapayCheckout(payload, token);
@@ -244,7 +254,15 @@ const DropshippingCheckout = () => {
         }),
       );
 
-      window.location.href = data.url;
+      const usedMobileMoney = data.paymentMode === 'mobile_money';
+      if (!usedMobileMoney && !data.url) {
+        throw new Error('URL de paiement FedaPay indisponible.');
+      }
+      window.location.href = usedMobileMoney
+        ? `${window.location.origin}/checkout/result?checkoutMode=dropshipping&transactionId=${encodeURIComponent(
+            data.transactionId,
+          )}&status=pending&mm=1`
+        : data.url;
     } catch (err) {
       setError(err.message || 'Impossible d’initialiser le paiement.');
       setPayLoading(false);
@@ -529,17 +547,28 @@ const DropshippingCheckout = () => {
 
                 <section className="ds-section">
                   <h2>Paiement</h2>
-                  <p className="text-sm text-gray-700 m-0 leading-relaxed">
-                    Vous serez redirigé vers FedaPay pour régler{' '}
-                    <strong>{formatCFA(total)}</strong>. Le montant est recalculé et vérifié côté serveur avant validation.
+                  <p className="text-sm text-gray-700 m-0 mb-4 leading-relaxed">
+                    Réglez <strong>{formatCFA(total)}</strong> par Mobile Money. Le montant est recalculé et vérifié côté serveur.
                   </p>
+                  <MobileMoneyPicker
+                    countryCode={form.countryCode}
+                    phone={form.phoneLocal}
+                    network={paymentNetwork}
+                    onNetworkChange={setPaymentNetwork}
+                    paymentMode={paymentMode}
+                    onPaymentModeChange={setPaymentMode}
+                  />
                   <button
                     type="button"
                     className="ds-btn-primary mt-4 hidden md:block"
-                    disabled={payLoading || !shippingOptionId}
+                    disabled={payLoading || !shippingOptionId || (paymentMode === 'mobile_money' && !paymentNetwork)}
                     onClick={handlePay}
                   >
-                    {payLoading ? 'Redirection…' : 'Payer avec FedaPay'}
+                    {payLoading
+                      ? 'Envoi…'
+                      : paymentMode === 'mobile_money'
+                        ? 'Payer par Mobile Money'
+                        : 'Payer avec FedaPay'}
                   </button>
                   <button
                     type="button"
@@ -572,10 +601,10 @@ const DropshippingCheckout = () => {
           <button
             type="button"
             className="ds-btn-primary m-0"
-            disabled={payLoading || !shippingOptionId}
+            disabled={payLoading || !shippingOptionId || (paymentMode === 'mobile_money' && !paymentNetwork)}
             onClick={handlePay}
           >
-            {payLoading ? 'Redirection…' : `Payer ${formatCFA(total)}`}
+            {payLoading ? 'Envoi…' : `Payer ${formatCFA(total)}`}
           </button>
         )}
       </div>

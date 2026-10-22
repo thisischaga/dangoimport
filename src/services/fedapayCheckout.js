@@ -67,8 +67,9 @@ export async function initiateFedapayCheckout(payload, token) {
     data?.url ||
     data?.paymentUrl ||
     data?.payment_url;
+  const paymentMode = data?.paymentMode || 'redirect';
 
-  if (!paymentUrl) {
+  if (!paymentUrl && paymentMode !== 'mobile_money') {
     throw new Error(
       data?.message ||
       'URL de paiement FedaPay indisponible.'
@@ -77,7 +78,9 @@ export async function initiateFedapayCheckout(payload, token) {
 
   return {
     ...data,
-    url: paymentUrl,
+    url: paymentUrl || '',
+    paymentMode,
+    paymentMessage: data?.paymentMessage || '',
   };
 }
 
@@ -435,6 +438,7 @@ export function buildCartFedapayPayload({
   shippingCost,
   shippingOptionId,
   callbackUrl,
+  paymentMode,
 }) {
   const base =
     buildCartBasePayload({
@@ -668,6 +672,9 @@ export function buildCartFedapayPayload({
 
     paymentMethod:
       'FedaPay',
+
+    paymentMode:
+      paymentMode || (network ? 'mobile_money' : 'redirect'),
 
     /* -----------------------------------------------------
        NETWORK

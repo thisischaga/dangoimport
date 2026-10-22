@@ -214,17 +214,17 @@ function MobileNavDrawer({ open, onClose, user, cartCount, onLogout, navigate })
               {/* Catégories */}
               <div className="px-2 py-2 pb-6">
                 <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Catégories</p>
-                {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
-                  <Link
-                    key={slug}
-                    to={`/category/${slug}`}
-                    onClick={onClose}
+              {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
+                <Link
+                  key={slug}
+                  to={`/category/${slug}`}
+                  onClick={onClose}
                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                  >
+                >
                     <Icon size={17} className="text-slate-400" />
-                    {label}
-                  </Link>
-                ))}
+                  {label}
+                </Link>
+              ))}
               </div>
             </div>
           </motion.div>
@@ -661,14 +661,14 @@ const Header = () => {
             <div className="hidden flex-1 items-center justify-center md:flex">
               <div className="relative w-full max-w-2xl">
                 <div className="flex h-11 items-stretch overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 shadow-sm transition-all duration-200 focus-within:border-[#FF6B00]/40 focus-within:bg-white focus-within:shadow-md focus-within:shadow-orange-500/10 focus-within:ring-2 focus-within:ring-[#FF6B00]/10">
-                  <SearchForm
-                    inputRef={searchInputRef}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onSubmit={handleSearch}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={handleSearchBlur}
-                  />
+                <SearchForm
+                  inputRef={searchInputRef}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onSubmit={handleSearch}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={handleSearchBlur}
+                />
                 </div>
                 {showSuggestions && (
                   <SuggestionsPanel
@@ -717,14 +717,14 @@ const Header = () => {
           {/* Recherche mobile — pleine largeur, sans bouton catégories dupliqué */}
           <div className="relative mt-2 md:hidden">
             <div className="flex h-10 items-stretch overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 shadow-sm transition-all duration-200 focus-within:border-[#FF6B00]/40 focus-within:bg-white focus-within:shadow-md focus-within:shadow-orange-500/10 focus-within:ring-2 focus-within:ring-[#FF6B00]/10">
-              <SearchForm
-                showLabel={false}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSubmit={handleSearch}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={handleSearchBlur}
-              />
+            <SearchForm
+              showLabel={false}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSubmit={handleSearch}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={handleSearchBlur}
+            />
             </div>
             {showSuggestions && (
               <SuggestionsPanel

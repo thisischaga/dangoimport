@@ -4,6 +4,7 @@ const INTERNAL_VARIANT_ATTR_KEYS = new Set([
   'externalvariantid',
   'variantkey',
   'supplierpriceusd',
+  'supplierpricecny',
   'vid',
   'pid',
 ]);

@@ -28,6 +28,7 @@ const PaymentResult = () => {
     const statusParam = String(params.get('status') || 'pending').toLowerCase();
     const orderIdParam = params.get('orderId');
     const transactionIdParam = params.get('transactionId') || params.get('id');
+    const mmParam = params.get('mm') === '1';
     const checkoutModeParam = (params.get('checkoutMode') || '').toLowerCase();
 
     setStatus(statusParam);
@@ -134,7 +135,13 @@ const PaymentResult = () => {
       }
     };
 
-    const currentTransactionId = transactionIdParam;
+    let pendingTransactionId = null;
+    try {
+      if (pendingRaw) pendingTransactionId = JSON.parse(pendingRaw)?.transactionId || null;
+    } catch {
+      pendingTransactionId = null;
+    }
+    const currentTransactionId = transactionIdParam || pendingTransactionId;
     const checkOrder = async () => {
       if (!currentTransactionId) {
         setMessage('Aucune transaction trouvée. Vérifiez votre commande plus tard.');
@@ -222,7 +229,11 @@ const PaymentResult = () => {
       };
     }
 
-    setMessage('Vérification du paiement FedaPay. Nous confirmons uniquement si le paiement a réellement abouti.');
+    setMessage(
+      mmParam
+        ? 'Validez le paiement sur votre téléphone (saisissez votre code secret). Nous confirmons la commande dès que FedaPay valide le règlement.'
+        : 'Vérification du paiement FedaPay. Nous confirmons uniquement si le paiement a réellement abouti.',
+    );
     startPolling();
 
     return () => {

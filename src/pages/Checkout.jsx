@@ -31,6 +31,7 @@ import {
   initiateFedapayCheckout,
   buildCartFedapayPayload,
 } from '../services/fedapayCheckout';
+import MobileMoneyPicker from '../components/MobileMoneyPicker';
 
 import { calculateDeliveryOptions } from '../api';
 import { io as socketIOClient } from 'socket.io-client';
@@ -1066,6 +1067,10 @@ function StepPayment({
   form,
   geoAddress,
   deliveryCalculation,
+  paymentMode,
+  setPaymentMode,
+  paymentNetwork,
+  setPaymentNetwork,
 }) {
   const provider =
     deliveryCalculation?.provider;
@@ -1137,6 +1142,15 @@ function StepPayment({
       </div>
 
 
+      <MobileMoneyPicker
+        countryCode={form.country}
+        phone={form.phone}
+        network={paymentNetwork}
+        onNetworkChange={setPaymentNetwork}
+        paymentMode={paymentMode}
+        onPaymentModeChange={setPaymentMode}
+      />
+
       {/* Secure payment */}
       <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3 text-gray-400">
 
@@ -1183,11 +1197,13 @@ function StepPayment({
         onClick={handlePlaceOrder}
         disabled={
           submitting || !acceptCGV || isCalculating
+          || (paymentMode === 'mobile_money' && !paymentNetwork)
         }
         className={[
           'group relative w-full overflow-hidden rounded-xl py-4 text-sm font-black tracking-wide transition-all duration-200',
 
           submitting || !acceptCGV || isCalculating
+          || (paymentMode === 'mobile_money' && !paymentNetwork)
             ? 'cursor-not-allowed bg-gray-200 text-gray-400'
             : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E67A0C]',
         ].join(' ')}
@@ -1198,7 +1214,7 @@ function StepPayment({
           {submitting ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Redirection vers le paiement...
+              Préparation du paiement...
             </>
           ) : isCalculating ? (
             <>
@@ -1295,6 +1311,12 @@ export default function Checkout() {
 
   const [acceptCGV, setAcceptCGV] =
     useState(false);
+
+  const [paymentMode, setPaymentMode] =
+    useState('mobile_money');
+
+  const [paymentNetwork, setPaymentNetwork] =
+    useState('');
 
   const [errors, setErrors] =
     useState({});
@@ -2730,6 +2752,16 @@ export default function Checkout() {
         return;
       }
 
+      if (
+        paymentMode === 'mobile_money' &&
+        !paymentNetwork
+      ) {
+        toast.error(
+          'Choisissez votre opérateur Mobile Money.'
+        );
+        return;
+      }
+
 
       if (
         form.lat === null ||
@@ -2822,6 +2854,16 @@ export default function Checkout() {
               'Commande Dango Import',
 
             type: 'cart',
+
+            network:
+              paymentMode === 'mobile_money'
+                ? paymentNetwork
+                : '',
+
+            paymentMode,
+
+            callbackUrl:
+              `${window.location.origin}/checkout/result`,
           });
 
 
@@ -2832,7 +2874,10 @@ export default function Checkout() {
           );
 
 
-        if (!data?.url) {
+        const usedMobileMoney =
+          data.paymentMode === 'mobile_money';
+
+        if (!usedMobileMoney && !data?.url) {
 
           throw new Error(
             'URL de paiement FedaPay introuvable.'
@@ -2872,7 +2917,10 @@ export default function Checkout() {
           toastId,
           {
             render:
-              'Redirection vers le paiement...',
+              usedMobileMoney
+                ? (data.paymentMessage ||
+                  'Validez le paiement sur votre téléphone.')
+                : 'Redirection vers le paiement...',
             type: 'info',
             isLoading: false,
             autoClose: 2000,
@@ -2880,8 +2928,11 @@ export default function Checkout() {
         );
 
 
-        window.location.href =
-          data.url;
+        window.location.href = usedMobileMoney
+          ? `${window.location.origin}/checkout/result?transactionId=${encodeURIComponent(
+              data.transactionId
+            )}&status=pending&mm=1`
+          : data.url;
 
       } catch (error) {
 
@@ -3274,6 +3325,18 @@ export default function Checkout() {
                         }
                         deliveryCalculation={
                           deliveryCalculation
+                        }
+                        paymentMode={
+                          paymentMode
+                        }
+                        setPaymentMode={
+                          setPaymentMode
+                        }
+                        paymentNetwork={
+                          paymentNetwork
+                        }
+                        setPaymentNetwork={
+                          setPaymentNetwork
                         }
                       />
                     )}
