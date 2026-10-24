@@ -32,6 +32,15 @@ export function isCjCatalogProduct(product) {
   return false;
 }
 
+export function isAlibabaProduct(product) {
+  if (!product) return false;
+  const platform = String(product?.supplier?.platform || '').toLowerCase();
+  if (platform === 'alibaba') return true;
+  if (product?.importSourceType === 'ALIBABA_API') return true;
+  if (/^alibaba:/i.test(String(product?.externalSourceKey || ''))) return true;
+  return false;
+}
+
 function isInvalidTranslationText(text) {
   const s = String(text || '').trim();
   if (!s) return true;

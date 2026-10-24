@@ -22,7 +22,7 @@ import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
-import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel } from '../utils/publicProduct';
+import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel, isAlibabaProduct } from '../utils/publicProduct';
 import { getCardDisplayPrice, getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
@@ -275,6 +275,7 @@ export default function ProductDetail() {
   const variantPrice = selectedVariant?.price != null ? Number(selectedVariant.price) : null;
   const price = variantPrice ?? basePrice;
   const isDropship = isDropshippingProduct(product);
+  const isAlibaba = isAlibabaProduct(product);
   const moqRules = getMoqRules(product);
   const promoPrice = !isDropship && variantPrice == null && basePromo > 0 && basePromo < basePrice ? basePromo : 0;
   const hasPromo = promoPrice > 0 && promoPrice < price;
@@ -364,12 +365,15 @@ export default function ProductDetail() {
     if (estimatedDeliveryDays > 0 && !rows.some((r) => r.key.toLowerCase().includes('délai'))) {
       rows.push({ key: 'Délai d’importation', value: importDaysLabel });
     }
-    if (isDropshippingProduct(product) && stock > 0 && !rows.some((r) => r.key.toLowerCase() === 'stock')) {
+    if (isAlibaba) {
+      rows.push({ key: 'Disponibilité', value: 'Sur commande (fabrication directe usine)' });
+      rows.push({ key: 'Production', value: 'Fabriqué à la demande selon votre commande' });
+    } else if (isDropshippingProduct(product) && stock > 0 && !rows.some((r) => r.key.toLowerCase() === 'stock')) {
       rows.push({ key: 'Stock disponible', value: `${stock} unité(s)` });
     }
     if (product?.condition) rows.push({ key: 'État', value: product.condition });
     return rows;
-  }, [product, estimatedDeliveryDays, importDaysLabel, stock]);
+  }, [product, estimatedDeliveryDays, importDaysLabel, stock, isAlibaba]);
 
   const normalizedProduct = useMemo(() => {
     if (!product) return null;
@@ -420,11 +424,13 @@ export default function ProductDetail() {
 
   const stockLabel = !inStock
     ? 'Rupture de stock'
-    : isDropship
-      ? `${stock} en stock`
-      : isLowStock
-        ? `Stock limité · ${stock} restants`
-        : `${stock} en stock`;
+    : isAlibaba
+      ? 'Sur commande · Fabrication directe usine'
+      : isDropship
+        ? (stock > 0 && stock <= 5 ? `Stock limité · ${stock} restants` : 'En stock')
+        : isLowStock
+          ? `Stock limité · ${stock} restants`
+          : `${stock} en stock`;
 
   if (isLoading) {
     return (
