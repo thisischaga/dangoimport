@@ -9,6 +9,18 @@ const INTERNAL_VARIANT_ATTR_KEYS = new Set([
   'pid',
 ]);
 
+function cleanVariantLabel(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let str = raw.trim();
+  str = str.replace(/^couleur\s*:\s*/i, '');
+  str = str.replace(/^color\s*:\s*/i, '');
+  str = str.replace(/\s*\/\s*(?:capacité|capacity)\s*:\s*/i, ' · ');
+  str = str.replace(/\s*\/\s*(?:taille|size)\s*:\s*/i, ' · ');
+  str = str.replace(/\s*\/\s*(?:pointure)\s*:\s*/i, ' · ');
+  str = str.replace(/\s*\/\s*/g, ' · ');
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function ProductVariants({
   product,
   selectedVariantIndex,
@@ -54,7 +66,7 @@ function ProductVariants({
           <p className="product-variants__label">Modèle</p>
           <div className="product-variants__options">
             {variants.map((v, i) => {
-              const label = v.name || v.sku || `Option ${i + 1}`;
+              const label = cleanVariantLabel(v.name) || v.sku || `Option ${i + 1}`;
               const out = Number(v.stock ?? 0) <= 0;
               return (
                 <button

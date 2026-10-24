@@ -180,13 +180,40 @@ function ProductGallery({ images = [], name }) {
   );
 }
 
-function ReadMore({ text }) {
+function cleanProseDescription(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let cleaned = raw
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/#detail_decorate_root[\s\S]*?\{[\s\S]*?\}/gi, ' ')
+    .replace(/@media[\s\S]*?\{[\s\S]*?\}/gi, ' ')
+    .replace(/\{[^{}]*\}/g, ' ')
+    .replace(/#detail_decorate_root[^\s;{}]*/gi, ' ')
+    .replace(/\.magic-\d+[^\s;{}]*/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (
+    cleaned.includes('#detail_decorate_root')
+    || /\{[a-z\-]+:[^}]+\}/i.test(cleaned)
+    || /border-(?:bottom|top)|padding-(?:top|bottom)|min-height/i.test(cleaned)
+    || cleaned.length < 15
+  ) {
+    return '';
+  }
+  return cleaned;
+}
+
+function ReadMore({ text, fallbackTitle = '', specifications = [] }) {
   const [open, setOpen] = useState(false);
-  if (!text?.trim()) return null;
-  const long = text.length > 420 || text.split('\n').length > 6;
+  const sanitized = cleanProseDescription(text);
+  const displayText = sanitized || (fallbackTitle ? `${fallbackTitle}.` : '');
+  if (!displayText) return null;
+  const long = displayText.length > 420 || displayText.split('\n').length > 6;
   return (
     <div className="pd-prose">
-      <p className={!open && long ? 'pd-prose--fold' : undefined}>{text}</p>
+      <p className={!open && long ? 'pd-prose--fold' : undefined}>{displayText}</p>
       {long && (
         <button type="button" className="pd-link" onClick={() => setOpen((v) => !v)}>
           {open ? 'Réduire' : 'Lire la suite'}
@@ -324,8 +351,11 @@ export default function ProductDetail() {
 
   const specifications = useMemo(() => {
     const specs = Array.isArray(product?.specifications) ? product.specifications : [];
-    const rows = specs.filter((s) => s?.key && s?.value).map((s) => ({ key: s.key, value: s.value }));
-    if (product?.brand && !rows.some((r) => r.key.toLowerCase() === 'marque')) rows.unshift({ key: 'Marque', value: product.brand });
+    const brandLower = String(product?.brand || '').trim().toLowerCase();
+    const isAlibabaBrand = brandLower.includes('alibaba') || brandLower.startsWith('produit');
+    if (product?.brand && !isAlibabaBrand && !rows.some((r) => r.key.toLowerCase() === 'marque')) {
+      rows.unshift({ key: 'Marque', value: product.brand });
+    }
     if (product?.category && !rows.some((r) => r.key.toLowerCase() === 'catégorie')) rows.push({ key: 'Catégorie', value: product.category });
     if (product?.subCategory && !rows.some((r) => r.key.toLowerCase() === 'sous-catégorie')) {
       rows.push({ key: 'Sous-catégorie', value: product.subCategory });
