@@ -351,6 +351,7 @@ export default function ProductDetail() {
 
   const specifications = useMemo(() => {
     const specs = Array.isArray(product?.specifications) ? product.specifications : [];
+    const rows = specs.filter((s) => s?.key && s?.value).map((s) => ({ key: s.key, value: s.value }));
     const brandLower = String(product?.brand || '').trim().toLowerCase();
     const isAlibabaBrand = brandLower.includes('alibaba') || brandLower.startsWith('produit');
     if (product?.brand && !isAlibabaBrand && !rows.some((r) => r.key.toLowerCase() === 'marque')) {
