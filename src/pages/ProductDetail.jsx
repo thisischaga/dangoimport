@@ -644,10 +644,11 @@ export default function ProductDetail() {
 
         <section ref={descRef} className="pd-section" id="description">
           <h2>Description</h2>
-          <ReadMore text={product.description || product.shortDescription || ''} />
-          {!product.description && !product.shortDescription && (
-            <p className="pd-muted">Aucune description pour ce produit.</p>
-          )}
+          <ReadMore
+            text={product.description || product.shortDescription || ''}
+            fallbackTitle={product.name}
+            specifications={specifications}
+          />
         </section>
 
         <section ref={specsRef} className="pd-section" id="specs">
