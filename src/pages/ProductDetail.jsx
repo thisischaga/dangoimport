@@ -34,7 +34,9 @@ import ProductReviewsSection from '../components/product/detail/ProductReviewsSe
 import './ProductDetail.css';
 
 function QtyControl({ value, onChange, min = 1, step = 1, max }) {
-  const cap = Math.max(min, max || min);
+  // max=undefined means no upper cap (Alibaba made-to-order)
+  const hasCap = max != null && Number.isFinite(max);
+  const cap = hasCap ? Math.max(min, max) : Infinity;
   return (
     <div className="pd-qty" role="group" aria-label="Quantité">
       <button
@@ -50,8 +52,8 @@ function QtyControl({ value, onChange, min = 1, step = 1, max }) {
       <button
         type="button"
         className="pd-qty__btn"
-        onClick={() => onChange(Math.min(cap, value + step))}
-        disabled={value >= cap}
+        onClick={() => onChange(hasCap ? Math.min(cap, value + step) : value + step)}
+        disabled={hasCap && value >= cap}
         aria-label="Augmenter"
       >
         <Plus size={14} />
@@ -289,8 +291,9 @@ export default function ProductDetail() {
     Number.isFinite(variantStock) ? variantStock : 0,
   );
   const minStock = Number(product?.minStock ?? 10) || 10;
-  const inStock = stock > 0;
-  const isLowStock = inStock && stock <= minStock;
+  // Alibaba products are made-to-order — always available regardless of stock count
+  const inStock = isAlibaba || stock > 0;
+  const isLowStock = !isAlibaba && inStock && stock <= minStock;
 
   const productId = product?._id || product?.id;
   const sellerId = product?.vendorId || product?.sellerId || product?.vendor_id || null;
@@ -576,7 +579,7 @@ export default function ProductDetail() {
                   onChange={(next) => setQty(snapQuantity(product, next))}
                   min={moqRules.moq}
                   step={moqRules.increment}
-                  max={stock}
+                  max={isAlibaba ? undefined : stock}
                 />
               </div>
             )}
