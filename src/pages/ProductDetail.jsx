@@ -22,7 +22,7 @@ import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor } from '../api';
 import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
-import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel, isAlibabaProduct } from '../utils/publicProduct';
+import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel, isAlibabaProduct, extractAlibabaDisplayInfo } from '../utils/publicProduct';
 import { getCardDisplayPrice, getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
@@ -32,6 +32,171 @@ import ProductRating from '../components/product/ProductRating';
 import ProductVariants from '../components/product/detail/ProductVariants';
 import ProductReviewsSection from '../components/product/detail/ProductReviewsSection';
 import './ProductDetail.css';
+
+/* ── Ladder pricing Alibaba ─────────────────────────────────────────── */
+function AlibabaLadderPrices({ skus }) {
+  // Aggregate all unique ladder tiers across SKUs
+  const tiers = React.useMemo(() => {
+    const allTiers = [];
+    skus.forEach((sku) => {
+      sku.ladderPrices.forEach((lp) => {
+        const key = `${lp.min}-${lp.max}`;
+        if (!allTiers.find((t) => `${t.min}-${t.max}` === key)) allTiers.push(lp);
+      });
+    });
+    return allTiers.sort((a, b) => a.min - b.min);
+  }, [skus]);
+
+  if (!tiers.length) return null;
+  return (
+    <div className="pd-ladder">
+      <p className="pd-ladder__title">Prix par quantité (fournisseur)</p>
+      <div className="pd-ladder__table">
+        <div className="pd-ladder__head">
+          <span>Quantité (unités)</span>
+          <span>Prix unitaire</span>
+        </div>
+        {tiers.map((t, i) => (
+          <div key={i} className="pd-ladder__row">
+            <span>{t.max ? `${t.min} – ${t.max}` : `≥ ${t.min}`}</span>
+            <span className="pd-ladder__price">{t.price} {t.currency}</span>
+          </div>
+        ))}
+      </div>
+      <p className="pd-ladder__note">Prix fournisseur indicatif · TVA et frais d'import inclus dans le prix affiché</p>
+    </div>
+  );
+}
+
+/* ── SKU Attributes Alibaba ─────────────────────────────────────────── */
+function AlibabaSkuAttributes({ skus }) {
+  if (!skus.length) return null;
+  // Build attribute groups
+  const groups = React.useMemo(() => {
+    const map = {};
+    skus.forEach((sku) => {
+      sku.attrs.forEach((attr) => {
+        if (!map[attr.name]) map[attr.name] = [];
+        if (!map[attr.name].find((v) => v.value === attr.value)) {
+          map[attr.name].push({ value: attr.value, image: attr.image });
+        }
+      });
+    });
+    return Object.entries(map);
+  }, [skus]);
+
+  if (!groups.length) return null;
+  return (
+    <div className="pd-sku-attrs">
+      {groups.map(([name, values]) => (
+        <div key={name} className="pd-sku-attr-group">
+          <span className="pd-label">{name}</span>
+          <div className="pd-sku-attr-values">
+            {values.map((v, i) => (
+              <span key={i} className="pd-sku-attr-chip" title={v.value}>
+                {v.image && <img src={v.image} alt={v.value} className="pd-sku-attr-chip__img" loading="lazy" />}
+                {v.value}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Wholesale info Alibaba ─────────────────────────────────────────── */
+function AlibabaWholesaleInfo({ wholesale }) {
+  if (!wholesale) return null;
+  const rows = [
+    wholesale.minOrderQuantity > 0 && { key: 'Quantité min. commande', value: `${wholesale.minOrderQuantity} ${wholesale.unitType}` },
+    wholesale.weight && { key: 'Poids brut', value: `${wholesale.weight} kg` },
+    wholesale.packageSize && { key: 'Dimensions colis', value: wholesale.packageSize },
+    wholesale.handlingTime && { key: 'Délai de traitement', value: `${wholesale.handlingTime} jours` },
+    wholesale.saleType && { key: 'Type de vente', value: wholesale.saleType === 'batch' ? 'Par lot' : wholesale.saleType },
+    wholesale.batchNumber && { key: 'Nombre par lot', value: wholesale.batchNumber },
+    wholesale.volume && { key: 'Volume expédié', value: wholesale.volume },
+  ].filter(Boolean);
+
+  if (!rows.length && !wholesale.deliverPeriods?.length) return null;
+  return (
+    <div className="pd-wholesale">
+      <h3 className="pd-wholesale__title">Informations de vente en gros</h3>
+      {rows.length > 0 && (
+        <dl className="pd-specs">
+          {rows.map((r) => (
+            <div key={r.key} className="pd-specs__row">
+              <dt>{r.key}</dt>
+              <dd>{r.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      {wholesale.deliverPeriods?.length > 0 && (
+        <div className="pd-deliver-periods">
+          <p className="pd-label">Délais de livraison selon quantité</p>
+          <div className="pd-ladder__table">
+            <div className="pd-ladder__head">
+              <span>Quantité</span>
+              <span>Délai fabrication</span>
+            </div>
+            {wholesale.deliverPeriods.map((p, i) => (
+              <div key={i} className="pd-ladder__row">
+                <span>{p.quantity} unités</span>
+                <span>{p.processPeriod} jours</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Alibaba supplier info ──────────────────────────────────────────── */
+function AlibabaSupplierCard({ alibabaInfo }) {
+  if (!alibabaInfo.supplierName && !alibabaInfo.detailUrl && !alibabaInfo.shipFrom) return null;
+  return (
+    <div className="pd-alibaba-supplier">
+      <h3 className="pd-alibaba-supplier__title">Fournisseur Alibaba</h3>
+      {alibabaInfo.supplierName && (
+        <p className="pd-alibaba-supplier__name">{alibabaInfo.supplierName}</p>
+      )}
+      {alibabaInfo.shipFrom && (
+        <p className="pd-muted">Expédie depuis : <strong>{alibabaInfo.shipFrom}</strong></p>
+      )}
+      {alibabaInfo.alibabaCategory && (
+        <p className="pd-muted">Catégorie Alibaba : <strong>{alibabaInfo.alibabaCategory}</strong></p>
+      )}
+      {alibabaInfo.detailUrl && (
+        <a
+          href={alibabaInfo.detailUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pd-alibaba-link"
+        >
+          Voir le produit sur Alibaba.com ↗
+        </a>
+      )}
+    </div>
+  );
+}
+
+/* ── Alibaba video player ───────────────────────────────────────────── */
+function AlibabaVideoPlayer({ videoUrl }) {
+  if (!videoUrl) return null;
+  return (
+    <div className="pd-video-wrap">
+      <video
+        src={videoUrl}
+        controls
+        preload="metadata"
+        className="pd-video"
+        aria-label="Vidéo produit"
+      />
+    </div>
+  );
+}
 
 function QtyControl({ value, onChange, min = 1, step = 1, max }) {
   // max=undefined means no upper cap (Alibaba made-to-order)
@@ -378,6 +543,11 @@ export default function ProductDetail() {
     return rows;
   }, [product, estimatedDeliveryDays, importDaysLabel, stock, isAlibaba]);
 
+  const alibabaInfo = useMemo(
+    () => (isAlibaba ? extractAlibabaDisplayInfo(product) : {}),
+    [product, isAlibaba],
+  );
+
   const normalizedProduct = useMemo(() => {
     if (!product) return null;
     return {
@@ -529,6 +699,12 @@ export default function ProductDetail() {
               <span className="pd-price__now">{formatCFA(displayPrice)}</span>
               {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
             </div>
+            {isAlibaba && alibabaInfo.hasLadderPrices && alibabaInfo.skus?.length > 0 && (
+              <AlibabaLadderPrices skus={alibabaInfo.skus} />
+            )}
+            {isAlibaba && alibabaInfo.hasSkus && (
+              <AlibabaSkuAttributes skus={alibabaInfo.skus} />
+            )}
             {isDropship && (moqRules.soldAsLot || moqRules.packSize > 1) && (
               <p className="pd-muted" style={{ marginTop: 6 }}>
                 Lot de {moqRules.packSize} unités
@@ -659,6 +835,9 @@ export default function ProductDetail() {
             fallbackTitle={product.name}
             specifications={specifications}
           />
+          {isAlibaba && alibabaInfo.hasVideo && (
+            <AlibabaVideoPlayer videoUrl={alibabaInfo.videoUrl} />
+          )}
         </section>
 
         <section ref={specsRef} className="pd-section" id="specs">
@@ -674,6 +853,12 @@ export default function ProductDetail() {
             </dl>
           ) : (
             <p className="pd-muted">Aucune caractéristique renseignée.</p>
+          )}
+          {isAlibaba && alibabaInfo.hasWholesale && (
+            <AlibabaWholesaleInfo wholesale={alibabaInfo.wholesale} />
+          )}
+          {isAlibaba && (
+            <AlibabaSupplierCard alibabaInfo={alibabaInfo} />
           )}
         </section>
 

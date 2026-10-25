@@ -1,6 +1,127 @@
 export const PLATFORM_VENDOR_NAME = 'DANGO IMPORT';
 export const CJ_CATALOG_VENDOR_LABEL = 'À importer';
 
+/**
+ * Extrait toutes les informations utiles issues de la réponse
+ * Alibaba /eco/buyer/product/description pour l'affichage client.
+ *
+ * Les données sont attendues dans product.supplier et/ou product.alibabaData
+ * telles qu'elles sont persistées après import via ALIBABA_API.
+ *
+ * @param {object} product - Produit normalisé (après sanitizeProductForDisplay)
+ * @returns {object} - Objet avec toutes les infos Alibaba enrichies
+ */
+export function extractAlibabaDisplayInfo(product) {
+  if (!product) return {};
+
+  const supplier = product.supplier || {};
+  const raw = product.alibabaData || {}; // champ optionnel si on stocke le payload brut
+
+  // --- Ladder pricing (prix par palier de quantité) ---
+  const ladderPrices = Array.isArray(raw.ladderPrices || supplier.ladderPrices)
+    ? (raw.ladderPrices || supplier.ladderPrices)
+    : [];
+
+  // --- SKUs avec attributs couleur/taille ---
+  const rawSkus = Array.isArray(raw.skus || supplier.skus) ? (raw.skus || supplier.skus) : [];
+  const skus = rawSkus.map((sku) => ({
+    skuId: sku.sku_id || sku.skuId || '',
+    sellerSkuId: sku.seller_sku_id || sku.sellerSkuId || '',
+    image: sku.image || '',
+    status: sku.status || 'NORMAL',
+    unit: sku.unit || 'Pièce',
+    costPrice: Number(sku.cost_origin_price || sku.costOriginPrice || 0),
+    totalCostPrice: Number(sku.total_origin_cost_price || sku.totalOriginCostPrice || 0),
+    shippingFee: Number(sku.shipping_fee || sku.shippingFee || 0),
+    currency: sku.cost_price_currency || sku.currency || 'USD',
+    attrs: Array.isArray(sku.sku_attr_list || sku.skuAttrList)
+      ? (sku.sku_attr_list || sku.skuAttrList).map((a) => ({
+          name: a.attr_name_desc || a.attrNameDesc || '',
+          value: a.attr_value_desc || a.attrValueDesc || '',
+          image: a.attr_value_image || a.attrValueImage || '',
+        }))
+      : [],
+    ladderPrices: Array.isArray(sku.ladder_price || sku.ladderPrice)
+      ? (sku.ladder_price || sku.ladderPrice).map((lp) => ({
+          min: Number(lp.min_quantity || lp.minQuantity || 0),
+          max: Number(lp.max_quantity || lp.maxQuantity || 0),
+          price: Number(lp.price || 0),
+          currency: lp.currency || 'USD',
+        }))
+      : [],
+  }));
+
+  // --- Wholesale / vente en gros ---
+  const wt = raw.wholesale_trade || raw.wholesaleTrade || supplier.wholesaleTrade || {};
+  const wholesale = Object.keys(wt).length > 0 ? {
+    volume: wt.volume,
+    batchNumber: wt.batch_number || wt.batchNumber,
+    packageSize: wt.package_size || wt.packageSize,
+    price: Number(wt.price || 0),
+    saleType: wt.sale_type || wt.saleType,
+    weight: wt.weight,
+    unitType: wt.unit_type || wt.unitType || 'Pièce',
+    handlingTime: wt.handling_time || wt.handlingTime,
+    minOrderQuantity: Number(wt.min_order_quantity || wt.minOrderQuantity || 0),
+    shippingLineTemplateId: wt.shipping_line_template_id || wt.shippingLineTemplateId,
+    deliverPeriods: Array.isArray(wt.deliver_periods || wt.deliverPeriods)
+      ? (wt.deliver_periods || wt.deliverPeriods).map((p) => ({
+          quantity: p.quantity,
+          processPeriod: p.process_period || p.processPeriod,
+        }))
+      : [],
+  } : null;
+
+  // --- Certifications ---
+  const certs = Array.isArray(raw.certifications || supplier.certifications)
+    ? (raw.certifications || supplier.certifications)
+    : [];
+
+  // --- Pays / origine fabrication ---
+  const shipFrom = raw.shipFromCountryName
+    || supplier.shipFromCountryName
+    || raw.ship_from_country_name
+    || '';
+
+  // --- URL produit original Alibaba ---
+  const detailUrl = raw.detail_url || raw.detailUrl || supplier.productUrl || '';
+
+  // --- Vidéo ---
+  const videoUrl = raw.video_url || raw.videoUrl || (Array.isArray(product.videos) ? product.videos[0] : '') || '';
+
+  // --- Fournisseur ---
+  const supplierName = raw.supplier || supplier.name || supplier.manufacturerName || '';
+  const eCompanyId = raw.eCompanyId || supplier.eCompanyId || '';
+
+  // --- Catégorie Alibaba ---
+  const alibabaCategory = raw.category || '';
+  const alibabaCategoryId = raw.category_id || raw.categoryId || '';
+
+  // --- Stock / inventaire ---
+  const isCountryRisk = String(raw.is_country_risk || 'false').toLowerCase() === 'true';
+
+  return {
+    ladderPrices,
+    skus,
+    wholesale,
+    certs,
+    shipFrom,
+    detailUrl,
+    videoUrl,
+    supplierName,
+    eCompanyId,
+    alibabaCategory,
+    alibabaCategoryId,
+    isCountryRisk,
+    hasSkus: skus.length > 0,
+    hasLadderPrices: skus.some((s) => s.ladderPrices.length > 0) || ladderPrices.length > 0,
+    hasWholesale: wholesale !== null,
+    hasCerts: certs.length > 0,
+    hasVideo: Boolean(videoUrl),
+    hasDetailUrl: Boolean(detailUrl),
+  };
+}
+
 const INTERNAL_FIELDS = [
   'costPrice',
   'otherCosts',
