@@ -88,6 +88,14 @@ export function buildProductDetailData(product = {}) {
   const inStock = isAlibaba || (!rawStockIsSuspect && productStock > 0);
   const minStock = Number(product.minStock || 10);
   const isLowStock = !isAlibaba && inStock && productStock <= minStock;
+  const parsePositiveWeight = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const text = String(value).trim();
+    if (!text || /^0+(?:[.,]0+)?\s*(kg|g)?$/i.test(text)) return null;
+    const numeric = Number(text.replace(/\s*(kg|g)\b/i, '').replace(',', '.'));
+    if (!Number.isFinite(numeric) || numeric <= 0) return null;
+    return numeric;
+  };
 
   let stockStatusLabel = '';
   let stockStatusCode = 'IN_STOCK';
@@ -177,8 +185,10 @@ export function buildProductDetailData(product = {}) {
     const dimStr = [dim.length, dim.width, dim.height].filter(Boolean).join(' × ') + (dim.unit ? ` ${dim.unit}` : ' cm');
     pushSpec('Dimensions', dimStr);
   }
-  const weightVal = product.weight || product.packaging?.weight || product.weightKg;
-  if (weightVal) {
+  const weightVal = [product.weight, product.packaging?.weight, product.weightKg]
+    .map(parsePositiveWeight)
+    .find((value) => value != null);
+  if (weightVal != null) {
     pushSpec('Poids brut', `${weightVal} kg`);
   }
   const packageSizeVal = product.packageSize || product.packaging?.packageSize;
@@ -197,13 +207,15 @@ export function buildProductDetailData(product = {}) {
   const specifications = Array.from(specMap.values());
 
   // 6. Conditionnement & Vente en gros
+  const weightCandidates = [product.weight, product.packaging?.weight, product.weightKg];
+  const meaningfulWeight = weightCandidates.map(parsePositiveWeight).find((value) => value != null);
   const packaging = {
-    weightKg: product.weight || product.packaging?.weight || '',
+    weightKg: meaningfulWeight != null ? meaningfulWeight : '',
     packageSize: product.packageSize || product.packaging?.packageSize || '',
     dimensions: product.dimensions || product.packaging?.dimensions || null,
     unit: product.unit || product.packaging?.unit || 'Pièce',
     supplyCapacity: product.supplyCapacity || product.packaging?.supplyCapacity || '',
-    hasPackaging: Boolean(product.weight || product.packageSize || product.dimensions),
+    hasPackaging: Boolean(meaningfulWeight != null || product.packageSize || product.dimensions),
   };
 
   const wholesale = {

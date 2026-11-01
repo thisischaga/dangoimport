@@ -332,14 +332,19 @@ export function sanitizeProductForDisplay(product) {
   }
 
   const imageCandidates = [
+    Array.isArray(product.galleryImages) ? product.galleryImages : [],
     Array.isArray(product.images) ? product.images : [],
+    Array.isArray(rawAlibaba.galleryImages) ? rawAlibaba.galleryImages : [],
     Array.isArray(rawAlibaba.images) ? rawAlibaba.images : [],
     Array.isArray(rawAlibaba.gallery) ? rawAlibaba.gallery : [],
-    Array.isArray(rawAlibaba.galleryImages) ? rawAlibaba.galleryImages : [],
   ].flat();
   if (imageCandidates.length) {
+    sanitized.galleryImages = imageCandidates;
     sanitized.images = imageCandidates;
-    sanitized.image = typeof imageCandidates[0] === 'string' ? imageCandidates[0] : imageCandidates[0]?.url || sanitized.image || '';
+    sanitized.image = typeof imageCandidates[0] === 'string'
+      ? imageCandidates[0]
+      : imageCandidates[0]?.url || product.mainImage || sanitized.image || '';
+    sanitized.mainImage = product.mainImage || sanitized.image || '';
   }
 
   const fallbackDescription = [

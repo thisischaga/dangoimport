@@ -39,11 +39,13 @@ export function getProductImages(product, max = Infinity) {
 
   const rawData = unwrapAlibabaPayload(product.rawAlibabaData || product.alibabaData || {});
   const candidates = [
+    Array.isArray(product.galleryImages) ? product.galleryImages : [],
     Array.isArray(product.images) ? product.images : [],
+    Array.isArray(rawData.galleryImages) ? rawData.galleryImages : [],
     Array.isArray(rawData.images) ? rawData.images : [],
     Array.isArray(rawData.gallery) ? rawData.gallery : [],
-    Array.isArray(rawData.galleryImages) ? rawData.galleryImages : [],
     Array.isArray(rawData.imageList) ? rawData.imageList : [],
+    Array.isArray(product?.supplier?.galleryImages) ? product.supplier.galleryImages : [],
     Array.isArray(product?.supplier?.images) ? product.supplier.images : [],
     Array.isArray(product?.supplier?.gallery) ? product.supplier.gallery : [],
   ].flat();
