@@ -181,6 +181,8 @@ const Ecom = () => {
     if (isError) toast.error('Impossible de charger les produits.');
   }, [isError]);
 
+  const normalizeCategory = (value) => String(value || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/s$/, '');
+
   const categories = useMemo(() => {
     const baseCategories = [
       'Électronique', 'Beauté & Parfums', 'Maison & Déco', 'Mode & Textile',
@@ -188,19 +190,15 @@ const Ecom = () => {
       'Sacs & Maroquinerie', 'Agriculture', 'Jeux Vidéo', 'Auto & Moto',
       'Bijoux & Montres', 'TV & Électroménager', 'Logistique & Transport', 'Événements'
     ];
-    
-    // Normalize string to ignore accents, case, trailing spaces, and trailing 's' (plural/singular)
-    const normalize = (str) => (str || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/s$/, "");
-    
-    const baseNormalized = new Map(baseCategories.map(cat => [normalize(cat), cat]));
+
+    const baseNormalized = new Map(baseCategories.map(cat => [normalizeCategory(cat), cat]));
     const productsCats = products.map((p) => p.category).filter(Boolean);
-    
     const allCatsMap = new Map(baseNormalized);
-    
-    productsCats.forEach(cat => {
-      const norm = normalize(cat);
+
+    productsCats.forEach((cat) => {
+      const norm = normalizeCategory(cat);
       if (!allCatsMap.has(norm)) {
-        allCatsMap.set(norm, cat); // Keep the DB version if it's completely new
+        allCatsMap.set(norm, cat);
       }
     });
 
@@ -210,11 +208,9 @@ const Ecom = () => {
   const maxPrice = useMemo(() => Math.max(0, ...products.map(getPrice)), [products]);
 
   const filtered = useMemo(() => {
-    const normalize = (str) => (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/s$/, "");
-    
-    let list = activeCategory === 'Tous' 
-      ? products 
-      : products.filter((p) => normalize(p.category) === normalize(activeCategory));
+    let list = activeCategory === 'Tous'
+      ? products
+      : products.filter((p) => normalizeCategory(p.category) === normalizeCategory(activeCategory));
 
     if (quickFilter === 'featured') list = list.filter((p) => p.isFeatured);
     if (quickFilter === 'new') list = list.filter((p) => p.isNewArrival);
@@ -247,6 +243,8 @@ const Ecom = () => {
     setTimeout(() => setAddedId(null), 1800);
   };
 
+  const getCategoryHref = (label) => `/shopping?category=${encodeURIComponent(label)}`;
+
   const toggleWishlist = (e, id) => {
     e.stopPropagation();
     setWishlist((w) => (w.includes(id) ? w.filter((x) => x !== id) : [...w, id]));
@@ -262,11 +260,12 @@ const Ecom = () => {
   };
 
   const setCategory = (cat) => {
-    setActiveCategory(cat);
+    const nextCategory = cat === 'Tous' ? 'Tous' : String(cat || '').trim();
+    setActiveCategory(nextCategory);
     setPage(1);
     const params = new URLSearchParams(location.search);
-    if (cat === 'Tous') params.delete('category');
-    else params.set('category', cat);
+    if (nextCategory === 'Tous') params.delete('category');
+    else params.set('category', nextCategory);
     const qs = params.toString();
     navigate(`/shopping${qs ? `?${qs}` : ''}`, { replace: true });
   };

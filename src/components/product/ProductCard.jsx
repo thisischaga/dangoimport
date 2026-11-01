@@ -4,7 +4,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock, getDisplayVendorName, getProductOriginLabel, getDisplayProductName, isDropshippingProduct } from '../../utils/publicProduct';
+import { getProductSellableStock, getDisplayVendorName, getDisplayProductName, isDropshippingProduct, isAlibabaProduct } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
 import API_BASE_URL from '../../apiConfig';
 import { getCardDisplayPrice, getMoqRules, getUnitPrice } from '../../utils/importMoq';
@@ -234,26 +234,17 @@ function ProductCard({
 
   const stock = getProductSellableStock(product);
 
-  const initialStock =
-    Number(
-      product?.initialStock ??
-        product?.stockInitial ??
-        product?.originalStock ??
-        product?.stock ??
-        0
-    ) || 0;
 
   const minStock =
     Number(
       product?.minStock ?? 10
     ) || 10;
 
-  const isOutOfStock =
-    stock <= 0;
+  const isAlibaba = isAlibabaProduct(product);
 
-  const isLowStock =
-    !isOutOfStock &&
-    stock <= minStock;
+  const isOutOfStock =
+    !isAlibaba && stock <= 0;
+
 
   /* =======================================================
      SELLER
@@ -287,7 +278,6 @@ function ProductCard({
       false
     );
 
-  const originLabel = getProductOriginLabel(product);
   const displayName = getDisplayProductName(product);
 
   /* =======================================================
@@ -343,10 +333,6 @@ function ProductCard({
         ''
     ).trim();
 
-  const deliveryInfo =
-    deliveryZones.length > 0
-      ? deliveryZones[0]
-      : shippingInfo;
 
   /* =======================================================
      RATING
@@ -401,15 +387,6 @@ function ProductCard({
      DISCOUNT
   ======================================================= */
 
-  const discountPercent =
-    hasPromo
-      ? Math.round(
-          (1 -
-            promoPrice /
-              price) *
-            100
-        )
-      : 0;
 
   /* =======================================================
      RENDER
@@ -911,9 +888,6 @@ function ProductCard({
               to={`/product/${productId}`}
               className="pc2__title-link"
             >
-              {originLabel ? (
-                <span className="pc2__origin-tag">{originLabel}</span>
-              ) : null}
               <h3
                 className="pc2__title"
                 title={displayName}
@@ -1036,8 +1010,7 @@ function ProductCard({
 
               {(vendorName || isCertified) &&
                 (isVerified ||
-                  yearsActive ||
-                  country) && (
+                  yearsActive) && (
                   <span className="pc2__meta-sep">
                     ·
                   </span>
@@ -1050,8 +1023,7 @@ function ProductCard({
               )}
 
               {isVerified &&
-                (yearsActive ||
-                  country) && (
+                yearsActive && (
                   <span className="pc2__meta-sep">
                     ·
                   </span>
@@ -1063,21 +1035,8 @@ function ProductCard({
                 </span>
               )}
 
-              {yearsActive &&
-                country && (
-                  <span className="pc2__meta-sep">
-                    ·
-                  </span>
-                )}
-
-              {country && !originLabel && (
-                <span className="pc2__country">
-                  {country}
-                </span>
-              )}
-
-            </p>
-          )}
+              </p>
+            )}
 
         </div>
       </article>

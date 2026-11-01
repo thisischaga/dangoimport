@@ -41,7 +41,7 @@ export const CartProvider = ({ children }) => {
     const { moq } = getMoqRules(product);
     const quantityToAdd = snapQuantity(product, qty || moq);
     const productId = product._id || product.id;
-    const stock = Number(product.stock ?? 999);
+    const stock = Number(product.stock ?? 0);
 
     // Rupture totale
     if (stock <= 0) {
@@ -102,7 +102,7 @@ export const CartProvider = ({ children }) => {
       prev.map((item) => {
         if ((item._id || item.id) !== productId) return item;
         const { moq } = getMoqRules(item);
-        const stock = Number(item.stock ?? 999);
+        const stock = Number(item.stock ?? 0);
         const snapped = snapQuantity(item, newQuantity);
         const clamped = Math.max(moq, Math.min(snapped, stock));
         return { ...item, quantity: clamped };
@@ -178,7 +178,7 @@ export const CartProvider = ({ children }) => {
       getCartTotal,
       getCartCount,
     }),
-    [cart, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, subtotal, savings, shipping, total, getCartTotal, getCartCount]
+    [cart, addToCart, removeFromCart, updateQuantity, clearCart, restoreCart, cartCount, subtotal, savings, shipping, total, getCartTotal, getCartCount]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -1,29 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
-  ChevronRight,
-  ShoppingCart,
-  Minus,
-  Plus,
-  Package,
-  Star,
-  BadgeCheck,
-  Truck,
-  RefreshCw,
-  ShieldCheck,
-  Share2,
-  Heart,
-  X,
-  ChevronLeft,
-  Check,
+  ChevronRight, ChevronLeft, ShoppingCart, Minus, Plus, Package, Star, BadgeCheck,
+  Truck, RefreshCw, ShieldCheck, Share2, Heart, X, Check, Factory, Anchor, Ship, MapPin,
 } from 'lucide-react';
 import { useProduct, useProductReviews, useSimilarProducts } from '../hooks/useProducts';
 import ProductCard from '../components/product/ProductCard';
 import { getVendorDeliveryZonesByVendor } from '../api';
-import { getProductImages, resolveImageUrl } from '../utils/imageUrl';
+import { resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
-import { isDropshippingProduct, getDisplayVendorName, getProductOriginLabel, isAlibabaProduct, extractAlibabaDisplayInfo } from '../utils/publicProduct';
-import { getCardDisplayPrice, getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
+import { getDisplayVendorName, extractAlibabaDisplayInfo, sanitizeProductForDisplay } from '../utils/publicProduct';
+import { getCardDisplayPrice, snapQuantity } from '../utils/importMoq';
 import { useCart } from '../context/CartContext';
 import { toast } from '../utils/toast';
 import Header from '../components/Header';
@@ -31,60 +18,184 @@ import Footer from '../components/Footer';
 import ProductRating from '../components/product/ProductRating';
 import ProductVariants from '../components/product/detail/ProductVariants';
 import ProductReviewsSection from '../components/product/detail/ProductReviewsSection';
+import { resolveVariantSelection, getVariantAttributeValue } from '../utils/variantSelection';
+import { buildProductDetailData } from '../utils/buildProductDetailData';
 import './ProductDetail.css';
 
-/* ── Ladder pricing Alibaba ─────────────────────────────────────────── */
-function AlibabaLadderPrices({ skus }) {
-  // Aggregate all unique ladder tiers across SKUs
-  const tiers = React.useMemo(() => {
-    const allTiers = [];
-    skus.forEach((sku) => {
-      sku.ladderPrices.forEach((lp) => {
-        const key = `${lp.min}-${lp.max}`;
-        if (!allTiers.find((t) => `${t.min}-${t.max}` === key)) allTiers.push(lp);
-      });
-    });
-    return allTiers.sort((a, b) => a.min - b.min);
-  }, [skus]);
+/* ════════════════════════════════════════════════════════════════════
+   Extraction des données fournisseur (keyAttributes Alibaba)
+   Règle : aucune donnée inventée. Si l'info n'existe pas, on ne l'affiche pas.
+   L'identité du fournisseur (nom d'usine, marque usine) reste masquée.
+   ════════════════════════════════════════════════════════════════════ */
+const GROUP_FR = {
+  'Industry-specific attributes': 'Produit',
+  'Other attributes': 'Fabrication et format',
+  'Packaging and delivery': 'Colis et expédition',
+};
+const ATTR_FR = {
+  'Herb & Spice Tools Type': 'Type de produit',
+  Material: 'Matériau',
+  Feature: 'Particularités',
+  'Place of Origin': 'Lieu de fabrication',
+  'Model Number': 'Référence modèle',
+  Size: 'Dimensions du produit',
+  Capacity: 'Capacité',
+  Packing: 'Emballage individuel',
+  Style: 'Style',
+  Port: "Port d'embarquement",
+  'Selling Units:': 'Unité de vente',
+  'Single package size:': 'Dimensions du colis unitaire',
+  'Single gross weight:': 'Poids brut unitaire',
+};
+const ATTR_HIDE = new Set(['Brand Name', 'OEM', 'Logo', 'Product name', 'Measurement']);
+const VALUE_FR = {
+  'Salad Dresing Shaker': 'Shaker à vinaigrette',
+  'Eco-Friendly': 'Écologique',
+  Handle: 'Avec poignée',
+  'White Box': 'Boîte blanche',
+  'Single item': 'Article unique',
+  'Zhejiang, China': 'Zhejiang, Chine',
+};
+const frValue = (v) => {
+  const s = String(v).trim();
+  if (VALUE_FR[s]) return VALUE_FR[s];
+  return s.replace(/Borosilicate Gal?ss/i, 'verre borosilicaté').replace(/(\d)\s*(cm|mm)\b/gi, '$1 $2').replace(/\s*x\s*/gi, ' × ');
+};
+const fmtNum = (n, d = 1) => Number(n).toLocaleString('fr-FR', { maximumFractionDigits: d });
+const fmtWeight = (raw) => {
+  const m = /([\d.,]+)\s*(kg|g)\b/i.exec(raw || '');
+  if (!m) return raw || '';
+  const n = parseFloat(m[1].replace(',', '.'));
+  const kg = m[2].toLowerCase() === 'kg' ? n : n / 1000;
+  return kg < 1 ? `${Math.round(kg * 1000)} g` : `${fmtNum(kg, 2)} kg`;
+};
+const titleCase = (s) => String(s || '').toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
-  if (!tiers.length) return null;
+function extractSupplierData(product) {
+  const src = product?.rawAlibabaData?.keyAttributes
+    ?? product?.rawAlibabaData?.result_data?.keyAttributes
+    ?? product?.keyAttributes
+    ?? product?.rawSections?.keyAttributes;
+  const raw = Array.isArray(src?.attributes) ? src.attributes : [];
+  const flat = {};
+  raw.forEach((g) => (g.attributes || []).forEach((a) => {
+    const vals = (a.values || []).map((v) => v?.value).filter(Boolean);
+    if (a?.name && vals.length && !flat[a.name]) flat[a.name] = vals;
+  }));
+
+  const seen = new Set();
+  const groups = raw.map((g) => ({
+    title: GROUP_FR[g.type] || g.type,
+    rows: (g.attributes || [])
+      .filter((a) => a?.name && !ATTR_HIDE.has(a.name))
+      .map((a) => ({
+        key: ATTR_FR[a.name] || String(a.name).replace(/:$/, ''),
+        value: (a.values || []).map((v) => v?.value).filter((v) => v && v !== 'Stocked').map(frValue).join(', '),
+      }))
+      .filter((r) => {
+        if (!r.value || seen.has(r.key)) return false;
+        seen.add(r.key);
+        return true;
+      }),
+  })).filter((g) => g.rows.length);
+
+  const one = (name) => (flat[name] ? frValue(flat[name][0]) : '');
+  const cartonRaw = flat.Measurement?.[0] || '';
+  const cm = /([\d.]+)\s*x\s*([\d.]+)\s*x\s*([\d.]+)\s*cm\s*\/\s*(\d+)\s*pcs/i.exec(cartonRaw);
+  const unitWeightKg = (() => {
+    const m = /([\d.,]+)\s*(kg|g)\b/i.exec(flat['Single gross weight:']?.[0] || '');
+    if (!m) return null;
+    const n = parseFloat(m[1].replace(',', '.'));
+    return m[2].toLowerCase() === 'kg' ? n : n / 1000;
+  })();
+  const carton = cm ? {
+    dims: `${cm[1]} × ${cm[2]} × ${cm[3]} cm`,
+    pcs: Number(cm[4]),
+    volumeM3: (cm[1] * cm[2] * cm[3]) / 1e6,
+    grossKg: unitWeightKg ? unitWeightKg * Number(cm[4]) : null,
+  } : null;
+
+  const portRaw = flat.Port?.[0] || '';
+  return {
+    groups,
+    carton,
+    capacity: one('Capacity'),
+    material: one('Material'),
+    size: one('Size'),
+    model: one('Model Number'),
+    packing: one('Packing'),
+    origin: one('Place of Origin'),
+    port: portRaw ? titleCase(portRaw.replace(/^FOB\s*/i, '')) : '',
+    unitWeight: flat['Single gross weight:'] ? fmtWeight(flat['Single gross weight:'][0]) : '',
+    unitPackage: flat['Single package size:'] ? frValue(flat['Single package size:'][0]) : '',
+  };
+}
+
+const num = (v) => (v == null || v === '' ? null : (Number.isFinite(Number(v)) ? Number(v) : null));
+const tierMin = (t) => num(t?.minQty ?? t?.minQuantity ?? t?.min) ?? num((String(t?.label || '').match(/\d+/) || [])[0]);
+
+/* ── Paliers de prix cliquables ─────────────────────────────────────── */
+function VolumePricingTable({ tiers = [], qty, onPick }) {
+  if (!Array.isArray(tiers) || tiers.length === 0) return null;
+  const mins = tiers.map(tierMin);
+  let activeIdx = -1;
+  mins.forEach((m, i) => { if (m != null && qty >= m) activeIdx = i; });
+
   return (
-    <div className="pd-ladder">
-      <p className="pd-ladder__title">Prix par quantité (fournisseur)</p>
-      <div className="pd-ladder__table">
-        <div className="pd-ladder__head">
-          <span>Quantité (unités)</span>
-          <span>Prix unitaire</span>
-        </div>
+    <div className="pd-tiers">
+      <p className="pd-tiers__title">Prix par quantité</p>
+      <ul className="pd-tiers__list">
         {tiers.map((t, i) => (
-          <div key={i} className="pd-ladder__row">
-            <span>{t.max ? `${t.min} – ${t.max}` : `≥ ${t.min}`}</span>
-            <span className="pd-ladder__price">{t.price} {t.currency}</span>
-          </div>
+          <li key={i}>
+            <button
+              type="button"
+              className={`pd-tier ${i === activeIdx ? 'is-on' : ''}`}
+              disabled={mins[i] == null}
+              onClick={() => mins[i] != null && onPick?.(mins[i])}
+            >
+              <span className="pd-tier__qty">{t.label}</span>
+              <span className="pd-tier__price">{t.unitPriceFormatted}</span>
+              {t.savingsPercent > 0 ? <span className="pd-tier__save">−{t.savingsPercent}%</span> : <span />}
+            </button>
+          </li>
         ))}
-      </div>
-      <p className="pd-ladder__note">Prix fournisseur indicatif · TVA et frais d'import inclus dans le prix affiché</p>
+      </ul>
+      <p className="pd-tiers__note">Prix publics en FCFA. Frais d&apos;importation calculés à la commande.</p>
     </div>
   );
 }
 
-/* ── SKU Attributes Alibaba ─────────────────────────────────────────── */
-function AlibabaSkuAttributes({ skus }) {
-  if (!skus.length) return null;
-  // Build attribute groups
-  const groups = React.useMemo(() => {
+/* ── Parcours d'importation ─────────────────────────────────────────── */
+function ImportRoute({ origin, port, days }) {
+  const steps = [
+    { icon: Factory, title: 'Usine', text: origin || 'Chine' },
+    port && { icon: Anchor, title: 'Embarquement', text: port },
+    { icon: Ship, title: 'Transit', text: days || 'Selon destination' },
+    { icon: MapPin, title: 'Livraison', text: 'Lomé et Cotonou' },
+  ].filter(Boolean);
+  return (
+    <ol className="pd-route" aria-label="Parcours de la commande">
+      {steps.map((s) => (
+        <li key={s.title} className="pd-route__step">
+          <span className="pd-route__node"><s.icon size={15} /></span>
+          <span className="pd-route__title">{s.title}</span>
+          <span className="pd-route__text">{s.text}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function AlibabaSkuAttributes({ skus = [] }) {
+  const groups = useMemo(() => {
+    if (!Array.isArray(skus) || !skus.length) return [];
     const map = {};
-    skus.forEach((sku) => {
-      sku.attrs.forEach((attr) => {
-        if (!map[attr.name]) map[attr.name] = [];
-        if (!map[attr.name].find((v) => v.value === attr.value)) {
-          map[attr.name].push({ value: attr.value, image: attr.image });
-        }
-      });
-    });
+    skus.forEach((sku) => (sku.attrs || []).forEach((attr) => {
+      if (!map[attr.name]) map[attr.name] = [];
+      if (!map[attr.name].find((v) => v.value === attr.value)) map[attr.name].push({ value: attr.value, image: attr.image });
+    }));
     return Object.entries(map);
   }, [skus]);
-
   if (!groups.length) return null;
   return (
     <div className="pd-sku-attrs">
@@ -93,7 +204,7 @@ function AlibabaSkuAttributes({ skus }) {
           <span className="pd-label">{name}</span>
           <div className="pd-sku-attr-values">
             {values.map((v, i) => (
-              <span key={i} className="pd-sku-attr-chip" title={v.value}>
+              <span key={i} className="pd-sku-attr-chip">
                 {v.image && <img src={v.image} alt={v.value} className="pd-sku-attr-chip__img" loading="lazy" />}
                 {v.value}
               </span>
@@ -105,146 +216,33 @@ function AlibabaSkuAttributes({ skus }) {
   );
 }
 
-/* ── Wholesale info Alibaba ─────────────────────────────────────────── */
-function AlibabaWholesaleInfo({ wholesale }) {
-  if (!wholesale) return null;
-  const rows = [
-    wholesale.minOrderQuantity > 0 && { key: 'Quantité min. commande', value: `${wholesale.minOrderQuantity} ${wholesale.unitType}` },
-    wholesale.weight && { key: 'Poids brut', value: `${wholesale.weight} kg` },
-    wholesale.packageSize && { key: 'Dimensions colis', value: wholesale.packageSize },
-    wholesale.handlingTime && { key: 'Délai de traitement', value: `${wholesale.handlingTime} jours` },
-    wholesale.saleType && { key: 'Type de vente', value: wholesale.saleType === 'batch' ? 'Par lot' : wholesale.saleType },
-    wholesale.batchNumber && { key: 'Nombre par lot', value: wholesale.batchNumber },
-    wholesale.volume && { key: 'Volume expédié', value: wholesale.volume },
-  ].filter(Boolean);
-
-  if (!rows.length && !wholesale.deliverPeriods?.length) return null;
-  return (
-    <div className="pd-wholesale">
-      <h3 className="pd-wholesale__title">Informations de vente en gros</h3>
-      {rows.length > 0 && (
-        <dl className="pd-specs">
-          {rows.map((r) => (
-            <div key={r.key} className="pd-specs__row">
-              <dt>{r.key}</dt>
-              <dd>{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {wholesale.deliverPeriods?.length > 0 && (
-        <div className="pd-deliver-periods">
-          <p className="pd-label">Délais de livraison selon quantité</p>
-          <div className="pd-ladder__table">
-            <div className="pd-ladder__head">
-              <span>Quantité</span>
-              <span>Délai fabrication</span>
-            </div>
-            {wholesale.deliverPeriods.map((p, i) => (
-              <div key={i} className="pd-ladder__row">
-                <span>{p.quantity} unités</span>
-                <span>{p.processPeriod} jours</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Alibaba supplier info ──────────────────────────────────────────── */
-function AlibabaSupplierCard({ alibabaInfo }) {
-  if (!alibabaInfo.supplierName && !alibabaInfo.detailUrl && !alibabaInfo.shipFrom) return null;
-  return (
-    <div className="pd-alibaba-supplier">
-      <h3 className="pd-alibaba-supplier__title">Fournisseur Alibaba</h3>
-      {alibabaInfo.supplierName && (
-        <p className="pd-alibaba-supplier__name">{alibabaInfo.supplierName}</p>
-      )}
-      {alibabaInfo.shipFrom && (
-        <p className="pd-muted">Expédie depuis : <strong>{alibabaInfo.shipFrom}</strong></p>
-      )}
-      {alibabaInfo.alibabaCategory && (
-        <p className="pd-muted">Catégorie Alibaba : <strong>{alibabaInfo.alibabaCategory}</strong></p>
-      )}
-      {alibabaInfo.detailUrl && (
-        <a
-          href={alibabaInfo.detailUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="pd-alibaba-link"
-        >
-          Voir le produit sur Alibaba.com ↗
-        </a>
-      )}
-    </div>
-  );
-}
-
-/* ── Alibaba video player ───────────────────────────────────────────── */
-function AlibabaVideoPlayer({ videoUrl }) {
-  if (!videoUrl) return null;
-  return (
-    <div className="pd-video-wrap">
-      <video
-        src={videoUrl}
-        controls
-        preload="metadata"
-        className="pd-video"
-        aria-label="Vidéo produit"
-      />
-    </div>
-  );
-}
-
 function QtyControl({ value, onChange, min = 1, step = 1, max }) {
-  // max=undefined means no upper cap (Alibaba made-to-order)
   const hasCap = max != null && Number.isFinite(max);
   const cap = hasCap ? Math.max(min, max) : Infinity;
   return (
     <div className="pd-qty" role="group" aria-label="Quantité">
-      <button
-        type="button"
-        className="pd-qty__btn"
-        onClick={() => onChange(Math.max(min, value - step))}
-        disabled={value <= min}
-        aria-label="Diminuer"
-      >
+      <button type="button" className="pd-qty__btn" onClick={() => onChange(Math.max(min, value - step))} disabled={value <= min} aria-label="Diminuer">
         <Minus size={14} />
       </button>
       <span className="pd-qty__val">{value}</span>
-      <button
-        type="button"
-        className="pd-qty__btn"
-        onClick={() => onChange(hasCap ? Math.min(cap, value + step) : value + step)}
-        disabled={hasCap && value >= cap}
-        aria-label="Augmenter"
-      >
+      <button type="button" className="pd-qty__btn" onClick={() => onChange(hasCap ? Math.min(cap, value + step) : value + step)} disabled={hasCap && value >= cap} aria-label="Augmenter">
         <Plus size={14} />
       </button>
     </div>
   );
 }
 
-function ProductGallery({ images = [], name }) {
+function ProductGallery({ images = [], name, videoUrl }) {
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [activeMedia, setActiveMedia] = useState('image');
   const [broken, setBroken] = useState(() => new Set());
-  const slides = useMemo(
-    () => images.filter(Boolean).filter((src) => !broken.has(src)).slice(0, 8),
-    [images, broken],
-  );
+
+  const slides = useMemo(() => images.filter(Boolean).filter((src) => !broken.has(src)), [images, broken]);
   const current = slides[index] || null;
 
-  useEffect(() => {
-    setBroken(new Set());
-    setIndex(0);
-  }, [images.join('|')]);
-
-  useEffect(() => {
-    setIndex((i) => (slides.length ? Math.min(i, slides.length - 1) : 0));
-  }, [slides.length]);
+  useEffect(() => { setBroken(new Set()); setIndex(0); setActiveMedia('image'); }, [images.join('|')]);
+  useEffect(() => { setIndex((i) => (slides.length ? Math.min(i, slides.length - 1) : 0)); }, [slides.length]);
 
   const markBroken = useCallback((src) => {
     if (!src) return;
@@ -257,10 +255,8 @@ function ProductGallery({ images = [], name }) {
   }, []);
 
   const go = useCallback((dir) => {
-    setIndex((i) => {
-      if (dir < 0) return i <= 0 ? slides.length - 1 : i - 1;
-      return i >= slides.length - 1 ? 0 : i + 1;
-    });
+    setActiveMedia('image');
+    setIndex((i) => (dir < 0 ? (i <= 0 ? slides.length - 1 : i - 1) : (i >= slides.length - 1 ? 0 : i + 1)));
   }, [slides.length]);
 
   useEffect(() => {
@@ -278,40 +274,42 @@ function ProductGallery({ images = [], name }) {
     <>
       <div className="pd-gallery">
         <div className="pd-gallery__stage">
-          {current ? (
+          {activeMedia === 'video' && videoUrl ? (
+            <div className="pd-gallery__video-stage"><video src={videoUrl} controls autoPlay className="pd-gallery__video-player" /></div>
+          ) : current ? (
             <button type="button" className="pd-gallery__zoom-hit" onClick={() => setLightbox(true)} aria-label="Voir en grand">
-              <img
-                src={current}
-                alt={name || 'Produit'}
-                className="pd-gallery__img"
-                decoding="async"
-                onError={() => markBroken(current)}
-              />
+              <img src={current} alt={name || 'Produit'} className="pd-gallery__img" decoding="async" onError={() => markBroken(current)} />
             </button>
           ) : (
             <div className="pd-gallery__empty"><Package size={40} strokeWidth={1.25} /></div>
           )}
-          {slides.length > 1 && (
+
+          {activeMedia === 'image' && slides.length > 1 && (
             <>
-              <button type="button" className="pd-gallery__arrow pd-gallery__arrow--prev" onClick={() => go(-1)} aria-label="Image précédente">
-                <ChevronLeft size={20} />
-              </button>
-              <button type="button" className="pd-gallery__arrow pd-gallery__arrow--next" onClick={() => go(1)} aria-label="Image suivante">
-                <ChevronRight size={20} />
-              </button>
+              <span className="pd-gallery__count">{index + 1} / {slides.length}</span>
+              <button type="button" className="pd-gallery__arrow pd-gallery__arrow--prev" onClick={() => go(-1)} aria-label="Image précédente"><ChevronLeft size={20} /></button>
+              <button type="button" className="pd-gallery__arrow pd-gallery__arrow--next" onClick={() => go(1)} aria-label="Image suivante"><ChevronRight size={20} /></button>
             </>
           )}
         </div>
-        {slides.length > 1 && (
+
+        {(slides.length > 1 || videoUrl) && (
           <div className="pd-gallery__strip" role="tablist" aria-label="Miniatures">
+            {videoUrl && (
+              <button
+                type="button" role="tab" aria-selected={activeMedia === 'video'}
+                className={`pd-gallery__thumb pd-gallery__thumb--video ${activeMedia === 'video' ? 'is-on' : ''}`}
+                onClick={() => setActiveMedia('video')} title="Vidéo"
+              >
+                <span className="pd-gallery__video-icon">▶</span>
+              </button>
+            )}
             {slides.map((src, i) => (
               <button
-                key={`${i}-${src}`}
-                type="button"
-                role="tab"
-                aria-selected={i === index}
-                className={`pd-gallery__thumb ${i === index ? 'is-on' : ''}`}
-                onClick={() => setIndex(i)}
+                key={`${i}-${src}`} type="button" role="tab"
+                aria-selected={activeMedia === 'image' && i === index}
+                className={`pd-gallery__thumb ${activeMedia === 'image' && i === index ? 'is-on' : ''}`}
+                onClick={() => { setActiveMedia('image'); setIndex(i); }}
               >
                 <img src={src} alt="" loading="lazy" onError={() => markBroken(src)} />
               </button>
@@ -322,71 +320,50 @@ function ProductGallery({ images = [], name }) {
 
       {lightbox && current && (
         <div className="pd-lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(false)}>
-          <button type="button" className="pd-lightbox__close" onClick={() => setLightbox(false)} aria-label="Fermer">
-            <X size={22} />
-          </button>
+          <button type="button" className="pd-lightbox__close" onClick={() => setLightbox(false)} aria-label="Fermer"><X size={22} /></button>
           <div className="pd-lightbox__frame" onClick={(e) => e.stopPropagation()}>
-            {slides.length > 1 && (
-              <button type="button" className="pd-lightbox__nav" onClick={() => go(-1)} aria-label="Précédent">
-                <ChevronLeft size={28} />
-              </button>
-            )}
+            {slides.length > 1 && <button type="button" className="pd-lightbox__nav" onClick={() => go(-1)} aria-label="Précédent"><ChevronLeft size={28} /></button>}
             <img src={current} alt={name} className="pd-lightbox__img" onError={() => markBroken(current)} />
-            {slides.length > 1 && (
-              <button type="button" className="pd-lightbox__nav pd-lightbox__nav--next" onClick={() => go(1)} aria-label="Suivant">
-                <ChevronRight size={28} />
-              </button>
-            )}
+            {slides.length > 1 && <button type="button" className="pd-lightbox__nav" onClick={() => go(1)} aria-label="Suivant"><ChevronRight size={28} /></button>}
           </div>
-          {slides.length > 1 && (
-            <p className="pd-lightbox__count">{index + 1} / {slides.length}</p>
-          )}
+          {slides.length > 1 && <p className="pd-lightbox__count">{index + 1} / {slides.length}</p>}
         </div>
       )}
     </>
   );
 }
 
-function cleanProseDescription(raw) {
-  if (!raw || typeof raw !== 'string') return '';
-  let cleaned = raw
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/#detail_decorate_root[\s\S]*?\{[\s\S]*?\}/gi, ' ')
-    .replace(/@media[\s\S]*?\{[\s\S]*?\}/gi, ' ')
-    .replace(/\{[^{}]*\}/g, ' ')
-    .replace(/#detail_decorate_root[^\s;{}]*/gi, ' ')
-    .replace(/\.magic-\d+[^\s;{}]*/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (
-    cleaned.includes('#detail_decorate_root')
-    || /\{[a-z\-]+:[^}]+\}/i.test(cleaned)
-    || /border-(?:bottom|top)|padding-(?:top|bottom)|min-height/i.test(cleaned)
-    || cleaned.length < 15
-  ) {
-    return '';
-  }
-  return cleaned;
-}
-
-function ReadMore({ text, fallbackTitle = '', specifications = [] }) {
+function ReadMore({ text, safeHtml, fallbackTitle = '' }) {
   const [open, setOpen] = useState(false);
-  const sanitized = cleanProseDescription(text);
-  const displayText = sanitized || (fallbackTitle ? `${fallbackTitle}.` : '');
-  if (!displayText) return null;
-  const long = displayText.length > 420 || displayText.split('\n').length > 6;
+  const displayText = text || (fallbackTitle ? `${fallbackTitle}.` : '');
+  if (!displayText && !safeHtml) return null;
+  const long = displayText.length > 400 || displayText.split('\n').length > 5 || (safeHtml && safeHtml.length > 500);
   return (
     <div className="pd-prose">
-      <p className={!open && long ? 'pd-prose--fold' : undefined}>{displayText}</p>
+      {safeHtml ? (
+        <div className={`pd-prose__html ${!open && long ? 'pd-prose--fold' : ''}`} dangerouslySetInnerHTML={{ __html: safeHtml }} />
+      ) : (
+        <p className={!open && long ? 'pd-prose--fold' : undefined} style={{ whiteSpace: 'pre-line' }}>{displayText}</p>
+      )}
       {long && (
         <button type="button" className="pd-link" onClick={() => setOpen((v) => !v)}>
-          {open ? 'Réduire' : 'Lire la suite'}
+          {open ? 'Réduire la description' : 'Lire la suite de la description'}
         </button>
       )}
     </div>
+  );
+}
+
+function Rows({ rows }) {
+  return (
+    <dl className="pd-rows">
+      {rows.map((r) => (
+        <div key={r.key} className="pd-rows__row">
+          <dt>{r.key}</dt>
+          <dd>{r.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -396,6 +373,7 @@ export default function ProductDetail() {
   const { addToCart, cart } = useCart();
   const descRef = useRef(null);
   const specsRef = useRef(null);
+  const wholesaleRef = useRef(null);
   const reviewsRef = useRef(null);
   const deliveryRef = useRef(null);
 
@@ -412,105 +390,104 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState('description');
   const [sellerZones, setSellerZones] = useState([]);
 
+  const displayProduct = useMemo(() => sanitizeProductForDisplay(product), [product]);
+  const detailData = useMemo(() => buildProductDetailData(displayProduct || product), [displayProduct, product]);
+  const extras = useMemo(() => extractSupplierData(product), [product]);
+
   useEffect(() => {
-    if (product?.name) document.title = `${product.name} | Dango Import`;
+    if (detailData?.name) document.title = `${detailData.name} | Dango Import`;
     else if (!isLoading && !product) document.title = 'Produit introuvable | Dango Import';
-  }, [product?.name, isLoading, product]);
+  }, [detailData?.name, isLoading, product]);
 
-  useEffect(() => {
-    setSelectedVariantIndex(null);
-    setSelectedColor(null);
-    setSelectedSize(null);
-  }, [id]);
+  useEffect(() => { setSelectedVariantIndex(null); setSelectedColor(null); setSelectedSize(null); }, [id]);
 
-  useEffect(() => {
-    if (!product) return;
-    setQty(snapQuantity(product, product.minimumOrderQuantity || 1));
-  }, [product?._id]);
+  const productQtyTarget = useMemo(() => {
+    if (!product) return 1;
+    return snapQuantity(product, product.minimumOrderQuantity || 1);
+  }, [product?._id, product?.minimumOrderQuantity, product?.variants?.length]);
+
+  useEffect(() => { if (product) setQty(productQtyTarget); }, [productQtyTarget, product]);
 
   const variants = useMemo(() => (Array.isArray(product?.variants) ? product.variants : []), [product?.variants]);
+  const variantSelection = useMemo(() => resolveVariantSelection(variants, selectedColor, selectedSize), [variants, selectedColor, selectedSize]);
+
   useEffect(() => {
     if (variants.length === 0) return;
-    const idx = variants.findIndex((v) => v.isDefault);
-    setSelectedVariantIndex(idx >= 0 ? idx : 0);
-  }, [variants]);
+    const defaultIndex = variants.findIndex((v) => v.isDefault);
+    const initialSelection = defaultIndex >= 0 ? defaultIndex : 0;
+    const initialVariant = variants[initialSelection];
+    const initialColor = getVariantAttributeValue(initialVariant, 'color');
+    const initialSize = getVariantAttributeValue(initialVariant, 'size');
+    setSelectedVariantIndex((current) => (current == null ? initialSelection : current));
+    if (initialColor && !selectedColor) setSelectedColor(initialColor);
+    if (initialSize && !selectedSize) setSelectedSize(initialSize);
+  }, [variants, selectedColor, selectedSize]);
+
+  useEffect(() => {
+    if (variants.length === 0) return;
+    const { index, color, size, variant } = variantSelection;
+    if (index >= 0 && selectedVariantIndex !== index) setSelectedVariantIndex(index);
+    if (variant) {
+      const nextColor = getVariantAttributeValue(variant, 'color');
+      const nextSize = getVariantAttributeValue(variant, 'size');
+      if (nextColor && nextColor !== selectedColor) setSelectedColor(nextColor);
+      if (nextSize && nextSize !== selectedSize) setSelectedSize(nextSize);
+    }
+    if (color && color !== selectedColor) setSelectedColor(color);
+    if (size && size !== selectedSize) setSelectedSize(size);
+  }, [variantSelection, selectedVariantIndex, selectedColor, selectedSize, variants.length]);
 
   const selectedVariant = selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
-  const unitPrice = getUnitPrice(product);
-  const basePrice = Number(product?.price || unitPrice || 0);
-  const basePromo = Number(product?.salePrice || product?.promoPrice || 0);
+  const basePrice = detailData?.price || 0;
   const variantPrice = selectedVariant?.price != null ? Number(selectedVariant.price) : null;
   const price = variantPrice ?? basePrice;
-  const isDropship = isDropshippingProduct(product);
-  const isAlibaba = isAlibabaProduct(product);
-  const moqRules = getMoqRules(product);
-  const promoPrice = !isDropship && variantPrice == null && basePromo > 0 && basePromo < basePrice ? basePromo : 0;
-  const hasPromo = promoPrice > 0 && promoPrice < price;
+  const isDropship = detailData?.isDropship || false;
+  const isAlibaba = detailData?.isAlibaba || false;
+  const moqRules = detailData?.moqRules || { moq: 1, increment: 1, soldAsLot: false, packSize: 1 };
+  const hasPromo = detailData?.hasPromo && variantPrice == null;
+  const promoPrice = detailData?.salePrice || 0;
   const displayPrice = isDropship ? getCardDisplayPrice(product) : (hasPromo ? promoPrice : price);
   const discount = hasPromo ? calcDiscountPercent(price, promoPrice) : 0;
 
-  const productStock = Number(product?.stock ?? 0);
-  const variantStock = selectedVariant?.stock != null ? Number(selectedVariant.stock) : null;
-  const stock = Math.max(
-    productStock,
-    Number.isFinite(variantStock) ? variantStock : 0,
-  );
-  const minStock = Number(product?.minStock ?? 10) || 10;
-  // Alibaba products are made-to-order — always available regardless of stock count
-  const inStock = isAlibaba || stock > 0;
-  const isLowStock = !isAlibaba && inStock && stock <= minStock;
+  const inStock = detailData?.inStock || false;
+  const isLowStock = detailData?.isLowStock || false;
+  const stock = detailData?.stock || 0;
 
-  const productId = product?._id || product?.id;
+  const productId = detailData?.id;
   const sellerId = product?.vendorId || product?.sellerId || product?.vendor_id || null;
   const isInCart = cart.some((item) => (item._id || item.id) === productId);
 
   const rating = product?.rating != null ? Number(product.rating) : null;
-  const reviewCount = product?.totalReviews != null
-    ? Number(product.totalReviews)
-    : reviewsData?.pagination?.totalItems || 0;
+  const reviewCount = product?.totalReviews != null ? Number(product.totalReviews) : reviewsData?.pagination?.totalItems || 0;
   const soldCount = Number(product?.totalSales ?? 0) || 0;
 
   const images = useMemo(() => {
-    const base = getProductImages(product, 8);
+    const list = detailData?.images || [];
     if (selectedVariant?.image) {
       const vImg = resolveImageUrl(selectedVariant.image);
-      if (vImg && !base.includes(vImg)) return [vImg, ...base].slice(0, 8);
+      if (vImg && !list.includes(vImg)) return [vImg, ...list];
     }
-    return base;
-  }, [product, selectedVariant]);
+    return list;
+  }, [detailData?.images, selectedVariant]);
 
-  const productDeliveryZones = useMemo(
-    () => (Array.isArray(product?.deliveryZones) ? product.deliveryZones : []),
-    [product?.deliveryZones],
-  );
+  const productDeliveryZones = useMemo(() => (Array.isArray(product?.deliveryZones) ? product.deliveryZones : []), [product?.deliveryZones]);
   const deliveryZones = useMemo(() => {
-    const zoneList = [...productDeliveryZones, ...sellerZones];
-    return zoneList.filter((zone, index, arr) => {
-      const key = [zone?.country, zone?.area, zone?.locality, zone?.zoneName, zone?.city].join('|');
-      return key && arr.findIndex((item) => [item?.country, item?.area, item?.locality, item?.zoneName, item?.city].join('|') === key) === index;
-    });
+    const keyOf = (z) => [z?.country, z?.area, z?.locality, z?.zoneName, z?.city].join('|');
+    return [...productDeliveryZones, ...sellerZones].filter((zone, i, arr) => keyOf(zone) && arr.findIndex((z) => keyOf(z) === keyOf(zone)) === i);
   }, [productDeliveryZones, sellerZones]);
+  const freeShippingZone = useMemo(() => deliveryZones.find((z) => z?.freeShipping || Number(z?.price || 0) === 0), [deliveryZones]);
 
-  const freeShippingZone = useMemo(
-    () => deliveryZones.find((z) => z?.freeShipping || Number(z?.price || 0) === 0),
-    [deliveryZones],
-  );
-  const importDays = product?.estimatedImportDays || {};
-  const estimatedDeliveryDays = Number(importDays.max || product?.estimatedDeliveryDays || 0) || 0;
-  const importDaysLabel = isDropship
-    ? (Number(importDays.min) >= 15 && Number(importDays.max) >= 15
-      ? `${importDays.min}–${importDays.max} jours`
-      : '20–30 jours')
-    : (estimatedDeliveryDays > 0 ? `${estimatedDeliveryDays} j.` : '');
-  const hasShippingInfo = Boolean(product?.shippingInfo?.trim());
-  const hasWarranty = Boolean(product?.warranty?.trim());
-  const hasDelivery = deliveryZones.length > 0 || hasShippingInfo || estimatedDeliveryDays > 0 || isDropship;
+  const estDays = product?.estimatedImportDays;
+  const importDaysLabel = detailData?.importDaysLabel
+    || (estDays?.min && estDays?.max ? `${estDays.min} à ${estDays.max} jours` : '');
+  const hasShippingInfo = Boolean(detailData?.shippingInfo?.trim());
+  const hasWarranty = Boolean(detailData?.warranty?.trim());
+  const originLabel = extras.origin || product?.shippingOrigin?.countryName || product?.supplier?.shipFromCountryName || '';
+  const originCountry = product?.shippingOrigin?.countryName || product?.supplier?.shipFromCountryName || '';
+  const isFragile = String(product?.shippingCategory || '').toLowerCase() === 'fragile';
 
   useEffect(() => {
-    if (!sellerId) {
-      setSellerZones([]);
-      return undefined;
-    }
+    if (!sellerId) { setSellerZones([]); return undefined; }
     let cancelled = false;
     getVendorDeliveryZonesByVendor(sellerId)
       .then((res) => { if (!cancelled) setSellerZones(Array.isArray(res?.data) ? res.data : []); })
@@ -518,50 +495,76 @@ export default function ProductDetail() {
     return () => { cancelled = true; };
   }, [sellerId]);
 
-  const specifications = useMemo(() => {
-    const specs = Array.isArray(product?.specifications) ? product.specifications : [];
-    const rows = specs.filter((s) => s?.key && s?.value).map((s) => ({ key: s.key, value: s.value }));
-    const brandLower = String(product?.brand || '').trim().toLowerCase();
-    const isAlibabaBrand = brandLower.includes('alibaba') || brandLower.startsWith('produit');
-    if (product?.brand && !isAlibabaBrand && !rows.some((r) => r.key.toLowerCase() === 'marque')) {
-      rows.unshift({ key: 'Marque', value: product.brand });
-    }
-    if (product?.category && !rows.some((r) => r.key.toLowerCase() === 'catégorie')) rows.push({ key: 'Catégorie', value: product.category });
-    if (product?.subCategory && !rows.some((r) => r.key.toLowerCase() === 'sous-catégorie')) {
-      rows.push({ key: 'Sous-catégorie', value: product.subCategory });
-    }
-    if (estimatedDeliveryDays > 0 && !rows.some((r) => r.key.toLowerCase().includes('délai'))) {
-      rows.push({ key: 'Délai d’importation', value: importDaysLabel });
-    }
-    if (isAlibaba) {
-      rows.push({ key: 'Disponibilité', value: 'Sur commande (fabrication directe usine)' });
-      rows.push({ key: 'Production', value: 'Fabriqué à la demande selon votre commande' });
-    } else if (isDropshippingProduct(product) && stock > 0 && !rows.some((r) => r.key.toLowerCase() === 'stock')) {
-      rows.push({ key: 'Stock disponible', value: `${stock} unité(s)` });
-    }
-    if (product?.condition) rows.push({ key: 'État', value: product.condition });
-    return rows;
-  }, [product, estimatedDeliveryDays, importDaysLabel, stock, isAlibaba]);
+  const alibabaInfo = useMemo(() => (isAlibaba ? extractAlibabaDisplayInfo(product) : {}), [product, isAlibaba]);
 
-  const alibabaInfo = useMemo(
-    () => (isAlibaba ? extractAlibabaDisplayInfo(product) : {}),
-    [product, isAlibaba],
-  );
+  /* Caractéristiques fusionnées : fiche générique + attributs fournisseur (sans doublons) */
+  const specGroups = useMemo(() => {
+    const norm = (k) => String(k).toLowerCase().replace(/[^a-zà-ÿ0-9]/g, '');
+    const seen = new Set();
+    const base = (detailData?.specifications || [])
+      .filter((s) => s?.key && s?.value && !/^marque$/i.test(s.key))
+      .map((s) => ({ key: String(s.key), value: String(s.value) }));
+    base.forEach((r) => seen.add(norm(r.key)));
+    const groups = base.length ? [{ title: 'Général', rows: base }] : [];
+    extras.groups.forEach((g) => {
+      const rows = g.rows.filter((r) => {
+        const k = norm(r.key);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      if (rows.length) groups.push({ title: g.title, rows });
+    });
+    return groups;
+  }, [detailData?.specifications, extras.groups]);
+  const specCount = specGroups.reduce((n, g) => n + g.rows.length, 0);
+
+  /* Fiche rapide */
+  const glance = [
+    extras.capacity && { label: 'Capacité', value: extras.capacity },
+    extras.material && { label: 'Matériau', value: extras.material },
+    extras.size && { label: 'Dimensions', value: extras.size },
+    extras.unitWeight && { label: 'Poids brut', value: extras.unitWeight },
+    extras.model && { label: 'Référence', value: extras.model },
+    extras.packing && { label: 'Emballage', value: extras.packing },
+  ].filter(Boolean);
+
+  /* Conditionnement & vente en gros */
+  const wh = detailData?.wholesale;
+  const pk = detailData?.packaging;
+  const packRows = [
+    (wh?.minOrderQuantity > 1 || moqRules.moq > 1) && { key: 'Quantité minimum', value: `${wh?.minOrderQuantity || moqRules.moq} ${wh?.unitType || 'unités'}` },
+    moqRules.increment > 1 && { key: 'Incrément de commande', value: `par ${moqRules.increment}` },
+    (moqRules.soldAsLot || moqRules.packSize > 1) && { key: 'Vendu par lot de', value: `${moqRules.packSize} unités` },
+    wh?.batchNumber && { key: 'Nombre par lot', value: `${wh.batchNumber} unités` },
+    extras.unitPackage && { key: 'Colis unitaire', value: extras.unitPackage },
+    (extras.unitWeight || pk?.weightKg) && { key: 'Poids brut unitaire', value: extras.unitWeight || `${pk.weightKg} kg` },
+    pk?.packageSize && !extras.unitPackage && { key: 'Dimensions colis', value: pk.packageSize },
+    extras.carton && { key: 'Pièces par carton', value: `${extras.carton.pcs}` },
+    extras.carton && { key: 'Dimensions du carton', value: extras.carton.dims },
+    extras.carton && { key: 'Volume du carton', value: `${fmtNum(extras.carton.volumeM3, 3)} m³` },
+    extras.carton?.grossKg && { key: 'Poids du carton complet', value: `≈ ${fmtNum(extras.carton.grossKg, 1)} kg` },
+    pk?.supplyCapacity && { key: 'Capacité fournisseur', value: pk.supplyCapacity },
+    wh?.handlingTimeDays && { key: 'Préparation usine', value: `${wh.handlingTimeDays} jour(s) ouvrés` },
+  ].filter(Boolean);
+  const tiers = detailData?.publicPriceTiers || [];
+  const hasWholesaleTab = packRows.length > 0 || tiers.length > 0 || wh?.deliverPeriods?.length > 0;
+
+  /* Sous-total uniquement quand le prix unitaire est connu */
+  const activeTier = useMemo(() => {
+    let found = null;
+    tiers.forEach((t) => { const m = tierMin(t); if (m != null && qty >= m) found = t; });
+    return found;
+  }, [tiers, qty]);
+  const unitNow = tiers.length ? num(activeTier?.unitPrice) : num(displayPrice);
+  const subtotal = unitNow != null ? unitNow * qty : null;
 
   const normalizedProduct = useMemo(() => {
     if (!product) return null;
     return {
-      ...product,
-      id: productId,
-      _id: productId,
-      price,
-      promoPrice: hasPromo ? promoPrice : null,
-      salePrice: hasPromo ? promoPrice : null,
-      image: images[0] || '',
-      stock,
-      selectedVariant: selectedVariant || undefined,
-      selectedColor,
-      selectedSize,
+      ...product, id: productId, _id: productId, price,
+      promoPrice: hasPromo ? promoPrice : null, salePrice: hasPromo ? promoPrice : null,
+      image: images[0] || '', stock, selectedVariant: selectedVariant || undefined, selectedColor, selectedSize,
     };
   }, [product, productId, price, promoPrice, hasPromo, images, stock, selectedVariant, selectedColor, selectedSize]);
 
@@ -582,28 +585,16 @@ export default function ProductDetail() {
   const scrollToSection = useCallback((ref, tab) => {
     setActiveTab(tab);
     const el = ref.current;
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 88;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
   }, []);
 
-  const sellerName = getDisplayVendorName(product) || product?.vendorName || product?.sellerName || '';
-  const originLabel = getProductOriginLabel(product);
-  const categoryLabel = product?.category;
-  const titleText = String(product?.name || '').trim();
-  const titleIsLong = titleText.length > 72;
-  const tagLabel = product?.isFeatured ? 'Sélection' : product?.isBestSeller ? 'Populaire' : hasPromo ? 'Promo' : null;
-
-  const stockLabel = !inStock
-    ? 'Rupture de stock'
-    : isAlibaba
-      ? 'Sur commande · Fabrication directe usine'
-      : isDropship
-        ? (stock > 0 && stock <= 5 ? `Stock limité · ${stock} restants` : 'En stock')
-        : isLowStock
-          ? `Stock limité · ${stock} restants`
-          : `${stock} en stock`;
+  const sellerName = detailData?.sellerName || product?.sellerName || product?.vendorName || getDisplayVendorName(product) || '';
+  const stockLabel = detailData?.stockStatusLabel || (
+    !inStock ? 'Rupture de stock'
+      : isAlibaba ? 'Sur commande, fabrication directe usine'
+        : isDropship ? (stock > 0 && stock <= 5 ? `Stock limité, ${stock} restants` : 'En stock')
+          : isLowStock ? `Stock limité, ${stock} restants` : `${stock} en stock`
+  );
 
   if (isLoading) {
     return (
@@ -633,9 +624,7 @@ export default function ProductDetail() {
           <Package size={48} strokeWidth={1.25} />
           <h1>Produit introuvable</h1>
           <p>Ce produit n&apos;est plus disponible ou le lien n&apos;est pas valide.</p>
-          <div className="pd-empty__actions">
-            <Link to="/shopping" className="pd-btn pd-btn--primary">Retour à la boutique</Link>
-          </div>
+          <div className="pd-empty__actions"><Link to="/shopping" className="pd-btn pd-btn--primary">Retour à la boutique</Link></div>
         </div>
         <Footer />
       </div>
@@ -644,9 +633,10 @@ export default function ProductDetail() {
 
   const tabs = [
     { key: 'description', label: 'Description', ref: descRef },
-    { key: 'specs', label: 'Détails', ref: specsRef },
-    { key: 'reviews', label: `Avis${reviewCount ? ` · ${reviewCount}` : ''}`, ref: reviewsRef },
-    { key: 'delivery', label: 'Livraison', ref: deliveryRef },
+    { key: 'specs', label: `Caractéristiques (${specCount})`, ref: specsRef },
+    ...(hasWholesaleTab ? [{ key: 'wholesale', label: 'Gros et conditionnement', ref: wholesaleRef }] : []),
+    { key: 'delivery', label: 'Livraison et importation', ref: deliveryRef },
+    { key: 'reviews', label: `Avis${reviewCount ? ` (${reviewCount})` : ''}`, ref: reviewsRef },
   ];
 
   return (
@@ -657,172 +647,144 @@ export default function ProductDetail() {
         <nav className="pd-crumb" aria-label="Fil d'Ariane">
           <Link to="/">Accueil</Link>
           <ChevronRight size={14} aria-hidden />
-          {categoryLabel && (
+          {detailData?.category && (
             <>
-              <Link to={`/category/${encodeURIComponent(String(categoryLabel).toLowerCase())}`}>{categoryLabel}</Link>
+              <Link to={`/category/${encodeURIComponent(String(detailData.category).toLowerCase())}`}>{detailData.category}</Link>
               <ChevronRight size={14} aria-hidden />
             </>
           )}
-          <span className="pd-crumb__current">{product.name}</span>
+          <span className="pd-crumb__current">{detailData?.name}</span>
         </nav>
 
         <div className="pd-layout">
           <div className="pd-layout__media">
-            <ProductGallery images={images} name={product.name} />
+            <ProductGallery images={images} name={detailData?.name} videoUrl={detailData?.videoUrl} />
           </div>
 
           <div className="pd-layout__info">
-          <aside className="pd-buy">
-            <div className="pd-buy__head">
-              {tagLabel && <span className="pd-tag">{tagLabel}</span>}
-              {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}
-              {product.brand && !/cj\s*drop/i.test(String(product.brand)) && (
-                <span className="pd-meta">{product.brand}</span>
+            <aside className="pd-buy">
+              <div className="pd-buy__head">
+                {originCountry && isAlibaba && <span className="pd-tag pd-tag--origin"><Ship size={12} /> Importé de {originCountry}</span>}
+                {detailData?.tagLabel && <span className="pd-tag">{detailData.tagLabel}</span>}
+                {isFragile && <span className="pd-tag">Colis fragile</span>}
+                {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}
+                {detailData?.brand && <span className="pd-meta">{detailData.brand}</span>}
+              </div>
+
+              <h1 className={`pd-title${(detailData?.name?.length || 0) > 72 ? ' pd-title--long' : ''}`}>{detailData?.name}</h1>
+
+              <div className="pd-rating-row">
+                <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
+                {soldCount > 0 && <span className="pd-meta"><Star size={12} fill="currentColor" /> {soldCount} vendus</span>}
+                {extras.model && <span className="pd-meta">Réf. {extras.model}</span>}
+              </div>
+
+              <div className="pd-price">
+                <span className="pd-price__now">{formatCFA(displayPrice)}</span>
+                {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
+                <span className="pd-price__unit">l&apos;unité, TTC</span>
+              </div>
+
+              <p className={`pd-stock ${!inStock ? 'pd-stock--out' : isLowStock ? 'pd-stock--low' : ''}`}>{stockLabel}</p>
+
+              <VolumePricingTable tiers={tiers} qty={qty} onPick={(m) => setQty(snapQuantity(product, m))} />
+
+              {isDropship && !moqRules.soldAsLot && moqRules.moq > 1 && (
+                <p className="pd-note">Quantité minimum : <strong>{moqRules.moq} unités</strong></p>
               )}
-            </div>
-
-            <h1 className={`pd-title${titleIsLong ? ' pd-title--long' : ''}`}>
-              {originLabel ? <span className="pd-origin-tag">{originLabel}</span> : null}
-              <span className="pd-title__text">{product.name}</span>
-            </h1>
-
-            <div className="pd-rating-row">
-              <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
-              {soldCount > 0 && (
-                <span className="pd-meta">
-                  <Star size={12} fill="currentColor" /> {soldCount} vendus
-                </span>
+              {isDropship && (moqRules.soldAsLot || moqRules.packSize > 1) && (
+                <p className="pd-note">Vendu par lot de <strong>{moqRules.packSize} unités</strong></p>
               )}
-            </div>
 
-            <div className="pd-price">
-              <span className="pd-price__now">{formatCFA(displayPrice)}</span>
-              {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
-            </div>
-            {isAlibaba && alibabaInfo.hasLadderPrices && alibabaInfo.skus?.length > 0 && (
-              <AlibabaLadderPrices skus={alibabaInfo.skus} />
-            )}
-            {isAlibaba && alibabaInfo.hasSkus && (
-              <AlibabaSkuAttributes skus={alibabaInfo.skus} />
-            )}
-            {isDropship && (moqRules.soldAsLot || moqRules.packSize > 1) && (
-              <p className="pd-muted" style={{ marginTop: 6 }}>
-                Lot de {moqRules.packSize} unités
-              </p>
-            )}
-            {isDropship && !moqRules.soldAsLot && moqRules.moq > 1 && (
-              <p className="pd-muted" style={{ marginTop: 6 }}>
-                Minimum {moqRules.moq} unités
-              </p>
-            )}
-            {isDropship && (
-              <p className="pd-muted" style={{ marginTop: 6 }}>
-                Frais d&apos;importation calculés au checkout
-              </p>
-            )}
+              <ProductVariants
+                product={product ? { ...product, isAlibaba } : product}
+                selectedVariantIndex={selectedVariantIndex}
+                onSelectVariant={setSelectedVariantIndex}
+                selectedColor={selectedColor}
+                onSelectColor={setSelectedColor}
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+              />
 
-            <p className={`pd-stock ${!inStock ? 'pd-stock--out' : isLowStock ? 'pd-stock--low' : ''}`}>
-              {stockLabel}
-            </p>
+              {inStock && (
+                <div className="pd-qty-row">
+                  <div>
+                    <span className="pd-label">Quantité</span>
+                    {subtotal != null && <p className="pd-subtotal">Sous-total {formatCFA(subtotal)}</p>}
+                  </div>
+                  <QtyControl
+                    value={qty}
+                    onChange={(next) => setQty(snapQuantity(product, next))}
+                    min={moqRules.moq}
+                    step={moqRules.increment}
+                    max={isAlibaba ? undefined : stock}
+                  />
+                </div>
+              )}
 
-            {isDropship && (
-              <ul className="pd-facts">
-                <li>
-                  <Truck size={15} />
-                  Délai d&apos;importation estimé · <strong>{importDaysLabel}</strong>
-                </li>
-                <li><ShieldCheck size={15} /> Vente et SAV · <strong>Dango Import</strong></li>
+              <div className="pd-actions">
+                <button type="button" className={`pd-btn pd-btn--primary ${addedAnim ? 'is-done' : ''}`} onClick={handleAddToCart} disabled={!inStock}>
+                  {addedAnim ? <><Check size={18} /> Ajouté</> : <><ShoppingCart size={18} /> {isInCart ? 'Encore au panier' : 'Ajouter au panier'}</>}
+                </button>
+                <button type="button" className="pd-btn pd-btn--ghost" onClick={handleBuyNow} disabled={!inStock}>Acheter</button>
+                <button type="button" className={`pd-icon-btn ${wished ? 'is-on' : ''}`} onClick={() => setWished((w) => !w)} aria-label="Favoris">
+                  <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
+                </button>
+              </div>
+
+              {isDropship && (
+                <section className="pd-panel">
+                  <h3 className="pd-panel__title">Le trajet de votre commande</h3>
+                  <ImportRoute origin={originLabel} port={extras.port} days={importDaysLabel} />
+                  <p className="pd-panel__foot">Frais d&apos;importation et taxes calculés au checkout. Vente et SAV par Dango Import.</p>
+                </section>
+              )}
+
+              {glance.length > 0 && (
+                <section className="pd-panel">
+                  <h3 className="pd-panel__title">En un coup d&apos;œil</h3>
+                  <dl className="pd-glance">
+                    {glance.map((g) => (
+                      <div key={g.label} className="pd-glance__item">
+                        <dt>{g.label}</dt>
+                        <dd>{g.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )}
+
+              <ul className="pd-assurance">
+                <li><Truck size={14} /> {freeShippingZone ? 'Livraison gratuite sur certaines zones' : 'Livraison partout au Togo et au Bénin'}</li>
+                <li><ShieldCheck size={14} /> Paiement mobile sécurisé (T-Money, Moov, Flooz, Carte)</li>
+                <li><RefreshCw size={14} /> Retours et conformité garantis par Dango Import</li>
               </ul>
-            )}
 
-            <div className="pd-divider" />
-
-            <ProductVariants
-              product={product}
-              selectedVariantIndex={selectedVariantIndex}
-              onSelectVariant={setSelectedVariantIndex}
-              selectedColor={selectedColor}
-              onSelectColor={setSelectedColor}
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
-            />
-
-            {inStock && (
-              <div className="pd-qty-row">
-                <span className="pd-label">Quantité</span>
-                <QtyControl
-                  value={qty}
-                  onChange={(next) => setQty(snapQuantity(product, next))}
-                  min={moqRules.moq}
-                  step={moqRules.increment}
-                  max={isAlibaba ? undefined : stock}
-                />
-              </div>
-            )}
-
-            <div className="pd-actions">
-              <button
-                type="button"
-                className={`pd-btn pd-btn--primary ${addedAnim ? 'is-done' : ''}`}
-                onClick={handleAddToCart}
-                disabled={!inStock}
-              >
-                {addedAnim ? <><Check size={18} /> Ajouté</> : <><ShoppingCart size={18} /> {isInCart ? 'Encore au panier' : 'Ajouter au panier'}</>}
-              </button>
-              <button type="button" className="pd-btn pd-btn--ghost" onClick={handleBuyNow} disabled={!inStock}>
-                Acheter
-              </button>
-              <button
-                type="button"
-                className={`pd-icon-btn ${wished ? 'is-on' : ''}`}
-                onClick={() => setWished((w) => !w)}
-                aria-label="Favoris"
-              >
-                <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
-              </button>
-            </div>
-
-            <ul className="pd-assurance">
-              <li><Truck size={14} /> {freeShippingZone ? 'Livraison gratuite sur certaines zones' : 'Livraison partout au pays'}</li>
-              <li><ShieldCheck size={14} /> Paiement sécurisé</li>
-              <li><RefreshCw size={14} /> Retours sous conditions</li>
-            </ul>
-
-            {sellerName && (
-              <div className="pd-seller">
-                <span className="pd-label">Vendeur</span>
-                <span className="pd-seller__name">
-                  {sellerName}
-                  {(product?.isVendorCertified || product?.sellerVerified) && (
-                    <BadgeCheck size={14} className="pd-seller__badge" aria-label="Certifié" />
-                  )}
-                </span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="pd-share"
-              onClick={() => (
-                navigator.share
-                  ? navigator.share({ title: product.name, url: window.location.href })
-                  : navigator.clipboard?.writeText(window.location.href).then(() => toast.success('Lien copié'))
+              {sellerName && (
+                <div className="pd-seller">
+                  <span className="pd-label">Vendeur</span>
+                  <span className="pd-seller__name">
+                    {sellerName}
+                    {detailData?.isVendorCertified && <BadgeCheck size={14} className="pd-seller__badge" aria-label="Certifié" />}
+                  </span>
+                </div>
               )}
-            >
-              <Share2 size={14} /> Partager
-            </button>
-          </aside>
+
+              <button
+                type="button" className="pd-share"
+                onClick={() => (navigator.share
+                  ? navigator.share({ title: detailData?.name, url: window.location.href })
+                  : navigator.clipboard?.writeText(window.location.href).then(() => toast.success('Lien copié')))}
+              >
+                <Share2 size={14} /> Partager
+              </button>
+            </aside>
           </div>
         </div>
 
         <nav className="pd-tabs" aria-label="Sections">
           {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              className={`pd-tabs__item ${activeTab === tab.key ? 'is-active' : ''}`}
-              onClick={() => scrollToSection(tab.ref, tab.key)}
-            >
+            <button key={tab.key} type="button" className={`pd-tabs__item ${activeTab === tab.key ? 'is-active' : ''}`} onClick={() => scrollToSection(tab.ref, tab.key)}>
               {tab.label}
             </button>
           ))}
@@ -830,36 +792,112 @@ export default function ProductDetail() {
 
         <section ref={descRef} className="pd-section" id="description">
           <h2>Description</h2>
-          <ReadMore
-            text={product.description || product.shortDescription || ''}
-            fallbackTitle={product.name}
-            specifications={specifications}
-          />
-          {isAlibaba && alibabaInfo.hasVideo && (
-            <AlibabaVideoPlayer videoUrl={alibabaInfo.videoUrl} />
+          <ReadMore text={detailData?.description} safeHtml={detailData?.safeHtml} fallbackTitle={detailData?.name} />
+          {detailData?.hasVideo && detailData?.videoUrl && (
+            <div className="pd-video-wrap">
+              <video src={detailData.videoUrl} controls preload="metadata" className="pd-video" aria-label="Vidéo de présentation produit" />
+            </div>
           )}
         </section>
 
         <section ref={specsRef} className="pd-section" id="specs">
           <h2>Caractéristiques</h2>
-          {specifications.length > 0 ? (
-            <dl className="pd-specs">
-              {specifications.map((row) => (
-                <div key={row.key} className="pd-specs__row">
-                  <dt>{row.key}</dt>
-                  <dd>{row.value}</dd>
-                </div>
-              ))}
-            </dl>
+          {specGroups.length > 0 ? (
+            specGroups.map((g) => (
+              <div key={g.title} className="pd-specgroup">
+                <h3>{g.title}</h3>
+                <Rows rows={g.rows} />
+              </div>
+            ))
           ) : (
             <p className="pd-muted">Aucune caractéristique renseignée.</p>
           )}
-          {isAlibaba && alibabaInfo.hasWholesale && (
-            <AlibabaWholesaleInfo wholesale={alibabaInfo.wholesale} />
+
+          {isAlibaba && alibabaInfo?.hasSkus && (
+            <div className="pd-specgroup">
+              <h3>Options proposées</h3>
+              <AlibabaSkuAttributes skus={alibabaInfo.skus} />
+            </div>
           )}
+
           {isAlibaba && (
-            <AlibabaSupplierCard alibabaInfo={alibabaInfo} />
+            <div className="pd-supplier">
+              <p className="pd-supplier__title">Approvisionnement direct usine</p>
+              <p className="pd-muted">Expédition depuis : <strong>{originLabel || 'Chine'}</strong>{extras.port ? <>, port de {extras.port}</> : null}</p>
+              <p className="pd-supplier__guarantee"><ShieldCheck size={14} /> Les commandes Alibaba passent par le contrôle qualité Dango Import avant expédition vers Lomé et Cotonou.</p>
+            </div>
           )}
+        </section>
+
+        {hasWholesaleTab && (
+          <section ref={wholesaleRef} className="pd-section" id="wholesale">
+            <h2>Gros et conditionnement</h2>
+            {packRows.length > 0 && <Rows rows={packRows} />}
+            {extras.carton?.grossKg && <p className="pd-footnote">Le poids du carton complet est estimé : poids unitaire multiplié par le nombre de pièces.</p>}
+            {wh?.deliverPeriods?.length > 0 && (
+              <div className="pd-specgroup">
+                <h3>Délais de fabrication selon le volume</h3>
+                <dl className="pd-rows">
+                  {wh.deliverPeriods.map((p, i) => (
+                    <div key={i} className="pd-rows__row">
+                      <dt>{p.quantity} unités</dt>
+                      <dd>{p.processPeriodDays || p.processPeriod} jours ouvrés</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+            {tiers.length > 0 && (
+              <div className="pd-specgroup">
+                <VolumePricingTable tiers={tiers} qty={qty} onPick={(m) => setQty(snapQuantity(product, m))} />
+              </div>
+            )}
+          </section>
+        )}
+
+        <section ref={deliveryRef} className="pd-section" id="delivery">
+          <h2>Livraison et importation</h2>
+          {isDropship ? (
+            <>
+              <ImportRoute origin={originLabel} port={extras.port} days={importDaysLabel} />
+              <ul className="pd-steps">
+                <li>
+                  <strong>Préparation chez le fournisseur</strong>
+                  <p>{wh?.handlingTimeDays ? `${wh.handlingTimeDays} jours ouvrés de fabrication et de préparation.` : 'Vérification et préparation de la commande par le fournisseur.'}</p>
+                </li>
+                <li>
+                  <strong>Transit international et dédouanement</strong>
+                  <p>Expédié depuis {originCountry || 'la Chine'} vers le hub Dango Import{importDaysLabel ? <> en <strong>{importDaysLabel}</strong></> : null}.</p>
+                </li>
+                <li>
+                  <strong>Distribution au Togo et au Bénin</strong>
+                  <p>Livraison à votre adresse ou retrait sécurisé en agence partenaire.</p>
+                </li>
+              </ul>
+              {isFragile && <p className="pd-footnote">Catégorie d&apos;expédition : fragile.</p>}
+            </>
+          ) : hasShippingInfo ? (
+            <p className="pd-prose">{detailData.shippingInfo}</p>
+          ) : null}
+
+          {deliveryZones.length > 0 && (
+            <div className="pd-specgroup">
+              <h3>Tarifs de livraison locale</h3>
+              <ul className="pd-zones">
+                {deliveryZones.map((zone, i) => {
+                  const zname = zone.locality || zone.area || zone.country || 'Zone locale';
+                  const isFree = zone.freeShipping || Number(zone.price) === 0;
+                  return (
+                    <li key={i}>
+                      <span>{zname}</span>
+                      <span>{isFree ? 'Gratuite' : zone.price != null ? formatCFA(zone.price) : zone.deliveryTime || '—'}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          {hasWarranty && <p className="pd-warranty"><ShieldCheck size={15} /> Garantie : {detailData.warranty}</p>}
         </section>
 
         <section ref={reviewsRef} className="pd-section pd-section--flush" id="reviews">
@@ -872,47 +910,11 @@ export default function ProductDetail() {
           />
         </section>
 
-        <section ref={deliveryRef} className="pd-section" id="delivery">
-          <h2>Livraison & retours</h2>
-          {hasDelivery ? (
-            <div className="pd-delivery">
-              {hasShippingInfo && <p>{product.shippingInfo}</p>}
-              {isDropship && (
-                <p>
-                  Frais d&apos;importation calculés au checkout. Délai estimé : <strong>20–30 jours</strong>.
-                </p>
-              )}
-              {!isDropship && estimatedDeliveryDays > 0 && !hasShippingInfo && (
-                <p>Délai estimé : <strong>{estimatedDeliveryDays} jour(s) ouvrés</strong>.</p>
-              )}
-              {deliveryZones.length > 0 && (
-                <ul className="pd-zones">
-                  {deliveryZones.map((zone, i) => {
-                    const name = zone.locality || zone.area || zone.country || 'Zone';
-                    const isFree = zone.freeShipping || Number(zone.price) === 0;
-                    return (
-                      <li key={i}>
-                        <span>{name}</span>
-                        <span>{isFree ? 'Gratuite' : zone.price != null ? formatCFA(zone.price) : zone.deliveryTime || '—'}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          ) : (
-            <p className="pd-muted">Informations de livraison bientôt disponibles.</p>
-          )}
-          {hasWarranty && <p className="pd-warranty"><ShieldCheck size={15} /> Garantie : {product.warranty}</p>}
-        </section>
-
         {similarProducts.length > 0 && (
           <section className="pd-related">
             <div className="pd-related__head">
               <h2>Produits similaires</h2>
-              {categoryLabel && (
-                <Link to={`/category/${encodeURIComponent(String(categoryLabel).toLowerCase())}`}>Voir la catégorie</Link>
-              )}
+              {detailData?.category && <Link to={`/category/${encodeURIComponent(String(detailData.category).toLowerCase())}`}>Voir la catégorie</Link>}
             </div>
             <div className="pd-related__grid">
               {similarProducts.slice(0, 8).map((item) => (
@@ -928,12 +930,8 @@ export default function ProductDetail() {
           <strong>{formatCFA(displayPrice)}</strong>
           {hasPromo && <s>{formatCFA(price)}</s>}
         </div>
-        <button type="button" className="pd-bar__btn" onClick={handleAddToCart} disabled={!inStock}>
-          Panier
-        </button>
-        <button type="button" className="pd-bar__btn pd-bar__btn--accent" onClick={handleBuyNow} disabled={!inStock}>
-          Acheter
-        </button>
+        <button type="button" className="pd-bar__btn" onClick={handleAddToCart} disabled={!inStock}>Panier</button>
+        <button type="button" className="pd-bar__btn pd-bar__btn--accent" onClick={handleBuyNow} disabled={!inStock}>Acheter</button>
       </div>
 
       <Footer />

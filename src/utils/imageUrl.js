@@ -1,5 +1,12 @@
 import API_BASE_URL from '../apiConfig';
 
+function unwrapAlibabaPayload(value) {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? unwrapAlibabaPayload(value[0]) : {};
+  }
+  return value && typeof value === 'object' ? value : {};
+}
+
 export function resolveImageUrl(img) {
   if (!img || typeof img !== 'string') return null;
   const trimmed = img.trim();
@@ -27,15 +34,26 @@ export function getProductImage(product) {
   return null;
 }
 
-export function getProductImages(product, max = 8) {
+export function getProductImages(product, max = Infinity) {
   if (!product) return [];
-  const raw = product.images || [];
-  const resolved = raw
+
+  const rawData = unwrapAlibabaPayload(product.rawAlibabaData || product.alibabaData || {});
+  const candidates = [
+    Array.isArray(product.images) ? product.images : [],
+    Array.isArray(rawData.images) ? rawData.images : [],
+    Array.isArray(rawData.gallery) ? rawData.gallery : [],
+    Array.isArray(rawData.galleryImages) ? rawData.galleryImages : [],
+    Array.isArray(rawData.imageList) ? rawData.imageList : [],
+    Array.isArray(product?.supplier?.images) ? product.supplier.images : [],
+    Array.isArray(product?.supplier?.gallery) ? product.supplier.gallery : [],
+  ].flat();
+
+  const resolved = candidates
     .map((img) => (typeof img === 'string' ? resolveImageUrl(img) : resolveImageUrl(img?.url)))
     .filter(Boolean);
 
   const scrapeFromImageField = () => {
-    const field = product.image;
+    const field = product.image || rawData.image || rawData.mainImage || product?.supplier?.productUrl;
     if (!field || typeof field !== 'string') return [];
     const trimmed = field.trim();
     if (trimmed.startsWith('[')) {
@@ -60,5 +78,5 @@ export function getProductImages(product, max = 8) {
     const single = getProductImage(product);
     if (single) return [single];
   }
-  return merged.slice(0, max);
+  return Number.isFinite(max) && max > 0 ? merged.slice(0, max) : merged;
 }

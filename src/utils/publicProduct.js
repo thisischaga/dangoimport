@@ -1,6 +1,13 @@
 export const PLATFORM_VENDOR_NAME = 'DANGO IMPORT';
 export const CJ_CATALOG_VENDOR_LABEL = 'À importer';
 
+function unwrapAlibabaPayload(value) {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? unwrapAlibabaPayload(value[0]) : {};
+  }
+  return value && typeof value === 'object' ? value : {};
+}
+
 /**
  * Extrait toutes les informations utiles issues de la réponse
  * Alibaba /eco/buyer/product/description pour l'affichage client.
@@ -15,7 +22,7 @@ export function extractAlibabaDisplayInfo(product) {
   if (!product) return {};
 
   const supplier = product.supplier || {};
-  const raw = product.alibabaData || {}; // champ optionnel si on stocke le payload brut
+  const raw = unwrapAlibabaPayload(product.rawAlibabaData || product.alibabaData || {});
 
   // --- Ladder pricing (prix par palier de quantité) ---
   const ladderPrices = Array.isArray(raw.ladderPrices || supplier.ladderPrices)
@@ -155,10 +162,21 @@ export function isCjCatalogProduct(product) {
 
 export function isAlibabaProduct(product) {
   if (!product) return false;
-  const platform = String(product?.supplier?.platform || '').toLowerCase();
+  if (product.isAlibaba === true) return true;
+  const source = String(product?.source || '').toLowerCase();
+  if (source === 'alibaba') return true;
+  const platform = String(product?.supplier?.platform || product?.supplierPlatform || product?.fulfillmentPlatform || '').toLowerCase();
   if (platform === 'alibaba') return true;
   if (product?.importSourceType === 'ALIBABA_API') return true;
-  if (/^alibaba:/i.test(String(product?.externalSourceKey || ''))) return true;
+  const rawPayload = unwrapAlibabaPayload(product?.rawAlibabaData || product?.alibabaData || {});
+  const rawSource = String(rawPayload?.source || '').toLowerCase();
+  if (rawSource === 'alibaba') return true;
+  const key = String(product?.externalSourceKey || product?.externalSourceId || '').toLowerCase();
+  if (/^alibaba:/i.test(key)) return true;
+  const url = String(product?.supplier?.productUrl || product?.supplierUrl || product?.productUrl || product?.detailUrl || '').toLowerCase();
+  if (/alibaba\.com/i.test(url)) return true;
+  const supplierName = String(product?.supplier?.name || product?.fulfillmentSupplierName || product?.vendorName || '').toLowerCase();
+  if (supplierName === 'alibaba') return true;
   return false;
 }
 
@@ -214,7 +232,7 @@ function resolveDisplayProductName(product) {
   return candidates[0] || variantNames[0] || 'Article Dango Import';
 }
 
-function sanitizeVariantsForDisplay(variants = []) {
+function sanitizeVariantsForDisplay(variants = [], isAlibaba = false) {
   if (!Array.isArray(variants)) return [];
   return variants.map((variant, index) => {
     const raw = String(variant?.name || '').trim();
@@ -226,13 +244,20 @@ function sanitizeVariantsForDisplay(variants = []) {
     const name = (!isInvalidTranslationText(raw) && !isGenericProductPlaceholder(raw))
       ? raw
       : (fallbacks.map((c) => String(c || '').trim()).find((c) => c && !isInvalidTranslationText(c)) || `Option ${index + 1}`);
-    return { ...variant, name };
+    const variantStock = Number(variant?.stock ?? 0);
+    const stock = Number.isFinite(variantStock) ? Math.max(0, variantStock) : 0;
+    return { ...variant, name, stock };
   });
 }
 
-/** Stock affichable (aligné fiche produit : max stock produit, variantes, entrepôts CJ). */
+/** Stock affichable : pas de faux 999 pour un stock inconnu, on garde la valeur réelle ou 0. */
 export function getProductSellableStock(product) {
   if (!product) return 0;
+  if (isAlibabaProduct(product)) {
+    const rawStock = Number(product.stock ?? 0);
+    return Number.isFinite(rawStock) ? Math.max(0, rawStock) : 0;
+  }
+
   let stock = Number(product.stock ?? 0);
   if (!Number.isFinite(stock) || stock < 0) stock = 0;
 
@@ -277,12 +302,81 @@ export function getDisplayProductName(product) {
 export function sanitizeProductForDisplay(product) {
   if (!product) return null;
 
+  const isAlibaba = isAlibabaProduct(product);
+  const rawAlibaba = unwrapAlibabaPayload(product.rawAlibabaData || product.alibabaData || {});
   const sanitized = { ...product };
   INTERNAL_FIELDS.forEach((field) => {
     delete sanitized[field];
   });
 
-  sanitized.stock = getProductSellableStock(product);
+  if (isAlibaba) {
+    sanitized.isAlibaba = true;
+    if (product.supplier) {
+      sanitized.supplier = {
+        name: product.supplier.name || 'Alibaba',
+        platform: 'alibaba',
+        productUrl: product.supplier.productUrl || '',
+        estimatedDeliveryDays: product.supplier.estimatedDeliveryDays || 25,
+        ladderPrices: product.supplier.ladderPrices || [],
+        skus: product.supplier.skus || [],
+        wholesaleTrade: product.supplier.wholesaleTrade || null,
+        videoUrl: product.supplier.videoUrl || '',
+        eCompanyId: product.supplier.eCompanyId || '',
+        alibabaCategory: product.supplier.alibabaCategory || '',
+        shipFromCountryName: product.supplier.shipFromCountryName || 'Chine',
+      };
+    }
+    if (product.externalSourceKey) {
+      sanitized.externalSourceKey = product.externalSourceKey;
+    }
+  }
+
+  const imageCandidates = [
+    Array.isArray(product.images) ? product.images : [],
+    Array.isArray(rawAlibaba.images) ? rawAlibaba.images : [],
+    Array.isArray(rawAlibaba.gallery) ? rawAlibaba.gallery : [],
+    Array.isArray(rawAlibaba.galleryImages) ? rawAlibaba.galleryImages : [],
+  ].flat();
+  if (imageCandidates.length) {
+    sanitized.images = imageCandidates;
+    sanitized.image = typeof imageCandidates[0] === 'string' ? imageCandidates[0] : imageCandidates[0]?.url || sanitized.image || '';
+  }
+
+  const fallbackDescription = [
+    product.description,
+    product.shortDescription,
+    rawAlibaba.description,
+    rawAlibaba.result_data?.description,
+    rawAlibaba.product?.description,
+    rawAlibaba.raw?.result?.result_data?.description,
+  ].find((value) => typeof value === 'string' && value.trim());
+  if (fallbackDescription) {
+    sanitized.description = sanitized.description || fallbackDescription;
+  }
+  if (!sanitized.shortDescription && sanitized.description) {
+    sanitized.shortDescription = String(sanitized.description).slice(0, 220);
+  }
+
+  const keyAttributes = unwrapAlibabaPayload(rawAlibaba.keyAttributes || {});
+  const keyAttributeRows = Array.isArray(keyAttributes.attributes || keyAttributes.attribute_list || keyAttributes.attr_list || keyAttributes.product_attributes)
+    ? (keyAttributes.attributes || keyAttributes.attribute_list || keyAttributes.attr_list || keyAttributes.product_attributes)
+    : [];
+  const specRows = [
+    ...(Array.isArray(product.specifications) ? product.specifications : []),
+    ...(Array.isArray(rawAlibaba.specifications) ? rawAlibaba.specifications : []),
+    ...keyAttributeRows,
+  ].map((row) => {
+    if (!row || typeof row !== 'object') return null;
+    const key = row.key || row.name || row.attr_name_desc || row.attr_name || row.attributeName || row.prop_name || row.property_name || '';
+    const value = row.value || row.val || row.attr_value_desc || row.attr_value || row.attributeValue || row.prop_value || row.property_value || '';
+    if (!key || !value) return null;
+    return { key: String(key).trim(), value: String(value).trim() };
+  }).filter(Boolean);
+  if (specRows.length) {
+    sanitized.specifications = specRows;
+  }
+
+  sanitized.stock = getProductSellableStock(isAlibaba ? { ...product, isAlibaba: true } : product);
   sanitized.name = resolveDisplayProductName(product);
   if (isInvalidTranslationText(sanitized.description)) {
     sanitized.description = sanitized.name;
@@ -291,13 +385,32 @@ export function sanitizeProductForDisplay(product) {
     sanitized.shortDescription = String(sanitized.description || sanitized.name).slice(0, 220);
   }
   if (Array.isArray(product.variants)) {
-    sanitized.variants = sanitizeVariantsForDisplay(product.variants);
+    sanitized.variants = sanitizeVariantsForDisplay(product.variants, isAlibaba);
+  }
+
+  if (isAlibaba) {
+    if (!Array.isArray(sanitized.color) || !sanitized.color.length) {
+      const colors = new Set();
+      (sanitized.variants || []).forEach((v) => {
+        const c = v?.attributes?.color || v?.attributes?.Couleur || v?.attributes?.Colour;
+        if (c && typeof c === 'string') colors.add(c.trim());
+      });
+      if (colors.size > 0) sanitized.color = Array.from(colors);
+    }
+    if (!Array.isArray(sanitized.size) || !sanitized.size.length) {
+      const sizes = new Set();
+      (sanitized.variants || []).forEach((v) => {
+        const s = v?.attributes?.size || v?.attributes?.Taille || v?.attributes?.Pointure;
+        if (s && typeof s === 'string') sizes.add(s.trim());
+      });
+      if (sizes.size > 0) sanitized.size = Array.from(sizes);
+    }
   }
 
   if (isDropshippingProduct(product)) {
     sanitized.vendorName = PLATFORM_VENDOR_NAME;
     sanitized.isVendorCertified = true;
-    sanitized.originLabel = 'Chine';
+    sanitized.originLabel = '';
     sanitized.fulfillmentType = product.fulfillmentType || 'DANGO_IMPORT';
     if (product.estimatedDeliveryDays != null) {
       sanitized.estimatedDeliveryDays = product.estimatedDeliveryDays;
@@ -312,8 +425,8 @@ export function sanitizeProductForDisplay(product) {
     if (Array.isArray(product.specifications)) sanitized.specifications = product.specifications;
     delete sanitized.country;
     delete sanitized.origin;
-  } else if (!sanitized.originLabel) {
-    sanitized.originLabel = resolveLocalOriginLabel(product);
+  } else {
+    sanitized.originLabel = '';
   }
 
   return sanitized;
@@ -353,8 +466,8 @@ export function resolveLocalOriginLabel(product = {}) {
 }
 
 export function getProductOriginLabel(product) {
-  if (isDropshippingProduct(product) || isCjCatalogProduct(product)) return 'Chine';
-  return product?.originLabel || resolveLocalOriginLabel(product);
+  // La plateforme est 100% import — on n'affiche plus de badge d'origine
+  return '';
 }
 
 export function isMarketplaceProduct(product) {

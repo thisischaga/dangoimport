@@ -9,7 +9,7 @@ import toast from '../utils/toast';
 import { 
   FaMapMarkerAlt, FaShoppingCart, FaShieldAlt, 
   FaCheckCircle, FaLocationArrow, FaSpinner,
-  FaUser, FaEnvelope, FaInfoCircle
+  FaUser, FaEnvelope, FaInfoCircle, FaCog
 } from 'react-icons/fa';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useCart } from '../context/CartContext';
@@ -418,7 +418,7 @@ const BuyProduct = ({ image, name, price, vendorName, parameters = [], isVisible
         {parameters && parameters.length > 0 && (
           <div className="mb-6 p-5 bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-2xl space-y-4">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">⚙️</span>
+              <FaCog className="text-purple-600" size={16} />
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Options disponibles</h3>
               <span className="ml-auto text-[10px] bg-purple-200 text-purple-900 px-2 py-1 rounded-full font-bold">{parameters.length} paramètre{parameters.length > 1 ? 's' : ''}</span>
             </div>

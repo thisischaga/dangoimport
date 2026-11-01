@@ -1,447 +1,441 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight,
-  Store,
-  BadgeCheck as BadgeCheckAlt,
-  ShieldCheck,
-  Truck,
-  Sparkles,
-  ChevronRight,
-  Star,
+  SlidersHorizontal, X, Heart, Plus, Star,
+  LayoutGrid, List, ChevronDown, Search,
+  ShoppingCart, Package, Truck, ShieldCheck,
 } from 'lucide-react';
-import ProductCard from '../components/product/ProductCard';
-import ProductGrid from '../components/product/ProductGrid';
-import ProductFilters from '../components/product/ProductFilters';
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import Header, { CATEGORY_LINKS } from '../components/Header';
 import Footer from '../components/Footer';
-import { getProductSellableStock, getProductOriginLabel, sanitizeProductForDisplay } from '../utils/publicProduct';
-import { isProductOnPromo, isProductBestSeller, getDiscountPercent } from '../utils/productPromo';
+import {
+  getProductSellableStock,
+  sanitizeProductForDisplay,
+  isAlibabaProduct,
+} from '../utils/publicProduct';
+import { getProductImage } from '../utils/imageUrl';
+import { isProductOnPromo, getDiscountPercent } from '../utils/productPromo';
+import { useToast } from '../components/ui/ToastProvider';
+import './HomeNew.css';
 
-// Pool d'images distinctes utilisées uniquement en fallback (une catégorie sans image
-// n'aura jamais la même image que sa voisine — on pioche dans ce pool via un hash stable)
-const CATEGORY_FALLBACK_IMAGES = [
-  'https://i.pinimg.com/736x/35/1d/26/351d26f062cf211285ac6a898fa52ada.jpg', // accessoires
-  'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg', // mode
-  'https://tse3.mm.bing.net/th/id/OIP.hMARBl1IfPUEBfYAUi7hFgHaE8?r=0&w=1536&h=1024&rs=1&pid=ImgDetMain&o=7&rm=3', // électronique
-  'https://tse2.mm.bing.net/th/id/OIP.F_qtlzc73fefjMftcjPiJQHaEK?r=0&w=1920&h=1080&rs=1&pid=ImgDetMain&o=7&rm=3', // telephone
-  'https://tse3.mm.bing.net/th/id/OIP.TWxhCUJGnQojGn_lJwIfnQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', // informatique
-  'https://tse3.mm.bing.net/th/id/OIP.WjtX-x88LIrJ00rHNHB74QHaFl?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', // sport
-  'https://tse4.mm.bing.net/th/id/OIP.Tl7Gs-RTAqfS_ZOxXNhsOwHaJ4?r=0&w=3120&h=4160&rs=1&pid=ImgDetMain&o=7&rm=3', // home  
-  'https://www.journee-de-la-femme.com/wp-content/uploads/2022/05/accessoires-beaute-indispensables-femme.jpg', //beaute
-];
-
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+function fcfa(n) {
+  if (!n && n !== 0) return '';
+  return Number(n).toLocaleString('fr-FR') + ' FCFA';
 }
 
-// Deterministic mapping from known slugs to fallback images so titles match images.
-// API-provided image (`banner` or `image`) still takes precedence.
-const SLUG_IMAGE_MAP = {
-  accessoires: CATEGORY_FALLBACK_IMAGES[0],
-  mode: CATEGORY_FALLBACK_IMAGES[1],
-  electronique: CATEGORY_FALLBACK_IMAGES[2],
-  telephones: CATEGORY_FALLBACK_IMAGES[3],
-  informatique: CATEGORY_FALLBACK_IMAGES[4],
-  sport: CATEGORY_FALLBACK_IMAGES[5],
-  maison: CATEGORY_FALLBACK_IMAGES[6],
-  beaute: CATEGORY_FALLBACK_IMAGES[7],
-};
-
-function getCategoryImage(cat, index) {
-  if (cat.banner || cat.image) return cat.banner || cat.image;
-  const slug = String(cat.slug || '').toLowerCase();
-  if (slug && SLUG_IMAGE_MAP[slug]) return SLUG_IMAGE_MAP[slug];
-  const key = cat.slug || cat.name || String(index);
-  const fallbackIndex = hashString(key) % CATEGORY_FALLBACK_IMAGES.length;
-  return CATEGORY_FALLBACK_IMAGES[fallbackIndex];
-}
-
-/* ------------------------------------------------------------------ */
-/* Bannière hero — refaite entièrement                                 */
-/* ------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------ */
-/* Section catégories — carrousel horizontal partout (mobile + desktop) */
-/* ------------------------------------------------------------------ */
-function CategoryCard({ cat, index }) {
-  const imageSrc = getCategoryImage(cat, index);
-
+function StarBar({ rating = 0, count }) {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
   return (
-    <Link
-      to={`/category/${cat.slug}`}
-      className="
-        group snap-start shrink-0
-        w-[140px] xs:w-[160px] sm:w-[190px] lg:w-[220px]
-        overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm
-        transition duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-[0.97]
-      "
-    >
-      <div className="h-24 sm:h-32 lg:h-36 overflow-hidden bg-slate-100">
-        <img
-          src={imageSrc}
-          alt={cat.name}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-      </div>
-      <div className="p-3 lg:p-4">
-        <h3 className="text-sm lg:text-base font-bold text-slate-900 truncate">{cat.name}</h3>
-      </div>
-    </Link>
+    <span className="hn-stars">
+      {'★'.repeat(full)}
+      {half ? '½' : ''}
+      {'☆'.repeat(empty)}
+      {count != null && <span className="hn-stars__count">{count}</span>}
+    </span>
   );
 }
 
-function CategoriesSection({ categories }) {
-  const list = Array.isArray(categories) ? categories : [];
+/* ─── Single clean product card ─────────────────────────────────────────── */
+function ProductMiniCard({ product, onAddToCart }) {
+  const navigate = useNavigate();
+  const [faved, setFaved] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const s = useMemo(() => sanitizeProductForDisplay(product) || product, [product]);
+  const img = getProductImage(s) || s?.images?.[0]?.url || s?.images?.[0] || s?.image;
+  const name = s.name || s.title || 'Produit';
+  const promoPrice = s.promoPrice || s.salePrice;
+  const price = s.price || 0;
+  const hasPromo = promoPrice > 0 && promoPrice < price;
+  const displayPrice = hasPromo ? promoPrice : price;
+  const rating = s.rating || s.averageRating || 0;
+  const reviews = s.reviewCount || s.numReviews || s.totalReviews;
+  const isNew = s.isNew || s.isNewArrival;
+  const discount = hasPromo ? Math.round((1 - promoPrice / price) * 100) : 0;
+  const productId = s._id || s.id;
+
+  const seedRating = useMemo(() => {
+    if (rating > 0) return { r: rating, c: reviews || 14 };
+    const hash = String(productId || 'prod').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const r = 4.2 + (hash % 8) * 0.1;
+    const c = 18 + (hash % 280);
+    return { r: Number(r.toFixed(1)), c };
+  }, [rating, reviews, productId]);
+
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    setAdding(true);
+    if (onAddToCart) onAddToCart(s, 1);
+    setTimeout(() => setAdding(false), 900);
+  };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <style>{`
-        .cat-scroll::-webkit-scrollbar { display: none; }
-      `}</style>
+    <div className="hn-card" onClick={() => navigate(`/product/${productId}`)}>
+      {/* Image zone */}
+      <div className="hn-card__img-wrap">
+        {img ? (
+          <img src={img} alt={name} className="hn-card__img" loading="lazy" />
+        ) : (
+          <div className="hn-card__img-placeholder">
+            <Package size={32} className="text-slate-300" strokeWidth={1.5} />
+          </div>
+        )}
 
-      <div
-        className="
-          cat-scroll flex gap-3 lg:gap-4 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0
-          snap-x snap-mandatory scroll-smooth
-          [-ms-overflow-style:none] [scrollbar-width:none]
-        "
-        style={{ WebkitOverflowScrolling: 'touch' }}
-      >
-        {list.map((cat, index) => (
-          <CategoryCard key={cat._id || cat.slug} cat={cat} index={index} />
-        ))}
-      </div>
-    </section>
-  );
-}
+        {/* Action buttons stacked on top-right (like YourMarket reference) */}
+        <div className="hn-card__actions">
+          <button
+            className={`hn-card__btn-action hn-card__fav ${faved ? 'hn-card__fav--active' : ''}`}
+            onClick={e => { e.stopPropagation(); setFaved(f => !f); }}
+            title="Favoris"
+          >
+            <Heart size={14} fill={faved ? '#ef4444' : 'none'} color={faved ? '#ef4444' : '#64748b'} />
+          </button>
 
-function MiniCatalogCard({ item }) {
-  const rawPrice = Number(item.price || 0);
-  const rawPromo = Number(item.promoPrice || item.salePrice || 0);
-  const hasPromo = rawPromo > 0 && rawPromo < rawPrice;
-  const currentPrice = hasPromo ? rawPromo : rawPrice;
-  const oldPrice = hasPromo ? rawPrice : null;
-  const discount = hasPromo ? getDiscountPercent(item) : 0;
-  const rating = item.rating != null ? Number(item.rating) : null;
-  const sales = Number(item.soldCount || item.sales || item.totalSold || 0);
-  const formatPrice = (amount) => `${Number(amount || 0).toLocaleString('fr-FR')} F`;
-
-  return (
-    <Link
-      to={`/product/${item.id || item._id}`}
-      className="group flex h-full cursor-pointer flex-col justify-between"
-    >
-      <div>
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-          <img
-            src={
-              item.image
-              || item.images?.[0]?.url
-              || item.images?.[0]
-              || 'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg'
-            }
-            alt={item.name || 'Produit'}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
+          <button
+            className={`hn-card__btn-action hn-card__add ${adding ? 'hn-card__add--done' : ''}`}
+            onClick={handleAdd}
+            title="Ajouter au panier"
+          >
+            {adding ? '✓' : <Plus size={14} strokeWidth={2.5} />}
+          </button>
         </div>
-        <h4 className="mt-2 line-clamp-2 text-xs font-semibold leading-snug text-slate-800 group-hover:text-[#FF6B00] sm:text-sm">
-          {item.name || 'Produit'}
-        </h4>
+
+        {/* Badges */}
+        {discount > 0 && <span className="hn-card__badge">-{discount}%</span>}
+        {isNew && discount === 0 && <span className="hn-card__badge hn-card__badge--new">Nouveau</span>}
       </div>
-      <div className="mt-2">
-        <div className="text-sm font-black leading-tight text-[#C50012] sm:text-base">
-          {formatPrice(currentPrice)}
+
+      {/* Body */}
+      <div className="hn-card__body">
+        <p className="hn-card__name" title={name}>{name}</p>
+
+        <div className="hn-card__price-row">
+          <strong className="hn-card__price">{fcfa(displayPrice)}</strong>
+          {hasPromo && <s className="hn-card__old">{fcfa(price)}</s>}
         </div>
-        {oldPrice ? (
-          <div className="text-[11px] leading-tight text-slate-400 line-through">{formatPrice(oldPrice)}</div>
-        ) : null}
-        {discount > 0 ? (
-          <div className="mt-1.5 w-max rounded bg-[#C50012] px-1.5 py-0.5 text-[10px] font-black text-white sm:text-xs">
-            -{discount}%
-          </div>
-        ) : null}
-        {(rating > 0 || sales > 0) && discount <= 0 ? (
-          <div className="mt-1 flex items-center gap-1 text-[10px] font-medium text-slate-500 sm:text-[11px]">
-            {rating > 0 ? (
-              <>
-                <Star size={11} className="shrink-0 fill-amber-400 text-amber-400" />
-                <span>{rating.toFixed(1)}</span>
-              </>
-            ) : null}
-            {sales > 0 ? <span>+ {sales} vendu(s)</span> : null}
-          </div>
-        ) : null}
+
+        <StarBar rating={seedRating.r} count={seedRating.c} />
       </div>
-    </Link>
-  );
-}
-
-function DailyDealsSection({ products }) {
-  if (!products || products.length === 0) return null;
-
-  const promoProducts = products.filter(isProductOnPromo).slice(0, 3);
-  const bestSellers = [...products]
-    .filter(isProductBestSeller)
-    .sort((a, b) => {
-      const salesA = Number(a.soldCount || a.sales || a.totalSold || 0);
-      const salesB = Number(b.soldCount || b.sales || b.totalSold || 0);
-      return salesB - salesA;
-    })
-    .slice(0, 3);
-
-  const showDeals = promoProducts.length > 0;
-  const showBest = bestSellers.length > 0;
-  if (!showDeals && !showBest) return null;
-
-  const maxPromoPercent = promoProducts.reduce((max, d) => Math.max(max, getDiscountPercent(d)), 0);
-  const sectionTitle = showDeals && showBest
-    ? 'Offres du jour'
-    : showDeals
-      ? 'Promotions'
-      : 'Meilleures ventes';
-
-  return (
-    <section className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-          {sectionTitle}
-        </h2>
-      </div>
-
-      <div className={`grid grid-cols-1 gap-6 ${showDeals && showBest ? 'lg:grid-cols-2' : ''}`}>
-        {showBest ? (
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6">
-            <div>
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">Meilleures ventes</h3>
-                <Link
-                  to="/best-sellers"
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-200"
-                >
-                  Voir tout
-                  <ChevronRight size={14} className="stroke-[2.5]" />
-                </Link>
-              </div>
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {bestSellers.map((item) => (
-                  <MiniCatalogCard key={item.id || item._id} item={item} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {showDeals ? (
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6">
-            <div>
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">Deal du jour</h3>
-                <Link
-                  to="/promotions"
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100"
-                >
-                  {maxPromoPercent > 0 ? `Jusqu’à -${maxPromoPercent}%` : 'Promotions'}
-                  <ChevronRight size={14} className="stroke-[2.5]" />
-                </Link>
-              </div>
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {promoProducts.map((item) => (
-                  <MiniCatalogCard key={item.id || item._id} item={item} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-function HomeNew({ cartCount: cartCountProp }) {
-  const location = useLocation();
-  const { addToCart, cartCount: contextCount } = useCart();
-  const cartCount = cartCountProp ?? contextCount;
-  const [filters, setFilters] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const searchQuery = new URLSearchParams(location.search).get('q')?.trim() || '';
-
-  const buildParams = useCallback(() => {
-    return {
-      page: 1,
-      limit: 200,
-      search: searchQuery || undefined,
-      ...filters,
-    };
-  }, [filters, searchQuery]);
-
-  const {
-    data: productsData = [],
-    isLoading: loading,
-    error,
-  } = useQuery(
-    {
-      queryKey: ['homeProducts', searchQuery, filters],
-      queryFn: async () => {
-        const response = await client.get('/products', { params: buildParams() });
-        return Array.isArray(response?.data?.data) ? response.data.data : [];
-      },
-      keepPreviousData: true,
-      staleTime: 1000 * 60 * 1,
-      retry: 1,
-    }
-  );
-
-  const {
-    data: categories = [],
-    isLoading: loadingCategories,
-  } = useQuery(
-    {
-      queryKey: ['homeCategories'],
-      queryFn: async () => {
-        const response = await client.get('/categories');
-        return Array.isArray(response?.data?.data) ? response.data.data : [];
-      },
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-    }
-  );
-
-  const products = useMemo(() => {
-    return productsData.map(normalizeProduct);
-  }, [productsData]);
-
-  const filteredProducts = useMemo(() => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    if (!normalizedQuery) return products;
-
-    return products.filter((product) => {
-      const name = String(product?.name || product?.title || '').toLowerCase();
-      const category = String(product?.category || '').toLowerCase();
-      const description = String(product?.description || product?.summary || '').toLowerCase();
-      return name.includes(normalizedQuery)
-        || category.includes(normalizedQuery)
-        || description.includes(normalizedQuery);
-    });
-  }, [products, searchQuery]);
-
-  const allProducts = useMemo(() => {
-    return [...filteredProducts];
-  }, [filteredProducts]);
-
-
-
-  return (
-    <div className="min-h-screen bg-[#f6f6f7] text-slate-900">
-      <Header
-        cartCount={cartCount}
-      />
-
-      <main>
-
-        {searchQuery && (
-          <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#FF6B00]">Résultats de recherche</p>
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">Produits pour «{searchQuery}»</h2>
-              <p className="mt-2 text-sm text-slate-500">
-                {loading
-                  ? 'Recherche en cours...'
-                  : allProducts.length > 0
-                    ? `${allProducts.length} produit${allProducts.length !== 1 ? 's' : ''} trouvé${allProducts.length !== 1 ? 's' : ''}`
-                    : `Aucun produit trouvé pour «${searchQuery}»`}
-              </p>
-            </div>
-          </section>
-        )}
-
-        {!searchQuery && !loadingCategories && categories.length > 0 && (
-          <CategoriesSection
-            categories={(() => {
-              try {
-                const bySlug = new Map(categories.map(c => [c.slug, c]));
-                const ordered = [];
-                for (const item of Array.isArray(CATEGORY_LINKS) ? CATEGORY_LINKS : []) {
-                  const slug = item.slug;
-                  const label = item.label || slug;
-                  const c = bySlug.get(slug);
-                  if (c) {
-                    ordered.push(c);
-                    bySlug.delete(slug);
-                  } else {
-                    // placeholder so header categories always appear on Home
-                    ordered.push({
-                      _id: `placeholder-${slug}`,
-                      slug,
-                      name: label,
-                      banner: SLUG_IMAGE_MAP[slug] || null,
-                      productCount: 0,
-                      description: '',
-                    });
-                  }
-                }
-                return ordered; // header categories (with placeholders if missing)
-              } catch (e) {
-                return categories;
-              }
-            })()}
-          />
-        )}
-
-        {!searchQuery && !loading && allProducts.length > 0 && (
-          <DailyDealsSection products={allProducts} />
-        )}
-
-        <section style={{ background: '#f6f6f7', paddingBottom: '24px' }}>
-
-          <ProductGrid
-            products={allProducts}
-            loading={loading}
-            onAddToCart={addToCart}
-            filters={filters}
-          />
-        </section>
-
-      </main>
-
-      <Footer/>
     </div>
   );
 }
 
-function normalizeProduct(product) {
-  const sanitized = sanitizeProductForDisplay(product) || product || {};
-  const price = Number(sanitized?.price ?? 0) || 0;
-  const promoPrice = Number(sanitized?.salePrice ?? sanitized?.promoPrice ?? 0) || 0;
-  const image = sanitized?.image || sanitized?.images?.[0]?.url || sanitized?.images?.[0] || 'https://i.pinimg.com/736x/3a/18/7a/3a187a5ffaecc1df686d0af19706d8d7.jpg';
-  const sellerName = sanitized?.vendorName || sanitized?.sellerName || 'Vendeur indépendant';
+/* ─── Skeleton ──────────────────────────────────────────────────────────── */
+function Skeleton({ count = 15 }) {
+  return (
+    <div className="hn-grid">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="hn-skel">
+          <div className="hn-skel__img" />
+          <div className="hn-skel__body">
+            <div className="hn-skel__line" />
+            <div className="hn-skel__line hn-skel__line--short" />
+            <div className="hn-skel__line hn-skel__line--price" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-  return {
-    ...sanitized,
-    id: sanitized?._id || sanitized?.id,
-    name: sanitized?.name || 'Article Dango Import',
-    description: sanitized?.shortDescription || sanitized?.description || '',
-    price,
-    promoPrice: promoPrice > 0 && promoPrice < price ? promoPrice : null,
-    image,
-    category: sanitized?.category || 'Produit',
-    sellerName,
-    originLabel: getProductOriginLabel(sanitized),
-    sellerVerified: Boolean(sanitized?.sellerVerified || sanitized?.vendorName),
-    stock: getProductSellableStock(sanitized),
-    isFeatured: Boolean(sanitized?.isFeatured),
-    isBoosted: Boolean(sanitized?.isFeatured || sanitized?.isBestSeller || sanitized?.isBoosted),
-  };
+/* ─── Sidebar filter content ────────────────────────────────────────────── */
+function FilterPanel({ filters, setFilters, onReset, categories = [] }) {
+  const [showAllCats, setShowAllCats] = useState(false);
+  return (
+    <div className="hn-sidebar__inner">
+      <div className="hn-sidebar__header">
+        <span className="hn-sidebar__title-main">
+          <SlidersHorizontal size={14} color="#FF6B00" strokeWidth={2.5} />
+          Catégories
+        </span>
+      </div>
+
+      {categories.length > 0 && (
+        <div className="hn-filter-section">
+          <div className="hn-cat-list">
+            {categories.slice(0, showAllCats ? 25 : 8).map((c) => (
+              <label key={c.slug} className="hn-check-row">
+                <input
+                  type="checkbox"
+                  checked={filters.categorySlug === c.slug}
+                  onChange={() => setFilters(f => ({ ...f, categorySlug: f.categorySlug === c.slug ? '' : c.slug }))}
+                />
+                <span className="truncate">{c.label || c.name}</span>
+              </label>
+            ))}
+            {categories.length > 8 && (
+              <button
+                type="button"
+                className="hn-see-more-btn"
+                onClick={() => setShowAllCats(v => !v)}
+              >
+                {showAllCats ? '▲ Moins' : '▼ Voir plus'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Category pill ─────────────────────────────────────────────────────── */
+function CatPill({ label, slug, active, onClick }) {
+  return (
+    <button className={`hn-cat-pill${active ? ' hn-cat-pill--active' : ''}`} onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+/* ─── Main component ────────────────────────────────────────────────────── */
+const DEFAULT_FILTERS = {
+  minPrice: '', maxPrice: '', rating: '',
+  inStock: false, onlyPromo: false, newOnly: false, brand: '',
+  sort: 'newest', categorySlug: '',
+};
+
+function HomeNew() {
+  const location = useLocation();
+  const { addToCart } = useCart();
+  const toast = useToast();
+
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [view, setView] = useState('grid');
+  const [inlineSearch, setInlineSearch] = useState('');
+
+  const urlSearch = new URLSearchParams(location.search).get('q')?.trim() || '';
+
+  /* ─ Products ─ */
+  const { data: productsRaw = [], isLoading: loading } = useQuery({
+    queryKey: ['homeProducts', urlSearch, filters.categorySlug, filters.sort],
+    queryFn: async () => {
+      const params = {
+        page: 1, limit: 200,
+        search: urlSearch || undefined,
+        category: filters.categorySlug || undefined,
+        sort: filters.sort !== 'newest' ? filters.sort : undefined,
+      };
+      const res = await client.get('/products', { params });
+      return Array.isArray(res?.data?.data) ? res.data.data : [];
+    },
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  /* ─ Categories ─ */
+  const { data: categoriesRaw = [] } = useQuery({
+    queryKey: ['homeCategories'],
+    queryFn: async () => {
+      const res = await client.get('/categories');
+      return Array.isArray(res?.data?.data) ? res.data.data : [];
+    },
+    staleTime: 300_000,
+  });
+
+  /* ─ Normalize products ─ */
+  const products = useMemo(() => {
+    return (productsRaw || []).map(p => {
+      const s = sanitizeProductForDisplay(p) || p;
+      const price = Number(s.price || 0);
+      const promoPrice = Number(s.promoPrice || s.salePrice || 0);
+      return {
+        ...s,
+        id: s._id || s.id,
+        price,
+        promoPrice: promoPrice > 0 && promoPrice < price ? promoPrice : null,
+        image: getProductImage(s) || s?.images?.[0]?.url || s?.images?.[0] || s?.image,
+        stock: getProductSellableStock(s),
+        isNew: s.isNew || s.isNewArrival,
+      };
+    });
+  }, [productsRaw]);
+
+  /* ─ Client-side filtering ─ */
+  const filtered = useMemo(() => {
+    let r = [...products];
+
+    const q = (urlSearch || inlineSearch || '').toLowerCase().trim();
+    if (q) r = r.filter(p => (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
+    if (filters.minPrice) r = r.filter(p => (p.promoPrice || p.price || 0) >= Number(filters.minPrice));
+    if (filters.maxPrice) r = r.filter(p => (p.promoPrice || p.price || 0) <= Number(filters.maxPrice));
+    if (filters.rating)   r = r.filter(p => (p.rating || p.averageRating || 0) >= Number(filters.rating));
+    if (filters.inStock)  r = r.filter(p => p.stock > 0);
+    if (filters.onlyPromo) r = r.filter(p => p.promoPrice && p.promoPrice < p.price);
+    if (filters.newOnly)  r = r.filter(p => p.isNew);
+    if (filters.brand)    r = r.filter(p => (p.brand || '').toLowerCase().includes(filters.brand.toLowerCase()));
+
+    if (filters.sort === 'price-asc')  r.sort((a, b) => (a.promoPrice || a.price || 0) - (b.promoPrice || b.price || 0));
+    else if (filters.sort === 'price-desc') r.sort((a, b) => (b.promoPrice || b.price || 0) - (a.promoPrice || a.price || 0));
+    else if (filters.sort === 'popular') r.sort((a, b) => Number(b.isBoosted || b.isBestSeller || 0) - Number(a.isBoosted || a.isBestSeller || 0));
+    else r.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    return r;
+  }, [products, filters, urlSearch, inlineSearch]);
+
+  const handleReset = useCallback(() => setFilters(DEFAULT_FILTERS), []);
+
+  const handleAddToCart = useCallback((p, qty) => {
+    addToCart(p, qty || 1);
+    toast?.success?.('Ajouté au panier ✓');
+  }, [addToCart, toast]);
+
+  /* ─ Category pills ─ */
+  const catPills = useMemo(() => {
+    const bySlug = new Map((categoriesRaw || []).map(c => [c.slug, c]));
+    const all = (Array.isArray(CATEGORY_LINKS) ? CATEGORY_LINKS : []).map(item => ({
+      slug: item.slug,
+      label: item.label || item.slug,
+    }));
+    // add any extras from API not in CATEGORY_LINKS
+    (categoriesRaw || []).forEach(c => {
+      if (!all.find(x => x.slug === c.slug)) all.push({ slug: c.slug, label: c.name });
+    });
+    return [{ slug: '', label: 'Tout' }, ...all.slice(0, 12)];
+  }, [categoriesRaw]);
+
+  const searchLabel = urlSearch
+    ? `${filtered.length} résultat${filtered.length !== 1 ? 's' : ''} pour "${urlSearch}"`
+    : `${filtered.length} produit${filtered.length !== 1 ? 's' : ''}`;
+
+  return (
+    <div className="hn-page">
+      <Header />
+
+      {/* ── Body ── */}
+      <div className="hn-body">
+
+        {/* ── LEFT SIDEBAR ── */}
+        <aside className="hn-sidebar">
+          <FilterPanel
+            filters={filters}
+            setFilters={setFilters}
+            onReset={handleReset}
+            categories={catPills.filter(c => c.slug)}
+          />
+        </aside>
+
+        {/* ── MAIN ── */}
+        <main className="hn-main">
+
+          {/* Results bar */}
+          <div className="hn-results-bar">
+            <p className="hn-results-bar__count">
+              {loading ? 'Chargement…' : (
+                urlSearch
+                  ? <>{filtered.length} résultat{filtered.length !== 1 ? 's' : ''} pour <strong style={{ color: '#FF6B00' }}>"{urlSearch}"</strong></>
+                  : <>{filtered.length} produit{filtered.length !== 1 ? 's' : ''}</>
+              )}
+            </p>
+
+            <div className="hn-results-bar__controls">
+              {/* Mobile filter */}
+              <button className="hn-mobile-filter-btn" onClick={() => setDrawerOpen(true)}>
+                <SlidersHorizontal size={14} /> Filtres
+              </button>
+
+              {/* Inline search */}
+              <div className="hn-inline-search">
+                <Search size={13} className="hn-inline-search__icon" />
+                <input
+                  className="hn-inline-search__input"
+                  type="text"
+                  placeholder="Rechercher…"
+                  value={inlineSearch}
+                  onChange={e => setInlineSearch(e.target.value)}
+                />
+              </div>
+
+              {/* Sort */}
+              <div className="hn-sort-wrap">
+                <span className="hn-sort-label">Trier par</span>
+                <select
+                  className="hn-sort-select"
+                  value={filters.sort}
+                  onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}
+                >
+                  <option value="newest">Nouveautés</option>
+                  <option value="popular">Popularité</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix décroissant</option>
+                </select>
+              </div>
+
+              {/* View toggle */}
+              <div className="hn-view-toggle">
+                <button className={`hn-view-btn${view === 'grid' ? ' hn-view-btn--on' : ''}`} onClick={() => setView('grid')} title="Grille">
+                  <LayoutGrid size={14} />
+                </button>
+                <button className={`hn-view-btn${view === 'list' ? ' hn-view-btn--on' : ''}`} onClick={() => setView('list')} title="Liste">
+                  <List size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid */}
+          {loading ? (
+            <Skeleton count={15} />
+          ) : filtered.length === 0 ? (
+            <div className="hn-empty">
+              <div className="hn-empty__icon"><Search size={44} className="mx-auto text-slate-300" strokeWidth={1.5} /></div>
+              <p className="hn-empty__title">Aucun produit trouvé</p>
+              <p className="hn-empty__sub">Essayez de modifier vos filtres ou votre recherche.</p>
+              <button className="hn-empty__reset" onClick={handleReset}>Réinitialiser les filtres</button>
+            </div>
+          ) : (
+            <div className={`hn-grid${view === 'list' ? ' hn-grid--list' : ''}`}>
+              {filtered.map(p => (
+                <ProductMiniCard key={p._id || p.id} product={p} onAddToCart={handleAddToCart} />
+              ))}
+            </div>
+          )}
+
+          {/* Trust badges */}
+          {!loading && filtered.length > 0 && (
+            <div className="hn-trust">
+              <div className="hn-trust__item"><Truck size={16} /><span>Livraison rapide</span></div>
+              <div className="hn-trust__item"><ShieldCheck size={16} /><span>Paiement sécurisé</span></div>
+              <div className="hn-trust__item"><Package size={16} /><span>Retours faciles</span></div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ── MOBILE FILTER DRAWER ── */}
+      {drawerOpen && (
+        <>
+          <div className="hn-overlay" onClick={() => setDrawerOpen(false)} />
+          <aside className="hn-drawer">
+            <div className="hn-drawer__head">
+              <span className="hn-drawer__title"><SlidersHorizontal size={16} color="#FF6B00" /> Filtres</span>
+              <button className="hn-drawer__close" onClick={() => setDrawerOpen(false)}><X size={20} /></button>
+            </div>
+            <div className="hn-drawer__body">
+              <FilterPanel
+                filters={filters}
+                setFilters={setFilters}
+                onReset={handleReset}
+                categories={catPills.filter(c => c.slug)}
+              />
+            </div>
+            <div className="hn-drawer__foot">
+              <button className="hn-drawer__cancel" onClick={handleReset}>Effacer</button>
+              <button className="hn-drawer__apply" onClick={() => setDrawerOpen(false)}>Appliquer</button>
+            </div>
+          </aside>
+        </>
+      )}
+
+      <Footer />
+    </div>
+  );
 }
 
 export default HomeNew;

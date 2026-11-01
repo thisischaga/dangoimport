@@ -11,6 +11,11 @@ async function fetchCategories() {
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=900&q=80';
 
+function getCategoryHref(category) {
+  const label = category?.name || category?.slug || 'toutes-les-categories';
+  return `/shopping?category=${encodeURIComponent(label)}`;
+}
+
 export default function CategoriesSection() {
   const { data: categories = [], isLoading, isError } = useQuery({
     queryKey: ['categories'],
@@ -68,7 +73,7 @@ export default function CategoriesSection() {
             }
             return ordered.map((cat) => (
             <Link
-              to={`/category/${cat.slug}`}
+              to={getCategoryHref(cat)}
               key={cat._id || cat.slug}
               className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
             >

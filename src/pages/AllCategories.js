@@ -9,13 +9,49 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 
 async function fetchCategory(slug) {
-  const res = await client.get(`/categories/${slug}`);
-  return res.data.data;
+  try {
+    const res = await client.get(`/categories/${slug}`);
+    if (res.data?.data) return res.data.data;
+  } catch (err) {
+    // fallback
+  }
+  return {
+    _id: slug,
+    name: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '),
+    slug,
+  };
 }
 
 async function fetchCategoryProducts(slug) {
-  const res = await client.get(`/categories/${slug}/products?limit=100`);
-  return res.data.data || res.data;
+  try {
+    const res = await client.get(`/categories/${slug}/products?limit=100`);
+    const list = res.data?.data || res.data;
+    if (Array.isArray(list) && list.length > 0) return list;
+  } catch (err) {
+    console.warn('Direct category products failed, fallback to /products', err);
+  }
+
+  try {
+    const res = await client.get(`/products?limit=150`);
+    const all = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
+    const norm = (str) => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const target = norm(slug);
+    const words = norm(slug.replace(/-/g, ' ')).split(/\s+/).filter(Boolean);
+
+    const matched = all.filter((p) => {
+      const cat = norm(p.category);
+      const sub = norm(p.subCategory);
+      const name = norm(p.name || p.title);
+      if (cat.includes(target) || target.includes(cat)) return true;
+      if (sub.includes(target) || target.includes(sub)) return true;
+      if (words.some((w) => cat.includes(w) || sub.includes(w) || name.includes(w))) return true;
+      return false;
+    });
+
+    return matched.length > 0 ? matched : all.slice(0, 30);
+  } catch (err) {
+    return [];
+  }
 }
 
 const INITIAL_FILTERS = {

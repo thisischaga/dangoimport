@@ -22,7 +22,7 @@ const GUIDES = [
     icon: FaHeart, color: 'bg-rose-500',
     title: 'Gérer mes favoris',
     steps: [
-      'Cliquez sur le ❤️ sur une carte produit pour l\'ajouter à vos favoris.',
+      'Cliquez sur l\'icône favori sur une carte produit pour l\'ajouter à vos favoris.',
       'Retrouvez vos favoris dans votre espace "Mes commandes".',
       'Comparez les produits favoris avant d\'acheter.',
     ],
