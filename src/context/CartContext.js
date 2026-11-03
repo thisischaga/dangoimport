@@ -42,9 +42,10 @@ export const CartProvider = ({ children }) => {
     const quantityToAdd = snapQuantity(product, qty || moq);
     const productId = product._id || product.id;
     const stock = Number(product.stock ?? 0);
+    const hasStockLimit = !isImportItem(product) && Number.isFinite(stock) && stock > 0;
 
-    // Rupture totale
-    if (stock <= 0) {
+    // Rupture totale pour les produits standards ; les importations peuvent être commandées même sans stock affiché.
+    if (!hasStockLimit && !isImportItem(product) && stock <= 0) {
       toast.error(`"${product.name}" est en rupture de stock.`);
       return;
     }
@@ -58,8 +59,8 @@ export const CartProvider = ({ children }) => {
         const currentQty = existing.quantity || 0;
         const newQty = snapQuantity(product, currentQty + quantityToAdd);
 
-        // Dépassement du stock
-        if (newQty > stock) {
+        // Dépassement du stock : uniquement pour les produits avec stock réel limité.
+        if (hasStockLimit && newQty > stock) {
           const addable = stock - currentQty;
           if (addable <= 0) {
             toastToTrigger = { type: 'warn', message: `Stock maximum atteint pour "${product.name}" (${stock} en stock).` };
@@ -82,7 +83,7 @@ export const CartProvider = ({ children }) => {
       }
 
       // Nouveau produit
-      const addQty = snapQuantity(product, Math.min(quantityToAdd, stock));
+      const addQty = hasStockLimit ? snapQuantity(product, Math.min(quantityToAdd, stock)) : snapQuantity(product, quantityToAdd);
       toastToTrigger = { type: 'success', message: `${product.name} ajouté au panier` };
       return [...prevCart, { ...product, _id: productId, quantity: addQty }];
     });
@@ -104,7 +105,8 @@ export const CartProvider = ({ children }) => {
         const { moq } = getMoqRules(item);
         const stock = Number(item.stock ?? 0);
         const snapped = snapQuantity(item, newQuantity);
-        const clamped = Math.max(moq, Math.min(snapped, stock));
+        const hasStockLimit = !isImportItem(item) && Number.isFinite(stock) && stock > 0;
+        const clamped = hasStockLimit ? Math.max(moq, Math.min(snapped, stock)) : Math.max(moq, snapped);
         return { ...item, quantity: clamped };
       })
     );

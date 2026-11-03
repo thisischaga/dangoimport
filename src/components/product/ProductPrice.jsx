@@ -81,14 +81,6 @@ function ProductPrice({
         )}
       </div>
 
-      {deliveryLabel && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minHeight: '18px' }}>
-          <Truck size={12} style={{ color: '#FF6B00', flexShrink: 0 }} />
-          <span style={{ fontSize: '11px', color: '#7a7a7a', fontWeight: 600 }}>
-            {shouldShowFreeShipping ? 'Livraison gratuite' : 'Livraison'} · {deliveryLabel}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

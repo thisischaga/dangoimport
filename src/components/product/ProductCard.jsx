@@ -1,1049 +1,230 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 
 import ProductImage from './ProductImage';
 import { formatSoftS } from '../../utils/formatPrice';
-import { getProductSellableStock, getDisplayVendorName, getDisplayProductName, isDropshippingProduct, isAlibabaProduct } from '../../utils/publicProduct';
+import {
+  getProductSellableStock,
+  getDisplayProductName,
+  isDropshippingProduct,
+  isAlibabaProduct,
+  isMarketplaceProduct,
+} from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
-import API_BASE_URL from '../../apiConfig';
 import { getCardDisplayPrice, getMoqRules, getUnitPrice } from '../../utils/importMoq';
 
-/* =========================================================
-   INTERACTIVE RATING
-========================================================= */
+/* ── Styles intégrés au composant ─────────────────────────
+   Injectés une seule fois dans <head> (id « pc3-styles »), après les autres
+   feuilles : ils passent donc devant l'ancien style. Aucun fichier CSS requis. */
+const PC3_CSS = `
+/* ── Carte ─────────────────────────────────────────────── */
+.pc3 {
+  --pc-ink: #12222e; --pc-soft: #4a5b68; --pc-mute: #8a959d; --pc-orange: #ff6b00;
+  position: relative; display: flex; flex-direction: column; width: 100%; min-width: 0;
+  container-type: inline-size;
+  padding: 14px 16px 16px; border-radius: 24px; background: #fff; color: var(--pc-ink);
+  box-shadow: 0 16px 36px -10px rgba(18, 34, 46, 0.18), 0 2px 8px rgba(18, 34, 46, 0.05);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.pc3 *, .pc3 *::before, .pc3 *::after { box-sizing: border-box; }
+@media (hover: hover) {
+  .pc3:hover { transform: translateY(-4px); box-shadow: 0 24px 48px -12px rgba(18, 34, 46, 0.24), 0 4px 12px rgba(18, 34, 46, 0.06); }
+}
+.pc3--oos { opacity: 0.72; }
 
-function InteractiveRating({
-  productId,
-  rating,
-  count,
-}) {
-  const [hover, setHover] = useState(0);
-  const [userRating, setUserRating] = useState(0);
-  const [toast, setToast] = useState('');
+/* Pastille inclinée, en haut à gauche */
+.pc3__tag { position: absolute; top: 14px; left: 12px; z-index: 3; padding: 4px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; line-height: 1.25; color: #fff; transform: rotate(-3deg); box-shadow: 0 3px 6px rgba(18, 34, 46, 0.16); pointer-events: none; white-space: nowrap; }
+.pc3__tag--blue { background: #0a63d6; }
+.pc3__tag--yellow { background: #ffd400; color: #12222e; }
+.pc3__tag--gray { background: #6b7780; }
 
-  const display =
-    hover ||
-    userRating ||
-    rating ||
-    0;
+/* Panier, en haut à droite */
+.pc3__cart { position: absolute; top: 10px; right: 10px; z-index: 3; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--pc-ink); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease; }
+.pc3__cart:hover { color: #fff; background: var(--pc-orange); }
+.pc3__cart:active { transform: scale(0.92); }
+.pc3__cart:focus-visible { outline: 2px solid var(--pc-orange); outline-offset: 2px; }
 
-  const handleRate = async (event, value) => {
-    event.preventDefault();
-    event.stopPropagation();
+/* Produit au centre : le fond blanc des photos se fond dans la carte */
+.pc3__media { position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; margin-top: 18px; overflow: hidden; border-radius: 16px; text-decoration: none; }
+.pc3__media > *, .pc3__media img { width: 100%; height: 100%; }
+.pc3__media img { object-fit: contain !important; mix-blend-mode: multiply; transition: transform 0.4s ease; }
+@media (hover: hover) { .pc3:hover .pc3__media img { transform: scale(1.05) rotate(-1deg); } }
 
-    const token =
-      localStorage.getItem('dangoToken');
+/* Bas de carte : nom à gauche, prix à droite */
+.pc3__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 10px; min-width: 0; }
+.pc3__text { flex: 1 1 0; min-width: 0; }
+.pc3__title-link { color: inherit; text-decoration: none; }
+.pc3__title { margin: 0; font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.pc3__sub { margin: 3px 0 0; font-size: 13px; line-height: 1.3; color: var(--pc-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc3__meta { display: flex; align-items: center; gap: 8px; margin: 3px 0 0; font-size: 12px; line-height: 1.3; color: var(--pc-mute); }
+.pc3__rating { display: inline-flex; align-items: center; gap: 3px; color: var(--pc-ink); font-weight: 600; }
+.pc3__rating svg { color: #f5a623; }
 
-    if (!token) {
-      setToast('Connectez-vous !');
+.pc3__pricebox { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; }
+.pc3__price { display: inline-flex; align-items: flex-end; gap: 2px; color: var(--pc-ink); }
+.pc3__price--promo { color: var(--pc-orange); }
+.pc3__amount { font-size: 24px; font-size: clamp(18px, 11cqw, 32px); font-weight: 800; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
+.pc3__amount--text { font-size: 16px; letter-spacing: 0; }
+/* Devise en petit, écrite à la verticale à droite du prix */
+.pc3__unit { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 400; line-height: 1; letter-spacing: 0.04em; color: var(--pc-mute); }
+.pc3__old { margin-top: 4px; font-size: 12px; color: var(--pc-mute); text-decoration: line-through; white-space: nowrap; }
 
-      setTimeout(() => {
-        setToast('');
-      }, 2000);
+/* Version compacte (panneau « Offres du jour ») */
+.pc3--compact { padding: 10px 12px 12px; border-radius: 18px; }
+.pc3--compact .pc3__tag { top: 10px; left: 8px; font-size: 11px; padding: 3px 9px; }
+.pc3--compact .pc3__cart { top: 6px; right: 6px; width: 34px; height: 34px; }
+.pc3--compact .pc3__media { margin-top: 14px; }
+.pc3--compact .pc3__title { font-size: 13px; }
+.pc3--compact .pc3__sub { font-size: 11px; }
 
-      return;
-    }
+@media (max-width: 639px) {
+  .pc3 { padding: 10px 12px 12px; border-radius: 20px; }
+  .pc3__tag { top: 10px; left: 8px; font-size: 11px; padding: 3px 9px; }
+  .pc3__cart { top: 6px; right: 6px; width: 34px; height: 34px; }
+  .pc3__cart svg { width: 19px; height: 19px; }
+  .pc3__media { margin-top: 14px; }
+  .pc3__title { font-size: 14px; }
+  .pc3__sub { font-size: 12px; }
+}
 
-    setUserRating(value);
-    setToast('Envoi...');
+/* ── Grille du catalogue (l'id garde la priorité sur l'ancien <style> intégré) ── */
+div#product-grid-main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; align-items: start; padding-bottom: 20px; }
+@media (min-width: 640px) { div#product-grid-main { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 18px; } }
+@media (min-width: 1000px) { div#product-grid-main { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 22px; } }
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/${productId}/reviews`,
-        {
-          method: 'POST',
+/* ── Onglets du catalogue : soulignés ── */
+.dango-tabs { display: flex; gap: 26px; margin: 0 0 22px; padding: 0 12px; border-bottom: 1px solid #e6e9ea; overflow-x: auto; scrollbar-width: none; }
+.dango-tabs::-webkit-scrollbar { display: none; }
+.dango-tabs__item { flex-shrink: 0; padding: 12px 2px; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; background: none; font: inherit; font-size: 15px; font-weight: 500; color: #7b8994; cursor: pointer; white-space: nowrap; transition: color 0.15s ease; }
+.dango-tabs__item:hover { color: #12222e; }
+.dango-tabs__item.is-active { color: #12222e; font-weight: 700; border-bottom-color: #ff6b00; }
+.dango-tabs__item:focus-visible { outline: 2px solid #ff6b00; outline-offset: 2px; border-radius: 4px; }
+@media (min-width: 640px) { .dango-tabs { padding: 0; } }
+`;
 
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            rating: value,
-            title: 'Avis rapide',
-            comment:
-              'Noté depuis la carte produit.',
-          }),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (data.success) {
-        setToast('Merci !');
-      } else {
-        setToast(
-          data.message || 'Erreur'
-        );
-      }
-    } catch (error) {
-      console.error(
-        'Erreur rating:',
-        error
-      );
-
-      setToast(
-        'Erreur connexion'
-      );
-    }
-
-    setTimeout(() => {
-      setToast('');
-    }, 2000);
-  };
-
-  return (
-    <span
-      className="pc2-rating"
-      onClick={(event) =>
-        event.preventDefault()
-      }
-    >
-      <span className="pc2-rating__stars">
-        {Array.from(
-          { length: 5 },
-          (_, index) => {
-            const value = index + 1;
-
-            const filled =
-              value <=
-              Math.round(display);
-
-            return (
-              <button
-                key={value}
-                type="button"
-                className="pc2-rating__star-btn"
-                onMouseEnter={() =>
-                  setHover(value)
-                }
-                onMouseLeave={() =>
-                  setHover(0)
-                }
-                onClick={(event) =>
-                  handleRate(
-                    event,
-                    value
-                  )
-                }
-                aria-label={`Noter ${value}`}
-              >
-                <Star
-                  size={15}
-                  strokeWidth={2}
-                  className={
-                    filled
-                      ? 'pc2-rating__star--full'
-                      : 'pc2-rating__star--empty'
-                  }
-                />
-              </button>
-            );
-          }
-        )}
-      </span>
-
-      {toast ? (
-        <span className="pc2-rating__toast">
-          {toast}
-        </span>
-      ) : (
-        count != null &&
-        count > 0 && (
-          <span className="pc2-rating__count">
-            ({count})
-          </span>
-        )
-      )}
-    </span>
-  );
+if (typeof document !== 'undefined') {
+  let el = document.getElementById('pc3-styles');
+  if (!el) {
+    el = document.createElement('style');
+    el.id = 'pc3-styles';
+    document.head.appendChild(el);
+  }
+  if (el.textContent !== PC3_CSS) el.textContent = PC3_CSS;
 }
 
 /* =========================================================
-   PRODUCT CARD
+   PRODUCT CARD : carte arrondie à grande ombre douce
+   pastille inclinée en haut à gauche, panier en haut à droite,
+   produit au centre, nom + détail à gauche, gros prix à droite.
+   (Le libellé « feature » promo / livraison gratuite reste désactivé :
+   la promo se voit par le prix orange et l'ancien prix barré.)
 ========================================================= */
 
-function ProductCard({
-  product,
-  onAddToCart,
-  isForPromoSection,
-}) {
-  const handleQuickAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onAddToCart) {
-      onAddToCart({ ...product, name: displayName });
-    }
-  };
+const fmt = (v) => {
+  const x = Number(v);
+  return Number.isFinite(x) && x > 0 ? x.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : null;
+};
 
-  /* =======================================================
-     BASIC PRODUCT DATA
-  ======================================================= */
-
-  const productId =
-    product?._id ||
-    product?.id;
-
+function ProductCard({ product, onAddToCart, isForPromoSection }) {
+  /* ── Données de base ─────────────────────────────────── */
+  const productId = product?._id || product?.id;
   const price = getUnitPrice(product);
   const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
   const { moq, soldAsLot, packSize } = getMoqRules(product);
 
-  const promoPrice =
-    Number(
-      product?.promoPrice ??
-        product?.salePrice ??
-        0
-    ) || 0;
+  const promoPrice = Number(product?.promoPrice ?? product?.salePrice ?? 0) || 0;
+  const hasPromo = !isDropship && promoPrice > 0 && promoPrice < price;
+  const displayPrice = isDropship ? getCardDisplayPrice(product) : (hasPromo ? promoPrice : price);
+  const amount = fmt(displayPrice);
+  const oldAmount = hasPromo ? fmt(price) : null;
 
-  const hasPromo =
-    !isDropship &&
-    promoPrice > 0 &&
-    promoPrice < price;
+  /* ── Images ──────────────────────────────────────────── */
+  const images = getProductImages(product, 2);
+  const primaryImage = images[0] || product?.image || '';
+  const hoverImage = images[1] || null;
 
-  const displayPrice =
-    isDropship
-      ? getCardDisplayPrice(product)
-      : hasPromo
-        ? promoPrice
-        : price;
-
-  /* =======================================================
-     IMAGES
-  ======================================================= */
-
-  const images =
-    getProductImages(
-      product,
-      2
-    );
-
-  const primaryImage =
-    images[0] ||
-    product?.image ||
-    '';
-
-  const hoverImage =
-    images[1] ||
-    null;
-
-  /* =======================================================
-     STOCK
-  ======================================================= */
-
+  /* ── Stock ───────────────────────────────────────────── */
   const stock = getProductSellableStock(product);
-
-
-  const minStock =
-    Number(
-      product?.minStock ?? 10
-    ) || 10;
-
   const isAlibaba = isAlibabaProduct(product);
-
-  const isOutOfStock =
-    !isAlibaba && stock <= 0;
-
-
-  /* =======================================================
-     SELLER
-  ======================================================= */
-
-  const vendorName =
-    getDisplayVendorName(product) ||
-    product?.vendorName ||
-    product?.vendor ||
-    '';
-
-  const country =
-    product?.country ||
-    product?.origin ||
-    '';
-
-  const yearsActive =
-    product?.vendorYears ||
-    null;
-
-  const isVerified =
-    product?.isVerified ??
-    product?.verified ??
-    false;
-
-  const isCertified =
-    Boolean(
-      product?.isVendorCertified ??
-      product?.isCertified ??
-      product?.vendorIsCertified ??
-      false
-    );
+  const isOutOfStock = !isAlibaba && stock <= 0;
 
   const displayName = getDisplayProductName(product);
 
-  /* =======================================================
-     SALES
-  ======================================================= */
+  /* ── Pastille (origine du produit) ───────────────────── */
+  let tag = null;
+  if (isOutOfStock) tag = { label: 'Rupture', tone: 'gray' };
+  else if (isAlibaba || isDropship) tag = { label: 'Import direct', tone: 'blue' };
+  else if (isMarketplaceProduct(product)) tag = { label: 'Marketplace', tone: 'yellow' };
 
-  const soldCount =
-    Number(
-      product?.soldCount ??
-        product?.sales ??
-        product?.totalSold ??
-        0
-    ) || 0;
+  /* ── Détail sous le nom ──────────────────────────────── */
+  let orderNote = '';
+  if (isDropship) {
+    if (soldAsLot || packSize > 1) orderNote = `Lot de ${packSize} unités`;
+    else if (moq > 1) orderNote = `Min. ${moq} unités`;
+  }
+  const categoryName = typeof product?.category === 'string' ? product.category : product?.category?.name;
+  const subtitle = orderNote || product?.brand || categoryName || '';
 
-  /* =======================================================
-     SHIPPING
-  ======================================================= */
+  const soldCount = Number(product?.soldCount ?? product?.sales ?? product?.totalSold ?? product?.totalSales ?? 0) || 0;
+  const rating = product?.rating != null ? Number(product.rating) : 0;
+  const showMeta = !isForPromoSection && (rating > 0 || soldCount > 0);
 
-  const freeShipping =
-    Boolean(
-      product?.freeShipping ??
-        product?.isFreeShipping
-    );
-
-  const deliveryZones =
-    Array.isArray(
-      product?.deliveryZones
-    )
-      ? product.deliveryZones
-          .map((zone) => {
-            if (typeof zone === 'string') {
-              return zone.trim();
-            }
-
-            const label = [
-              zone?.zoneName,
-              zone?.locality,
-              zone?.area,
-              zone?.city,
-              zone?.country,
-            ]
-              .filter(Boolean)
-              .join(' • ');
-
-            return label || zone?.name || zone?.label || '';
-          })
-          .filter(Boolean)
-      : [];
-
-  const shippingInfo =
-    String(
-      product?.shippingInfo ||
-        ''
-    ).trim();
-
-
-  /* =======================================================
-     RATING
-  ======================================================= */
-
-  const rating =
-    product?.rating != null
-      ? Number(product.rating)
-      : null;
-
-  const reviewCount =
-    product?.totalReviews != null
-      ? Number(
-          product.totalReviews
-        )
-      : null;
-
-  /* =======================================================
-     PRODUCT FEATURE
-  ======================================================= */
-
-  const getFeatureLabel = () => {
-    if (freeShipping) {
-      return {
-        text: 'Livraison gratuite',
-        type: 'shipping',
-      };
-    }
-
-    if (hasPromo) {
-      const discount =
-        Math.round(
-          (1 -
-            promoPrice /
-              price) *
-            100
-        );
-
-      return {
-        text: `-${discount}%`,
-        type: 'promo',
-      };
-    }
-
-    return null;
+  const handleQuickAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onAddToCart) onAddToCart({ ...product, name: displayName });
   };
 
-  const feature =
-    getFeatureLabel();
-
-  /* =======================================================
-     DISCOUNT
-  ======================================================= */
-
-
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  const to = `/product/${productId}`;
 
   return (
-    <>
-      <style>{`
-
-        /* =================================================
-           PRODUCT CARD
-        ================================================= */
-
-        .pc2 {
-          width: 100%;
-          min-width: 0;
-          height: auto;
-          min-height: 0;
-          align-self: start;
-          overflow: hidden;
-          display: block;
-          box-sizing: border-box;
-        }
-
-        /* =================================================
-           IMAGE
-        ================================================= */
-
-        .pc2__img-wrap {
-          position: relative;
-          width: 100%;
-          height: auto;
-          overflow: hidden;
-          border-radius: 5px 5px 0 0;
-          background: rgba(248, 250, 252, 0.7);
-        }
-
-        .pc2__img-link {
-          display: block;
-          width: 100%;
-          text-decoration: none;
-        }
-
-        .pc2__quick-add-btn {
-          position: absolute;
-          bottom: 8px;
-          right: 8px;
-          width: 32px;
-          height: 32px;
-          border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.92);
-          border: 1px solid rgba(148, 163, 184, 0.45);
-          color: #334155;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 10;
-          padding: 0;
-        }
-
-        .pc2__quick-add-btn:hover {
-          background: #f8fafc;
-          color: #0f172a;
-          border-color: rgba(100, 116, 139, 0.5);
-          transform: scale(1.03);
-        }
-
-        .pc2__quick-add-btn:active {
-          transform: scale(0.95);
-        }
-
-        /* =================================================
-           BODY
-        ================================================= */
-
-        .pc2__body {
-          width: 100%;
-          height: auto;
-          min-height: 0;
-          padding: 10px 12px 12px;
-          display: block;
-          background: transparent;
-        }
-
-        /* =================================================
-           TITLE
-        ================================================= */
-
-        .pc2__headline {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 0;
-          width: 100%;
-        }
-
-        .pc2__title-link {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 0;
-          flex: 1;
-          color: inherit;
-          text-decoration: none;
-          margin: 0;
-          padding: 0;
-        }
-
-        .pc2__title {
-          margin: 0;
-          flex: 1;
-          min-width: 0;
-          font-size: 12px;
-          line-height: 1.35;
-          font-weight: 600;
-          color: #111827;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .pc2__title-link:hover
-        .pc2__title {
-          color: #000000;
-        }
-
-        .pc2__origin-tag {
-          display: inline-flex;
-          align-items: center;
-          flex-shrink: 0;
-          padding: 1px 6px;
-          border-radius: 4px;
-          background: #ffdc2b;
-          color: #111827;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.02em;
-          line-height: 1.4;
-          white-space: nowrap;
-        }
-
-        /* =================================================
-           FEATURE
-        ================================================= */
-
-        .pc2__feature {
-          margin: 4px 0 0;
-
-          font-size: 10px;
-          line-height: 1.3;
-
-          font-weight: 600;
-
-          white-space: normal;
-        }
-
-        .pc2__feature--shipping {
-          color: #15803d;
-        }
-
-        .pc2__feature--promo {
-          color: white;
-          background-color: #ef4444;
-          font-size: 10px;
-          line-height: 1.3;
-          width: max-content;
-          height: max-content;
-          padding: 2px 7px;
-        }
-
-        /* =================================================
-           PRICE
-        ================================================= */
-
-        .pc2__price-row {
-          display: flex;
-          align-items: baseline;
-
-          flex-wrap: wrap;
-
-          gap: 5px;
-
-          margin-top: 5px;
-
-          min-height: 0;
-        }
-
-        .pc2__import-note {
-          margin: 4px 0 0;
-          font-size: 10px;
-          line-height: 1.3;
-          color: #64748b;
-        }
-
-        .pc2__price {
-          font-size: 17px;
-          line-height: 1.2;
-
-          /*
-           * Prix bien visible.
-           */
-          font-weight: 800;
-
-          color: #111827;
-
-          letter-spacing: -0.2px;
-
-          white-space: nowrap;
-        }
-
-        .pc2__price-old {
-          font-size: 12px;
-          line-height: 1.2;
-
-          font-weight: 500;
-
-          color: #94a3b8;
-
-          text-decoration: line-through;
-
-          white-space: nowrap;
-        }
-
-        /* =================================================
-           SALES
-        ================================================= */
-
-        .pc2__moq-sold {
-          margin: 3px 0 0;
-
-          font-size: 11px;
-          line-height: 1.3;
-
-          color: #64748b;
-
-          font-weight: 500;
-        }
-
-        /* =================================================
-           DELIVERY
-        ================================================= */
-
-        .pc2__delivery-zone {
-          margin: 3px 0 0;
-
-          font-size: 11px;
-          line-height: 1.3;
-
-          color: #64748b;
-
-          font-weight: 500;
-
-          overflow-wrap: anywhere;
-        }
-
-        /* =================================================
-           RATING
-        ================================================= */
-
-        .pc2__rating-row {
-          display: flex;
-          align-items: center;
-          flex-shrink: 0;
-          margin: 0;
-          min-height: 0;
-        }
-
-        .pc2-rating {
-          display: inline-flex;
-
-          align-items: center;
-
-          min-width: 0;
-
-          font-size: 10px;
-          line-height: 1;
-
-          color: #64748b;
-        }
-
-        .pc2-rating__stars {
-          display: inline-flex;
-
-          align-items: center;
-
-          gap: 1px;
-        }
-
-        .pc2-rating__star-btn {
-          display: inline-flex;
-
-          align-items: center;
-          justify-content: center;
-
-          width: 13px;
-          height: 13px;
-
-          padding: 0;
-
-          border: 0;
-
-          background: transparent;
-
-          cursor: pointer;
-        }
-
-        .pc2-rating__star--full {
-          color: #000;
-
-          fill: currentColor;
-        }
-
-        .pc2-rating__star--empty {
-          color: #cbd5e1;
-
-          fill: transparent;
-        }
-
-        .pc2-rating__count {
-          display: none;
-        }
-
-        .pc2-rating__toast {
-          margin-left: 6px;
-
-          color: #475569;
-
-          font-size: 10px;
-          font-weight: 600;
-
-          white-space: nowrap;
-        }
-
-        /* =================================================
-           VENDOR META
-        ================================================= */
-
-        .pc2__vendor-meta {
-          display: flex;
-
-          align-items: center;
-
-          flex-wrap: wrap;
-
-          gap: 4px;
-
-          margin: 4px 0 0;
-
-          font-size: 10px;
-          line-height: 1.3;
-
-          color: #64748b;
-        }
-
-        .pc2__verified {
-          font-weight: 700;
-
-          color: #15803d;
-        }
-
-        .pc2__meta-sep {
-          color: #cbd5e1;
-        }
-
-        .pc2__country {
-          color: #64748b;
-        }
-
-        /* =================================================
-           OUT OF STOCK
-        ================================================= */
-
-        .pc2--oos {
-          opacity: 0.78;
-        }
-
-        /* =================================================
-           MOBILE
-        ================================================= */
-
-        @media (max-width: 639px) {
-          .pc2__body {
-            padding: 5px 3px 4px;
-          }
-
-          .pc2__title {
-            font-size: 11px;
-            line-height: 1.3;
-          }
-
-          .pc2__origin-tag {
-            font-size: 9px;
-            padding: 1px 5px;
-          }
-
-          .pc2__price {
-            font-size: 13px;
-          }
-
-          .pc2__price-old {
-            font-size: 9px;
-          }
-
-          .pc2__price-row {
-            gap: 3px;
-            margin-top: 3px;
-          }
-
-          .pc2__feature {
-            font-size: 9px;
-          }
-
-          .pc2__feature--promo {
-            font-size: 9px;
-            padding: 1px 5px;
-          }
-
-          .pc2__moq-sold,
-          .pc2__delivery-zone {
-            font-size: 9px;
-          }
-
-          .pc2__vendor-meta {
-            font-size: 9px;
-          }
-
-          .pc2__quick-add-btn {
-            bottom: 4px;
-            right: 4px;
-            width: 26px;
-            height: 26px;
-          }
-
-          .pc2-rating__star-btn {
-            width: 11px;
-            height: 11px;
-          }
-
-          .pc2-rating__star-btn svg {
-            width: 11px;
-            height: 11px;
-          }
-        }
-
-      `}</style>
-
-      <article
-        className={`pc2 ${
-          isOutOfStock
-            ? 'pc2--oos'
-            : ''
-        }`}
-      >
-        {/* =================================================
-            PRODUCT IMAGE
-        ================================================= */}
-
-        <div className="pc2__img-wrap">
-          <Link
-            to={`/product/${productId}`}
-            className="pc2__img-link"
-          >
-            <ProductImage
-              src={primaryImage}
-              hoverSrc={hoverImage}
-              alt={
-                displayName ||
-                'Produit'
-              }
-              isOutOfStock={
-                isOutOfStock
-              }
-            />
+    <article className={`pc3${isForPromoSection ? ' pc3--compact' : ''}${isOutOfStock ? ' pc3--oos' : ''}`}>
+      {tag && <span className={`pc3__tag pc3__tag--${tag.tone}`}>{tag.label}</span>}
+
+      {!isOutOfStock && onAddToCart && (
+        <button type="button" onClick={handleQuickAddToCart} className="pc3__cart" title="Ajouter au panier" aria-label="Ajouter au panier">
+          <ShoppingCart size={22} strokeWidth={1.75} />
+        </button>
+      )}
+
+      <Link to={to} className="pc3__media" aria-label={displayName || 'Voir le produit'}>
+        <ProductImage
+          src={primaryImage}
+          hoverSrc={hoverImage}
+          alt={displayName || 'Produit'}
+          isOutOfStock={isOutOfStock}
+        />
+      </Link>
+
+      <div className="pc3__foot">
+        <div className="pc3__text">
+          <Link to={to} className="pc3__title-link">
+            <h3 className="pc3__title" title={displayName}>{displayName}</h3>
           </Link>
-          {!isOutOfStock && onAddToCart && (
-            <button
-              onClick={handleQuickAddToCart}
-              className="pc2__quick-add-btn"
-              title="Ajouter au panier"
-            >
-              <ShoppingCart size={15} />
-            </button>
+          {subtitle && <p className="pc3__sub">{subtitle}</p>}
+          {showMeta && (
+            <p className="pc3__meta">
+              {rating > 0 && <span className="pc3__rating"><Star size={11} fill="currentColor" strokeWidth={0} />{rating.toFixed(1)}</span>}
+              {soldCount > 0 && <span>{soldCount} vendus</span>}
+            </p>
           )}
         </div>
 
-        {/* =================================================
-            PRODUCT INFORMATION
-        ================================================= */}
-
-        <div className="pc2__body">
-
-          {/* PRODUCT NAME */}
-
-          <div className="pc2__headline">
-            <Link
-              to={`/product/${productId}`}
-              className="pc2__title-link"
-            >
-              <h3
-                className="pc2__title"
-                title={displayName}
-              >
-                {displayName}
-              </h3>
-            </Link>
-            <div className="pc2__rating-row">
-              <InteractiveRating
-                productId={productId}
-                rating={rating}
-                count={reviewCount}
-              />
-            </div>
-          </div>
-
-          {/* FEATURE */}
-
-          {feature && (
-            <p
-              className={`
-                pc2__feature
-                pc2__feature--${feature.type}
-              `}
-            >
-              {feature.text}
-            </p>
-          )}
-
-          {/* PRICE */}
-
-          <div className="pc2__price-row">
-
-            <span className="pc2__price">
-              {formatSoftS(
-                displayPrice
-              )}
+        <div className="pc3__pricebox">
+          {amount ? (
+            <span className={`pc3__price${hasPromo ? ' pc3__price--promo' : ''}`}>
+              <span className="pc3__amount">{amount}</span>
+              <span className="pc3__unit">FCFA</span>
             </span>
-
-            {hasPromo && (
-              <span className="pc2__price-old">
-                {formatSoftS(price)}
-              </span>
-            )}
-
-            
-
-          </div>
-
-          {isDropship && (soldAsLot || packSize > 1) && (
-            <p className="pc2__import-note">
-              Lot de {packSize} unités
-            </p>
+          ) : (
+            <span className="pc3__price"><span className="pc3__amount pc3__amount--text">{formatSoftS(displayPrice)}</span></span>
           )}
-          {isDropship && !soldAsLot && moq > 1 && (
-            <p className="pc2__import-note">
-              Minimum {moq} unités
-            </p>
-          )}
-
-          {/* SALES */}
-
-          {soldCount > 0 && (
-            <p className="pc2__moq-sold">
-              {soldCount.toLocaleString(
-                'fr-FR'
-              )}{' '}
-              vendus
-            </p>
-          )}
-
-          {/* DELIVERY */}
-
-          {/**deliveryInfo && (
-            <p className="pc2__delivery-zone">
-              Zone : {deliveryInfo}
-            </p>
-          ) */}
-
-          {/* VENDOR */}
-
-            {(vendorName ||
-              isCertified ||
-              isVerified ||
-              yearsActive ||
-              country) && (
-              <p className="pc2__vendor-meta">
-  
-                {vendorName && (
-                  <span className="pc2__vendor-name" style={{ 
-                    fontWeight: 600, 
-                    color: '#475569', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 3,
-                    maxWidth: '100%',
-                    minWidth: 0
-                  }}>
-                    <span style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {vendorName}
-                    </span>
-                    {isCertified && (
-                      <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }} title="Vendeur Certifié">
-                        ✓ Certifié
-                      </span>
-                    )}
-                  </span>
-                )}
-  
-                {!vendorName && isCertified && (
-                  <span style={{ background: '#2563eb', color: '#ffffff', fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }} title="Vendeur Certifié">
-                    ✓ Certifié
-                  </span>
-
-              )}
-
-              {(vendorName || isCertified) &&
-                (isVerified ||
-                  yearsActive) && (
-                  <span className="pc2__meta-sep">
-                    ·
-                  </span>
-                )}
-
-              {isVerified && (
-                <span className="pc2__verified">
-                  ✓ Vérifié
-                </span>
-              )}
-
-              {isVerified &&
-                yearsActive && (
-                  <span className="pc2__meta-sep">
-                    ·
-                  </span>
-                )}
-
-              {yearsActive && (
-                <span>
-                  {yearsActive} ans
-                </span>
-              )}
-
-              </p>
-            )}
-
+          {oldAmount && <span className="pc3__old">{oldAmount} FCFA</span>}
         </div>
-      </article>
-    </>
+      </div>
+    </article>
   );
 }
 
-export default React.memo(
-  ProductCard
-);
+export default React.memo(ProductCard);

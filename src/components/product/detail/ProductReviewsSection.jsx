@@ -43,7 +43,7 @@ function RatingSummary({ reviews, averageRating, count }) {
         <span className="pdp-reviews__score-value">
           {averageRating != null ? Number(averageRating).toFixed(1) : '—'}
         </span>
-        <ProductRating rating={averageRating} reviewCount={count} size="lg" />
+        <ProductRating rating={averageRating} reviewCount={count} size="lg" showStars={false} />
         <p className="pdp-reviews__score-label">{count} avis client{count > 1 ? 's' : ''}</p>
       </div>
       {reviews.length > 0 && (

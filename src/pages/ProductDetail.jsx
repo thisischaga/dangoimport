@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
-  ChevronRight, ChevronLeft, ShoppingCart, Minus, Plus, Package, Star, BadgeCheck,
-  Truck, RefreshCw, ShieldCheck, Share2, Heart, X, Check, Factory, Anchor, Ship, MapPin,
+  ChevronRight, ChevronLeft, ShoppingCart, Minus, Plus, Package, BadgeCheck,
+  Truck, RefreshCw, ShieldCheck, Share2, Heart, X, Check, Factory, Anchor, Ship, MapPin, Maximize2, CreditCard,
 } from 'lucide-react';
 import { useProduct, useProductReviews, useSimilarProducts } from '../hooks/useProducts';
 import ProductCard from '../components/product/ProductCard';
@@ -24,8 +24,7 @@ import './ProductDetail.css';
 
 /* ════════════════════════════════════════════════════════════════════
    Extraction des données fournisseur (keyAttributes Alibaba)
-   Règle : aucune donnée inventée. Si l'info n'existe pas, on ne l'affiche pas.
-   L'identité du fournisseur (nom d'usine, marque usine) reste masquée.
+   Règle : aucune donnée inventée. L'identité du fournisseur reste masquée.
    ════════════════════════════════════════════════════════════════════ */
 const GROUP_FR = {
   'Industry-specific attributes': 'Produit',
@@ -134,7 +133,7 @@ function extractSupplierData(product) {
 const num = (v) => (v == null || v === '' ? null : (Number.isFinite(Number(v)) ? Number(v) : null));
 const tierMin = (t) => num(t?.minQty ?? t?.minQuantity ?? t?.min) ?? num((String(t?.label || '').match(/\d+/) || [])[0]);
 
-/* ── En-tête de section (style landing) ─────────────────────────────── */
+/* ── En-tête de section ─────────────────────────────────────────────── */
 function SectionHead({ eyebrow, title, lead }) {
   return (
     <header className="pd-head">
@@ -145,55 +144,41 @@ function SectionHead({ eyebrow, title, lead }) {
   );
 }
 
-/* ── Paliers de prix cliquables (liste ou cartes) ───────────────────── */
-function VolumePricingTable({ tiers = [], qty, onPick, variant = 'list' }) {
+/* ── Paliers de prix (gros chiffres, cliquables) ────────────────────── */
+function VolumePricingTable({ tiers = [], qty, onPick }) {
   if (!Array.isArray(tiers) || tiers.length === 0) return null;
   const mins = tiers.map(tierMin);
   let activeIdx = -1;
   mins.forEach((m, i) => { if (m != null && qty >= m) activeIdx = i; });
-  const isCards = variant === 'cards';
-
   return (
-    <div className={`pd-tiers${isCards ? ' pd-tiers--cards' : ''}`}>
-      <p className="pd-tiers__title">Prix par quantité</p>
-      <ul className="pd-tiers__list">
-        {tiers.map((t, i) => (
-          <li key={i}>
-            <button
-              type="button"
-              className={`pd-tier ${i === activeIdx ? 'is-on' : ''}`}
-              disabled={mins[i] == null}
-              onClick={() => mins[i] != null && onPick?.(mins[i])}
-            >
-              <span className="pd-tier__qty">{t.label}</span>
-              <span className="pd-tier__price">{t.unitPriceFormatted}</span>
-              {t.savingsPercent > 0
-                ? <span className="pd-tier__save">−{t.savingsPercent}%</span>
-                : (isCards ? null : <span />)}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="pd-tiers__note">Prix publics en FCFA. Frais d&apos;importation calculés à la commande.</p>
-    </div>
+    <ul className="pd-tiers__list">
+      {tiers.map((t, i) => (
+        <li key={i}>
+          <button
+            type="button"
+            className={`pd-tierbtn ${i === activeIdx ? 'is-on' : ''}`}
+            disabled={mins[i] == null}
+            onClick={() => mins[i] != null && onPick?.(mins[i])}
+          >
+            <span className="pd-tierbtn__price">{t.unitPriceFormatted}</span>
+            <span className="pd-tierbtn__qty">{t.label}</span>
+            {t.savingsPercent > 0 && <span className="pd-tierbtn__save">−{t.savingsPercent}%</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-/* ── Parcours d'importation ─────────────────────────────────────────── */
-function ImportRoute({ origin, port, days }) {
-  const steps = [
-    { icon: Factory, title: 'Usine', text: origin || 'Chine' },
-    port && { icon: Anchor, title: 'Embarquement', text: port },
-    { icon: Ship, title: 'Transit', text: days || 'Selon destination' },
-    { icon: MapPin, title: 'Livraison', text: 'Lomé et Cotonou' },
-  ].filter(Boolean);
+/* ── Parcours d'importation (une seule frise, pas de cartes en double) ─ */
+function ImportRoute({ steps = [] }) {
   return (
     <ol className="pd-route" aria-label="Parcours de la commande">
-      {steps.map((s) => (
-        <li key={s.title} className="pd-route__step">
-          <span className="pd-route__node"><s.icon size={15} /></span>
-          <span className="pd-route__title">{s.title}</span>
-          <span className="pd-route__text">{s.text}</span>
+      {steps.map((st) => (
+        <li key={st.title} className="pd-route__step">
+          <span className="pd-route__node"><st.icon size={15} /></span>
+          <span className="pd-route__title">{st.title}</span>
+          <span className="pd-route__text">{st.text}</span>
         </li>
       ))}
     </ol>
@@ -246,7 +231,7 @@ function QtyControl({ value, onChange, min = 1, step = 1, max }) {
   );
 }
 
-function ProductGallery({ images = [], name, videoUrl }) {
+function ProductGallery({ images = [], name, videoUrl, wished = false, onToggleWish }) {
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [activeMedia, setActiveMedia] = useState('image');
@@ -254,8 +239,20 @@ function ProductGallery({ images = [], name, videoUrl }) {
 
   const slides = useMemo(() => images.filter(Boolean).filter((src) => !broken.has(src)), [images, broken]);
   const current = slides[index] || null;
+  const stripRef = useRef(null);
 
   useEffect(() => { setBroken(new Set()); setIndex(0); setActiveMedia('image'); }, [images.join('|')]);
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    const el = strip?.querySelector('.is-on');
+    if (!strip || !el) return;
+    strip.scrollTo({
+      left: el.offsetLeft - (strip.clientWidth - el.offsetWidth) / 2,
+      top: el.offsetTop - (strip.clientHeight - el.offsetHeight) / 2,
+      behavior: 'smooth',
+    });
+  }, [index, activeMedia, slides.length]);
   useEffect(() => { setIndex((i) => (slides.length ? Math.min(i, slides.length - 1) : 0)); }, [slides.length]);
 
   const markBroken = useCallback((src) => {
@@ -298,6 +295,19 @@ function ProductGallery({ images = [], name, videoUrl }) {
             <div className="pd-gallery__empty"><Package size={40} strokeWidth={1.25} /></div>
           )}
 
+          <div className="pd-gallery__fabs">
+            {onToggleWish && (
+              <button type="button" className={`pd-gallery__fab ${wished ? 'is-on' : ''}`} onClick={onToggleWish} aria-label="Favoris" aria-pressed={wished}>
+                <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
+              </button>
+            )}
+            {current && activeMedia === 'image' && (
+              <button type="button" className="pd-gallery__fab" onClick={() => setLightbox(true)} aria-label="Agrandir l'image">
+                <Maximize2 size={18} />
+              </button>
+            )}
+          </div>
+
           {activeMedia === 'image' && slides.length > 1 && (
             <>
               <span className="pd-gallery__count">{index + 1} / {slides.length}</span>
@@ -308,7 +318,7 @@ function ProductGallery({ images = [], name, videoUrl }) {
         </div>
 
         {(slides.length > 1 || videoUrl) && (
-          <div className="pd-gallery__strip" role="tablist" aria-label="Miniatures">
+          <div ref={stripRef} className="pd-gallery__strip" role="tablist" aria-label="Miniatures">
             {videoUrl && (
               <button
                 type="button" role="tab" aria-selected={activeMedia === 'video'}
@@ -363,6 +373,59 @@ function ReadMore({ text, safeHtml, fallbackTitle = '' }) {
         <button type="button" className="pd-link" onClick={() => setOpen((v) => !v)}>
           {open ? 'Réduire la description' : 'Lire la suite de la description'}
         </button>
+      )}
+    </div>
+  );
+}
+
+/* Descriptions fournisseur : on retire les titres parasites
+   (« Points forts du produit », « Présentation de l'entreprise », « FAQ ») et on met les Q/R en accordéon. */
+function parseDescription(raw) {
+  const src = String(raw || '').replace(/\r/g, '');
+  if (!src.trim()) return { intro: [], faq: [] };
+  const m = /\bFAQ\b|\bQ\s*:/.exec(src);
+  const cut = m ? m.index : -1;
+  const headRaw = cut >= 0 ? src.slice(0, cut) : src;
+  const tailRaw = cut >= 0 ? src.slice(cut).replace(/\s+/g, ' ') : '';
+  const intro = headRaw
+    .replace(/Points forts du produit|Pr[ée]sentation de l['’]entreprise/gi, '\n')
+    .split(/\n+/).map((x) => x.trim()).filter((x) => x.length > 2);
+  const faq = [];
+  const re = /Q\s*:\s*([\s\S]+?)\s*R\s*:\s*([\s\S]+?)(?=\s*Q\s*:|$)/g;
+  let hit = re.exec(tailRaw);
+  while (hit) {
+    faq.push({ q: hit[1].trim(), a: hit[2].trim() });
+    hit = re.exec(tailRaw);
+  }
+  if (!faq.length && tailRaw) {
+    const rest = tailRaw.replace(/^\s*FAQ\s*/i, '').trim();
+    if (rest) intro.push(rest);
+  }
+  return { intro, faq };
+}
+
+function ProductDescription({ text, safeHtml, fallbackTitle }) {
+  const parsed = useMemo(() => parseDescription(text), [text]);
+  if (safeHtml || (!parsed.intro.length && !parsed.faq.length)) {
+    return <ReadMore text={text} safeHtml={safeHtml} fallbackTitle={fallbackTitle} />;
+  }
+  return (
+    <div className="pd-desc">
+      {parsed.intro.length > 0 && (
+        <div className="pd-desc__intro">{parsed.intro.map((para, i) => <p key={i}>{para}</p>)}</div>
+      )}
+      {parsed.faq.length > 0 && (
+        <div className="pd-faq">
+          <h3 className="pd-faq__title">Questions fréquentes</h3>
+          <div className="pd-faq__list">
+          {parsed.faq.map((f, i) => (
+            <details key={i} className="pd-faq__item" open={i === 0}>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -511,41 +574,56 @@ export default function ProductDetail() {
 
   const alibabaInfo = useMemo(() => (isAlibaba ? extractAlibabaDisplayInfo(product) : {}), [product, isAlibaba]);
 
-  /* Caractéristiques fusionnées : fiche générique + attributs fournisseur (sans doublons) */
-  const specGroups = useMemo(() => {
+  /* Les sélecteurs Couleur / Taille du haut montrent déjà ces options : on ne les répète pas dans les caractéristiques */
+  const hasVariantPicker = variants.length > 0;
+  const hasSkuOptions = Boolean(isAlibaba && alibabaInfo?.hasSkus) && !hasVariantPicker;
+  const isDuplicateSpec = (key) => (
+    (hasVariantPicker && /^(couleur|color|taille|size|pointure)/i.test(key))
+    || (isAlibaba && /approvisionnement/i.test(key))
+    || (isAlibaba && Boolean(originCountry) && /^origine$/i.test(key))
+  );
+
+  /* Caractéristiques : fiche générique + attributs fournisseur, sans doublons.
+     Les 6 plus utiles vont en haut ; le reste va uniquement dans la fiche technique du bas. */
+  const { topSpecs, restGroups } = useMemo(() => {
     const norm = (k) => String(k).toLowerCase().replace(/[^a-zà-ÿ0-9]/g, '');
-    const seen = new Set();
-    const base = (detailData?.specifications || [])
-      .filter((s) => s?.key && s?.value && !/^marque$/i.test(s.key))
-      .map((s) => ({ key: String(s.key), value: String(s.value) }));
-    base.forEach((r) => seen.add(norm(r.key)));
-    const groups = base.length ? [{ title: 'Général', rows: base }] : [];
-    extras.groups.forEach((g) => {
-      const rows = g.rows.filter((r) => {
+    const seenKeys = new Set();
+    const seenVals = [];
+    const groups = [];
+    const push = (title, rows) => {
+      const kept = rows.filter((r) => {
         const k = norm(r.key);
-        if (seen.has(k)) return false;
-        seen.add(k);
+        const v = norm(r.value);
+        if (isDuplicateSpec(r.key)) return false;
+        if (!k || !v || seenKeys.has(k)) return false;
+        /* « Poids » et « Poids brut » avec la même valeur : une seule ligne */
+        if (seenVals.some((o) => o.v === v && (o.k.includes(k) || k.includes(o.k)))) return false;
+        seenKeys.add(k);
+        seenVals.push({ k, v });
         return true;
       });
-      if (rows.length) groups.push({ title: g.title, rows });
-    });
-    return groups;
-  }, [detailData?.specifications, extras.groups]);
-  const specCount = specGroups.reduce((n, g) => n + g.rows.length, 0);
-  const hasSkuOptions = Boolean(isAlibaba && alibabaInfo?.hasSkus);
-  const specCardCount = specGroups.length + (hasSkuOptions ? 1 : 0);
+      if (kept.length) groups.push({ title, rows: kept });
+    };
+    push('Général', (detailData?.specifications || [])
+      .filter((x) => x?.key && x?.value && !/^marque$/i.test(x.key))
+      .map((x) => ({ key: String(x.key), value: String(x.value) })));
+    extras.groups.forEach((g) => push(g.title, g.rows));
 
-  /* Points forts (fiche rapide) */
-  const glance = [
-    extras.capacity && { label: 'Capacité', value: extras.capacity },
-    extras.material && { label: 'Matériau', value: extras.material },
-    extras.size && { label: 'Dimensions', value: extras.size },
-    extras.unitWeight && { label: 'Poids brut', value: extras.unitWeight },
-    extras.model && { label: 'Référence', value: extras.model },
-    extras.packing && { label: 'Emballage', value: extras.packing },
-  ].filter(Boolean);
+    const priority = /capacit|mat[ée]riau|dimension|poids|r[ée]f|origine|fabrication|couleur|type/i;
+    const flat = groups.flatMap((g) => g.rows.map((r) => ({ ...r, group: g.title })));
+    const ranked = [...flat.filter((r) => priority.test(r.key)), ...flat.filter((r) => !priority.test(r.key))];
+    const top = ranked.slice(0, 6);
+    const topIds = new Set(top.map((r) => `${r.group}|${r.key}`));
+    const rest = groups
+      .map((g) => ({ title: g.title, rows: g.rows.filter((r) => !topIds.has(`${g.title}|${r.key}`)) }))
+      .filter((g) => g.rows.length);
+    return { topSpecs: top, restGroups: rest };
+  }, [detailData?.specifications, extras.groups, hasVariantPicker, isAlibaba, originCountry]);
+  const restCount = restGroups.reduce((n, g) => n + g.rows.length, 0);
+  const specCardCount = restGroups.length + (hasSkuOptions ? 1 : 0);
+  const showSpecsBand = restCount > 0 || hasSkuOptions;
 
-  /* Conditionnement & vente en gros */
+  /* Gros et conditionnement (sans les paliers de prix, déjà en haut) */
   const wh = detailData?.wholesale;
   const pk = detailData?.packaging;
   const packRows = [
@@ -564,17 +642,20 @@ export default function ProductDetail() {
     wh?.handlingTimeDays && { key: 'Préparation usine', value: `${wh.handlingTimeDays} jour(s) ouvrés` },
   ].filter(Boolean);
 
-  const stats = [
-    (wh?.minOrderQuantity > 1 || moqRules.moq > 1) && { label: 'Commande minimum', value: `${wh?.minOrderQuantity || moqRules.moq} ${wh?.unitType || 'unités'}` },
-    extras.carton && { label: 'Pièces par carton', value: `${extras.carton.pcs}` },
-    extras.carton && { label: 'Volume du carton', value: `${fmtNum(extras.carton.volumeM3, 3)} m³` },
-    extras.carton?.grossKg && { label: 'Poids du carton', value: `≈ ${fmtNum(extras.carton.grossKg, 1)} kg` },
-  ].filter(Boolean);
-
   const tiers = detailData?.publicPriceTiers || [];
   const hasPeriods = wh?.deliverPeriods?.length > 0;
-  const hasWholesaleTab = packRows.length > 0 || tiers.length > 0 || hasPeriods;
-  const hasDelivery = isDropship || hasShippingInfo || deliveryZones.length > 0 || hasWarranty;
+  const hasWholesaleTab = packRows.length > 0 || hasPeriods;
+  /* Livraison : la section n'existe que si elle contient de vraies informations */
+  const isImport = isDropship || isAlibaba;
+  const importInfo = isImport && Boolean(originLabel || importDaysLabel || extras.port);
+  const shippingText = !isImport && hasShippingInfo ? detailData.shippingInfo : '';
+  const hasDelivery = importInfo || Boolean(shippingText) || deliveryZones.length > 0 || hasWarranty;
+  const routeSteps = [
+    { icon: Factory, title: 'Fabrication', text: wh?.handlingTimeDays ? `${originLabel || 'Chine'}, ${wh.handlingTimeDays} j de préparation` : (originLabel || 'Chine') },
+    extras.port && { icon: Anchor, title: 'Embarquement', text: extras.port },
+    { icon: Ship, title: 'Transit international', text: importDaysLabel || 'Selon destination' },
+    { icon: MapPin, title: 'Livraison', text: 'Lomé et Cotonou, à domicile ou en agence' },
+  ].filter(Boolean);
 
   /* Sous-total uniquement quand le prix unitaire est connu */
   const activeTier = useMemo(() => {
@@ -675,11 +756,10 @@ export default function ProductDetail() {
     );
   }
 
-  /* Ordre = ordre d'affichage des bandes */
   const tabs = [
     { key: 'description', label: 'Description', ref: descRef },
     ...(hasDelivery ? [{ key: 'delivery', label: 'Livraison', ref: deliveryRef }] : []),
-    { key: 'specs', label: `Caractéristiques${specCount ? ` (${specCount})` : ''}`, ref: specsRef },
+    ...(showSpecsBand ? [{ key: 'specs', label: `Fiche technique${restCount ? ` (${restCount})` : ''}`, ref: specsRef }] : []),
     ...(hasWholesaleTab ? [{ key: 'wholesale', label: 'Gros et conditionnement', ref: wholesaleRef }] : []),
     { key: 'reviews', label: `Avis${reviewCount ? ` (${reviewCount})` : ''}`, ref: reviewsRef },
   ];
@@ -691,7 +771,7 @@ export default function ProductDetail() {
       <Header />
 
       <main className="pd-main">
-        {/* ═════════ Haut de page : galerie + achat ═════════ */}
+        {/* ═════════ Haut de page : galerie | détails | résumé de commande ═════════ */}
         <div className="pd-wrap pd-wrap--top">
           <nav className="pd-crumb" aria-label="Fil d'Ariane">
             <Link to="/">Accueil</Link>
@@ -706,60 +786,68 @@ export default function ProductDetail() {
           </nav>
 
           <div className="pd-layout">
+            {/* Colonne 1 : galerie */}
             <div className="pd-layout__media">
-              <ProductGallery images={images} name={detailData?.name} videoUrl={detailData?.videoUrl} />
+              <ProductGallery
+                images={images}
+                name={detailData?.name}
+                videoUrl={detailData?.videoUrl}
+                wished={wished}
+                onToggleWish={() => setWished((w) => !w)}
+              />
             </div>
 
+            {/* Colonne 2 : détails */}
             <div className="pd-layout__info">
-              <aside className="pd-buy">
-                <div className="pd-buy__head">
-                  {originCountry && isAlibaba && <span className="pd-tag pd-tag--origin"><Ship size={12} /> Importé de {originCountry}</span>}
-                  {detailData?.tagLabel && <span className="pd-tag">{detailData.tagLabel}</span>}
-                  {isFragile && <span className="pd-tag">Colis fragile</span>}
-                  {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}
-                  {detailData?.brand && <span className="pd-meta">{detailData.brand}</span>}
-                </div>
+              <div className="pd-buy__head">
+                {originCountry && isAlibaba && <span className="pd-tag pd-tag--origin"><Ship size={12} /> Importé de {originCountry}</span>}
+                {detailData?.tagLabel && <span className="pd-tag">{detailData.tagLabel}</span>}
+                {isFragile && <span className="pd-tag">Colis fragile</span>}
+                {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}
+                {detailData?.brand && <span className="pd-meta">{detailData.brand}</span>}
+              </div>
 
-                <h1 className={`pd-title${(detailData?.name?.length || 0) > 72 ? ' pd-title--long' : ''}`}>{detailData?.name}</h1>
+              <h1 className={`pd-title${(detailData?.name?.length || 0) > 72 ? ' pd-title--long' : ''}`}>{detailData?.name}</h1>
 
-                <div className="pd-rating-row">
-                  <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
-                  {soldCount > 0 && <span className="pd-meta"><Star size={12} fill="currentColor" /> {soldCount} vendus</span>}
-                  {extras.model && <span className="pd-meta">Réf. {extras.model}</span>}
-                </div>
+              <div className="pd-rating-row">
+                {reviewCount > 0
+                  ? <ProductRating rating={rating} reviewCount={reviewCount} size="md" />
+                  : <span className="pd-meta pd-meta--lg">Aucun avis pour l&apos;instant</span>}
+                {soldCount > 0 && <span className="pd-meta pd-meta--lg pd-meta--sep">{soldCount} vendus</span>}
+                {extras.model && <span className="pd-meta pd-meta--sep">Réf. {extras.model}</span>}
+              </div>
 
-                <div className="pd-price">
-                  <span className="pd-price__now">{formatCFA(displayPrice)}</span>
-                  {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
-                  <span className="pd-price__unit">l&apos;unité, TTC</span>
-                </div>
-
+              <div className="pd-pricebox">
+                {tiers.length > 0 ? (
+                  <div className="pd-tiers pd-tiers--bar">
+                    <VolumePricingTable tiers={tiers} qty={qty} onPick={(m) => setQty(snapQuantity(product, m))} />
+                  </div>
+                ) : (
+                  <div className="pd-price">
+                    <span className="pd-price__now">{formatCFA(displayPrice)}</span>
+                    {hasPromo && <span className="pd-price__was">{formatCFA(price)}</span>}
+                    <span className="pd-price__unit">l&apos;unité, TTC</span>
+                  </div>
+                )}
                 <p className={`pd-stock ${!inStock ? 'pd-stock--out' : isLowStock ? 'pd-stock--low' : ''}`}>{stockLabel}</p>
+              </div>
 
-                <VolumePricingTable tiers={tiers} qty={qty} onPick={(m) => setQty(snapQuantity(product, m))} />
+              <ProductVariants
+                product={product ? { ...product, isAlibaba } : product}
+                selectedVariantIndex={selectedVariantIndex}
+                onSelectVariant={setSelectedVariantIndex}
+                selectedColor={selectedColor}
+                onSelectColor={setSelectedColor}
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+              />
 
-                {isDropship && !moqRules.soldAsLot && moqRules.moq > 1 && (
-                  <p className="pd-note">Quantité minimum : <strong>{moqRules.moq} unités</strong></p>
-                )}
-                {isDropship && (moqRules.soldAsLot || moqRules.packSize > 1) && (
-                  <p className="pd-note">Vendu par lot de <strong>{moqRules.packSize} unités</strong></p>
-                )}
-
-                <ProductVariants
-                  product={product ? { ...product, isAlibaba } : product}
-                  selectedVariantIndex={selectedVariantIndex}
-                  onSelectVariant={setSelectedVariantIndex}
-                  selectedColor={selectedColor}
-                  onSelectColor={setSelectedColor}
-                  selectedSize={selectedSize}
-                  onSelectSize={setSelectedSize}
-                />
-
-                {inStock && (
+              {inStock && (
+                <div className="pd-block">
                   <div className="pd-qty-row">
                     <div>
-                      <span className="pd-label">Quantité</span>
-                      {subtotal != null && <p className="pd-subtotal">Sous-total {formatCFA(subtotal)}</p>}
+                      <span className="pd-label pd-label--lg">Quantité</span>
+                      {moqRules.moq > 1 && <p className="pd-subtotal">Minimum {moqRules.moq} unités{moqRules.packSize > 1 ? `, par lot de ${moqRules.packSize}` : ''}</p>}
                     </div>
                     <QtyControl
                       value={qty}
@@ -769,78 +857,73 @@ export default function ProductDetail() {
                       max={isAlibaba ? undefined : stock}
                     />
                   </div>
-                )}
-
-                <div className="pd-actions">
-                  <button type="button" className={`pd-btn pd-btn--primary ${addedAnim ? 'is-done' : ''}`} onClick={handleAddToCart} disabled={!inStock}>
-                    {addedAnim ? <><Check size={18} /> Ajouté</> : <><ShoppingCart size={18} /> {isInCart ? 'Encore au panier' : 'Ajouter au panier'}</>}
-                  </button>
-                  <button type="button" className="pd-btn pd-btn--ghost" onClick={handleBuyNow} disabled={!inStock}>Acheter</button>
-                  <button type="button" className={`pd-icon-btn ${wished ? 'is-on' : ''}`} onClick={() => setWished((w) => !w)} aria-label="Favoris">
-                    <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
-                  </button>
                 </div>
+              )}
 
-                <ul className="pd-assurance">
-                  <li><Truck size={14} /> {freeShippingZone ? 'Livraison gratuite sur certaines zones' : 'Livraison partout au Togo et au Bénin'}</li>
-                  <li><ShieldCheck size={14} /> Paiement mobile sécurisé (T-Money, Moov, Flooz, Carte)</li>
-                  <li><RefreshCw size={14} /> Retours et conformité garantis par Dango Import</li>
+              {topSpecs.length > 0 && (
+                <section className="pd-keyspecs">
+                  <h2 className="pd-keyspecs__title">Caractéristiques</h2>
+                  <dl className="pd-keyspecs__list">
+                    {topSpecs.map((g) => (
+                      <div key={`${g.group}-${g.key}`} className="pd-keyspecs__row">
+                        <dt>{g.key}</dt>
+                        <dd>{g.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {showSpecsBand && (
+                    <button type="button" className="pd-link" onClick={() => scrollToSection(specsRef, 'specs')}>Voir toute la fiche technique</button>
+                  )}
+                </section>
+              )}
+            </div>
+
+            {/* Colonne 3 : résumé de commande */}
+            <aside className="pd-buycard" aria-label="Résumé de la commande">
+              {importDaysLabel && isImport && (
+                <p className="pd-buycard__eta"><Ship size={14} /> Livraison estimée : {importDaysLabel}</p>
+              )}
+
+              <dl className="pd-sum">
+                <div className="pd-sum__row"><dt>Sous-total de l&apos;article</dt><dd>{subtotal != null ? formatCFA(subtotal) : '—'}</dd></div>
+                <div className="pd-sum__row"><dt>Frais d&apos;importation</dt><dd className="pd-sum__muted">Calculés au checkout</dd></div>
+                <div className="pd-sum__row pd-sum__row--total"><dt>Sous-total</dt><dd>{subtotal != null ? formatCFA(subtotal) : '—'}</dd></div>
+              </dl>
+
+              <ul className="pd-protect">
+                  <li><CreditCard size={16} /> Paiement mobile sécurisé (T-Money, Moov, Flooz, carte)</li>
+                  <li><ShieldCheck size={16} /> Contrôle qualité Dango Import avant expédition</li>
+                  <li><RefreshCw size={16} /> Retours et conformité garantis</li>
+                  <li><Truck size={16} /> {freeShippingZone ? 'Livraison gratuite sur certaines zones' : 'Livraison au Togo et au Bénin'}</li>
                 </ul>
 
-                {sellerName && (
-                  <div className="pd-seller">
-                    <span className="pd-label">Vendeur</span>
-                    <span className="pd-seller__name">
-                      {sellerName}
-                      {detailData?.isVendorCertified && <BadgeCheck size={14} className="pd-seller__badge" aria-label="Certifié" />}
-                    </span>
-                  </div>
-                )}
-
-                <button
-                  type="button" className="pd-share"
-                  onClick={() => (navigator.share
-                    ? navigator.share({ title: detailData?.name, url: window.location.href })
-                    : navigator.clipboard?.writeText(window.location.href).then(() => toast.success('Lien copié')))}
-                >
-                  <Share2 size={14} /> Partager
+              <div className="pd-buycard__actions">
+                <button type="button" className={`pd-btn pd-btn--primary ${addedAnim ? 'is-done' : ''}`} onClick={handleAddToCart} disabled={!inStock}>
+                  {addedAnim ? <><Check size={18} /> Ajouté</> : <><ShoppingCart size={18} /> {isInCart ? 'Encore au panier' : 'Ajouter au panier'}</>}
                 </button>
-              </aside>
-            </div>
+                <button type="button" className="pd-btn pd-btn--ghost" onClick={handleBuyNow} disabled={!inStock}>Acheter maintenant</button>
+              </div>
+            </aside>
           </div>
         </div>
 
-        {/* ═════════ Bas de page : landing ═════════ */}
+        {/* ═════════ Bas de page ═════════ */}
         <div className="pd-landing">
           <div className="pd-tabs">
-            <nav className="pd-tabs__inner" aria-label="Sections">
+            {/*<nav className="pd-tabs__inner" aria-label="Sections">
               {tabs.map((tab) => (
                 <button key={tab.key} type="button" className={`pd-tabs__item ${activeTab === tab.key ? 'is-active' : ''}`} onClick={() => scrollToSection(tab.ref, tab.key)}>
                   {tab.label}
                 </button>
-              ))}
-            </nav>
+              ))}*/}
+            {/*</nav>*/}
           </div>
 
-          {/* 1 · Description + points forts */}
+          {/* 1 · Description */}
           <section ref={descRef} className="pd-band" id="description">
             <div className="pd-inner">
-              <SectionHead eyebrow="Le produit" title="À propos de ce produit" />
-              <div className="pd-narrow">
-                <ReadMore text={detailData?.description} safeHtml={detailData?.safeHtml} fallbackTitle={detailData?.name} />
-              </div>
-
-              {glance.length > 0 && (
-                <dl className="pd-feats" aria-label="Points forts">
-                  {glance.map((g) => (
-                    <div key={g.label} className="pd-feat">
-                      <dt>{g.label}</dt>
-                      <dd>{g.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-
+              <SectionHead title="Description" />
+              <ProductDescription text={detailData?.description} safeHtml={detailData?.safeHtml} fallbackTitle={detailData?.name} />
               {detailData?.hasVideo && detailData?.videoUrl && (
                 <div className="pd-video-wrap">
                   <video src={detailData.videoUrl} controls preload="metadata" className="pd-video" aria-label="Vidéo de présentation produit" />
@@ -849,41 +932,22 @@ export default function ProductDetail() {
             </div>
           </section>
 
-          {/* 2 · Livraison et importation */}
+          {/* 2 · Livraison (uniquement avec du contenu réel) */}
           {hasDelivery && (
-            <section ref={deliveryRef} className="pd-band pd-band--ink" id="delivery">
+            <section ref={deliveryRef} className="pd-band pd-band--tint" id="delivery">
               <div className="pd-inner">
-                <SectionHead
-                  eyebrow="Livraison et importation"
-                  title={isDropship ? "De l'usine jusqu'à chez vous" : 'Livraison'}
-                  lead={isDropship && importDaysLabel ? `Délai d'importation estimé : ${importDaysLabel}` : undefined}
-                />
+                <SectionHead title={importInfo ? "Du fournisseur jusqu'à chez vous" : 'Livraison'} />
 
-                {isDropship ? (
+                {importInfo && (
                   <>
-                    <ImportRoute origin={originLabel} port={extras.port} days={importDaysLabel} />
-                    <ol className="pd-steps">
-                      <li>
-                        <strong>Préparation chez le fournisseur</strong>
-                        <p>{wh?.handlingTimeDays ? `${wh.handlingTimeDays} jours ouvrés de fabrication et de préparation.` : 'Vérification et préparation de la commande par le fournisseur.'}</p>
-                      </li>
-                      <li>
-                        <strong>Transit international et dédouanement</strong>
-                        <p>Expédié depuis {originCountry || 'la Chine'} vers le hub Dango Import{importDaysLabel ? <> en <strong>{importDaysLabel}</strong></> : null}.</p>
-                      </li>
-                      <li>
-                        <strong>Distribution au Togo et au Bénin</strong>
-                        <p>Livraison à votre adresse ou retrait sécurisé en agence partenaire.</p>
-                      </li>
-                    </ol>
+                    <ImportRoute steps={routeSteps} />
                     <p className="pd-band__foot">
-                      Frais d&apos;importation et taxes calculés au checkout. Vente et SAV par Dango Import.
-                      {isFragile ? ' Catégorie d\'expédition : fragile.' : ''}
+                      Frais d&apos;importation et taxes calculés au checkout.{isFragile ? ' Catégorie d\'expédition : fragile.' : ''}
                     </p>
                   </>
-                ) : hasShippingInfo ? (
-                  <div className="pd-narrow"><p className="pd-prose">{detailData.shippingInfo}</p></div>
-                ) : null}
+                )}
+
+                {shippingText && <div className="pd-narrow"><p className="pd-prose">{shippingText}</p></div>}
 
                 {deliveryZones.length > 0 && (
                   <div className="pd-zonecard">
@@ -908,18 +972,13 @@ export default function ProductDetail() {
             </section>
           )}
 
-          {/* 3 · Caractéristiques */}
-          <section ref={specsRef} className="pd-band pd-band--surface" id="specs">
-            <div className="pd-inner">
-              <SectionHead
-                eyebrow="Fiche technique"
-                title="Caractéristiques"
-                lead={specCount > 0 ? `${specCount} informations détaillées sur le produit.` : undefined}
-              />
-
-              {specCardCount > 0 ? (
+          {/* 3 · Fiche technique : seulement ce qui n'est pas déjà affiché en haut */}
+          {showSpecsBand && (
+            <section ref={specsRef} className="pd-band pd-band--surface" id="specs">
+              <div className="pd-inner">
+                <SectionHead title="Fiche technique" lead="Les autres informations détaillées du produit." />
                 <div className={`pd-specgrid${specCardCount === 1 ? ' pd-specgrid--single' : ''}`}>
-                  {specGroups.map((g) => (
+                  {restGroups.map((g) => (
                     <div key={g.title} className="pd-card">
                       <h3>{g.title}</h3>
                       <Rows rows={g.rows} />
@@ -932,21 +991,9 @@ export default function ProductDetail() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <p className="pd-muted pd-center">Aucune caractéristique renseignée.</p>
-              )}
-
-              {isAlibaba && (
-                <div className="pd-supplier">
-                  <div>
-                    <p className="pd-supplier__title">Approvisionnement direct usine</p>
-                    <p className="pd-muted">Expédition depuis : <strong>{originLabel || 'Chine'}</strong>{extras.port ? <>, port de {extras.port}</> : null}</p>
-                  </div>
-                  <p className="pd-supplier__guarantee"><ShieldCheck size={16} /> Les commandes Alibaba passent par le contrôle qualité Dango Import avant expédition vers Lomé et Cotonou.</p>
-                </div>
-              )}
-            </div>
-          </section>
+              </div>
+            </section>
+          )}
 
           {/* 4 · Gros et conditionnement */}
           {hasWholesaleTab && (
@@ -955,50 +1002,32 @@ export default function ProductDetail() {
                 <SectionHead
                   eyebrow="Achat en volume"
                   title="Gros et conditionnement"
-                  lead="Conditions de commande, dimensions des colis et prix dégressifs."
+                  lead="Conditions de commande et dimensions des colis."
                 />
-
-                {stats.length > 0 && (
-                  <div className="pd-stats">
-                    {stats.map((s) => (
-                      <div key={s.label} className="pd-stat">
-                        <strong>{s.value}</strong>
-                        <span>{s.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {tiers.length > 0 && (
-                  <VolumePricingTable variant="cards" tiers={tiers} qty={qty} onPick={(m) => setQty(snapQuantity(product, m))} />
-                )}
-
-                {(packRows.length > 0 || hasPeriods) && (
-                  <div className={`pd-twocol${packRows.length > 0 && hasPeriods ? '' : ' pd-twocol--single'}`}>
-                    {packRows.length > 0 && (
-                      <div className="pd-card">
-                        <h3>Conditionnement</h3>
-                        <Rows rows={packRows} />
-                        {extras.carton?.grossKg && <p className="pd-footnote">Le poids du carton complet est estimé : poids unitaire multiplié par le nombre de pièces.</p>}
-                      </div>
-                    )}
-                    {hasPeriods && (
-                      <div className="pd-card">
-                        <h3>Délais de fabrication selon le volume</h3>
-                        <Rows rows={wh.deliverPeriods.map((p) => ({
-                          key: `${p.quantity} unités`,
-                          value: `${p.processPeriodDays || p.processPeriod} jours ouvrés`,
-                        }))}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className={`pd-twocol${packRows.length > 0 && hasPeriods ? '' : ' pd-twocol--single'}`}>
+                  {packRows.length > 0 && (
+                    <div className="pd-card">
+                      <h3>Conditionnement</h3>
+                      <Rows rows={packRows} />
+                      {extras.carton?.grossKg && <p className="pd-footnote">Le poids du carton complet est estimé : poids unitaire multiplié par le nombre de pièces.</p>}
+                    </div>
+                  )}
+                  {hasPeriods && (
+                    <div className="pd-card">
+                      <h3>Délais de fabrication selon le volume</h3>
+                      <Rows rows={wh.deliverPeriods.map((p) => ({
+                        key: `${p.quantity} unités`,
+                        value: `${p.processPeriodDays || p.processPeriod} jours ouvrés`,
+                      }))}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           )}
 
-          {/* 5 · Avis */}
+          {/* 5 · Avis (désactivé)
           <section ref={reviewsRef} className={`pd-band${hasWholesaleTab ? ' pd-band--surface' : ''}`} id="reviews">
             <div className="pd-inner pd-inner--mid">
               <ProductReviewsSection
@@ -1010,6 +1039,7 @@ export default function ProductDetail() {
               />
             </div>
           </section>
+          */}
 
           {/* 6 · Produits similaires */}
           {similarProducts.length > 0 && (
@@ -1029,35 +1059,10 @@ export default function ProductDetail() {
               </div>
             </section>
           )}
-
-          {/* 7 · Appel final */}
-          {inStock && (
-            <section className="pd-band pd-band--ink pd-cta" aria-label="Commander">
-              <div className="pd-inner pd-cta__inner">
-                <p className="pd-eyebrow">Prêt à commander ?</p>
-                <h2 className="pd-cta__title">{detailData?.name}</h2>
-                <div className="pd-cta__price">
-                  <strong>{formatCFA(displayPrice)}</strong>
-                  {hasPromo && <s>{formatCFA(price)}</s>}
-                  <span>l&apos;unité, TTC</span>
-                </div>
-                <div className="pd-cta__actions">
-                  <button type="button" className={`pd-btn pd-btn--primary ${addedAnim ? 'is-done' : ''}`} onClick={handleAddToCart}>
-                    {addedAnim ? <><Check size={18} /> Ajouté</> : <><ShoppingCart size={18} /> Ajouter au panier</>}
-                  </button>
-                  <button type="button" className="pd-btn pd-btn--light" onClick={handleBuyNow}>Acheter maintenant</button>
-                </div>
-                <ul className="pd-cta__trust">
-                  <li><Truck size={14} /> Togo et Bénin</li>
-                  <li><ShieldCheck size={14} /> Paiement mobile sécurisé</li>
-                  <li><RefreshCw size={14} /> Retours garantis</li>
-                </ul>
-              </div>
-            </section>
-          )}
         </div>
       </main>
 
+      {/* Barre mobile uniquement */}
       <div className="pd-bar">
         <div className="pd-bar__price">
           <strong>{formatCFA(displayPrice)}</strong>
