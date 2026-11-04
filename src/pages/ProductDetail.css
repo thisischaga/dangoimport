@@ -91,6 +91,7 @@
 .pd-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: var(--surface); color: var(--ink-soft); }
 .pd-tag--origin { background: var(--ink); color: #fff; }
 .pd-tag--sale { background: var(--orange); color: #fff; }
+.pd-tag--factory { background: #fff4ec; color: var(--orange-deep); border: 1px solid #ffd8bf; }
 .pd-meta { font-size: 13px; color: var(--ink-mute); display: inline-flex; align-items: center; gap: 4px; }
 .pd-meta--lg { font-size: 15px; color: var(--ink-soft); }
 .pd-meta--sep { margin-left: 14px; padding-left: 14px; border-left: 1px solid var(--line); }

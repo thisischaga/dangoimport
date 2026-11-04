@@ -27,39 +27,70 @@ import './ProductDetail.css';
    Règle : aucune donnée inventée. L'identité du fournisseur reste masquée.
    ════════════════════════════════════════════════════════════════════ */
 const GROUP_FR = {
-  'Industry-specific attributes': 'Produit',
-  'Other attributes': 'Fabrication et format',
-  'Packaging and delivery': 'Colis et expédition',
+  'Industry-specific attributes': 'Spécifications industrielles',
+  'Other attributes': 'Fabrication & Matériaux',
+  'Packaging and delivery': 'Colis & Expédition',
 };
-const ATTR_FR = {
-  'Herb & Spice Tools Type': 'Type de produit',
-  Material: 'Matériau',
-  Feature: 'Particularités',
-  'Place of Origin': 'Lieu de fabrication',
-  'Model Number': 'Référence modèle',
-  Size: 'Dimensions du produit',
-  Capacity: 'Capacité',
-  Packing: 'Emballage individuel',
-  Style: 'Style',
-  Port: "Port d'embarquement",
-  'Selling Units:': 'Unité de vente',
-  'Single package size:': 'Dimensions du colis unitaire',
-  'Single gross weight:': 'Poids brut unitaire',
+const ATTR_FR_MAP = {
+  'herb & spice tools type': 'Type de produit',
+  material: 'Matériau',
+  feature: 'Particularités / Points forts',
+  'place of origin': 'Lieu de fabrication',
+  'model number': 'Référence modèle',
+  size: 'Dimensions du produit',
+  capacity: 'Capacité',
+  packing: 'Emballage individuel',
+  style: 'Style',
+  port: "Port d'embarquement",
+  'selling units:': 'Unité de vente',
+  'single package size:': 'Dimensions colis unitaire',
+  'single gross weight:': 'Poids brut unitaire',
+  connectors: 'Connecteurs',
+  function: 'Fonctionnalités',
+  type: 'Type de câble / produit',
+  'usb type': 'Connectique USB',
+  use: 'Appareils compatibles',
+  application: 'Compatibilité / Usage',
+  conductor: 'Conducteur interne',
+  jacket: 'Gaine extérieure',
+  'private mold': 'Moule d’usine exclusif',
+  shielding: 'Blindage anti-interférence',
+  moq: 'Quantité minimale d’usine (MOQ)',
+  warranty: 'Garantie usine',
+  keywords: 'Mots-clés',
 };
-const ATTR_HIDE = new Set(['Brand Name', 'OEM', 'Logo', 'Product name', 'Measurement']);
-const VALUE_FR = {
-  'Salad Dresing Shaker': 'Shaker à vinaigrette',
-  'Eco-Friendly': 'Écologique',
-  Handle: 'Avec poignée',
-  'White Box': 'Boîte blanche',
-  'Single item': 'Article unique',
-  'Zhejiang, China': 'Zhejiang, Chine',
+const ATTR_HIDE = new Set(['brand name', 'oem', 'logo', 'product name', 'keywords', 'odm']);
+
+const VALUE_FR_MAP = {
+  'pure copper': 'Cuivre pur',
+  'shielded': 'Blindé anti-interférences',
+  'nylon': 'Nylon tressé',
+  'tpe': 'TPE renforcé',
+  'eco-friendly': 'Écologique',
+  '3a fast charging': 'Charge rapide 3A',
+  'guangdong, china': 'Guangdong, Chine',
+  '24 moths': '24 mois',
+  'mobile phone': 'Téléphones portables',
+  'for phone, tablet, laptop': 'Smartphones, tablettes, PC portables',
+  'single item': 'Article individuel',
+  'type-c to type-c': 'USB-C vers USB-C',
+  'fast charging cable': 'Câble charge rapide',
+  'salad dresing shaker': 'Shaker à vinaigrette',
+  'white box': 'Boîte blanche',
+  'yes': 'Oui',
+  'no': 'Non',
 };
+
 const frValue = (v) => {
-  const s = String(v).trim();
-  if (VALUE_FR[s]) return VALUE_FR[s];
-  return s.replace(/Borosilicate Gal?ss/i, 'verre borosilicaté').replace(/(\d)\s*(cm|mm)\b/gi, '$1 $2').replace(/\s*x\s*/gi, ' × ');
+  const s = String(v || '').trim();
+  const lower = s.toLowerCase();
+  if (VALUE_FR_MAP[lower]) return VALUE_FR_MAP[lower];
+  return s
+    .replace(/Borosilicate Gal?ss/i, 'verre borosilicaté')
+    .replace(/(\d)\s*(cm|mm)\b/gi, '$1 $2')
+    .replace(/\s*x\s*/gi, ' × ');
 };
+
 const fmtNum = (n, d = 1) => Number(n).toLocaleString('fr-FR', { maximumFractionDigits: d });
 const fmtWeight = (raw) => {
   const m = /([\d.,]+)\s*(kg|g)\b/i.exec(raw || '');
@@ -71,8 +102,11 @@ const fmtWeight = (raw) => {
 const titleCase = (s) => String(s || '').toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 function extractSupplierData(product) {
-  const src = product?.rawAlibabaData?.keyAttributes
+  const src = product?.rawPayload?.result_data?.keyAttributes
+    ?? product?.normalized?.rawAlibabaData?.result_data?.keyAttributes
     ?? product?.rawAlibabaData?.result_data?.keyAttributes
+    ?? product?.rawAlibabaData?.keyAttributes
+    ?? product?.pricing?.raw?.keyAttributes
     ?? product?.keyAttributes
     ?? product?.rawSections?.keyAttributes;
   const raw = Array.isArray(src?.attributes) ? src.attributes : [];
@@ -80,17 +114,23 @@ function extractSupplierData(product) {
   raw.forEach((g) => (g.attributes || []).forEach((a) => {
     const vals = (a.values || []).map((v) => v?.value).filter(Boolean);
     if (a?.name && vals.length && !flat[a.name]) flat[a.name] = vals;
+    if (a?.name && vals.length && !flat[a.name.toLowerCase()]) flat[a.name.toLowerCase()] = vals;
   }));
 
   const seen = new Set();
   const groups = raw.map((g) => ({
     title: GROUP_FR[g.type] || g.type,
     rows: (g.attributes || [])
-      .filter((a) => a?.name && !ATTR_HIDE.has(a.name))
-      .map((a) => ({
-        key: ATTR_FR[a.name] || String(a.name).replace(/:$/, ''),
-        value: (a.values || []).map((v) => v?.value).filter((v) => v && v !== 'Stocked').map(frValue).join(', '),
-      }))
+      .filter((a) => a?.name && !ATTR_HIDE.has(String(a.name).toLowerCase()))
+      .map((a) => {
+        const rawName = String(a.name).trim();
+        const lowerName = rawName.toLowerCase();
+        const label = ATTR_FR_MAP[lowerName] || rawName.replace(/:$/, '');
+        return {
+          key: label,
+          value: (a.values || []).map((v) => v?.value).filter((v) => v && v !== 'Stocked').map(frValue).join(', '),
+        };
+      })
       .filter((r) => {
         if (!r.value || seen.has(r.key)) return false;
         seen.add(r.key);
@@ -98,11 +138,15 @@ function extractSupplierData(product) {
       }),
   })).filter((g) => g.rows.length);
 
-  const one = (name) => (flat[name] ? frValue(flat[name][0]) : '');
-  const cartonRaw = flat.Measurement?.[0] || '';
+  const one = (name) => {
+    const hit = flat[name] || flat[name.toLowerCase()];
+    return hit ? frValue(hit[0]) : '';
+  };
+  const cartonRaw = flat.Measurement?.[0] || flat.measurement?.[0] || '';
   const cm = /([\d.]+)\s*x\s*([\d.]+)\s*x\s*([\d.]+)\s*cm\s*\/\s*(\d+)\s*pcs/i.exec(cartonRaw);
+  const unitWeightRaw = flat['Single gross weight:']?.[0] || flat['single gross weight:']?.[0] || flat['single gross weight']?.[0] || '';
   const unitWeightKg = (() => {
-    const m = /([\d.,]+)\s*(kg|g)\b/i.exec(flat['Single gross weight:']?.[0] || '');
+    const m = /([\d.,]+)\s*(kg|g)\b/i.exec(unitWeightRaw);
     if (!m) return null;
     const n = parseFloat(m[1].replace(',', '.'));
     return m[2].toLowerCase() === 'kg' ? n : n / 1000;
@@ -114,19 +158,25 @@ function extractSupplierData(product) {
     grossKg: unitWeightKg ? unitWeightKg * Number(cm[4]) : null,
   } : null;
 
-  const portRaw = flat.Port?.[0] || '';
+  const portRaw = flat.Port?.[0] || flat.port?.[0] || '';
+  const supplierName = product?.rawPayload?.result_data?.supplier
+    || product?.normalized?.rawAlibabaData?.result_data?.supplier
+    || product?.supplier?.name
+    || '';
+
   return {
     groups,
     carton,
+    supplierName,
     capacity: one('Capacity'),
     material: one('Material'),
     size: one('Size'),
-    model: one('Model Number'),
+    model: one('Model Number') || product?.rawPayload?.result_data?.mode_id || product?.modelNumber || '',
     packing: one('Packing'),
-    origin: one('Place of Origin'),
+    origin: one('Place of Origin') || (product?.rawPayload?.result_data?.shipping_from === 'CN' ? 'Chine' : ''),
     port: portRaw ? titleCase(portRaw.replace(/^FOB\s*/i, '')) : '',
-    unitWeight: flat['Single gross weight:'] ? fmtWeight(flat['Single gross weight:'][0]) : '',
-    unitPackage: flat['Single package size:'] ? frValue(flat['Single package size:'][0]) : '',
+    unitWeight: unitWeightRaw ? fmtWeight(unitWeightRaw) : '',
+    unitPackage: one('Single package size:') || one('single package size') || '',
   };
 }
 
@@ -378,52 +428,56 @@ function ReadMore({ text, safeHtml, fallbackTitle = '' }) {
   );
 }
 
-/* Descriptions fournisseur : on retire les titres parasites
-   (« Points forts du produit », « Présentation de l'entreprise », « FAQ ») et on met les Q/R en accordéon. */
-function parseDescription(raw) {
-  const src = String(raw || '').replace(/\r/g, '');
-  if (!src.trim()) return { intro: [], faq: [] };
-  const m = /\bFAQ\b|\bQ\s*:/.exec(src);
-  const cut = m ? m.index : -1;
-  const headRaw = cut >= 0 ? src.slice(0, cut) : src;
-  const tailRaw = cut >= 0 ? src.slice(cut).replace(/\s+/g, ' ') : '';
-  const intro = headRaw
-    .replace(/Points forts du produit|Pr[ée]sentation de l['’]entreprise/gi, '\n')
-    .split(/\n+/).map((x) => x.trim()).filter((x) => x.length > 2);
-  const faq = [];
-  const re = /Q\s*:\s*([\s\S]+?)\s*R\s*:\s*([\s\S]+?)(?=\s*Q\s*:|$)/g;
-  let hit = re.exec(tailRaw);
-  while (hit) {
-    faq.push({ q: hit[1].trim(), a: hit[2].trim() });
-    hit = re.exec(tailRaw);
+function extractFaqs(raw = '') {
+  if (!raw || typeof raw !== 'string') return [];
+  const list = [];
+  const htmlRegex = /<p>(?:<strong>)?Q\s*:\s*([\s\S]+?)(?:<\/strong>)?<\/p>\s*<p>(?:<strong>)?(?:A|R)\s*:\s*([\s\S]+?)(?:<\/strong>)?<\/p>/gi;
+  let match = htmlRegex.exec(raw);
+  while (match) {
+    const q = match[1].replace(/<[^>]+>/g, '').trim();
+    const a = match[2].replace(/<[^>]+>/g, '').trim();
+    if (q && a) list.push({ q, a });
+    match = htmlRegex.exec(raw);
   }
-  if (!faq.length && tailRaw) {
-    const rest = tailRaw.replace(/^\s*FAQ\s*/i, '').trim();
-    if (rest) intro.push(rest);
+  if (list.length > 0) return list;
+
+  const textRegex = /Q\s*:\s*([\s\S]+?)\s*(?:R|A)\s*:\s*([\s\S]+?)(?=\s*Q\s*:|$)/g;
+  let tMatch = textRegex.exec(raw);
+  while (tMatch) {
+    const q = tMatch[1].replace(/<[^>]+>/g, '').trim();
+    const a = tMatch[2].replace(/<[^>]+>/g, '').trim();
+    if (q && a && q.length < 250) list.push({ q, a });
+    tMatch = textRegex.exec(raw);
   }
-  return { intro, faq };
+  return list;
 }
 
 function ProductDescription({ text, safeHtml, fallbackTitle }) {
-  const parsed = useMemo(() => parseDescription(text), [text]);
-  if (safeHtml || (!parsed.intro.length && !parsed.faq.length)) {
-    return <ReadMore text={text} safeHtml={safeHtml} fallbackTitle={fallbackTitle} />;
-  }
+  const faqs = useMemo(() => {
+    const fromHtml = extractFaqs(safeHtml);
+    return fromHtml.length > 0 ? fromHtml : extractFaqs(text);
+  }, [safeHtml, text]);
+
+  const cleanSafeHtml = useMemo(() => {
+    if (!safeHtml) return '';
+    return faqs.length > 0
+      ? safeHtml.replace(/<h[23][^>]*>\s*FAQs?\s*<\/h[23]>[\s\S]*$/i, '')
+      : safeHtml;
+  }, [safeHtml, faqs.length]);
+
   return (
     <div className="pd-desc">
-      {parsed.intro.length > 0 && (
-        <div className="pd-desc__intro">{parsed.intro.map((para, i) => <p key={i}>{para}</p>)}</div>
-      )}
-      {parsed.faq.length > 0 && (
-        <div className="pd-faq">
-          <h3 className="pd-faq__title">Questions fréquentes</h3>
+      <ReadMore text={text} safeHtml={cleanSafeHtml || safeHtml} fallbackTitle={fallbackTitle} />
+      {faqs.length > 0 && (
+        <div className="pd-faq" style={{ marginTop: '32px' }}>
+          <h3 className="pd-faq__title">Questions fréquentes (FAQ fournisseur usine)</h3>
           <div className="pd-faq__list">
-          {parsed.faq.map((f, i) => (
-            <details key={i} className="pd-faq__item" open={i === 0}>
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
+            {faqs.map((f, i) => (
+              <details key={i} className="pd-faq__item" open={i === 0}>
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       )}
@@ -801,6 +855,7 @@ export default function ProductDetail() {
             <div className="pd-layout__info">
               <div className="pd-buy__head">
                 {originCountry && isAlibaba && <span className="pd-tag pd-tag--origin"><Ship size={12} /> Importé de {originCountry}</span>}
+                {extras.supplierName && isAlibaba && <span className="pd-tag pd-tag--factory" title={extras.supplierName}><Factory size={12} /> Direct usine certifiée</span>}
                 {detailData?.tagLabel && <span className="pd-tag">{detailData.tagLabel}</span>}
                 {isFragile && <span className="pd-tag">Colis fragile</span>}
                 {hasPromo && <span className="pd-tag pd-tag--sale">−{discount}%</span>}

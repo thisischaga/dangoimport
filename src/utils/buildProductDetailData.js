@@ -62,6 +62,48 @@ export function extractCleanProse(raw = '', fallbackTitle = '') {
   return text;
 }
 
+const ATTR_LABELS_FR = {
+  'connectors': 'Connecteurs',
+  'function': 'Fonctionnalités',
+  'material': 'Matériau',
+  'type': 'Type de câble / produit',
+  'usb type': 'Connectique USB',
+  'place of origin': 'Lieu de fabrication',
+  'use': 'Appareils compatibles',
+  'application': 'Compatibilité / Usage',
+  'model number': 'Référence modèle',
+  'conductor': 'Conducteur interne',
+  'jacket': 'Gaine extérieure',
+  'private mold': 'Moule d’usine exclusif',
+  'shielding': 'Blindage anti-interférence',
+  'feature': 'Points forts',
+  'moq': 'Quantité minimale d’usine (MOQ)',
+  'warranty': 'Garantie usine',
+  'selling units:': 'Unité de vente',
+  'single package size:': 'Dimensions colis unitaire',
+  'single gross weight:': 'Poids brut unitaire',
+  'cable length': 'Longueur du câble',
+  'color': 'Couleur disponible',
+};
+
+const VALUE_TRANSLATIONS = {
+  'pure copper': 'Cuivre pur',
+  'shielded': 'Blindé',
+  'nylon': 'Nylon tressé',
+  'tpe': 'TPE renforcé',
+  'eco-friendly': 'Écologique',
+  '3a fast charging': 'Charge rapide 3A',
+  'guangdong, china': 'Guangdong, Chine',
+  '24 moths': '24 mois',
+  'mobile phone': 'Téléphones mobiles',
+  'for phone, tablet, laptop': 'Smartphones, tablettes, PC portables',
+  'single item': 'Article individuel',
+  'type-c to type-c': 'USB-C vers USB-C',
+  'fast charging cable': 'Câble charge rapide',
+  'yes': 'Oui',
+  'no': 'Non',
+};
+
 /**
  * Prépare et centralise toutes les données prêtes à afficher dans la fiche produit.
  */
@@ -222,13 +264,61 @@ export function buildProductDetailData(product = {}) {
     if (s && s.key && s.value) pushSpec(s.key, s.value);
   });
 
+  // Extraction des spécifications clés fournisseurs (ex: Alibaba keyAttributes)
+  const keyAttrsSrc = product.rawPayload?.result_data?.keyAttributes
+    || product.normalized?.rawAlibabaData?.result_data?.keyAttributes
+    || product.rawAlibabaData?.result_data?.keyAttributes
+    || product.rawAlibabaData?.keyAttributes
+    || product.pricing?.raw?.keyAttributes
+    || product.keyAttributes;
+
+  const keyAttrsList = Array.isArray(keyAttrsSrc?.attributes) ? keyAttrsSrc.attributes : [];
+  keyAttrsList.forEach((group) => {
+    (group.attributes || []).forEach((attr) => {
+      if (!attr?.name) return;
+      const vals = (attr.values || []).map((v) => v?.value).filter(Boolean);
+      if (vals.length) {
+        const rawName = attr.name.trim();
+        const lowerName = rawName.toLowerCase().replace(/:$/, '');
+        if (['brand name', 'logo', 'product name', 'keywords'].includes(lowerName)) return;
+        const cleanName = ATTR_LABELS_FR[lowerName] || rawName.replace(/:$/, '').trim();
+        const cleanVal = vals.map((v) => VALUE_TRANSLATIONS[String(v).trim().toLowerCase()] || v).join(', ');
+        pushSpec(cleanName, cleanVal);
+      }
+    });
+  });
+
+  const modelVal = product.modelNumber
+    || product.rawPayload?.result_data?.mode_id
+    || product.normalized?.rawAlibabaData?.result_data?.mode_id
+    || product.mode_id;
+  if (modelVal) pushSpec('Référence modèle usine', modelVal);
+
+  const supplierVal = product.rawPayload?.result_data?.supplier
+    || product.normalized?.rawAlibabaData?.result_data?.supplier
+    || product.supplier?.name
+    || product.vendorName;
+  if (supplierVal && !/alibaba/i.test(supplierVal)) {
+    pushSpec('Usine partenaire certifiée', supplierVal);
+  }
+
   if (product.brand && !/generic|cj\s*drop/i.test(product.brand)) {
     pushSpec('Marque', product.brand);
   }
-  if (product.modelNumber) pushSpec('Modèle', product.modelNumber);
   if (product.material) pushSpec('Matériau / Composition', product.material);
   if (product.condition) pushSpec('État', product.condition);
-  if (product.warranty) pushSpec('Garantie', product.warranty);
+
+  // Recherche garantie
+  const keyWarranty = keyAttrsList
+    .flatMap((g) => g.attributes || [])
+    .find((a) => /warranty/i.test(a?.name || ''))
+    ?.values?.[0]?.value;
+  const warrantyVal = product.warranty || keyWarranty || '';
+  if (warrantyVal) {
+    const cleanW = VALUE_TRANSLATIONS[String(warrantyVal).trim().toLowerCase()] || warrantyVal;
+    pushSpec('Garantie usine', cleanW);
+  }
+
   if (product.unit) pushSpec('Unité de vente', product.unit);
 
   const dim = product.dimensions || product.packaging?.dimensions;
@@ -239,34 +329,44 @@ export function buildProductDetailData(product = {}) {
   const weightVal = [product.weight, product.packaging?.weight, product.weightKg]
     .map(parsePositiveWeight)
     .find((value) => value != null);
-  if (weightVal != null) {
-    pushSpec('Poids brut', `${weightVal} kg`);
+
+  // Recherche poids et colis dans keyAttributes
+  const keyWeightRaw = keyAttrsList
+    .flatMap((g) => g.attributes || [])
+    .find((a) => /single gross weight/i.test(a?.name || ''))
+    ?.values?.[0]?.value;
+  const keyPackageSize = keyAttrsList
+    .flatMap((g) => g.attributes || [])
+    .find((a) => /single package size/i.test(a?.name || ''))
+    ?.values?.[0]?.value;
+
+  const finalWeightKg = weightVal != null ? weightVal : parsePositiveWeight(keyWeightRaw);
+  if (finalWeightKg != null) {
+    pushSpec('Poids brut unitaire', `${finalWeightKg} kg`);
   }
-  const packageSizeVal = product.packageSize || product.packaging?.packageSize;
+  const packageSizeVal = product.packageSize || product.packaging?.packageSize || keyPackageSize;
   if (packageSizeVal) {
-    pushSpec('Dimensions du colis', packageSizeVal);
+    pushSpec('Dimensions colis unitaire', packageSizeVal.replace(/\s*x\s*/gi, ' × '));
   }
   const capacityVal = product.supplyCapacity || product.packaging?.supplyCapacity;
   if (capacityVal) {
-    pushSpec('Capacité de fourniture', capacityVal);
+    pushSpec('Capacité de fourniture usine', capacityVal);
   }
   if (isAlibaba) {
-    pushSpec('Origine', 'Chine (Importation directe usine)');
-    pushSpec('Mode d\'approvisionnement', 'Fabrication sur commande vérifiée');
+    pushSpec('Origine', 'Chine (Fabrication et importation directe usine)');
+    pushSpec('Mode d\'approvisionnement', 'Fabrication sur commande vérifiée avec inspection');
   }
 
   const specifications = Array.from(specMap.values());
 
   // 6. Conditionnement & Vente en gros
-  const weightCandidates = [product.weight, product.packaging?.weight, product.weightKg];
-  const meaningfulWeight = weightCandidates.map(parsePositiveWeight).find((value) => value != null);
   const packaging = {
-    weightKg: meaningfulWeight != null ? meaningfulWeight : '',
-    packageSize: product.packageSize || product.packaging?.packageSize || '',
+    weightKg: finalWeightKg != null ? finalWeightKg : '',
+    packageSize: packageSizeVal || '',
     dimensions: product.dimensions || product.packaging?.dimensions || null,
     unit: product.unit || product.packaging?.unit || 'Pièce',
-    supplyCapacity: product.supplyCapacity || product.packaging?.supplyCapacity || '',
-    hasPackaging: Boolean(meaningfulWeight != null || product.packageSize || product.dimensions),
+    supplyCapacity: capacityVal || '',
+    hasPackaging: Boolean(finalWeightKg != null || packageSizeVal || product.dimensions),
   };
 
   const wholesale = {
@@ -295,7 +395,7 @@ export function buildProductDetailData(product = {}) {
     id: product._id || product.id,
     name: product.name || 'Produit',
     brand: product.brand && !/generic|cj\s*drop/i.test(product.brand) ? product.brand : null,
-    modelNumber: product.modelNumber || null,
+    modelNumber: modelVal || product.modelNumber || null,
     category: product.category || 'Général',
     subCategory: product.subCategory || null,
     tagLabel: product.isFeatured ? 'Sélection' : product.isBestSeller ? 'Populaire' : hasPromo ? 'Promo' : null,
@@ -334,10 +434,11 @@ export function buildProductDetailData(product = {}) {
     isAlibaba,
     isDropship,
     sellerName,
+    supplierName: supplierVal || sellerName || '',
     isVendorCertified: Boolean(product.isVendorCertified || product.sellerVerified),
     importDaysLabel,
     shippingInfo: product.shippingInfo || '',
-    warranty: product.warranty || '',
+    warranty: product.warranty || warrantyVal || '',
     deliveryZones: Array.isArray(product.deliveryZones) ? product.deliveryZones : [],
 
     // Variantes brutes transmises

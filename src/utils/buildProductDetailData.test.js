@@ -132,4 +132,69 @@ describe('buildProductDetailData', () => {
     expect(data.images).toContain('https://example.com/variant-blue.jpg');
     expect(data.name).toBe('Produit sans galerie');
   });
+
+  it('correctly extracts rich Alibaba payload data (keyAttributes, ladder_price, warranty, supplier)', () => {
+    const raw = {
+      _id: '6aeb2e5721f510f2fa306a0b',
+      name: 'KYT 60W USB-C Cable',
+      source: 'ALIBABA',
+      price: 341,
+      rawPayload: {
+        result_data: {
+          supplier: 'Shenzhen Keyuantai Industry Co., Ltd.',
+          mode_id: 'KYT-830',
+          keyAttributes: {
+            attributes: [
+              {
+                type: 'Industry-specific attributes',
+                attributes: [
+                  { name: 'connectors', values: [{ value: 'USB 3.0 Connector' }] },
+                  { name: 'function', values: [{ value: '3A Fast Charging' }] },
+                  { name: 'material', values: [{ value: 'Nylon' }, { value: 'TPE' }] },
+                  { name: 'usb type', values: [{ value: 'type-c to type-c' }] },
+                ],
+              },
+              {
+                type: 'Other attributes',
+                attributes: [
+                  { name: 'conductor', values: [{ value: 'Pure Copper' }] },
+                  { name: 'Warranty', values: [{ value: '24 moths' }] },
+                ],
+              },
+              {
+                type: 'Packaging and delivery',
+                attributes: [
+                  { name: 'Single package size:', values: [{ value: '3X3X2 cm' }] },
+                  { name: 'Single gross weight:', values: [{ value: '0.100 KG' }] },
+                ],
+              },
+            ],
+          },
+          skus: [
+            {
+              ladder_price: [
+                { min_quantity: 1000, max_quantity: 2999, price: 0.51, currency: 'USD' },
+                { min_quantity: 3000, max_quantity: 4999, price: 0.48, currency: 'USD' },
+                { min_quantity: 5000, max_quantity: 9999, price: 0.45, currency: 'USD' },
+                { min_quantity: 10000, max_quantity: -1, price: 0.40, currency: 'USD' },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    const data = buildProductDetailData(raw);
+
+    expect(data.isAlibaba).toBe(true);
+    expect(data.publicPriceTiers.length).toBe(4);
+    expect(data.publicPriceTiers[0].label).toContain('1\u202f000');
+    expect(data.specifications.some((s) => s.key === 'Connecteurs' && s.value === 'USB 3.0 Connector')).toBe(true);
+    expect(data.specifications.some((s) => s.key === 'Conducteur interne' && s.value === 'Cuivre pur')).toBe(true);
+    expect(data.specifications.some((s) => s.key === 'Garantie usine' && s.value === '24 mois')).toBe(true);
+    expect(data.packaging.weightKg).toBe(0.1);
+    expect(data.packaging.packageSize).toBe('3X3X2 cm');
+    expect(data.modelNumber).toBe('KYT-830');
+    expect(data.supplierName).toBe('Shenzhen Keyuantai Industry Co., Ltd.');
+  });
 });

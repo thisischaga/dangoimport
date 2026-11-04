@@ -199,27 +199,40 @@ function ProductVariants({
         </div>
       )}
 
-      {variantGroups?.map(({ key, label, options }) => (
-        <div key={key} className="product-variants__group">
-          <p className="product-variants__label">{label}</p>
-          <div className="product-variants__options">
-            {options.map((opt) => {
-              const available = isOptionAvailable(variants, key, opt, selectedColor, selectedSize, isAlibaba);
-              return (
-                <button
-                  key={`${key}-${opt}`}
-                  type="button"
-                  className={`product-variants__chip ${!available ? 'is-disabled' : ''}`}
-                  onClick={() => onSelectVariant?.(variants.findIndex((v) => readVariantAttrValue(v, key) === opt))}
-                  disabled={!available && !isAlibaba}
-                >
-                  {opt}
-                </button>
-              );
-            })}
+      {variantGroups?.map(({ key, label, options }) => {
+        const activeVariant = selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
+        const currentVal = activeVariant ? readVariantAttrValue(activeVariant, key) : null;
+        return (
+          <div key={key} className="product-variants__group">
+            <p className="product-variants__label">{label}</p>
+            <div className="product-variants__options">
+              {options.map((opt) => {
+                const available = isOptionAvailable(variants, key, opt, selectedColor, selectedSize, isAlibaba);
+                const isSelected = currentVal === opt;
+                return (
+                  <button
+                    key={`${key}-${opt}`}
+                    type="button"
+                    className={`product-variants__chip ${isSelected ? 'is-selected' : ''} ${!available ? 'is-disabled' : ''}`}
+                    onClick={() => {
+                      const matchIdx = variants.findIndex((v) => {
+                        const matchesKey = readVariantAttrValue(v, key) === opt;
+                        if (!matchesKey) return false;
+                        if (selectedColor && readVariantAttrValue(v, 'color') !== selectedColor) return false;
+                        return true;
+                      });
+                      onSelectVariant?.(matchIdx >= 0 ? matchIdx : variants.findIndex((v) => readVariantAttrValue(v, key) === opt));
+                    }}
+                    disabled={!available && !isAlibaba}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
