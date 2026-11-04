@@ -189,7 +189,7 @@ function ProductFilters({
               {/* Prix */}
               <div>
                 <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Prix (FCFA)
+                  Prix (XOF)
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <input

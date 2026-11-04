@@ -146,9 +146,9 @@ const CARD_CSS = `
 
 .hm-pills { display: flex; gap: 8px; padding: 14px 0; overflow-x: auto; scrollbar-width: none; }
 .hm-pills::-webkit-scrollbar { display: none; }
-.hm-chip { flex-shrink: 0; height: 34px; padding: 0 16px; border-radius: 999px; border: 1px solid #e3e6ec; background: #fff; font-family: inherit; font-size: 13px; font-weight: 500; color: #4a5b68; cursor: pointer; white-space: nowrap; transition: all 0.15s ease; }
-.hm-chip:hover { border-color: #12222e; color: #12222e; }
-.hm-chip--on { background: #12222e; border-color: #12222e; color: #fff; }
+.hm-chip { flex-shrink: 0; height: 34px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #e3e6ec; background: #fff; font-family: inherit; font-size: 13px; font-weight: 600; color: #4a5b68; cursor: pointer; white-space: nowrap; transition: all 0.18s ease; letter-spacing: 0.01em; }
+.hm-chip:hover { border-color: #ff6b00; color: #ff6b00; background: #fff4ec; }
+.hm-chip--on { background: #ff6b00; border-color: #ff6b00; color: #fff; font-weight: 700; }
 
 .hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: 999px; border: 1px solid transparent; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
 .hm-pill--primary { background: #ff6b00; color: #fff; }
@@ -159,30 +159,32 @@ const CARD_CSS = `
 .hm-pill--ghost:hover { background: #12222e; border-color: #12222e; color: #fff; }
 
 /* Hero */
-.hm-hero { background: #f4f6f9; padding: 40px 0 36px; }
-.hm-hero__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 28px; flex-wrap: wrap; margin-bottom: 34px; }
-.hm-hero__title { margin: 0; max-width: 660px; font-size: clamp(28px, 4vw, 46px); font-weight: 500; line-height: 1.15; letter-spacing: -0.03em; color: #12222e; }
-.hm-hero__lead { margin: 6px 0 0; max-width: 330px; font-size: 13px; line-height: 1.65; color: #6b7683; }
-.hm-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.hm-hero { background: #111827; padding: 56px 0 48px; }
+.hm-hero__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 28px; flex-wrap: wrap; margin-bottom: 36px; }
+.hm-hero__eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #ff6b00; margin-bottom: 14px; }
+.hm-hero__title { margin: 0; max-width: 680px; font-size: clamp(34px, 5vw, 60px); font-weight: 900; line-height: 1.0; letter-spacing: -0.04em; color: #ffffff; text-transform: uppercase; }
+.hm-hero__title em { font-style: normal; color: #ff6b00; }
+.hm-hero__lead { margin: 16px 0 0; max-width: 340px; font-size: 14px; line-height: 1.65; color: #9ca3af; }
+.hm-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 
-.hm-bento { display: grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: 190px 190px; gap: 14px; }
+.hm-bento { display: grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: 200px 200px; gap: 14px; }
 .hm-bento > :nth-child(1) { grid-row: 1 / span 2; }
 .hm-bento > :nth-child(4) { grid-row: 1 / span 2; grid-column: 3; }
 .hm-bento > :nth-child(2) { grid-column: 2; grid-row: 1; }
 .hm-bento > :nth-child(3) { grid-column: 2; grid-row: 2; }
 
-.hm-tile { position: relative; display: block; overflow: hidden; border-radius: 18px; background: linear-gradient(135deg, #dfe4ec, #cfd6e1); cursor: pointer; color: #fff; text-align: left; }
+.hm-tile { position: relative; display: block; overflow: hidden; border-radius: 12px; background: linear-gradient(135deg, #1e2d3e, #12222e); cursor: pointer; color: #fff; text-align: left; }
 .hm-tile__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-@media (hover: hover) { .hm-tile:hover .hm-tile__img { transform: scale(1.05); } }
-.hm-tile__shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(12, 20, 30, 0.68), rgba(12, 20, 30, 0) 58%); }
-.hm-tile__go { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: #12222e; display: flex; align-items: center; justify-content: center; }
+@media (hover: hover) { .hm-tile:hover .hm-tile__img { transform: scale(1.06); } }
+.hm-tile__shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0) 55%); }
+.hm-tile__go { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 107, 0, 0.9); color: #fff; display: flex; align-items: center; justify-content: center; }
 .hm-tile__text { position: absolute; left: 18px; right: 18px; bottom: 16px; display: flex; flex-direction: column; gap: 2px; }
-.hm-tile__text strong { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
-.hm-tile__text span { font-size: 12px; opacity: 0.85; }
+.hm-tile__text strong { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
+.hm-tile__text span { font-size: 12px; opacity: 0.75; }
 
-.hm-offer { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 20px; border-radius: 18px; background: #e8ecf4; color: #12222e; }
-.hm-offer__tag { display: inline-flex; padding: 4px 12px; border-radius: 999px; border: 1px solid #bcc5d3; font-size: 12px; font-weight: 500; }
-.hm-offer p { margin: 0; font-size: 20px; line-height: 1.25; font-weight: 500; letter-spacing: -0.02em; }
+.hm-offer { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 22px; border-radius: 12px; background: #ff6b00; color: #fff; }
+.hm-offer__tag { display: inline-flex; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.hm-offer p { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 800; letter-spacing: -0.02em; }
 
 /* Bande de confiance (réassurance) */
 .hm-trust { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 22px 0; }
@@ -190,11 +192,12 @@ const CARD_CSS = `
 .hm-trust__item svg { flex-shrink: 0; width: 34px; height: 34px; padding: 8px; border-radius: 50%; background: #fff1e6; color: #ff6b00; }
 
 /* Sections */
-.hm-section { padding: 44px 0; scroll-margin-top: 96px; }
+.hm-section { padding: 56px 0; scroll-margin-top: 96px; }
 .hm-section--tint { background: #f7f8fa; }
-.hm-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-.hm-head__title { margin: 0; font-size: clamp(24px, 3vw, 34px); font-weight: 500; letter-spacing: -0.02em; color: #12222e; }
-.hm-head__lead { margin: 6px 0 0; font-size: 14px; color: #6b7683; }
+.hm-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.hm-head__eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ff6b00; margin-bottom: 8px; display: block; }
+.hm-head__title { margin: 0; font-size: clamp(26px, 3vw, 36px); font-weight: 900; letter-spacing: -0.03em; color: #111827; text-transform: uppercase; }
+.hm-head__lead { margin: 8px 0 0; font-size: 14px; color: #6b7280; }
 
 /* Catégories en mosaïque */
 .hm-cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 170px; gap: 12px; }
@@ -204,20 +207,25 @@ const CARD_CSS = `
 
 /* Collections */
 .hm-coll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.hm-coll__card { position: relative; display: flex; align-items: center; min-height: 230px; padding: 28px; border-radius: 20px; background: linear-gradient(120deg, #f3f5f9, #e3e9f3); overflow: hidden; }
-.hm-coll__text { position: relative; z-index: 1; max-width: 52%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.hm-coll__text h3 { margin: 0; font-size: 26px; font-weight: 500; letter-spacing: -0.02em; color: #12222e; }
-.hm-coll__text p { margin: 0; font-size: 13px; line-height: 1.6; color: #6b7683; }
-.hm-coll__img { position: absolute; right: 0; top: 0; bottom: 0; width: 50%; height: 100%; object-fit: cover; -webkit-mask-image: linear-gradient(to right, transparent, #000 38%); mask-image: linear-gradient(to right, transparent, #000 38%); }
+.hm-coll__card { position: relative; display: flex; align-items: center; min-height: 240px; padding: 32px; border-radius: 12px; background: #111827; overflow: hidden; }
+.hm-coll__text { position: relative; z-index: 1; max-width: 54%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.hm-coll__text h3 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.03em; color: #fff; text-transform: uppercase; }
+.hm-coll__text p { margin: 0; font-size: 13px; line-height: 1.6; color: #9ca3af; }
+.hm-coll__img { position: absolute; right: 0; top: 0; bottom: 0; width: 55%; height: 100%; object-fit: cover; -webkit-mask-image: linear-gradient(to right, transparent, #000 40%); mask-image: linear-gradient(to right, transparent, #000 40%); }
 
 /* Barre d'outils des produits */
 .hm-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 24px; }
-.hm-toolbar__count { margin: 6px 0 0; font-size: 14px; color: #6b7683; }
+.hm-toolbar__count { margin: 6px 0 0; font-size: 13px; color: #6b7280; }
 .hm-toolbar__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.hm-clear { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid #12222e; background: #fff; color: #12222e; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.hm-clear { height: 34px; padding: 0 14px; border-radius: 999px; border: 1.5px solid #12222e; background: #fff; color: #12222e; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
 .hm-clear:hover { background: #12222e; color: #fff; }
-.hm-empty { text-align: center; padding: 70px 16px; color: #6b7683; }
-.hm-empty strong { display: block; margin: 10px 0 6px; font-size: 18px; color: #12222e; }
+.hm-empty { text-align: center; padding: 70px 16px; color: #6b7280; }
+.hm-empty strong { display: block; margin: 10px 0 6px; font-size: 18px; color: #111827; }
+.hm-sort-select { height: 36px; padding: 0 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; background: #fff; color: #111827; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; transition: border-color 0.15s; }
+.hm-sort-select:focus { border-color: #ff6b00; }
+.hm-view-toggle { display: flex; background: #f3f4f6; border-radius: 8px; padding: 3px; gap: 2px; }
+.hm-view-btn { width: 30px; height: 30px; border: none; border-radius: 6px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #9ca3af; transition: all 0.15s; }
+.hm-view-btn--on { background: #fff; color: #ff6b00; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
 /* Grille de produits : plus d'air */
 .hm-section .hn-grid { gap: 28px 18px; }
@@ -254,9 +262,9 @@ if (typeof document !== 'undefined') {
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
-function fcfa(n) {
+function formatXOF(n) {
   if (!n && n !== 0) return '';
-  return Number(n).toLocaleString('fr-FR') + ' FCFA';
+  return Number(n).toLocaleString('fr-FR') + ' XOF';
 }
 
 const amountOf = (n) => {
@@ -471,7 +479,7 @@ function ProductMiniCard({ product, onAddToCart, index = 0 }) {
               <span className="pc3__unit">XOF</span>
             </span>
           ) : (
-            <span className="pc3__price"><span className="pc3__amount" style={{ fontSize: 16 }}>{fcfa(displayPrice)}</span></span>
+            <span className="pc3__price"><span className="pc3__amount" style={{ fontSize: 16 }}>{formatXOF(displayPrice)}</span></span>
           )}
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
         </div>
@@ -513,10 +521,11 @@ const discountOf = (p) => {
   return pp > 0 && pp < pr ? Math.round((1 - pp / pr) * 100) : 0;
 };
 
-function SectionHead({ title, lead, actionLabel, onAction }) {
+function SectionHead({ title, eyebrow, lead, actionLabel, onAction }) {
   return (
     <div className="hm-head">
       <div>
+        {eyebrow && <span className="hm-head__eyebrow">{eyebrow}</span>}
         <h2 className="hm-head__title">{title}</h2>
         {lead && <p className="hm-head__lead">{lead}</p>}
       </div>
@@ -585,12 +594,11 @@ function Hero({ products, loading, onShop, onPromo, onNew }) {
       <div className="hm-wrap">
         <div className="hm-hero__top">
           <div>
-            <h1 className="hm-hero__title">Importez directement de l&apos;usine, livré à Lomé et Cotonou</h1>
+            <h1 className="hm-hero__title">Direct de<br /><em>l&apos;usine</em><br />vers chez vous</h1>
             <div className="hm-cta">
               <button type="button" className="hm-pill hm-pill--primary" onClick={onShop}>Voir les produits <ArrowRight size={14} /></button>
             </div>
           </div>
-          <p className="hm-hero__lead">Des produits en direct de l&apos;usine, un contrôle qualité avant expédition et un paiement mobile sécurisé.</p>
         </div>
 
         {loading ? (
@@ -793,10 +801,11 @@ function HomeNew() {
         />
       )}
 
+
       {isHome && !loading && catTiles.length > 0 && (
         <section className="hm-section">
           <div className="hm-wrap">
-            <SectionHead title="Nos catégories" lead="Parcourez le catalogue par univers." actionLabel="Tout voir" onAction={scrollToGrid} />
+            <SectionHead title="Nos catégories" eyebrow="Explorer" lead="Parcourez le catalogue par univers." actionLabel="Tout voir" onAction={scrollToGrid} />
             <div className="hm-cats">
               {catTiles.map((c) => (
                 <CatTile key={c.slug} img={c.img} label={c.label} onClick={() => selectCategory(c.slug)} />
@@ -809,7 +818,7 @@ function HomeNew() {
       {isHome && !loading && (newProduct || promoProduct) && (
         <section className="hm-section hm-section--tint">
           <div className="hm-wrap">
-            <SectionHead title="À ne pas manquer" lead="Les nouveautés et les offres du moment." />
+            <SectionHead title="À ne pas manquer" eyebrow="Sélection" lead="Les nouveautés et les offres du moment." />
             <div className="hm-coll">
               {newProduct && (
                 <div className="hm-coll__card">
@@ -847,6 +856,23 @@ function HomeNew() {
               <p className="hm-toolbar__count">
                 {loading ? <span className="hn-sk" style={{ display: 'inline-block', width: 110, height: 14, verticalAlign: 'middle' }} /> : countLabel}
               </p>
+            </div>
+            <div className="hm-toolbar__controls">
+              <select
+                className="hm-sort-select"
+                value={filters.sort}
+                onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}
+                aria-label="Trier par"
+              >
+                <option value="newest">Plus récents</option>
+                <option value="price-asc">Prix croissant</option>
+                <option value="price-desc">Prix décroissant</option>
+                <option value="popular">Popularité</option>
+              </select>
+              <div className="hm-view-toggle">
+                <button type="button" className={`hm-view-btn${view === 'grid' ? ' hm-view-btn--on' : ''}`} onClick={() => setView('grid')} aria-label="Grille"><LayoutGrid size={16} /></button>
+                <button type="button" className={`hm-view-btn${view === 'list' ? ' hm-view-btn--on' : ''}`} onClick={() => setView('list')} aria-label="Liste"><List size={16} /></button>
+              </div>
             </div>
           </div>
 

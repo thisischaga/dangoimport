@@ -64,9 +64,9 @@ async function fetchCategoryProducts(slug) {
 }
 
 /* ─── Formatting ────────────────────────────────────────────────────────── */
-function formatFCFA(n) {
+function formatXOF(n) {
   if (!n && n !== 0) return '';
-  return Number(n).toLocaleString('fr-FR') + ' FCFA';
+  return Number(n).toLocaleString('fr-FR') + ' XOF';
 }
 
 function starString(rating) {
@@ -169,9 +169,9 @@ function ProductMiniCard({ product, onAddToCart }) {
         <p className="cat-card__name">{name}</p>
 
         <div className="cat-card__price-row">
-          <span className="cat-card__price">{formatFCFA(price)}</span>
+          <span className="cat-card__price">{formatXOF(price)}</span>
           {hasPromo && (
-            <span className="cat-card__old-price">{formatFCFA(originalPrice)}</span>
+            <span className="cat-card__old-price">{formatXOF(originalPrice)}</span>
           )}
         </div>
 

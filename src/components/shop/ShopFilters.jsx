@@ -128,7 +128,7 @@ function ShopFilters({
         </div>
 
         <div className="shop-filters__group">
-          <h3>Prix (FCFA)</h3>
+          <h3>Prix (XOF)</h3>
           <div className="shop-filters__price-row">
             <input
               type="number"

@@ -85,7 +85,7 @@ const PaymentResult = () => {
       }
       localStorage.removeItem('pendingDropshipCheckoutSummary');
       const totalLabel = summary?.total
-        ? `${Number(summary.total).toLocaleString('fr-FR')} FCFA`
+        ? `${Number(summary.total).toLocaleString('fr-FR')} XOF`
         : null;
       const eta = summary?.estimatedDelivery;
       const ref = resolvedOrderNumber || resolvedOrderId;

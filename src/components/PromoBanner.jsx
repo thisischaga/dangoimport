@@ -444,7 +444,7 @@ export default function PromoBanner() {
           {/* Right — visual */}
           <div className="pb-right">
             <div className="pb-visual">
-              <span className="pb-visual__text" style={{ fontSize: '56px', fontWeight: 900, color: '#FF6B00', display: 'block', lineHeight: 1, marginBottom: '12px' }}>0 FCFA</span>
+              <span className="pb-visual__text" style={{ fontSize: '56px', fontWeight: 900, color: '#FF6B00', display: 'block', lineHeight: 1, marginBottom: '12px' }}>0 XOF</span>
               <span className="pb-visual__tag">
                 Livraison offerte
               </span>

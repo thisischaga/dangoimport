@@ -362,7 +362,7 @@ function OrderSummaryPanel({
             <span className="text-base font-black text-[#F68B1E]">
               {previewLoading
                 ? '...'
-                : `${total.toLocaleString('fr-FR')} FCFA`}
+                : `${total.toLocaleString('fr-FR')} XOF`}
             </span>
 
             <span className="text-xs font-bold text-gray-400">
@@ -516,7 +516,7 @@ function OrderSummaryPanel({
             <span className="text-lg font-black text-[#F68B1E]">
               {previewLoading
                 ? '...'
-                : `${total.toLocaleString('fr-FR')} FCFA`}
+                : `${total.toLocaleString('fr-FR')} XOF`}
             </span>
 
           </div>
@@ -1229,7 +1229,7 @@ function StepPayment({
                 ? '...'
                 : `${computedTotal.toLocaleString(
                     'fr-FR'
-                  )} FCFA`}
+                  )} XOF`}
             </>
           )}
 
@@ -1727,7 +1727,7 @@ export default function Checkout() {
           }));
 
           if (typeof toast === 'function') {
-            toast.info(`Frais de livraison mis à jour : ${totalFee.toLocaleString('fr-FR')} FCFA`);
+            toast.info(`Frais de livraison mis à jour : ${totalFee.toLocaleString('fr-FR')} XOF`);
           }
         } catch (e) {
           console.warn('[Checkout] error computing fee from payload', e);
@@ -3443,7 +3443,7 @@ export default function Checkout() {
                 ? '...'
                 : `${computedTotal.toLocaleString(
                     'fr-FR'
-                  )} FCFA`}
+                  )} XOF`}
 
             </p>
 

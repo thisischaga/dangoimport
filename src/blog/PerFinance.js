@@ -58,7 +58,7 @@ export default function PerFinance() {
       </ul>
 
       <h2>5. L'épargne : construire sa sécurité financière</h2>
-      <p>L'épargne doit être régulière, même si elle est petite. Mieux vaut commencer avec 5 000 FCFA par mois que de ne rien mettre de côté. Quelques conseils pratiques :</p>
+      <p>L'épargne doit être régulière, même si elle est petite. Mieux vaut commencer avec 5 000 XOF par mois que de ne rien mettre de côté. Quelques conseils pratiques :</p>
       <ul>
         <li>Mettre en place un virement automatique vers un compte épargne</li>
         <li>Épargner en priorité (se payer soi-même d'abord)</li>

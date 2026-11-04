@@ -303,7 +303,7 @@ export default function Orders() {
                           Total
                         </span>
                         <div className="mt-0.5 text-sm font-black text-[#FF6B00]">
-                          {formatCurrency(order.total || order.totalPrice || 0)} FCFA
+                          {formatCurrency(order.total || order.totalPrice || 0)} XOF
                         </div>
                       </div>
                       <div>
@@ -382,7 +382,7 @@ export default function Orders() {
                                     Qté: {item.quantity || 1}
                                   </span>
                                   <span className="text-xs font-semibold text-gray-700">
-                                    {formatCurrency(item.price || 0)} FCFA
+                                    {formatCurrency(item.price || 0)} XOF
                                   </span>
                                 </div>
                               </div>
@@ -433,25 +433,25 @@ export default function Orders() {
                             <div className="flex justify-between">
                               <dt>Sous-total</dt>
                               <dd className="font-semibold text-gray-800">
-                                {formatCurrency(order.subtotal || 0)} FCFA
+                                {formatCurrency(order.subtotal || 0)} XOF
                               </dd>
                             </div>
                             <div className="flex justify-between">
                               <dt>Livraison</dt>
                               <dd className="font-semibold text-gray-800">
-                                {formatCurrency(order.shippingCost || 0)} FCFA
+                                {formatCurrency(order.shippingCost || 0)} XOF
                               </dd>
                             </div>
                             <div className="flex justify-between">
                               <dt>Réduction</dt>
                               <dd className="font-semibold text-gray-800">
-                                -{formatCurrency(order.discount || 0)} FCFA
+                                -{formatCurrency(order.discount || 0)} XOF
                               </dd>
                             </div>
                             <div className="flex justify-between border-t pt-2 font-bold text-gray-900">
                               <dt>Total payé</dt>
                               <dd className="text-[#FF6B00]">
-                                {formatCurrency(order.total || order.totalPrice || 0)} FCFA
+                                {formatCurrency(order.total || order.totalPrice || 0)} XOF
                               </dd>
                             </div>
                           </dl>

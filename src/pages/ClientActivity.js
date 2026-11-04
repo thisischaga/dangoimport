@@ -162,7 +162,7 @@ const ClientActivity = () => {
                       <div className="text-left sm:text-right">
                         <p className="text-[11px] text-gray-400 font-medium mb-1">Total</p>
                         <span className="text-[18px] font-black text-gray-900 dark:text-white leading-none">
-                          {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">FCFA</span>
+                          {cmd.totalPrice} <span className="text-[12px] font-bold text-gray-500">XOF</span>
                         </span>
                       </div>
                       <button
@@ -191,7 +191,7 @@ const ClientActivity = () => {
                                 <span className="font-medium text-sm text-gray-900 dark:text-white line-clamp-1 max-w-[200px] sm:max-w-sm">{p.name || p.productName || 'Produit sans nom'}</span>
                                 <span className="text-xs text-gray-500 font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">x{p.quantity || 1}</span>
                               </div>
-                              <span className="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">{(p.price || 0).toLocaleString('fr-FR')} FCFA</span>
+                              <span className="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">{(p.price || 0).toLocaleString('fr-FR')} XOF</span>
                             </div>
                           ))}
                         </div>
@@ -238,7 +238,7 @@ const ClientActivity = () => {
                                 </div>
                                 <div className="flex-1 text-sm">
                                   <div className="font-medium text-gray-900 dark:text-white">{t.vendorName || 'Vendeur'}</div>
-                                  <div className="text-xs text-gray-500">Montant: {(t.vendorTotal || 0).toLocaleString('fr-FR')} FCFA</div>
+                                  <div className="text-xs text-gray-500">Montant: {(t.vendorTotal || 0).toLocaleString('fr-FR')} XOF</div>
                                   <div className="text-xs text-gray-400">Statut: {t.status}</div>
                                   <div className="text-xs text-gray-400">Valide jusqu'au: {new Date(t.expiresAt).toLocaleString('fr-FR')}</div>
                                 </div>

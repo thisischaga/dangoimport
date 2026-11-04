@@ -91,5 +91,5 @@ export function isPromoActive(product) {
 }
 
 export function formatCurrency(value) {
-  return `${Number(value || 0).toLocaleString('fr-FR')} FCFA`;
+  return `${Number(value || 0).toLocaleString('fr-FR')} XOF`;
 }

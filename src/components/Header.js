@@ -593,21 +593,6 @@ const Header = () => {
           transition: 'transform 0.2s ease',
         }}
       >
-        {/* Barre de messages : repliée dès qu'on descend dans la page */}
-        <div ref={barRef} className="border-b border-orange-400/20 bg-[#B43800] px-3 py-1.5 text-[12px] font-medium text-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-            <ul className="flex min-w-0 flex-1 items-center gap-x-6 overflow-hidden">
-              {TRUST_ITEMS.map((text, i) => (
-                <li key={text} className={`whitespace-nowrap ${TRUST_VISIBILITY[i] || 'hidden xl:block'} ${i === 0 ? 'font-bold text-amber-200' : 'text-white/90'}`}>
-                  {text}
-                </li>
-              ))}
-            </ul>
-            <a href={SELLER_URL} target="_blank" rel="noopener noreferrer" className="hidden shrink-0 items-center gap-1 font-bold text-white hover:underline md:flex">
-              Devenir vendeur ou B2B <ArrowUpRight size={13} aria-hidden />
-            </a>
-          </div>
-        </div>
 
         {user && hasToken ? <PhoneUpdateBanner user={user} onUpdated={setUser} /> : null}
 

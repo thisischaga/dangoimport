@@ -65,7 +65,7 @@ const DevisForm = ({ showForm }) => {
       <div className="mb-6">
         <h2 className="text-2xl font-black text-gray-900">Demande de Sourcing</h2>
         <p className="text-sm text-gray-500 mt-2">
-          Frais d'étude de dossier : <span className="font-bold text-[#ffdc2b]">5 000 FCFA</span>. Remplissez les détails ci-dessous pour que nos agents sourcent votre produit en Chine.
+          Frais d'étude de dossier : <span className="font-bold text-[#ffdc2b]">5 000 XOF</span>. Remplissez les détails ci-dessous pour que nos agents sourcent votre produit en Chine.
         </p>
       </div>
 
@@ -113,7 +113,7 @@ const DevisForm = ({ showForm }) => {
         </button>
         <button disabled={loading} onClick={handleSubmit} type="submit" className="bg-[#ffdc2b] hover:bg-[#e6c600] text-[#0f172a] px-6 py-2.5 rounded-xl text-sm font-black disabled:opacity-50 transition-all flex items-center gap-2 shadow-sm">
           {loading ? <FaSpinner className="animate-spin" /> : null}
-          Payer 5000 FCFA et Soumettre
+          Payer 5000 XOF et Soumettre
         </button>
       </div>
     </div>

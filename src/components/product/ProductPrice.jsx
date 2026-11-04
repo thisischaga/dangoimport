@@ -2,7 +2,7 @@ import React from 'react';
 import { Truck } from 'lucide-react';
 
 function formatCFA(value) {
-  return `${Number(value || 0).toLocaleString('fr-FR')} FCFA`;
+  return `${Number(value || 0).toLocaleString('fr-FR')} XOF`;
 }
 
 function ProductPrice({

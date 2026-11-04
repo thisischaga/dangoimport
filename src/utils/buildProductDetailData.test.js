@@ -48,7 +48,7 @@ describe('buildProductDetailData', () => {
     expect(data.publicPriceTiers.length).toBe(3);
     expect(data.publicPriceTiers[0].label).toBe('2 à 9 unités');
     expect(data.publicPriceTiers[0].unitPriceFormatted).toContain('15');
-    expect(data.publicPriceTiers[0].unitPriceFormatted).toContain('FCFA');
+    expect(data.publicPriceTiers[0].unitPriceFormatted).toContain('XOF');
     expect(data.publicPriceTiers[1].savingsPercent).toBe(10);
     expect(data.specifications.some((s) => s.key === 'Matériau supérieur')).toBe(true);
     expect(data.specifications.some((s) => s.key === 'Poids brut')).toBe(true);

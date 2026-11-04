@@ -131,27 +131,78 @@ export function buildProductDetailData(product = {}) {
     || product.rawAlibabaData?.video_url
     || '';
 
-  // 4. Paliers de prix en gros (PUBLIC en FCFA)
-  const rawTiers = Array.isArray(product.publicPriceTiers)
+  // 4. Paliers de prix en gros (PUBLIC en XOF)
+  const rawTiers = Array.isArray(product.publicPriceTiers) && product.publicPriceTiers.length > 0
     ? product.publicPriceTiers
     : [];
 
-  const publicPriceTiers = rawTiers.map((t) => {
-    const min = Math.max(1, Number(t.minQuantity || 1));
-    const max = t.maxQuantity ? Number(t.maxQuantity) : null;
-    const tierUnitPrice = Number(t.unitPrice || 0);
-    const savings = basePrice > 0 && tierUnitPrice < basePrice
-      ? Math.round(((basePrice - tierUnitPrice) / basePrice) * 100)
-      : 0;
-    return {
-      min,
-      max,
-      label: max ? `${min} à ${max} unités` : `≥ ${min} unités`,
-      unitPrice: tierUnitPrice,
-      unitPriceFormatted: formatCFA(tierUnitPrice),
-      savingsPercent: savings,
-    };
-  });
+  let publicPriceTiers = [];
+  if (rawTiers.length > 0) {
+    publicPriceTiers = rawTiers.map((t) => {
+      const min = Math.max(1, Number(t.minQuantity || t.minQty || t.min || 1));
+      const max = t.maxQuantity || t.maxQty || t.max ? Number(t.maxQuantity || t.maxQty || t.max) : null;
+      const tierUnitPrice = Number(t.unitPrice || t.price || 0);
+      const savings = basePrice > 0 && tierUnitPrice < basePrice
+        ? Math.round(((basePrice - tierUnitPrice) / basePrice) * 100)
+        : 0;
+      return {
+        min,
+        max,
+        label: max ? `${min.toLocaleString('fr-FR')} à ${max.toLocaleString('fr-FR')} unités` : `≥ ${min.toLocaleString('fr-FR')} unités`,
+        unitPrice: tierUnitPrice,
+        unitPriceFormatted: formatCFA(tierUnitPrice),
+        savingsPercent: savings,
+      };
+    });
+  } else {
+    // Essayer d'extraire depuis sourcePriceTiers ou ladder_price (ex: Alibaba)
+    const sourceTiers = (Array.isArray(product.sourcePriceTiers) && product.sourcePriceTiers.length > 0)
+      ? product.sourcePriceTiers
+      : (Array.isArray(product.normalized?.sourcePriceTiers) && product.normalized.sourcePriceTiers.length > 0)
+        ? product.normalized.sourcePriceTiers
+        : null;
+
+    const ladderTiers = sourceTiers || (() => {
+      const rawLadder = product.rawPayload?.result_data?.skus?.[0]?.ladder_price
+        || product.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price
+        || product.normalized?.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price
+        || product.pricing?.raw?.skus?.[0]?.ladder_price;
+      if (!Array.isArray(rawLadder) || !rawLadder.length) return [];
+      return rawLadder.map((l) => ({
+        minQty: Number(l.min_quantity || l.minQty || 1),
+        maxQty: Number(l.max_quantity || l.maxQty) > 0 ? Number(l.max_quantity || l.maxQty) : null,
+        price: Number(l.price || 0),
+        currency: l.currency || 'USD',
+      }));
+    })();
+
+    if (ladderTiers.length > 0) {
+      const positiveUsd = ladderTiers.map((t) => Number(t.price || 0)).filter((p) => p > 0);
+      const minTierUsd = positiveUsd.length ? Math.min(...positiveUsd) : 0;
+      const rate = minTierUsd > 0 && basePrice > 0 ? basePrice / minTierUsd : 850;
+      const converted = ladderTiers.map((t) => {
+        const min = Math.max(1, Number(t.minQty || t.min_quantity || 1));
+        const maxVal = Number(t.maxQty || t.max_quantity);
+        const max = maxVal > 0 ? maxVal : null;
+        const tierUnitPrice = Math.round(Number(t.price || 0) * rate);
+        return { min, max, unitPrice: tierUnitPrice };
+      });
+      const highestPrice = Math.max(...converted.map((t) => t.unitPrice));
+      publicPriceTiers = converted.map((t) => {
+        const savings = highestPrice > 0 && t.unitPrice < highestPrice
+          ? Math.round(((highestPrice - t.unitPrice) / highestPrice) * 100)
+          : 0;
+        return {
+          min: t.min,
+          max: t.max,
+          label: t.max ? `${t.min.toLocaleString('fr-FR')} à ${t.max.toLocaleString('fr-FR')} unités` : `≥ ${t.min.toLocaleString('fr-FR')} unités`,
+          unitPrice: t.unitPrice,
+          unitPriceFormatted: formatCFA(t.unitPrice),
+          savingsPercent: savings,
+        };
+      });
+    }
+  }
 
   // 5. Spécifications fusionnées complètes
   const specMap = new Map();

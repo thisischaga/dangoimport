@@ -337,7 +337,7 @@ const SourcingForm = () => {
                 />
               </label>
               <label className="block">
-                <span className="mb-1.5 block text-sm font-semibold">Budget total en FCFA *</span>
+                <span className="mb-1.5 block text-sm font-semibold">Budget total en XOF *</span>
                 <input
                   type="number"
                   name="budget"

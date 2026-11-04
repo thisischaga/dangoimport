@@ -148,7 +148,7 @@ function CheckRow({ label, checked, count, onChange }) {
 function FilterPanel({ filters, setFilters, facets }) {
   return (
     <>
-      <FilterSection title="Prix (FCFA)">
+      <FilterSection title="Prix (XOF)">
         <div className="grid grid-cols-2 gap-2">
           <input
             type="number"
@@ -226,7 +226,7 @@ function ActiveFilterChips({ filters, setFilters, onClearAll }) {
   if (filters.minPrice || filters.maxPrice) {
     chips.push({
       key: 'price',
-      label: `Prix: ${filters.minPrice || '0'} – ${filters.maxPrice || '∞'} FCFA`,
+      label: `Prix: ${filters.minPrice || '0'} – ${filters.maxPrice || '∞'} XOF`,
       clear: () => setFilters((p) => ({ ...p, minPrice: '', maxPrice: '' })),
     });
   }

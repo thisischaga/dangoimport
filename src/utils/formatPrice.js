@@ -1,7 +1,11 @@
-export function formatCFA(value) {
+export function formatXOF(value) {
   const n = Number(value ?? 0);
-  if (!Number.isFinite(n)) return '0 FCFA';
-  return `${n.toLocaleString('fr-FR')} FCFA`;
+  if (!Number.isFinite(n) || n < 0) return '0 XOF';
+  return `${Math.round(n).toLocaleString('fr-FR').replace(/\s/g, ' ')} XOF`;
+}
+
+export function formatCFA(value) {
+  return formatXOF(value);
 }
 
 export function calcDiscountPercent(original, current) {
@@ -11,7 +15,7 @@ export function calcDiscountPercent(original, current) {
   return Math.round((1 - curr / orig) * 100);
 }
 
-export default formatCFA;
+export default formatXOF;
 export function formatSoftS(value) {
-  return formatCFA(value);
+  return formatXOF(value);
 }

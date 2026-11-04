@@ -108,7 +108,7 @@ export default function FeaturedSelection() {
                     <p className="text-[13px] text-gray-800 dark:text-gray-200 line-clamp-2 mb-3 leading-snug">{p.name}</p>
                     <div className="mt-auto">
                       <p className="font-black text-gray-900 dark:text-white text-[16px]">
-                        {fmtCFA(price)} <span className="text-[11px] font-bold text-gray-500">FCFA</span>
+                        {fmtCFA(price)} <span className="text-[11px] font-bold text-gray-500">XOF</span>
                       </p>
                     </div>
                   </div>

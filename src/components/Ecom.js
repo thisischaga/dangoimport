@@ -116,7 +116,7 @@ function MarketplaceCard({ product, inCart, isWished, justAdded, onOpen, onGoCar
             <span className="text-[16px] sm:text-[18px] font-bold text-[#222] dark:text-white leading-none">
               {Number(displayPrice).toLocaleString('fr-FR')}
             </span>
-            <span className="text-[12px] font-semibold text-[#222] dark:text-white">FCFA</span>
+            <span className="text-[12px] font-semibold text-[#222] dark:text-white">XOF</span>
           </div>
           
           <p className="text-[12px] text-[#666] dark:text-gray-400 mt-1 mb-3">

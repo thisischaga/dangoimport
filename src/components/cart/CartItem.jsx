@@ -23,8 +23,8 @@ export default function CartItem({ item }) {
 
       <div className="w-44 flex flex-col items-end gap-3">
         <div className="text-right">
-          <div className="text-xl font-black text-gray-900">{display.toLocaleString()} FCFA</div>
-          {promo > 0 && promo < price && <div className="text-sm text-gray-400 line-through">{price.toLocaleString()} FCFA</div>}
+          <div className="text-xl font-black text-gray-900">{display.toLocaleString()} XOF</div>
+          {promo > 0 && promo < price && <div className="text-sm text-gray-400 line-through">{price.toLocaleString()} XOF</div>}
         </div>
 
         <div className="flex items-center gap-2">

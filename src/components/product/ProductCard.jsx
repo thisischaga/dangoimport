@@ -215,12 +215,12 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
           {amount ? (
             <span className={`pc3__price${hasPromo ? ' pc3__price--promo' : ''}`}>
               <span className="pc3__amount">{amount}</span>
-              <span className="pc3__unit">FCFA</span>
+              <span className="pc3__unit">XOF</span>
             </span>
           ) : (
             <span className="pc3__price"><span className="pc3__amount pc3__amount--text">{formatSoftS(displayPrice)}</span></span>
           )}
-          {oldAmount && <span className="pc3__old">{oldAmount} FCFA</span>}
+          {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
         </div>
       </div>
     </article>
