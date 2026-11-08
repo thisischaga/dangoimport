@@ -2,7 +2,7 @@ import axios from 'axios';
 import API_BASE_URL from './apiConfig';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'https://dangoimport-server.onrender.com/api',
   timeout: 60000,
 });
 
