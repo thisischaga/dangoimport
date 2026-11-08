@@ -1,9 +1,8 @@
 import axios from 'axios';
-
-const API_BASE_URL = (process.env.REACT_APP_API_URL || 'https://dangoimport-server.onrender.com').replace(/\/$/, '');
+import API_BASE_URL from './apiConfig';
 
 const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: 'http://localhost:8000/api',
   timeout: 60000,
 });
 

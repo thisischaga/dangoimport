@@ -129,19 +129,20 @@ const fmt = (v) => {
 function ProductCard({ product, onAddToCart, isForPromoSection }) {
   /* ── Données de base ─────────────────────────────────── */
   const productId = product?._id || product?.id;
-  const price = getUnitPrice(product);
+  const rawProductPrice = Number(product?.price || product?.promoPrice || product?.unitPrice || 0);
+  const price = getUnitPrice(product) || rawProductPrice;
   const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
   const { moq, soldAsLot, packSize } = getMoqRules(product);
 
   const promoPrice = Number(product?.promoPrice ?? product?.salePrice ?? 0) || 0;
   const hasPromo = !isDropship && promoPrice > 0 && promoPrice < price;
-  const displayPrice = isDropship ? getCardDisplayPrice(product) : (hasPromo ? promoPrice : price);
+  const displayPrice = isDropship ? (getCardDisplayPrice(product) || rawProductPrice) : (hasPromo ? promoPrice : price);
   const amount = fmt(displayPrice);
   const oldAmount = hasPromo ? fmt(price) : null;
 
   /* ── Images ──────────────────────────────────────────── */
   const images = getProductImages(product, 2);
-  const primaryImage = images[0] || product?.image || '';
+  const primaryImage = images[0] || product?.mainImage || product?.image || (typeof product?.images?.[0] === 'string' ? product?.images?.[0] : product?.images?.[0]?.url) || '';
   const hoverImage = images[1] || null;
 
   /* ── Stock ───────────────────────────────────────────── */
@@ -154,12 +155,13 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
   /* ── Pastille (origine du produit) ───────────────────── */
   let tag = null;
   if (isOutOfStock) tag = { label: 'Rupture', tone: 'gray' };
-  else if (isAlibaba || isDropship) tag = { label: 'Import direct', tone: 'blue' };
+  else if (isAlibaba) tag = { label: 'Direct usine', tone: 'blue' };
+  else if (isDropship) tag = { label: 'Import direct', tone: 'blue' };
   else if (isMarketplaceProduct(product)) tag = { label: 'Marketplace', tone: 'yellow' };
 
   /* ── Détail sous le nom ──────────────────────────────── */
   let orderNote = '';
-  if (isDropship) {
+  if (isAlibaba || isDropship) {
     if (soldAsLot || packSize > 1) orderNote = `Lot de ${packSize} unités`;
     else if (moq > 1) orderNote = `Min. ${moq} unités`;
   }

@@ -32,6 +32,7 @@ function ProductImage({
         alt={alt || 'Produit'}
         loading="lazy"
         decoding="async"
+        referrerPolicy="no-referrer"
         className={`product-image__img ${loaded ? 'is-loaded' : ''}`}
         onLoad={() => setLoaded(true)}
         onError={() => {

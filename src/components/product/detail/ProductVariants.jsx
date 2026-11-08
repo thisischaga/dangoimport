@@ -1,16 +1,12 @@
 import React, { useMemo } from 'react';
-import { normalizeVariantAttributeKey } from '../../../utils/variantSelection';
+import {
+  extractVariantDimensions,
+  getVariantAttributeValue,
+  resolveColorStyle,
+  cleanVariantLabel,
+} from '../../../utils/variantSelection';
 
-const INTERNAL_VARIANT_ATTR_KEYS = new Set([
-  'externalvariantid',
-  'variantkey',
-  'supplierpriceusd',
-  'supplierpricecny',
-  'vid',
-  'pid',
-]);
-
-function cleanVariantLabel(raw) {
+function cleanLabel(raw) {
   if (!raw || typeof raw !== 'string') return '';
   let str = raw.trim();
   str = str.replace(/^couleur\s*:\s*/i, '');
@@ -22,61 +18,12 @@ function cleanVariantLabel(raw) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function readVariantAttrValue(variant, key) {
-  if (!variant || !variant.attributes || typeof variant.attributes !== 'object') return null;
-  const target = normalizeVariantAttributeKey(key);
-  for (const [attrKey, attrValue] of Object.entries(variant.attributes)) {
-    if (normalizeVariantAttributeKey(attrKey) === target) {
-      const value = String(attrValue ?? '').trim();
-      return value || null;
-    }
-  }
-  return null;
-}
-
-function isOptionAvailable(variants, key, optionValue, selectedColor, selectedSize, isAlibaba = false) {
-  const normalizedKey = normalizeVariantAttributeKey(key);
-  const normalizedValue = String(optionValue ?? '').trim();
-  if (!normalizedValue) return false;
-
-  // Pour la couleur : toute couleur existant dans les variantes avec stock > 0 (ou sur commande Alibaba) est disponible
-  if (normalizedKey === 'color') {
-    return variants.some((v) => {
-      const value = readVariantAttrValue(v, 'color');
-      if (!value || value.toLowerCase() !== normalizedValue.toLowerCase()) return false;
-      return isAlibaba || Number(v.stock ?? 0) > 0;
-    });
-  }
-
-  // Pour la taille : vérifier la compatibilité avec la couleur sélectionnée
-  if (normalizedKey === 'size') {
-    const hasColorMatch = variants.some((v) => {
-      const sVal = readVariantAttrValue(v, 'size');
-      if (!sVal || sVal.toLowerCase() !== normalizedValue.toLowerCase()) return false;
-      if (!isAlibaba && Number(v.stock ?? 0) <= 0) return false;
-      if (!selectedColor) return true;
-      const cVal = readVariantAttrValue(v, 'color');
-      return !cVal || cVal.toLowerCase() === String(selectedColor).trim().toLowerCase();
-    });
-    if (hasColorMatch) return true;
-    // Si pas de combinaison exacte avec la couleur actuelle mais la taille existe ailleurs
-    return variants.some((v) => {
-      const sVal = readVariantAttrValue(v, 'size');
-      return sVal && sVal.toLowerCase() === normalizedValue.toLowerCase() && (isAlibaba || Number(v.stock ?? 0) > 0);
-    });
-  }
-
-  // Autres attributs génériques
-  return variants.some((v) => {
-    const value = readVariantAttrValue(v, normalizedKey);
-    return value && value.toLowerCase() === normalizedValue.toLowerCase() && (isAlibaba || Number(v.stock ?? 0) > 0);
-  });
-}
-
 function ProductVariants({
   product,
   selectedVariantIndex,
   onSelectVariant,
+  selectedAttributes = {},
+  onSelectAttribute,
   selectedColor,
   onSelectColor,
   selectedSize,
@@ -95,83 +42,71 @@ function ProductVariants({
     () => (Array.isArray(product?.variants) ? product.variants : []),
     [product?.variants],
   );
-  const colors = Array.isArray(product?.color) ? product.color.filter(Boolean) : [];
-  const sizes = Array.isArray(product?.size) ? product.size.filter(Boolean) : [];
 
-  const variantGroups = useMemo(() => {
-    if (variants.length === 0) return null;
-    const attrKeys = new Set();
-    variants.forEach((v) => {
-      const attrs = v.attributes || {};
-      Object.keys(attrs).forEach((k) => {
-        const normalizedKey = normalizeVariantAttributeKey(k);
-        if (!normalizedKey || INTERNAL_VARIANT_ATTR_KEYS.has(String(k).toLowerCase())) return;
-        if (!['color', 'size'].includes(normalizedKey)) attrKeys.add(k);
+  // Extrait les dimensions dynamiques (Couleur, Taille, Capacité, etc.)
+  const dimensions = useMemo(() => extractVariantDimensions(variants), [variants]);
+
+  // Variant actif actuel
+  const activeVariant = selectedVariantIndex != null && variants[selectedVariantIndex]
+    ? variants[selectedVariantIndex]
+    : variants[0] || null;
+
+  // Détermine la valeur sélectionnée pour une dimension
+  const getSelectedValue = (groupKey) => {
+    if (selectedAttributes[groupKey]) return selectedAttributes[groupKey];
+    if (groupKey === 'color' && selectedColor) return selectedColor;
+    if (groupKey === 'size' && selectedSize) return selectedSize;
+    if (activeVariant) {
+      const vVal = getVariantAttributeValue(activeVariant, groupKey);
+      if (vVal) return vVal;
+    }
+    return '';
+  };
+
+  const handlePickOption = (groupKey, value) => {
+    if (groupKey === 'color' && onSelectColor) onSelectColor(value);
+    if (groupKey === 'size' && onSelectSize) onSelectSize(value);
+    if (onSelectAttribute) {
+      onSelectAttribute(groupKey, value);
+    } else if (onSelectVariant) {
+      // Fallback si onSelectAttribute n'est pas passé
+      const matchIdx = variants.findIndex((v) => {
+        const vVal = getVariantAttributeValue(v, groupKey);
+        return vVal && vVal.toLowerCase() === String(value).toLowerCase();
       });
-    });
-    if (attrKeys.size === 0) return null;
-    return Array.from(attrKeys).map((key) => ({
-      key,
-      label: key.charAt(0).toUpperCase() + key.slice(1),
-      options: [...new Set(variants.map((v) => readVariantAttrValue(v, key)).filter(Boolean))],
-    }));
-  }, [variants]);
+      if (matchIdx >= 0) onSelectVariant(matchIdx);
+    }
+  };
 
-  const hasVariants = variants.length > 0;
-  const hasColors = colors.length > 0 || variants.some((v) => readVariantAttrValue(v, 'color'));
-  const hasSizes = sizes.length > 0 || variants.some((v) => readVariantAttrValue(v, 'size'));
-  const hasOtherGroups = Array.isArray(variantGroups) && variantGroups.length > 0;
-  // Afficher "Modèle" seulement si le produit n'a ni couleur, ni taille, ni autre groupe d'attributs
-  const showModelGroup = hasVariants && !hasColors && !hasSizes && !hasOtherGroups;
+  if (!variants || variants.length <= 1 && dimensions.length === 0) {
+    return null;
+  }
 
-  const renderColorOptions = (list) => list.map((c) => {
-    const available = isOptionAvailable(variants, 'color', c, selectedColor, selectedSize, isAlibaba);
+  // Si aucune dimension n'a pu être extraite des attributs, afficher la liste des variantes sous forme de modèles
+  if (dimensions.length === 0 && variants.length > 1) {
     return (
-      <button
-        key={c}
-        type="button"
-        className={`product-variants__chip ${selectedColor === c ? 'is-selected' : ''} ${!available ? 'is-disabled' : ''}`}
-        onClick={() => onSelectColor?.(c)}
-        disabled={!available && !isAlibaba}
-      >
-        {c}
-      </button>
-    );
-  });
-
-  const renderSizeOptions = (list) => list.map((s) => {
-    const available = isOptionAvailable(variants, 'size', s, selectedColor, selectedSize, isAlibaba);
-    return (
-      <button
-        key={s}
-        type="button"
-        className={`product-variants__chip product-variants__chip--size ${selectedSize === s ? 'is-selected' : ''} ${!available ? 'is-disabled' : ''}`}
-        onClick={() => onSelectSize?.(s)}
-        disabled={!available && !isAlibaba}
-      >
-        {s}
-      </button>
-    );
-  });
-
-  if (!hasVariants && !hasColors && !hasSizes) return null;
-
-  return (
-    <div className="product-variants">
-      {showModelGroup && (
+      <div className="product-variants">
         <div className="product-variants__group">
-          <p className="product-variants__label">Modèle</p>
+          <div className="product-variants__header">
+            <span className="product-variants__label">Modèle</span>
+            {activeVariant && (
+              <span className="product-variants__current-value">
+                {cleanLabel(activeVariant.name) || activeVariant.sku || `Option ${(selectedVariantIndex || 0) + 1}`}
+              </span>
+            )}
+          </div>
           <div className="product-variants__options">
             {variants.map((v, i) => {
-              const label = cleanVariantLabel(v.name) || v.sku || `Option ${i + 1}`;
-              const out = Number(v.stock ?? 0) <= 0 && !isAlibaba;
+              const label = cleanLabel(v.name) || v.sku || `Option ${i + 1}`;
+              const isSelected = selectedVariantIndex === i;
+              const isOut = Number(v.stock ?? 0) <= 0 && !isAlibaba;
               return (
                 <button
-                  key={v._id || v.sku || i}
+                  key={v._id || v.skuId || v.sku || i}
                   type="button"
-                  className={`product-variants__chip ${selectedVariantIndex === i ? 'is-selected' : ''} ${out ? 'is-disabled' : ''}`}
-                  onClick={() => !out && onSelectVariant?.(i)}
-                  disabled={out}
+                  className={`product-variants__chip ${isSelected ? 'is-selected' : ''} ${isOut ? 'is-disabled' : ''}`}
+                  onClick={() => !isOut && onSelectVariant?.(i)}
+                  disabled={isOut}
                 >
                   {label}
                 </button>
@@ -179,57 +114,88 @@ function ProductVariants({
             })}
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {hasColors && (
-        <div className="product-variants__group">
-          <p className="product-variants__label">Couleur</p>
-          <div className="product-variants__options">
-            {renderColorOptions([...new Set([...colors, ...variants.map((v) => readVariantAttrValue(v, 'color')).filter(Boolean)])])}
-          </div>
-        </div>
-      )}
+  return (
+    <div className="product-variants">
+      {dimensions.map((group) => {
+        const currentVal = getSelectedValue(group.key);
+        const isColorGroup = group.key === 'color';
 
-      {hasSizes && (
-        <div className="product-variants__group">
-          <p className="product-variants__label">Taille</p>
-          <div className="product-variants__options">
-            {renderSizeOptions([...new Set([...sizes, ...variants.map((v) => readVariantAttrValue(v, 'size')).filter(Boolean)])])}
-          </div>
-        </div>
-      )}
-
-      {variantGroups?.map(({ key, label, options }) => {
-        const activeVariant = selectedVariantIndex != null ? variants[selectedVariantIndex] : null;
-        const currentVal = activeVariant ? readVariantAttrValue(activeVariant, key) : null;
         return (
-          <div key={key} className="product-variants__group">
-            <p className="product-variants__label">{label}</p>
-            <div className="product-variants__options">
-              {options.map((opt) => {
-                const available = isOptionAvailable(variants, key, opt, selectedColor, selectedSize, isAlibaba);
-                const isSelected = currentVal === opt;
-                return (
-                  <button
-                    key={`${key}-${opt}`}
-                    type="button"
-                    className={`product-variants__chip ${isSelected ? 'is-selected' : ''} ${!available ? 'is-disabled' : ''}`}
-                    onClick={() => {
-                      const matchIdx = variants.findIndex((v) => {
-                        const matchesKey = readVariantAttrValue(v, key) === opt;
-                        if (!matchesKey) return false;
-                        if (selectedColor && readVariantAttrValue(v, 'color') !== selectedColor) return false;
-                        return true;
-                      });
-                      onSelectVariant?.(matchIdx >= 0 ? matchIdx : variants.findIndex((v) => readVariantAttrValue(v, key) === opt));
-                    }}
-                    disabled={!available && !isAlibaba}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
+          <div key={group.key} className="product-variants__group">
+            {/* Titre du groupe + valeur active */}
+            <div className="product-variants__header">
+              <span className="product-variants__label">{group.label}</span>
+              {currentVal && (
+                <span className="product-variants__current-value">
+                  : <strong>{currentVal}</strong>
+                </span>
+              )}
             </div>
+
+            {/* 1. Affichage en RONDS pour la couleur */}
+            {isColorGroup ? (
+              <div className="product-variants__color-row" role="radiogroup" aria-label="Choisir une couleur">
+                {group.options.map((opt) => {
+                  const isSelected = currentVal && currentVal.toLowerCase() === opt.value.toLowerCase();
+                  const colorStyle = resolveColorStyle(opt.value, opt.image);
+
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      title={opt.value}
+                      className={`product-variants__color-dot ${isSelected ? 'is-selected' : ''}`}
+                      onClick={() => handlePickOption('color', opt.value)}
+                    >
+                      <span
+                        className={`product-variants__color-circle ${colorStyle.isLight ? 'is-light' : ''}`}
+                        style={{
+                          background: colorStyle.background,
+                          backgroundColor: colorStyle.backgroundColor,
+                        }}
+                      >
+                        {colorStyle.hasImage && (
+                          <img
+                            src={opt.image}
+                            alt={opt.value}
+                            className="product-variants__color-img"
+                            referrerPolicy="no-referrer"
+                          />
+                        )}
+                        {isSelected && (
+                          <span className={`product-variants__check ${colorStyle.isLight ? 'is-dark' : 'is-white'}`}>
+                            ✓
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              /* 2. Affichage en CHIPS pour la taille, capacité, modèle, etc. */
+              <div className="product-variants__options">
+                {group.options.map((opt) => {
+                  const isSelected = currentVal && currentVal.toLowerCase() === opt.value.toLowerCase();
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`product-variants__chip ${isSelected ? 'is-selected' : ''}`}
+                      onClick={() => handlePickOption(group.key, opt.value)}
+                    >
+                      {opt.value}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}

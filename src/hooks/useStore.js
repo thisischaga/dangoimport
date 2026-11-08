@@ -7,6 +7,8 @@ const API = API_BASE_URL;
 function normalizeList(payload) {
   if (Array.isArray(payload)) return payload;
   if (payload?.data && Array.isArray(payload.data)) return payload.data;
+  if (payload?.products && Array.isArray(payload.products)) return payload.products;
+  if (payload?.data?.products && Array.isArray(payload.data.products)) return payload.data.products;
   return [];
 }
 

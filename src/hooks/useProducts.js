@@ -8,9 +8,15 @@ const API = API_BASE_URL;
 function normalizeProducts(payload) {
   const list = Array.isArray(payload)
     ? payload
-    : payload?.data && Array.isArray(payload.data)
+    : Array.isArray(payload?.data)
       ? payload.data
-      : [];
+      : Array.isArray(payload?.products)
+        ? payload.products
+        : Array.isArray(payload?.data?.products)
+          ? payload.data.products
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : [];
 
   return list.filter((item) => item && typeof item === 'object' && (item._id || item.id || item.slug || item.name))
     .map(sanitizeProductForDisplay);
@@ -18,8 +24,11 @@ function normalizeProducts(payload) {
 
 function normalizeSingleProduct(payload) {
   if (!payload) return null;
-  if (typeof payload === 'object' && payload.data && typeof payload.data === 'object') {
+  if (typeof payload === 'object' && payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)) {
     return sanitizeProductForDisplay(payload.data);
+  }
+  if (typeof payload === 'object' && payload.product && typeof payload.product === 'object') {
+    return sanitizeProductForDisplay(payload.product);
   }
   return sanitizeProductForDisplay(payload);
 }
@@ -35,6 +44,19 @@ function isHiddenPublicStatus(product) {
 
 function isPubliclyVisibleProduct(product) {
   if (!product) return false;
+  const isAlibaba = Boolean(
+    product.isAlibaba === true ||
+    String(product.source || '').toUpperCase() === 'ALIBABA' ||
+    product.fulfillmentPlatform === 'Alibaba' ||
+    product.sourceProductId ||
+    product.externalProductId ||
+    /alicdn\.com/i.test(String(product.mainImage || product.image || ''))
+  );
+  if (isAlibaba) {
+    const val = String(product.validationStatus || '').toLowerCase().trim();
+    if (['rejected', 'disabled', 'archived'].includes(val)) return false;
+    return true;
+  }
   if (product.isPublished === false) return false;
   if (isHiddenPublicStatus(product)) return false;
   return true;
@@ -84,8 +106,7 @@ export function useProduct(id) {
     queryKey: ['products', id],
     queryFn: async () => {
       const res = await axios.get(`${API}/api/products/${id}`, { timeout: 30000 });
-      const product = normalizeSingleProduct(res.data);
-      if (!isPubliclyVisibleProduct(product)) return null;
+      const product = normalizeSingleProduct(res.data) || res.data?.data || res.data?.product || res.data;
       return product;
     },
     enabled: !!id,

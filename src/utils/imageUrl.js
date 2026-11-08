@@ -28,7 +28,7 @@ export function resolveImageUrl(img) {
 }
 
 export function getProductImage(product) {
-  const raw = product?.images?.[0]?.url || product?.images?.[0] || product?.image;
+  const raw = product?.mainImage || product?.image || product?.images?.[0]?.url || product?.images?.[0] || product?.galleryImages?.[0];
   if (typeof raw === 'string') return resolveImageUrl(raw);
   if (raw?.url) return resolveImageUrl(raw.url);
   return null;
@@ -39,6 +39,7 @@ export function getProductImages(product, max = Infinity) {
 
   const rawData = unwrapAlibabaPayload(product.rawAlibabaData || product.alibabaData || {});
   const candidates = [
+    Array.isArray(product.alibabaGalleryImages) ? product.alibabaGalleryImages : [],
     Array.isArray(product.galleryImages) ? product.galleryImages : [],
     Array.isArray(product.images) ? product.images : [],
     Array.isArray(rawData.galleryImages) ? rawData.galleryImages : [],

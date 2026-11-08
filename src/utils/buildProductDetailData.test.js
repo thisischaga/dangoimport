@@ -195,6 +195,7 @@ describe('buildProductDetailData', () => {
     expect(data.packaging.weightKg).toBe(0.1);
     expect(data.packaging.packageSize).toBe('3X3X2 cm');
     expect(data.modelNumber).toBe('KYT-830');
-    expect(data.supplierName).toBe('Shenzhen Keyuantai Industry Co., Ltd.');
+    expect(data.hasFactorySupplier).toBe(true);
+    expect(data.customization.available).toBe(false);
   });
 });

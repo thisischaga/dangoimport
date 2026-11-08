@@ -4,25 +4,12 @@ import {
   Search, ChevronDown, Menu, X, Cpu, Shirt, Home as HomeIcon,
   Sparkles, Smartphone, Laptop, Headphones, Dumbbell, User, ShoppingCart, LogOut,
   Tag, Flame, HelpCircle, ShoppingBag, Store, Package, ArrowUpRight,
+  LayoutGrid, Factory, ChevronRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import client from '../apiClient';
 import { useCart } from '../context/CartContext';
 import PhoneUpdateBanner from './PhoneUpdateBanner';
-
-/* ------------------------------------------------------------------ */
-/* Messages de réassurance : UN seul endroit à modifier.               */
-/* Garde-les alignés avec la fiche produit (frais d'import calculés    */
-/* au checkout) et ne promets que ce que tu peux tenir.               */
-/* ------------------------------------------------------------------ */
-const TRUST_ITEMS = [
-  'Import direct depuis la Chine',
-  'Paiement Mobile Money',
-  "Frais d'importation calculés au checkout",
-  'Garantie et support local',
-];
-// Un message de plus apparaît à chaque palier d'écran
-const TRUST_VISIBILITY = ['', 'hidden sm:block', 'hidden md:block', 'hidden lg:block'];
 
 const SELLER_URL = process.env.NODE_ENV === 'production'
   ? 'https://business.dangoimport.com'
@@ -42,6 +29,19 @@ export const CATEGORY_LINKS = [
   { label: 'Informatique', slug: 'informatique', Icon: Laptop },
   { label: 'Accessoires', slug: 'accessoires', Icon: Headphones },
   { label: 'Sport', slug: 'sport', Icon: Dumbbell },
+];
+
+export const QUICK_LINKS = [
+  { label: 'Direct usine', to: '/a-importer', Icon: Factory, iconColor: 'text-[#FF6B00]', badge: 'Usine', badgeColor: 'bg-orange-100 text-[#C24E00]' },
+  { label: 'Électronique', to: '/shopping?category=Électronique' },
+  { label: 'Mode', to: '/shopping?category=Mode' },
+  { label: 'Maison', to: '/shopping?category=Maison' },
+  { label: 'Beauté', to: '/shopping?category=Beauté' },
+  { label: 'Téléphones', to: '/shopping?category=Téléphones' },
+  { label: 'Informatique', to: '/shopping?category=Informatique' },
+  { label: 'Nouveautés', to: '/nouveautes', Icon: Sparkles, iconColor: 'text-amber-500' },
+  { label: 'Promotions', to: '/promotions', Icon: Tag, iconColor: 'text-rose-500', badge: 'PROMO', badgeColor: 'bg-rose-100 text-rose-700' },
+  { label: 'Meilleures ventes', to: '/best-sellers', Icon: Flame, iconColor: 'text-orange-500' },
 ];
 
 const NAV_LINKS = [
@@ -406,12 +406,14 @@ const Header = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [catMenuOpen, setCatMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
   const suggestionTimer = useRef(null);
   const suggestionRequestRef = useRef(0);
   const accountRef = useRef(null);
+  const catMenuRef = useRef(null);
   const searchInputRef = useRef(null);
   const closeMobileMenu = React.useCallback(() => setMobileMenuOpen(false), []);
 
@@ -482,12 +484,18 @@ const Header = () => {
 
   useEffect(() => { setActiveIndex(-1); }, [suggestions]);
 
-  // Clic extérieur et touche Échap pour le menu compte
+  // Clic extérieur et touche Échap pour le menu compte et catégories
   useEffect(() => {
     const onPointerDown = (event) => {
       if (accountRef.current && !accountRef.current.contains(event.target)) setAccountOpen(false);
+      if (catMenuRef.current && !catMenuRef.current.contains(event.target)) setCatMenuOpen(false);
     };
-    const onKey = (e) => { if (e.key === 'Escape') setAccountOpen(false); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setAccountOpen(false);
+        setCatMenuOpen(false);
+      }
+    };
     window.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('keydown', onKey);
     return () => {
@@ -495,6 +503,10 @@ const Header = () => {
       window.removeEventListener('keydown', onKey);
     };
   }, []);
+
+  useEffect(() => {
+    setCatMenuOpen(false);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
@@ -679,6 +691,133 @@ const Header = () => {
               />
             </div>
             {showSuggestions && <SuggestionsPanel listId="search-list-mobile" {...panelProps} />}
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* Barre de navigation catégories (style Alibaba)             */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        <div className="border-t border-white/20 bg-white text-slate-800 shadow-sm" data-light-surface>
+          <div className="mx-auto flex max-w-7xl items-center px-2 sm:px-6 lg:px-8">
+
+            {/* 1. Bouton "Toutes les catégories" avec Mega Menu (Desktop) */}
+            <div
+              className="relative hidden md:block shrink-0"
+              ref={catMenuRef}
+              onMouseEnter={() => setCatMenuOpen(true)}
+              onMouseLeave={() => setCatMenuOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setCatMenuOpen((v) => !v)}
+                className="flex h-10 items-center gap-2 px-3 text-[13px] font-bold text-slate-900 transition hover:text-[#FF6B00]"
+                aria-expanded={catMenuOpen}
+                aria-label="Toutes les catégories"
+              >
+                <LayoutGrid size={16} className="text-[#FF6B00]" />
+                <span>Toutes les catégories</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${catMenuOpen ? 'rotate-180 text-[#FF6B00]' : ''}`} />
+              </button>
+
+              {/* Menu déroulant des catégories style Alibaba */}
+              <AnimatePresence>
+                {catMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 top-full z-50 w-72 rounded-b-xl border border-slate-200 bg-white py-2 shadow-2xl"
+                  >
+                    <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Rayons & Catégories
+                    </div>
+                    {CATEGORY_LINKS.map(({ label, slug, Icon }) => (
+                      <Link
+                        key={slug}
+                        to={buildCategoryHref(label, slug)}
+                        onClick={() => setCatMenuOpen(false)}
+                        className="group flex items-center justify-between px-3.5 py-2.5 text-[13px] text-slate-700 transition hover:bg-orange-50 hover:text-[#FF6B00]"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-orange-100 group-hover:text-[#FF6B00]">
+                            <Icon size={15} />
+                          </span>
+                          <span className="font-semibold text-slate-800 group-hover:text-[#FF6B00]">{label}</span>
+                        </div>
+                        <ChevronRight size={14} className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-[#FF6B00]" />
+                      </Link>
+                    ))}
+                    <div className="my-1.5 border-t border-slate-100" />
+                    <Link
+                      to="/shopping"
+                      onClick={() => setCatMenuOpen(false)}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-[#FF6B00] transition hover:bg-orange-50"
+                    >
+                      <span>Explorer tout le catalogue</span>
+                      <ArrowUpRight size={13} />
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Séparateur discret desktop */}
+            <div className="hidden h-5 w-px bg-slate-200 md:block mx-1" />
+
+            {/* 2. Liens de navigation horizontaux (Desktop) */}
+            <nav className="hidden md:flex flex-1 items-center gap-1 overflow-x-auto scrollbar-none py-1 px-1" aria-label="Catégories rapides">
+              {QUICK_LINKS.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50 hover:text-[#FF6B00] whitespace-nowrap"
+                >
+                  {item.Icon && <item.Icon size={14} className={item.iconColor || 'text-[#FF6B00]'} />}
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${item.badgeColor}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </nav>
+
+            {/* 3. Strip tactile horizontal (Mobile) */}
+            <div className="flex md:hidden w-full items-center gap-2 overflow-x-auto scrollbar-none py-2 px-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 font-bold text-slate-800"
+              >
+                <LayoutGrid size={13} className="text-[#FF6B00]" />
+                <span>Rayons</span>
+              </button>
+              {QUICK_LINKS.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 whitespace-nowrap"
+                >
+                  {item.Icon && <item.Icon size={12} className={item.iconColor || 'text-[#FF6B00]'} />}
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* 4. Lien Vendeur / B2B (Desktop XL) */}
+            <a
+              href={SELLER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto hidden xl:flex shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600 transition hover:text-[#C24E00]"
+            >
+              <Store size={14} className="text-slate-400" />
+              <span>Vendre sur Dango / B2B</span>
+              <ArrowUpRight size={13} />
+            </a>
+
           </div>
         </div>
 

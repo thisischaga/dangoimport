@@ -1,11 +1,11 @@
-import { getProductImages, resolveImageUrl } from './imageUrl';
+import { resolveImageUrl } from './imageUrl';
+import { extractGalleryImages, extractPresentationImages, enrichVariantsWithColorImages } from './productMedia';
 import { getMoqRules, getUnitPrice, getCardDisplayPrice } from './importMoq';
 import { isAlibabaProduct, isDropshippingProduct, getDisplayVendorName } from './publicProduct';
 import { formatCFA, calcDiscountPercent } from './formatPrice';
 
 /**
- * Nettoie le code HTML d'une description Alibaba en supprimant les styles,
- * scripts, classes décoratives et balises dangereuses.
+ * Nettoie le code HTML d'une description Alibaba.
  */
 export function sanitizeAlibabaHtml(rawHtml = '') {
   if (!rawHtml || typeof rawHtml !== 'string') return '';
@@ -21,7 +21,6 @@ export function sanitizeAlibabaHtml(rawHtml = '') {
     .replace(/on\w+='[^']*'/gi, '')
     .replace(/javascript:[^"']*/gi, '');
 
-  // Supprimer les conteneurs décoratifs vides ou styles inline Alibaba cassés
   cleaned = cleaned
     .replace(/<div[^>]*class="[^"]*magic-[^"]*"[^>]*>/gi, '<div>')
     .replace(/style="[^"]*"/gi, '')
@@ -63,34 +62,34 @@ export function extractCleanProse(raw = '', fallbackTitle = '') {
 }
 
 const ATTR_LABELS_FR = {
-  'connectors': 'Connecteurs',
-  'function': 'Fonctionnalités',
-  'material': 'Matériau',
-  'type': 'Type de câble / produit',
+  connectors: 'Connecteurs',
+  function: 'Fonctionnalités',
+  material: 'Matériau',
+  type: 'Type de câble / produit',
   'usb type': 'Connectique USB',
   'place of origin': 'Lieu de fabrication',
-  'use': 'Appareils compatibles',
-  'application': 'Compatibilité / Usage',
+  use: 'Appareils compatibles',
+  application: 'Compatibilité / Usage',
   'model number': 'Référence modèle',
-  'conductor': 'Conducteur interne',
-  'jacket': 'Gaine extérieure',
-  'private mold': 'Moule d’usine exclusif',
-  'shielding': 'Blindage anti-interférence',
-  'feature': 'Points forts',
-  'moq': 'Quantité minimale d’usine (MOQ)',
-  'warranty': 'Garantie usine',
+  conductor: 'Conducteur interne',
+  jacket: 'Gaine extérieure',
+  'private mold': "Moule d'usine exclusif",
+  shielding: 'Blindage anti-interférence',
+  feature: 'Points forts',
+  moq: "Quantité minimale d'usine (MOQ)",
+  warranty: 'Garantie usine',
   'selling units:': 'Unité de vente',
   'single package size:': 'Dimensions colis unitaire',
   'single gross weight:': 'Poids brut unitaire',
   'cable length': 'Longueur du câble',
-  'color': 'Couleur disponible',
+  color: 'Couleur disponible',
 };
 
 const VALUE_TRANSLATIONS = {
   'pure copper': 'Cuivre pur',
-  'shielded': 'Blindé',
-  'nylon': 'Nylon tressé',
-  'tpe': 'TPE renforcé',
+  shielded: 'Blindé',
+  nylon: 'Nylon tressé',
+  tpe: 'TPE renforcé',
   'eco-friendly': 'Écologique',
   '3a fast charging': 'Charge rapide 3A',
   'guangdong, china': 'Guangdong, Chine',
@@ -100,12 +99,22 @@ const VALUE_TRANSLATIONS = {
   'single item': 'Article individuel',
   'type-c to type-c': 'USB-C vers USB-C',
   'fast charging cable': 'Câble charge rapide',
-  'yes': 'Oui',
-  'no': 'Non',
+  yes: 'Oui',
+  no: 'Non',
 };
 
 /**
  * Prépare et centralise toutes les données prêtes à afficher dans la fiche produit.
+ *
+ * NOTE : Ce fichier lit exclusivement les champs NORMALISÉS du produit.
+ * rawAlibabaData / rawPayload sont supprimés par sanitizeProductForDisplay().
+ * Les données critiques Alibaba sont ré-exposées par sanitize en tant que :
+ *   - product.alibabaSKUs          (SKUs avec sku_attr_list + ladder_price)
+ *   - product.alibabaKeyAttributes (fiche technique)
+ *   - product.alibabaDescriptionHtml (HTML usine pour présentation + OEM/ODM)
+ *   - product.alibabaGalleryImages  (galerie brute)
+ *   - product.modelNumber           (numéro modèle usine)
+ *   - product.sourcePriceTiers      (paliers USD bruts)
  */
 export function buildProductDetailData(product = {}) {
   if (!product || typeof product !== 'object') return null;
@@ -130,6 +139,7 @@ export function buildProductDetailData(product = {}) {
   const inStock = isAlibaba || (!rawStockIsSuspect && productStock > 0);
   const minStock = Number(product.minStock || 10);
   const isLowStock = !isAlibaba && inStock && productStock <= minStock;
+
   const parsePositiveWeight = (value) => {
     if (value === null || value === undefined || value === '') return null;
     const text = String(value).trim();
@@ -155,9 +165,11 @@ export function buildProductDetailData(product = {}) {
     stockStatusCode = 'IN_STOCK';
   }
 
-  // 3. Galerie complète sans limite arbitraire
-  const rawImages = getProductImages(product, Infinity);
-  const variantImages = (Array.isArray(product.variants) ? product.variants : [])
+  // 3. Galerie complète et variantes enrichies
+  const rawVariants = Array.isArray(product.variants) ? product.variants : [];
+  const enrichedVariants = enrichVariantsWithColorImages(product, rawVariants);
+  const rawImages = extractGalleryImages(product);
+  const variantImages = enrichedVariants
     .map((v) => resolveImageUrl(v?.image))
     .filter(Boolean);
 
@@ -167,10 +179,11 @@ export function buildProductDetailData(product = {}) {
     ? [primaryImage, ...mergedImages.filter((url) => url !== primaryImage)]
     : mergedImages;
 
+  const presentationImages = extractPresentationImages(product);
+
   const videoUrl = product.videoUrl
     || product.videos?.[0]
     || product.supplier?.videoUrl
-    || product.rawAlibabaData?.video_url
     || '';
 
   // 4. Paliers de prix en gros (PUBLIC en XOF)
@@ -182,7 +195,9 @@ export function buildProductDetailData(product = {}) {
   if (rawTiers.length > 0) {
     publicPriceTiers = rawTiers.map((t) => {
       const min = Math.max(1, Number(t.minQuantity || t.minQty || t.min || 1));
-      const max = t.maxQuantity || t.maxQty || t.max ? Number(t.maxQuantity || t.maxQty || t.max) : null;
+      const max = t.maxQuantity || t.maxQty || t.max
+        ? Number(t.maxQuantity || t.maxQty || t.max)
+        : null;
       const tierUnitPrice = Number(t.unitPrice || t.price || 0);
       const savings = basePrice > 0 && tierUnitPrice < basePrice
         ? Math.round(((basePrice - tierUnitPrice) / basePrice) * 100)
@@ -190,41 +205,38 @@ export function buildProductDetailData(product = {}) {
       return {
         min,
         max,
-        label: max ? `${min.toLocaleString('fr-FR')} à ${max.toLocaleString('fr-FR')} unités` : `≥ ${min.toLocaleString('fr-FR')} unités`,
+        label: max
+          ? `${min.toLocaleString('fr-FR')} à ${max.toLocaleString('fr-FR')} unités`
+          : `≥ ${min.toLocaleString('fr-FR')} unités`,
         unitPrice: tierUnitPrice,
         unitPriceFormatted: formatCFA(tierUnitPrice),
         savingsPercent: savings,
       };
     });
   } else {
-    // Essayer d'extraire depuis sourcePriceTiers ou ladder_price (ex: Alibaba)
-    const sourceTiers = (Array.isArray(product.sourcePriceTiers) && product.sourcePriceTiers.length > 0)
+    // Fallback : sourcePriceTiers (extrait depuis ladder_price dans sanitizeProductForDisplay, ou rawPayload fallback)
+    const ladderTiers = (Array.isArray(product.sourcePriceTiers) && product.sourcePriceTiers.length > 0)
       ? product.sourcePriceTiers
-      : (Array.isArray(product.normalized?.sourcePriceTiers) && product.normalized.sourcePriceTiers.length > 0)
-        ? product.normalized.sourcePriceTiers
-        : null;
-
-    const ladderTiers = sourceTiers || (() => {
-      const rawLadder = product.rawPayload?.result_data?.skus?.[0]?.ladder_price
-        || product.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price
-        || product.normalized?.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price
-        || product.pricing?.raw?.skus?.[0]?.ladder_price;
-      if (!Array.isArray(rawLadder) || !rawLadder.length) return [];
-      return rawLadder.map((l) => ({
-        minQty: Number(l.min_quantity || l.minQty || 1),
-        maxQty: Number(l.max_quantity || l.maxQty) > 0 ? Number(l.max_quantity || l.maxQty) : null,
-        price: Number(l.price || 0),
-        currency: l.currency || 'USD',
-      }));
-    })();
+      : (() => {
+          const rawLadder = product.alibabaSKUs?.[0]?.ladder_price
+            || product.rawPayload?.result_data?.skus?.[0]?.ladder_price
+            || product.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price;
+          if (!Array.isArray(rawLadder) || !rawLadder.length) return [];
+          return rawLadder.map((l) => ({
+            minQty: Number(l.min_quantity || l.minQty || 1),
+            maxQty: Number(l.max_quantity || l.maxQty) > 0 ? Number(l.max_quantity || l.maxQty) : null,
+            price: Number(l.price || 0),
+            currency: l.currency || 'USD',
+          }));
+        })();
 
     if (ladderTiers.length > 0) {
       const positiveUsd = ladderTiers.map((t) => Number(t.price || 0)).filter((p) => p > 0);
       const minTierUsd = positiveUsd.length ? Math.min(...positiveUsd) : 0;
       const rate = minTierUsd > 0 && basePrice > 0 ? basePrice / minTierUsd : 850;
       const converted = ladderTiers.map((t) => {
-        const min = Math.max(1, Number(t.minQty || t.min_quantity || 1));
-        const maxVal = Number(t.maxQty || t.max_quantity);
+        const min = Math.max(1, Number(t.minQty || 1));
+        const maxVal = Number(t.maxQty);
         const max = maxVal > 0 ? maxVal : null;
         const tierUnitPrice = Math.round(Number(t.price || 0) * rate);
         return { min, max, unitPrice: tierUnitPrice };
@@ -237,7 +249,9 @@ export function buildProductDetailData(product = {}) {
         return {
           min: t.min,
           max: t.max,
-          label: t.max ? `${t.min.toLocaleString('fr-FR')} à ${t.max.toLocaleString('fr-FR')} unités` : `≥ ${t.min.toLocaleString('fr-FR')} unités`,
+          label: t.max
+            ? `${t.min.toLocaleString('fr-FR')} à ${t.max.toLocaleString('fr-FR')} unités`
+            : `≥ ${t.min.toLocaleString('fr-FR')} unités`,
           unitPrice: t.unitPrice,
           unitPriceFormatted: formatCFA(t.unitPrice),
           savingsPercent: savings,
@@ -260,44 +274,53 @@ export function buildProductDetailData(product = {}) {
     }
   };
 
+  // Specs normalisées du produit
   (Array.isArray(product.specifications) ? product.specifications : []).forEach((s) => {
     if (s && s.key && s.value) pushSpec(s.key, s.value);
   });
 
-  // Extraction des spécifications clés fournisseurs (ex: Alibaba keyAttributes)
-  const keyAttrsSrc = product.rawPayload?.result_data?.keyAttributes
-    || product.normalized?.rawAlibabaData?.result_data?.keyAttributes
+  // Specs depuis alibabaKeyAttributes (extrait dans sanitizeProductForDisplay, avec fallback raw)
+  const keyAttrsSrc = product.alibabaKeyAttributes
+    || product.keyAttributes
+    || product.alibaba?.keyAttributes
+    || product.rawPayload?.result_data?.keyAttributes
     || product.rawAlibabaData?.result_data?.keyAttributes
-    || product.rawAlibabaData?.keyAttributes
-    || product.pricing?.raw?.keyAttributes
-    || product.keyAttributes;
+    || null;
+  const keyAttrsList = Array.isArray(keyAttrsSrc?.attributes)
+    ? keyAttrsSrc.attributes
+    : (Array.isArray(keyAttrsSrc) ? keyAttrsSrc : []);
 
-  const keyAttrsList = Array.isArray(keyAttrsSrc?.attributes) ? keyAttrsSrc.attributes : [];
   keyAttrsList.forEach((group) => {
     (group.attributes || []).forEach((attr) => {
       if (!attr?.name) return;
-      const vals = (attr.values || []).map((v) => v?.value).filter(Boolean);
+      const vals = (attr.values || []).map((v) => (typeof v === 'string' ? v : v?.value)).filter(Boolean);
+      if (!vals.length && attr.value) vals.push(attr.value);
       if (vals.length) {
         const rawName = attr.name.trim();
         const lowerName = rawName.toLowerCase().replace(/:$/, '');
         if (['brand name', 'logo', 'product name', 'keywords'].includes(lowerName)) return;
         const cleanName = ATTR_LABELS_FR[lowerName] || rawName.replace(/:$/, '').trim();
-        const cleanVal = vals.map((v) => VALUE_TRANSLATIONS[String(v).trim().toLowerCase()] || v).join(', ');
+        const cleanVal = vals
+          .map((v) => VALUE_TRANSLATIONS[String(v).trim().toLowerCase()] || v)
+          .join(', ');
         pushSpec(cleanName, cleanVal);
       }
     });
   });
 
+  // Numéro de modèle (extrait dans sanitize vers product.modelNumber, avec fallback raw)
   const modelVal = product.modelNumber
     || product.rawPayload?.result_data?.mode_id
-    || product.normalized?.rawAlibabaData?.result_data?.mode_id
-    || product.mode_id;
+    || product.rawAlibabaData?.result_data?.mode_id
+    || null;
   if (modelVal) pushSpec('Référence modèle usine', modelVal);
 
-  const supplierVal = product.rawPayload?.result_data?.supplier
-    || product.normalized?.rawAlibabaData?.result_data?.supplier
-    || product.supplier?.name
-    || product.vendorName;
+  // Fournisseur (avec fallback raw, sans exposer le nom direct si alibaba)
+  const supplierVal = product.supplier?.name
+    || product.vendorName
+    || product.rawPayload?.result_data?.supplier
+    || product.rawAlibabaData?.result_data?.supplier
+    || null;
   if (supplierVal && !/alibaba/i.test(supplierVal)) {
     pushSpec('Usine partenaire certifiée', supplierVal);
   }
@@ -308,7 +331,7 @@ export function buildProductDetailData(product = {}) {
   if (product.material) pushSpec('Matériau / Composition', product.material);
   if (product.condition) pushSpec('État', product.condition);
 
-  // Recherche garantie
+  // Garantie
   const keyWarranty = keyAttrsList
     .flatMap((g) => g.attributes || [])
     .find((a) => /warranty/i.test(a?.name || ''))
@@ -323,14 +346,16 @@ export function buildProductDetailData(product = {}) {
 
   const dim = product.dimensions || product.packaging?.dimensions;
   if (dim && (dim.length || dim.width || dim.height)) {
-    const dimStr = [dim.length, dim.width, dim.height].filter(Boolean).join(' × ') + (dim.unit ? ` ${dim.unit}` : ' cm');
+    const dimStr =
+      [dim.length, dim.width, dim.height].filter(Boolean).join(' × ') +
+      (dim.unit ? ` ${dim.unit}` : ' cm');
     pushSpec('Dimensions', dimStr);
   }
+
   const weightVal = [product.weight, product.packaging?.weight, product.weightKg]
     .map(parsePositiveWeight)
-    .find((value) => value != null);
+    .find((v) => v != null);
 
-  // Recherche poids et colis dans keyAttributes
   const keyWeightRaw = keyAttrsList
     .flatMap((g) => g.attributes || [])
     .find((a) => /single gross weight/i.test(a?.name || ''))
@@ -342,19 +367,22 @@ export function buildProductDetailData(product = {}) {
 
   const finalWeightKg = weightVal != null ? weightVal : parsePositiveWeight(keyWeightRaw);
   if (finalWeightKg != null) {
-    pushSpec('Poids brut unitaire', `${finalWeightKg} kg`);
+    pushSpec('Poids brut', `${finalWeightKg} kg`);
   }
+
   const packageSizeVal = product.packageSize || product.packaging?.packageSize || keyPackageSize;
   if (packageSizeVal) {
     pushSpec('Dimensions colis unitaire', packageSizeVal.replace(/\s*x\s*/gi, ' × '));
   }
+
   const capacityVal = product.supplyCapacity || product.packaging?.supplyCapacity;
   if (capacityVal) {
     pushSpec('Capacité de fourniture usine', capacityVal);
   }
+
   if (isAlibaba) {
     pushSpec('Origine', 'Chine (Fabrication et importation directe usine)');
-    pushSpec('Mode d\'approvisionnement', 'Fabrication sur commande vérifiée avec inspection');
+    pushSpec("Mode d'approvisionnement", 'Fabrication sur commande vérifiée avec inspection');
   }
 
   const specifications = Array.from(specMap.values());
@@ -373,8 +401,13 @@ export function buildProductDetailData(product = {}) {
     minOrderQuantity: moqRules.moq,
     unitType: packaging.unit,
     handlingTimeDays: product.wholesale?.handlingTimeDays || null,
-    deliverPeriods: Array.isArray(product.wholesale?.deliverPeriods) ? product.wholesale.deliverPeriods : [],
-    hasWholesale: publicPriceTiers.length > 0 || Boolean(product.wholesale?.handlingTimeDays) || moqRules.moq > 1,
+    deliverPeriods: Array.isArray(product.wholesale?.deliverPeriods)
+      ? product.wholesale.deliverPeriods
+      : [],
+    hasWholesale:
+      publicPriceTiers.length > 0 ||
+      Boolean(product.wholesale?.handlingTimeDays) ||
+      moqRules.moq > 1,
   };
 
   // 7. Délais et Livraison
@@ -384,21 +417,50 @@ export function buildProductDetailData(product = {}) {
   const importDaysLabel = isDropship ? `${importMin}–${importMax} jours` : '';
 
   const sellerName = getDisplayVendorName(product);
+  const hasFactorySupplier = Boolean(isAlibaba || supplierVal);
 
-  // 8. Description nettoyée
-  const cleanDescription = extractCleanProse(product.description || product.shortDescription, product.name);
-  const safeHtml = product.description && product.description.includes('<')
-    ? sanitizeAlibabaHtml(product.description)
-    : '';
+  // 8. Personnalisation usine (OEM / ODM)
+  // Lire depuis alibabaDescriptionHtml (HTML usine brut) + description normalisée (avec fallback raw)
+  const fullDesc = `${product.alibabaDescriptionHtml || ''} ${product.description || ''} ${product.rawPayload?.result_data?.description || ''} ${product.rawAlibabaData?.result_data?.description || ''}`;
+  const hasCustom = /oem|odm|customiz|personnalis/i.test(fullDesc);
+  const customOptions = [];
+  if (/logo/i.test(fullDesc)) customOptions.push('Impression de logo personnalisé');
+  if (/length|longueur/i.test(fullDesc)) customOptions.push('Longueur de câble sur mesure');
+  if (/connector|bo[îi]tier/i.test(fullDesc)) customOptions.push('Boîtier et connecteurs personnalisés');
+  if (/braid|tress/i.test(fullDesc)) customOptions.push('Texture tressée au choix');
+  if (/packag|emballage/i.test(fullDesc)) customOptions.push("Conception d'emballage personnalisé");
+  if (hasCustom && customOptions.length === 0) {
+    customOptions.push('Logo usine personnalisé', 'Emballage sur mesure', 'Personnalisation graphique');
+  }
+  const customization = {
+    available: hasCustom,
+    options: customOptions,
+  };
+
+  // 9. Description nettoyée
+  const cleanDescription = extractCleanProse(
+    product.description || product.shortDescription,
+    product.name,
+  );
+  const safeHtml =
+    product.description && product.description.includes('<')
+      ? sanitizeAlibabaHtml(product.description)
+      : '';
 
   return {
     id: product._id || product.id,
-    name: product.name || 'Produit',
+    name: product.name || product.title || 'Produit',
     brand: product.brand && !/generic|cj\s*drop/i.test(product.brand) ? product.brand : null,
-    modelNumber: modelVal || product.modelNumber || null,
+    modelNumber: modelVal || null,
     category: product.category || 'Général',
     subCategory: product.subCategory || null,
-    tagLabel: product.isFeatured ? 'Sélection' : product.isBestSeller ? 'Populaire' : hasPromo ? 'Promo' : null,
+    tagLabel: product.isFeatured
+      ? 'Sélection'
+      : product.isBestSeller
+        ? 'Populaire'
+        : hasPromo
+          ? 'Promo'
+          : null,
 
     // Prix
     price: basePrice,
@@ -421,6 +483,7 @@ export function buildProductDetailData(product = {}) {
     primaryImage,
     videoUrl,
     hasVideo: Boolean(videoUrl),
+    presentationImages,
 
     // Sections de contenu
     description: cleanDescription,
@@ -429,19 +492,20 @@ export function buildProductDetailData(product = {}) {
     publicPriceTiers,
     packaging,
     wholesale,
+    customization,
 
     // Origine & Expédition
     isAlibaba,
     isDropship,
     sellerName,
-    supplierName: supplierVal || sellerName || '',
+    hasFactorySupplier,
     isVendorCertified: Boolean(product.isVendorCertified || product.sellerVerified),
     importDaysLabel,
     shippingInfo: product.shippingInfo || '',
     warranty: product.warranty || warrantyVal || '',
     deliveryZones: Array.isArray(product.deliveryZones) ? product.deliveryZones : [],
 
-    // Variantes brutes transmises
-    variants: Array.isArray(product.variants) ? product.variants : [],
+    // Variantes enrichies avec les images de couleurs
+    variants: enrichedVariants,
   };
 }
