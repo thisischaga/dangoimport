@@ -528,8 +528,8 @@ const Header = () => {
           </div>
         </div>
 
-        {/* LIGNE 2 : bouton catégories + mega menu pleine largeur */}
-        <div className="border-t border-slate-100 bg-white">
+        {/* LIGNE 2 : bouton catégories + mega menu (uniquement sur desktop) */}
+        <div className="hidden md:block border-t border-slate-100 bg-white">
           <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8">
             <div
               className="relative py-1.5"

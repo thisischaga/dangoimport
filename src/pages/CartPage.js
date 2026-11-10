@@ -137,16 +137,12 @@ const CartPage = () => {
   const handleCheckout = () => {
     const user = localStorage.getItem('dangoUser');
     if (!user) {
-      toast.warning('Veuillez vous connecter pour passer au checkout.');
+      toast.warning('Veuillez vous connecter pour passer votre commande.');
       navigate('/login', { state: { from: '/cart' } });
       return;
     }
+    // Redirection directe vers le checkout sans blocage de panier mixte
     const hasDrop = cart.some(isImportCartItem);
-    const hasLocal = cart.some((item) => !isImportCartItem(item));
-    if (hasDrop && hasLocal) {
-      toast.error('Panier mixte : retirez les produits locaux ou dropshipping pour finaliser en une seule commande.');
-      return;
-    }
     if (hasDrop) {
       navigate('/checkout/dropshipping');
       return;
@@ -300,33 +296,16 @@ const CartPage = () => {
           </div>
         </div>
 
-        {/* Free shipping progress — produits locaux uniquement */}
-        {!isImportCart && (
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          {amountToFreeShipping > 0 ? (
-            <p className="text-sm font-semibold text-slate-700">
-              Plus que <span className="text-[#FF6B00]">{formatMoney(amountToFreeShipping)}</span> pour bénéficier de la livraison gratuite
-            </p>
-          ) : (
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-              <Truck className="h-4 w-4" /> Livraison gratuite débloquée
-            </p>
-          )}
-          <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${freeShippingProgress}%` }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-              className={`h-full rounded-full ${freeShippingProgress >= 100 ? 'bg-emerald-500' : 'bg-[#FF6B00]'}`}
-            />
+        {/* Information rassurante sur la commande */}
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-xs sm:text-sm font-medium text-slate-600 shadow-sm flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Truck className="h-4 w-4 text-[#FF6B00] shrink-0" />
+            <span>Livraison et frais d'acheminement calculés directement à l'étape suivante selon votre zone (Togo / Bénin).</span>
           </div>
+          <span className="hidden sm:inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs">
+            <ShieldCheck className="h-3.5 w-3.5" /> Commande vérifiée
+          </span>
         </div>
-        )}
-        {isImportCart && (
-          <div className="mb-6 rounded-2xl border border-orange-100 bg-[#FFF7F1] p-4 text-sm font-semibold text-slate-700 shadow-sm sm:p-5">
-            Produits Dango Import : les frais d&apos;importation sont calculés au checkout selon le poids total (délai estimé 20–30 jours).
-          </div>
-        )}
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-5">

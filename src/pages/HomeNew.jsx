@@ -57,7 +57,8 @@ const CSS = `
 
 /* Hero */
 .hm-hero { background: linear-gradient(180deg, #fff3ea 0%, #ffffff 100%); padding: 40px 0 36px; }
-.hm-hero__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+.hm-hero__grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; }
+@media (min-width: 1024px) { .hm-hero__grid { grid-template-columns: 1.15fr 0.85fr; gap: 36px; } }
 .hm-hero__eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--or); margin-bottom: 14px; }
 .hm-hero__title { margin: 0; font-size: clamp(30px, 4.2vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; color: var(--hb-ink); }
 .hm-hero__lead { margin: 16px 0 0; max-width: 460px; font-size: 16px; line-height: 1.6; color: #555; }
@@ -390,20 +391,7 @@ function Skeleton({ count = 12 }) {
 }
 
 /* ─── Hero ──────────────────────────────────────────────────────────── */
-function Hero({ products, loading, onShop, onPromo, onNew }) {
-  const pick = useMemo(() => {
-    const withImg = products.filter((p) => imgOf(p));
-    const promo = [...withImg].filter((p) => discountOf(p) > 0).sort((a, b) => discountOf(b) - discountOf(a))[0];
-    const fresh = withImg.find((p) => p.isNew && p !== promo);
-    const imp = withImg.find((p) => isAlibabaProduct(p) && p !== promo && p !== fresh);
-    const rest = withImg.filter((p) => p !== promo && p !== fresh && p !== imp);
-    return {
-      main: fresh || rest[0] || withImg[0],
-      imp: imp || rest[1] || withImg[1],
-      maxDiscount: promo ? discountOf(promo) : 0,
-    };
-  }, [products]);
-
+function Hero({ onShop, onNew }) {
   return (
     <section className="hm-hero">
       <div className="hm-wrap">
@@ -412,35 +400,32 @@ function Hero({ products, loading, onShop, onPromo, onNew }) {
             <span className="hm-hero__eyebrow">Commandez depuis la Chine</span>
             <h1 className="hm-hero__title">Depuis la Chine, vers l'Afrique de l'Ouest</h1>
             <p className="hm-hero__lead">
-              Faites connaître votre marque avec des articles de qualité, produits directement en usine et livrés rapidement.
+              Faites connaître votre marque avec des articles de qualité, produits directement en usine et livrés rapidement au Togo et au Bénin.
             </p>
-            <div className="hm-cta">
-              <button type="button" className="hm-pill hm-pill--primary" onClick={onShop}>Voir les produits <ArrowRight size={14} /></button>
-              <button type="button" className="hm-pill hm-pill--light" onClick={onNew}>Nouveautés</button>
-            </div>
           </div>
 
-          {loading ? (
-            <div className="hm-bento" aria-busy="true">
-              {[0, 1, 2].map((i) => <div key={i} className="hn-sk" style={{ borderRadius: 12 }} />)}
-            </div>
-          ) : (
-            <div className="hm-bento">
-              <div className="hm-tile" role="button" tabIndex={0} onClick={onNew}>
-                {pick.main && <img src={imgOf(pick.main)} alt="" className="hm-tile__img" loading="lazy" referrerPolicy="no-referrer" />}
-                <span className="hm-tile__shade" />
-                <span className="hm-tile__go"><ArrowRight size={16} /></span>
-                <div className="hm-tile__text"><strong>Nouveautés</strong><span>Les derniers arrivages</span></div>
-              </div>
-              <div className="hm-tile" role="button" tabIndex={0} onClick={onShop}>
-                {pick.imp && <img src={imgOf(pick.imp)} alt="" className="hm-tile__img" loading="lazy" referrerPolicy="no-referrer" />}
-                <span className="hm-tile__shade" />
-                <span className="hm-tile__go"><ArrowRight size={16} /></span>
-                <div className="hm-tile__text"><strong>Import direct</strong><span>Fabriqué en usine</span></div>
-              </div>
+          {/* Visuel d'arrière-plan simple — affiché uniquement sur desktop */}
+          <div className="hidden lg:flex items-center justify-center p-6">
+            <div className="w-full max-w-md rounded-3xl border border-orange-200/70 bg-gradient-to-br from-white via-orange-50/40 to-orange-100/30 p-8 shadow-xl shadow-orange-950/5">
 
+              <h3 className="mt-3 text-2xl font-black text-slate-900 leading-tight">
+                Du fabricant jusqu&apos;à votre porte
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Approvisionnement certifié, contrôle qualité systématique et expédition sécurisée vers Lomé et Cotonou.
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
+                  <span className="block font-black text-slate-900 text-sm">Prix direct usine</span>
+                  <span className="text-slate-500">Sans intermédiaire</span>
+                </div>
+                <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
+                  <span className="block font-black text-slate-900 text-sm">Livraison express</span>
+                  <span className="text-slate-500">Togo & Bénin</span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </section>
@@ -586,43 +571,9 @@ function HomeNew() {
       <Header />
 
       {isHome && (
-        <Hero products={products} loading={loading} onShop={scrollToGrid} onPromo={showPromos} onNew={showNew} />
+        <Hero onShop={scrollToGrid} onPromo={showPromos} onNew={showNew} />
       )}
 
-      {isHome && (
-        <div className="hm-wrap">
-          <div className="hm-trust">
-            <article className="hm-feat">
-              <span className="hm-feat__icon"><Tag size={20} /></span>
-              <div>
-                <strong>Sans frais de mise en place</strong>
-                <p>Ce que vous voyez est ce que vous payez.</p>
-              </div>
-            </article>
-            <article className="hm-feat">
-              <span className="hm-feat__icon"><Truck size={20} /></span>
-              <div>
-                <strong>Livraison express</strong>
-                <p>Production en 24h ou 72h.</p>
-              </div>
-            </article>
-            <article className="hm-feat">
-              <span className="hm-feat__icon"><ShieldCheck size={20} /></span>
-              <div>
-                <strong>Meilleur prix garanti</strong>
-                <p>Trouvé moins cher ? Nous alignons.</p>
-              </div>
-            </article>
-            <article className="hm-feat">
-              <span className="hm-feat__icon"><ImageIcon size={20} /></span>
-              <div>
-                <strong>Maquettes gratuites</strong>
-                <p>Validées avant impression.</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      )}
 
       {isHome && !loading && newItems.length > 0 && (
         <section className="hm-section">

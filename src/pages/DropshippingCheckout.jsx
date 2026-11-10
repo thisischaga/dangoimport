@@ -115,12 +115,6 @@ const DropshippingCheckout = () => {
   useEffect(() => {
     if (!cart.length) {
       navigate('/cart', { replace: true });
-      return;
-    }
-    const hasLocal = cart.some((item) => !isDropshippingProduct(item));
-    if (hasLocal) {
-      toast.error('Panier mixte : finalisez d’abord les produits locaux ou dropshipping séparément.');
-      navigate('/cart', { replace: true });
     }
   }, [cart, navigate]);
 
