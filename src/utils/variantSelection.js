@@ -178,13 +178,33 @@ export function resolveColorStyle(colorRaw, imageUrl = null) {
 }
 
 /**
- * Coerce une valeur d'attribut qui peut être une string ou un objet Alibaba
+ * Coerce une valeur d'attribut qui peut être une string ou un objet Alibaba.
+ * Gère aussi les tableaux d'objets (Alibaba SKU attributes).
  */
 export function coerceAttrValue(raw) {
   if (raw == null) return '';
   if (typeof raw === 'string') return raw.trim();
+  if (Array.isArray(raw)) {
+    // Tableau de valeurs : on prend la première valeur significative
+    for (const item of raw) {
+      const v = coerceAttrValue(item);
+      if (v) return v;
+    }
+    return '';
+  }
   if (typeof raw === 'object') {
-    const v = raw.value ?? raw.attr_value ?? raw.attr_value_desc ?? raw.attrValue ?? raw.name ?? raw.label ?? '';
+    // Alibaba attribute object : {value, attr_value, attr_value_desc, attrValue, name, label, skuPropertyValueDisplayName, ...}
+    const v =
+      raw.value ??
+      raw.attr_value ??
+      raw.attr_value_desc ??
+      raw.attrValue ??
+      raw.skuPropertyValueDisplayName ??
+      raw.displayName ??
+      raw.valueName ??
+      raw.name ??
+      raw.label ??
+      '';
     return String(v).trim();
   }
   return String(raw).trim();
@@ -309,43 +329,65 @@ export function getVariantAttributeImage(variant, key) {
 
 /**
  * Extrait tous les attributs d'un variant sous forme d'objet { color: '...', size: '...' }
+ * Gère tous les formats : Alibaba (array), CJ (object), local (plat), etc.
  */
 export function extractAllVariantAttributes(variant) {
   if (!variant) return {};
   const result = {};
 
-  if (variant.color) result.color = coerceAttrValue(variant.color);
-  if (variant.size) result.size = coerceAttrValue(variant.size);
+  // ── Propriétés directes ───────────────────────────────────────────
+  if (variant.color) {
+    const c = coerceAttrValue(variant.color);
+    if (c && !c.startsWith('{') && !c.startsWith('[')) result.color = c;
+  }
+  if (variant.size) {
+    const s = coerceAttrValue(variant.size);
+    if (s && !s.startsWith('{') && !s.startsWith('[')) result.size = s;
+  }
 
+  // ── Alibaba : variant.attributes = [{name, value|attr_value, image?}] ──
   if (Array.isArray(variant.attributes)) {
     variant.attributes.forEach((attr) => {
       if (!attr) return;
-      const name = attr.name || attr.key || attr.attr_name || attr.attribute_name;
-      const val = coerceAttrValue(attr.value ?? attr.attr_value ?? attr.val);
-      if (name && val) {
-        const norm = normalizeVariantAttributeKey(name);
+      const rawName = attr.name || attr.key || attr.attr_name || attr.attribute_name
+        || attr.skuPropertyName || attr.propertyName;
+      // La valeur peut être un objet { value, image } ou une string directe
+      let rawVal;
+      if (attr.value !== undefined) rawVal = attr.value;
+      else if (attr.attr_value !== undefined) rawVal = attr.attr_value;
+      else if (attr.val !== undefined) rawVal = attr.val;
+      else if (attr.attr_value_desc !== undefined) rawVal = attr.attr_value_desc;
+      else rawVal = attr;
+      const val = coerceAttrValue(rawVal);
+      if (rawName && val && !val.startsWith('{') && !val.startsWith('[')) {
+        const norm = normalizeVariantAttributeKey(rawName);
         if (norm && !INTERNAL_VARIANT_ATTR_KEYS.has(norm)) {
           result[norm] = val;
         }
       }
     });
-  } else if (variant.attributes && typeof variant.attributes === 'object') {
+  }
+
+  // ── CJ / Local : variant.attributes = { color: '...', size: '...' } ──
+  if (variant.attributes && typeof variant.attributes === 'object' && !Array.isArray(variant.attributes)) {
     Object.entries(variant.attributes).forEach(([k, v]) => {
       const norm = normalizeVariantAttributeKey(k);
       const val = coerceAttrValue(v);
-      if (norm && val && !INTERNAL_VARIANT_ATTR_KEYS.has(norm)) {
+      if (norm && val && !val.startsWith('{') && !val.startsWith('[') && !INTERNAL_VARIANT_ATTR_KEYS.has(norm)) {
         result[norm] = val;
       }
     });
   }
 
+  // ── Alibaba SKUs bruts : sku_attr_list ──────────────────────────────
   if (Array.isArray(variant.sku_attr_list)) {
     variant.sku_attr_list.forEach((attr) => {
       if (!attr) return;
-      const name = attr.attr_name_desc || attr.attr_name || attr.name;
-      const val = coerceAttrValue(attr.attr_value_desc || attr.attr_value || attr.value);
-      if (name && val) {
-        const norm = normalizeVariantAttributeKey(name);
+      const rawName = attr.attr_name_desc || attr.attr_name || attr.name || attr.skuPropertyName;
+      const rawVal = attr.attr_value_desc || attr.attr_value || attr.value || attr.skuPropertyValueDisplayName;
+      const val = coerceAttrValue(rawVal);
+      if (rawName && val && !val.startsWith('{') && !val.startsWith('[')) {
+        const norm = normalizeVariantAttributeKey(rawName);
         if (norm && !INTERNAL_VARIANT_ATTR_KEYS.has(norm) && !result[norm]) {
           result[norm] = val;
         }

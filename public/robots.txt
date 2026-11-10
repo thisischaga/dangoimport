@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
-
+Allow: /product/
+Allow: /category/
 
 Sitemap: https://dangoimport.com/sitemap.xml

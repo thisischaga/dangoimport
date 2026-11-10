@@ -20,8 +20,6 @@ import ProductRating from '../components/product/ProductRating';
 import ProductVariants from '../components/product/detail/ProductVariants';
 import ProductReviewsSection from '../components/product/detail/ProductReviewsSection';
 import {
-  resolveVariantSelection,
-  getVariantAttributeValue,
   extractAllVariantAttributes,
   findBestMatchingVariant,
 } from '../utils/variantSelection';

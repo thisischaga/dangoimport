@@ -3,7 +3,6 @@ import {
   extractVariantDimensions,
   getVariantAttributeValue,
   resolveColorStyle,
-  cleanVariantLabel,
 } from '../../../utils/variantSelection';
 
 function cleanLabel(raw) {
@@ -78,7 +77,7 @@ function ProductVariants({
     }
   };
 
-  if (!variants || variants.length <= 1 && dimensions.length === 0) {
+  if (!variants || (variants.length <= 1 && dimensions.length === 0)) {
     return null;
   }
 
