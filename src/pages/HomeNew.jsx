@@ -17,6 +17,7 @@ import {
 import { getProductImage, getProductImages } from '../utils/imageUrl';
 import { getMoqRules } from '../utils/importMoq';
 import { useToast } from '../components/ui/ToastProvider';
+import homeBgImg from '../images/homebg.png';
 import './HomeNew.css';
 
 /* ── Styles (style Alibaba : fond blanc, prix noir, accent orange) ───── */
@@ -31,7 +32,8 @@ const CSS = `
   --line: #ececec;
 }
 
-.hn-page { background: #f5f5f5; }
+.hn-page { background: #f5f5f5; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+.hn-page button, .hn-page a { touch-action: manipulation; }
 .hm-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 20px; }
 
 /* Barre de catégories */
@@ -43,7 +45,8 @@ const CSS = `
 .hm-chip--on { background: var(--or); border-color: var(--or); color: #fff; font-weight: 600; }
 
 /* Boutons */
-.hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 22px; border-radius: 999px; border: 1.5px solid transparent; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; transition: background .15s ease, color .15s ease, border-color .15s ease; }
+.hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 22px; border-radius: 999px; border: 1.5px solid transparent; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; transition: background .15s ease, color .15s ease, border-color .15s ease, transform .12s ease; }
+.hm-pill:active { transform: scale(.97); }
 .hm-pill--primary { background: var(--or); color: #fff; }
 .hm-pill--primary:hover { background: #e85f00; }
 .hm-pill--light { background: #fff; color: var(--hb-ink); }
@@ -56,13 +59,18 @@ const CSS = `
 .hm-arrow:hover { background: var(--or); border-color: var(--or); color: #fff; }
 
 /* Hero */
-.hm-hero { background: linear-gradient(180deg, #fff3ea 0%, #ffffff 100%); padding: 40px 0 36px; }
-.hm-hero__grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; }
-@media (min-width: 1024px) { .hm-hero__grid { grid-template-columns: 1.15fr 0.85fr; gap: 36px; } }
-.hm-hero__eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--or); margin-bottom: 14px; }
-.hm-hero__title { margin: 0; font-size: clamp(30px, 4.2vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; color: var(--hb-ink); }
-.hm-hero__lead { margin: 16px 0 0; max-width: 460px; font-size: 16px; line-height: 1.6; color: #555; }
-.hm-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.hm-hero { background: linear-gradient(180deg, #fff3ea 0%, #ffffff 100%); padding: 64px 0 56px; overflow: hidden; }
+.hm-hero__wrap { max-width: 1400px; padding-left: 48px; padding-right: 48px; }
+.hm-hero__grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
+@media (min-width: 900px) { .hm-hero__grid { grid-template-columns: 1.05fr 0.95fr; gap: 64px; } }
+.hm-hero__copy { max-width: 620px; }
+.hm-hero__eyebrow { display: inline-block; font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--or); margin-bottom: 18px; }
+.hm-hero__title { margin: 0; font-size: clamp(44px, 5.8vw, 88px); font-weight: 900; line-height: 1.02; letter-spacing: -0.035em; color: var(--hb-ink); }
+.hm-hero__lead { margin: 22px 0 0; max-width: 560px; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.6; color: #555; }
+.hm-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.hm-hero .hm-pill { height: 54px; padding: 0 32px; font-size: 16px; }
+.hm-hero__media { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.hm-hero__img { width: 100%; max-width: 640px; height: auto; max-height: 560px; object-fit: contain; filter: drop-shadow(0 24px 40px rgba(0,0,0,.14)); user-select: none; pointer-events: none; }
 
 .hm-bento { display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: 180px 180px; gap: 12px; }
 .hm-bento > :nth-child(1) { grid-row: 1 / span 2; }
@@ -101,8 +109,9 @@ const CSS = `
 .hm-banner__img { justify-self: end; width: 100%; max-width: 360px; height: 220px; object-fit: contain; }
 
 /* ── Carte produit (style Alibaba) ── */
-.pc { position: relative; display: flex; flex-direction: column; min-width: 0; cursor: pointer; color: var(--hb-ink); background: #fff; border-radius: 8px; padding: 8px; border: 1px solid transparent; transition: border-color .2s ease, box-shadow .2s ease; }
+.pc { position: relative; display: flex; flex-direction: column; min-width: 0; cursor: pointer; color: var(--hb-ink); background: #fff; border-radius: 8px; padding: 8px; border: 1px solid transparent; transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease; }
 @media (hover: hover) { .pc:hover { border-color: #e6e6e6; box-shadow: 0 6px 18px rgba(0,0,0,.08); } }
+.pc:active { transform: scale(.97); }
 .pc__frame { position: relative; border-radius: 6px; background: #fff; overflow: hidden; }
 .pc__track { display: flex; width: 100%; aspect-ratio: 1 / 1; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
 .pc__track::-webkit-scrollbar { display: none; }
@@ -148,7 +157,7 @@ const CSS = `
 .hn-grid--list { grid-template-columns: 1fr; gap: 12px; }
 
 /* Rangée horizontale */
-.hm-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 6px; }
+.hm-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
 .hm-row::-webkit-scrollbar { display: none; }
 .hm-row > .pc { flex: 0 0 200px; scroll-snap-align: start; }
 
@@ -172,21 +181,57 @@ const CSS = `
 .hm-empty { text-align: center; padding: 70px 16px; color: var(--hb-mute); background: #fff; border-radius: 8px; }
 .hm-empty strong { display: block; margin: 10px 0 6px; font-size: 18px; color: var(--hb-ink); }
 
-@media (max-width: 900px) {
-  .hm-hero__grid { grid-template-columns: 1fr; }
-  .hm-trust { margin-top: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* ── Responsive : tablette ── */
+@media (max-width: 1024px) {
+  .hm-hero__wrap { padding-left: 32px; padding-right: 32px; }
+}
+
+/* ── Responsive : mobile (expérience app) ── */
+@media (max-width: 899px) {
+  .hm-hero { padding: 36px 0 40px; }
+  .hm-hero__wrap { padding-left: 20px; padding-right: 20px; }
+  .hm-hero__grid { gap: 28px; }
+  .hm-hero__title { font-size: clamp(36px, 9.5vw, 52px); }
+  .hm-hero__lead { font-size: 16px; margin-top: 16px; }
+  .hm-hero__eyebrow { font-size: 12px; margin-bottom: 12px; }
+  .hm-cta { margin-top: 24px; gap: 10px; }
+  .hm-hero .hm-pill { flex: 1 1 calc(50% - 5px); height: 50px; font-size: 15px; padding: 0 16px; }
+  .hm-hero__img { max-width: 420px; max-height: 340px; }
+  .hm-bento { grid-template-rows: 160px 150px; gap: 8px; }
+  .hm-trust { margin-top: -16px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .hm-feat { padding: 14px; border-radius: 14px; }
+  .hm-feat p { font-size: 12px; }
   .hm-banner { grid-template-columns: 1fr; padding: 28px; }
   .hm-banner__img { justify-self: center; }
-}
-@media (max-width: 520px) {
-  .hm-wrap { padding: 0 12px; }
-  .hm-hero { padding: 24px 0 20px; }
-  .hm-bento { grid-template-rows: 160px 150px; gap: 8px; }
   .hm-offer p { font-size: 16px; }
-  .hm-section { padding: 24px 0; }
-  .hm-row > .pc { flex-basis: 160px; }
-  .hm-feat { padding: 14px; }
-  .hm-feat p { font-size: 12px; }
+}
+
+@media (max-width: 767px) {
+  .hm-wrap { padding: 0 16px; }
+  .hm-section { padding: 26px 0; scroll-margin-top: 90px; }
+  .hm-head { margin-bottom: 14px; }
+  .hm-head__title { font-size: 21px; }
+  .hm-head__lead { font-size: 13px; }
+  .hm-head__nav { display: none; }
+  .hm-pill--ghost { height: 34px; font-size: 12px; }
+  .hm-row { gap: 10px; margin: 0 -16px; padding: 0 16px 8px; scroll-padding: 0 16px; }
+  .hm-row > .pc { flex-basis: 158px; }
+  .hn-grid { gap: 10px; }
+  .pc { padding: 6px; }
+  .pc__title { font-size: 13px; min-height: 36px; }
+  .pc__price { font-size: 16px; }
+  .hm-toolbar { margin-bottom: 14px; }
+  .hm-empty { padding: 48px 16px; }
+  .hm-banner { padding: 22px; }
+  .hm-banner h3 { font-size: 22px; }
+}
+
+@media (max-width: 520px) {
+  .hm-hero__title { font-size: clamp(32px, 10vw, 42px); }
+  .hm-hero .hm-pill { font-size: 14px; }
+  .hm-hero__img { max-height: 280px; }
+  .hm-bento { grid-template-rows: 150px 140px; }
+  .hm-row > .pc { flex-basis: 150px; }
   .hn-grid--list .pc { grid-template-columns: 110px minmax(0, 1fr); column-gap: 12px; }
 }
 `;
@@ -390,41 +435,35 @@ function Skeleton({ count = 12 }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────── */
+/* ─── Hero : texte et image agrandis, marges latérales, responsive ─── */
 function Hero({ onShop, onNew }) {
   return (
     <section className="hm-hero">
-      <div className="hm-wrap">
+      <div className="hm-wrap hm-hero__wrap">
         <div className="hm-hero__grid">
-          <div>
+          <div className="hm-hero__copy">
             <span className="hm-hero__eyebrow">Commandez depuis la Chine</span>
             <h1 className="hm-hero__title">Depuis la Chine, vers l'Afrique de l'Ouest</h1>
             <p className="hm-hero__lead">
               Faites connaître votre marque avec des articles de qualité, produits directement en usine et livrés rapidement au Togo et au Bénin.
             </p>
+            <div className="hm-cta">
+              <button type="button" className="hm-pill hm-pill--primary" onClick={onShop}>
+                Voir les produits <ArrowRight size={16} />
+              </button>
+              <button type="button" className="hm-pill hm-pill--light" onClick={onNew}>
+                Nouveautés
+              </button>
+            </div>
           </div>
 
-          {/* Visuel d'arrière-plan simple — affiché uniquement sur desktop */}
-          <div className="hidden lg:flex items-center justify-center p-6">
-            <div className="w-full max-w-md rounded-3xl border border-orange-200/70 bg-gradient-to-br from-white via-orange-50/40 to-orange-100/30 p-8 shadow-xl shadow-orange-950/5">
-
-              <h3 className="mt-3 text-2xl font-black text-slate-900 leading-tight">
-                Du fabricant jusqu&apos;à votre porte
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Approvisionnement certifié, contrôle qualité systématique et expédition sécurisée vers Lomé et Cotonou.
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
-                  <span className="block font-black text-slate-900 text-sm">Prix direct usine</span>
-                  <span className="text-slate-500">Sans intermédiaire</span>
-                </div>
-                <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
-                  <span className="block font-black text-slate-900 text-sm">Livraison express</span>
-                  <span className="text-slate-500">Togo & Bénin</span>
-                </div>
-              </div>
-            </div>
+          <div className="hm-hero__media">
+            <img
+              src={homeBgImg}
+              alt="Dango Import Shopping"
+              className="hm-hero__img"
+              draggable={false}
+            />
           </div>
         </div>
       </div>
