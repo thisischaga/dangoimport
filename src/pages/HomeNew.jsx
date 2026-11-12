@@ -1,583 +1,1577 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+
 import { useQuery } from '@tanstack/react-query';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Package, Check, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import {
+  ShoppingCart,
+  Package,
+  Check,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+
 import { useCart } from '../context/CartContext';
 import client from '../apiClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { getProductSellableStock, sanitizeProductForDisplay } from '../utils/publicProduct';
-import { getProductImage, getProductImages } from '../utils/imageUrl';
+
+import {
+  getProductSellableStock,
+  sanitizeProductForDisplay
+} from '../utils/publicProduct';
+
+import {
+  getProductImage,
+  getProductImages
+} from '../utils/imageUrl';
+
 import { getMoqRules } from '../utils/importMoq';
 import { useToast } from '../components/ui/ToastProvider';
-import homeBgImg from '../images/homebg.png';
 import './HomeNew.css';
 
-/* ── Styles : maquette Dango import, sans promotions ─────────────────── */
+import buynow from '../images/buy-removebg-preview.png';
+import mobilemoney from '../images/mobilemoney-removebg-preview.png';
+import livraison from '../images/livraison-removebg-preview.png';
+
+const BANNER_IMAGES = {
+  shopping: buynow,
+  mobileMoney: mobilemoney,
+  delivery: livraison
+};
+
+/* =========================================================
+   STYLES
+========================================================= */
+
 const CSS = `
 :root {
-  --or: #ff6a00;
-  --ink: #111111;
-  --mute: #6b6b6b;
-  --line: #ececec;
+  --hn-orange: #ff6a00;
+  --hn-dark: #171717;
+  --hn-muted: #777;
 }
 
 .hn-page {
-  background: #ffffff;
   min-height: 100vh;
+  background: #fff;
+  color: var(--hn-dark);
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
-}
-.hn-page button, .hn-page a { touch-action: manipulation; }
-.hm-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-
-/* Hero */
-.hm-hero { position: relative; overflow: hidden; padding: 40px 0 0; background: #fff; }
-.hm-hero::before {
-  content: ''; position: absolute; right: -180px; top: -220px; width: 720px; height: 720px;
-  border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ffb27a 0%, #ff6a00 75%);
-  opacity: .16; pointer-events: none;
-}
-.hm-hero__grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 32px; }
-.hm-hero__copy { position: relative; z-index: 1; padding: 16px 0; }
-.hm-hero__title { margin: 0; font-size: clamp(44px, 5.4vw, 80px); font-weight: 900; line-height: 1.02; letter-spacing: -0.035em; color: var(--ink); }
-.hm-hero__accent { color: var(--or); }
-.hm-hero__lead { margin: 22px 0 0; max-width: 520px; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: #444; }
-.hm-hero__media { position: relative; display: flex; justify-content: flex-end; }
-.hm-hero__img { width: 100%; max-width: 620px; max-height: 540px; margin-left: auto; object-fit: contain; user-select: none; pointer-events: none; }
-
-.hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 28px; border-radius: 999px; border: 0; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; white-space: nowrap; text-decoration: none; transition: background .15s ease, transform .12s ease; }
-.hm-pill:active { transform: scale(.97); }
-.hm-pill--primary { background: var(--or); color: #fff; margin-top: 30px; }
-.hm-pill--primary:hover { background: #e85f00; }
-.hm-pill--dark { background: var(--ink); color: #fff; }
-.hm-pill--dark:hover { background: #000; }
-
-/* Réassurance : texte seul */
-.hm-features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 56px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.hm-feature { padding: 22px 24px; border-left: 1px solid var(--line); }
-.hm-feature:first-child { border-left: 0; }
-.hm-feature strong { display: block; font-size: 16px; font-weight: 800; color: var(--ink); }
-.hm-feature span { display: block; margin-top: 4px; font-size: 13px; color: var(--mute); }
-
-/* Sections */
-.hm-section { padding: 40px 0; scroll-margin-top: calc(var(--header-h, 120px) + 16px); }
-.hm-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-.hm-head__title { position: relative; margin: 0; padding-bottom: 12px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 900; letter-spacing: -0.02em; color: var(--ink); }
-.hm-head__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 56px; height: 4px; border-radius: 4px; background: var(--or); }
-.hm-link { font-size: 15px; font-weight: 800; color: var(--or); text-decoration: none; white-space: nowrap; }
-.hm-link:hover { text-decoration: underline; }
-.hm-arrow { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d9d9d9; background: #fff; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.hm-arrow:hover { background: var(--or); border-color: var(--or); color: #fff; }
-.hm-head__nav { display: flex; gap: 8px; align-items: center; }
-.hm-row { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
-.hm-row::-webkit-scrollbar { display: none; }
-.hm-row > .pc { flex: 0 0 220px; scroll-snap-align: start; }
-
-/* Grille produits */
-.hn-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-@media (min-width: 720px) { .hn-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; } }
-@media (min-width: 1040px) { .hn-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-
-/* Carte produit */
-.pc { position: relative; display: flex; flex-direction: column; min-width: 0; cursor: pointer; color: var(--ink); background: #fff; }
-.pc__frame { position: relative; aspect-ratio: 1 / 1; border-radius: 14px; background: #f6f6f6; overflow: hidden; }
-.pc__track { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
-.pc__track::-webkit-scrollbar { display: none; }
-.pc__slide { flex: 0 0 100%; height: 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 14px; }
-.pc__img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; transition: transform .35s ease; }
-@media (hover: hover) { .pc:hover .pc__img { transform: scale(1.04); } }
-.pc__ph { color: #cfcfcf; }
-.pc__cart { position: absolute; right: 10px; bottom: 10px; z-index: 3; width: 40px; height: 40px; border: 0; border-radius: 10px; background: var(--or); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(255,106,0,.35); transition: background .15s ease, transform .12s ease; }
-.pc__cart:hover { background: #e85f00; }
-.pc__cart:active { transform: scale(.94); }
-.pc__cart--done { background: #111; }
-.pc__nav { position: absolute; top: 50%; z-index: 3; width: 30px; height: 30px; margin-top: -15px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.96); color: var(--ink); display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-.pc__nav--prev { left: 8px; }
-.pc__nav--next { right: 8px; }
-@media (hover: hover) { .pc__nav { display: flex; opacity: 0; transition: opacity .2s ease; } .pc:hover .pc__nav { opacity: 1; } }
-.pc__dots { display: flex; justify-content: center; gap: 5px; margin-top: 8px; min-height: 6px; }
-.pc__dot { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 3px; background: #d6d6d6; cursor: pointer; transition: width .25s ease, background .25s ease; }
-.pc__dot--on { width: 16px; background: var(--or); }
-.pc__title { margin: 12px 2px 0; font-size: 15px; line-height: 1.35; font-weight: 800; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px; }
-.pc__price { margin: 4px 2px 0; font-size: 17px; font-weight: 900; color: var(--or); }
-.pc__moq { margin: 2px 2px 0; font-size: 12px; color: var(--mute); }
-
-/* Chargement */
-@keyframes hnSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-@keyframes hnBar { from { transform: translateX(-100%); } to { transform: translateX(380%); } }
-.hn-sk { position: relative; overflow: hidden; background: #efefef; border-radius: 10px; }
-.hn-sk::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.8), transparent); animation: hnSweep 1.3s infinite; }
-.hn-loadbar { position: relative; height: 3px; margin: 0 0 14px; border-radius: 3px; background: #ffe7d6; overflow: hidden; }
-.hn-loadbar span { position: absolute; top: 0; bottom: 0; left: 0; width: 28%; border-radius: 3px; background: var(--or); animation: hnBar 1.1s ease-in-out infinite; }
-
-.hm-empty { text-align: center; padding: 70px 16px; color: var(--mute); }
-.hm-empty strong { display: block; margin: 12px 0 6px; font-size: 18px; color: var(--ink); }
-
-.hm-banner { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 24px; padding: 44px; border-radius: 18px; background: linear-gradient(120deg, #fff1e6, #ffffff); overflow: hidden; }
-.hm-banner h3 { margin: 0; font-size: clamp(26px, 3vw, 34px); font-weight: 900; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15; }
-.hm-banner p { margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: #555; max-width: 420px; }
-.hm-banner__img { justify-self: end; width: 100%; max-width: 340px; height: 220px; object-fit: contain; }
-
-/* ── Tablette ── */
-@media (max-width: 1023px) {
-  .hm-wrap { padding: 0 20px; }
-  .hm-hero__grid { gap: 20px; }
-  .hm-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .hm-feature:nth-child(3) { border-left: 0; }
-  .hm-feature:nth-child(n+3) { border-top: 1px solid var(--line); }
 }
 
-/* ── Mobile : hero et sections en expérience application ── */
+.hn-page button {
+  font-family: inherit;
+}
+
+.hn-wrap {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* =========================================================
+   SLIDER DES BANNIÈRES
+========================================================= */
+
+.hn-banner-section {
+  padding: 22px 0 12px;
+  background: #fff;
+}
+
+.hn-slider {
+  position: relative;
+  width: 100%;
+  height: 285px;
+  overflow: hidden;
+  border-radius: 16px;
+  isolation: isolate;
+}
+
+.hn-slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  align-items: center;
+  padding: 30px 55px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(18px);
+  transition:
+    opacity .7s ease,
+    transform .7s ease,
+    visibility .7s ease;
+}
+
+.hn-slide.is-active {
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* Couleurs des trois slides */
+
+.hn-slide--orange {
+  background: #fff0e5;
+}
+
+.hn-slide--blue {
+  background: #e8f2ff;
+}
+
+.hn-slide--green {
+  background: #e9f5ed;
+}
+
+/* Décoration */
+
+.hn-slide::before {
+  content: '';
+  position: absolute;
+  width: 390px;
+  height: 390px;
+  right: 17%;
+  top: -245px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.48);
+  pointer-events: none;
+}
+
+.hn-slide::after {
+  content: '';
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  right: -80px;
+  bottom: -155px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.42);
+  pointer-events: none;
+}
+
+.hn-slide__content {
+  position: relative;
+  z-index: 2;
+  max-width: 590px;
+}
+
+.hn-slide__eyebrow {
+  display: block;
+  margin-bottom: 13px;
+  color: var(--hn-orange);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.hn-slide--blue .hn-slide__eyebrow {
+  color: #2465bd;
+}
+
+.hn-slide--green .hn-slide__eyebrow {
+  color: #25804b;
+}
+
+.hn-slide__title {
+  max-width: 570px;
+  margin: 0;
+  color: #171717;
+  font-size: clamp(34px, 4vw, 53px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -.045em;
+}
+
+.hn-slide__title span {
+  color: var(--hn-orange);
+}
+
+.hn-slide--blue .hn-slide__title span {
+  color: #2465bd;
+}
+
+.hn-slide--green .hn-slide__title span {
+  color: #25804b;
+}
+
+.hn-slide__description {
+  max-width: 420px;
+  margin: 15px 0 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.hn-slide__visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.hn-slide__image {
+  display: block;
+  width: 100%;
+  max-width: 430px;
+  height: 240px;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 20px rgba(0,0,0,.08));
+}
+
+/* =========================================================
+   POINTS DE NAVIGATION SOUS LE SLIDER
+========================================================= */
+
+.hn-slider__navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 13px;
+}
+
+.hn-slider__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hn-slider__dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 20px;
+  background: rgba(23, 23, 23, .20);
+  cursor: pointer;
+  transition:
+    width .3s ease,
+    background .3s ease,
+    opacity .3s ease;
+}
+
+.hn-slider__dot:hover {
+  background: rgba(23, 23, 23, .45);
+}
+
+.hn-slider__dot.is-active {
+  width: 23px;
+  background: rgba(23, 23, 23, .65);
+}
+
+/* =========================================================
+   TITRES DES SECTIONS
+========================================================= */
+
+.hn-section {
+  padding: 30px 0;
+  scroll-margin-top: 110px;
+}
+
+.hn-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.hn-section__title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #171717;
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+}
+
+.hn-section__count {
+  color: #858585;
+  font-size: 13px;
+}
+
+/* =========================================================
+   GRILLE PRODUITS
+========================================================= */
+
+.hn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 14px;
+}
+
+@media (min-width: 640px) {
+  .hn-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hn-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 26px 20px;
+  }
+}
+
+/* =========================================================
+   CARTE PRODUIT
+========================================================= */
+
+.hn-product {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+}
+
+.hn-product__visual {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: #f6f6f6;
+}
+
+.hn-product__gallery {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.hn-product__gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.hn-product__image-wrap {
+  display: flex;
+  flex: 0 0 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  scroll-snap-align: center;
+}
+
+.hn-product__image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform .3s ease;
+}
+
+@media (hover: hover) {
+  .hn-product:hover .hn-product__image {
+    transform: scale(1.045);
+  }
+}
+
+.hn-product__placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: #c7c7c7;
+}
+
+.hn-product__add {
+  position: absolute;
+  z-index: 4;
+  right: 9px;
+  bottom: 9px;
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background: var(--hn-orange);
+  color: #fff;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.hn-product__add:hover {
+  background: #e85f00;
+}
+
+.hn-product__add:active {
+  transform: scale(.94);
+}
+
+.hn-product__add.is-done {
+  background: #171717;
+}
+
+.hn-product__arrow {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-top: -15px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #171717;
+  box-shadow: 0 2px 9px rgba(0,0,0,.12);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.hn-product:hover .hn-product__arrow {
+  opacity: 1;
+}
+
+.hn-product__arrow--left {
+  left: 8px;
+}
+
+.hn-product__arrow--right {
+  right: 8px;
+}
+
+.hn-product__dots {
+  display: flex;
+  min-height: 6px;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.hn-product__dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: #d8d8d8;
+  cursor: pointer;
+}
+
+.hn-product__dot.is-active {
+  width: 16px;
+  background: var(--hn-orange);
+}
+
+.hn-product__name {
+  display: -webkit-box;
+  min-height: 39px;
+  overflow: hidden;
+  margin: 10px 2px 0;
+  color: #171717;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.hn-product__price {
+  margin: 5px 2px 0;
+  color: #e85f00;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.hn-product__moq {
+  margin: 3px 2px 0;
+  color: #858585;
+  font-size: 11px;
+}
+
+/* =========================================================
+   CHARGEMENT
+========================================================= */
+
+@keyframes hnShimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.hn-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #eee;
+}
+
+.hn-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.8),
+    transparent
+  );
+  animation: hnShimmer 1.3s infinite;
+}
+
+.hn-progress {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border-radius: 4px;
+  background: #ffe6d5;
+}
+
+.hn-progress span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 28%;
+  border-radius: 4px;
+  background: var(--hn-orange);
+  animation: hnProgress 1.2s ease-in-out infinite;
+}
+
+@keyframes hnProgress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(380%); }
+}
+
+.hn-empty {
+  padding: 65px 16px;
+  color: #777;
+  text-align: center;
+}
+
+.hn-empty strong {
+  display: block;
+  margin: 12px 0 6px;
+  color: #171717;
+  font-size: 18px;
+}
+
+.hn-reset {
+  margin-top: 16px;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--hn-orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+/* =========================================================
+   TABLETTE ET RESPONSIVE INTERMÉDIAIRE
+   Bannière de même hauteur, titre et image agrandis
+========================================================= */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hn-slide {
+    padding: 26px 34px;
+    grid-template-columns: 1.05fr .95fr;
+  }
+
+  .hn-slide__title {
+    font-size: clamp(39px, 5.5vw, 55px);
+    line-height: 1.06;
+  }
+
+  .hn-slide__image {
+    width: 115%;
+    max-width: 410px;
+    height: 235px;
+  }
+}
+
+/* =========================================================
+   TABLETTE LARGE
+========================================================= */
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .hn-slide__title {
+    font-size: clamp(43px, 4.5vw, 56px);
+  }
+
+  .hn-slide__image {
+    width: 110%;
+    max-width: 460px;
+    height: 255px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media (max-width: 767px) {
-  .hn-page { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
-  .hm-wrap { padding: 0 18px; }
+  .hn-page {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
 
-  .hm-hero { padding: 14px 0 0; }
-  .hm-hero::before { width: 460px; height: 460px; top: -180px; right: -200px; opacity: .12; }
-  .hm-hero__grid { grid-template-columns: 1fr; gap: 0; }
-  .hm-hero__copy { padding: 8px 0 0; }
-  .hm-hero__title { font-size: clamp(38px, 11vw, 48px); line-height: 1.04; letter-spacing: -0.03em; }
-  .hm-hero__lead { margin-top: 14px; font-size: 15px; line-height: 1.55; max-width: none; }
-  .hm-pill--primary { width: 100%; height: 54px; margin-top: 22px; font-size: 16px; border-radius: 14px; }
-  .hm-hero__media { justify-content: center; margin-top: 18px; }
-  .hm-hero__img { max-width: 440px; max-height: 360px; margin: 0 auto; }
+  .hn-wrap {
+    padding: 0 15px;
+  }
 
-  .hm-features { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; }
-  .hm-feature { padding: 16px 14px; }
-  .hm-feature:nth-child(3) { border-left: 0; }
-  .hm-feature:nth-child(n+3) { border-top: 1px solid var(--line); }
-  .hm-feature strong { font-size: 14px; }
-  .hm-feature span { font-size: 12px; }
+  .hn-banner-section {
+    padding: 12px 0 0;
+  }
 
-  .hm-section { padding: 28px 0; }
-  .hm-head { margin-bottom: 14px; }
-  .hm-head__title { font-size: 22px; }
-  .hm-head__nav { display: none; }
-  .hm-row { gap: 12px; margin: 0 -18px; padding: 0 18px 6px; scroll-padding: 0 18px; }
-  .hm-row > .pc { flex-basis: 160px; }
-  .hn-grid { gap: 14px 10px; }
-  .pc__title { font-size: 13px; min-height: 36px; }
-  .pc__price { font-size: 15px; }
-  .pc__cart { width: 34px; height: 34px; right: 8px; bottom: 8px; }
+  .hn-slider {
+    height: 170px;
+    border-radius: 12px;
+  }
 
-  .hm-empty { padding: 48px 16px; }
-  .hm-banner { grid-template-columns: 1fr; padding: 24px; }
-  .hm-banner__img { justify-self: center; height: 160px; }
+  .hn-slide {
+    grid-template-columns: 1.08fr .92fr;
+    gap: 2px;
+    padding: 15px 13px 15px 17px;
+  }
+
+  .hn-slide::before {
+    width: 220px;
+    height: 220px;
+    right: 5%;
+    top: -140px;
+  }
+
+  .hn-slide::after {
+    width: 130px;
+    height: 130px;
+    right: -45px;
+    bottom: -85px;
+  }
+
+  .hn-slide__content {
+    min-width: 0;
+  }
+
+  .hn-slide__eyebrow {
+    margin-bottom: 8px;
+    font-size: 8px;
+    letter-spacing: .09em;
+  }
+
+  .hn-slide__title {
+    max-width: 230px;
+    font-size: clamp(21px, 6vw, 29px);
+    line-height: 1.12;
+    letter-spacing: -.035em;
+  }
+
+  .hn-slide__description {
+    display: none;
+  }
+
+  .hn-slide__visual {
+    min-width: 0;
+  }
+
+  .hn-slide__image {
+    width: 100%;
+    max-width: 190px;
+    height: 135px;
+  }
+
+  .hn-slider__navigation {
+    padding-top: 11px;
+  }
+
+  .hn-slider__dots {
+    gap: 7px;
+  }
+
+  .hn-slider__dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .hn-slider__dot.is-active {
+    width: 20px;
+  }
+
+  .hn-section {
+    padding: 24px 0;
+  }
+
+  .hn-section__header {
+    margin-bottom: 15px;
+  }
+
+  .hn-section__title {
+    font-size: 21px;
+  }
+
+  .hn-section__count {
+    font-size: 11px;
+  }
+
+  .hn-grid {
+    gap: 18px 10px;
+  }
+
+  .hn-product__name {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .hn-product__price {
+    font-size: 14px;
+  }
+
+  .hn-product__add {
+    width: 33px;
+    height: 33px;
+    right: 7px;
+    bottom: 7px;
+  }
+
+  .hn-product__arrow {
+    display: none;
+  }
 }
 
-@media (max-width: 380px) {
-  .hm-hero__title { font-size: 34px; }
+@media (max-width: 370px) {
+  .hn-slider {
+    height: 155px;
+  }
+
+  .hn-slide {
+    padding-left: 13px;
+    padding-right: 9px;
+  }
+
+  .hn-slide__title {
+    font-size: 20px;
+  }
+
+  .hn-slide__image {
+    height: 120px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hn-slide {
+    transition: none;
+  }
+
+  .hn-skeleton::after,
+  .hn-progress span {
+    animation: none;
+  }
 }
 `;
 
+/* =========================================================
+   INJECTION DU CSS
+========================================================= */
+
 if (typeof document !== 'undefined') {
-  let styleEl = document.getElementById('pc-home-styles');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'pc-home-styles';
-    document.head.appendChild(styleEl);
+  let style = document.getElementById('hn-home-styles');
+
+  if (!style) {
+    style = document.createElement('style');
+    style.id = 'hn-home-styles';
+    document.head.appendChild(style);
   }
-  if (styleEl.textContent !== CSS) styleEl.textContent = CSS;
+
+  if (style.textContent !== CSS) {
+    style.textContent = CSS;
+  }
 }
 
-/* ─── Helpers ────────────────────────────────────────────────────────── */
-const amountOf = (n) => {
-  const x = Number(n);
-  return Number.isFinite(x) && x > 0 ? x.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : null;
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const formatPrice = (value) => {
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number <= 0) {
+    return null;
+  }
+
+  return number.toLocaleString('fr-FR', {
+    maximumFractionDigits: 0
+  });
 };
 
-const imgOf = (p) => getProductImage(p) || p?.mainImage || p?.image || p?.images?.[0]?.url || p?.images?.[0] || '';
+const imageOf = (product) =>
+  getProductImage(product) ||
+  product?.mainImage ||
+  product?.image ||
+  product?.images?.[0]?.url ||
+  product?.images?.[0] ||
+  '';
 
-/* ─── Carte produit : galerie, prix, bouton panier ──────────────────── */
-function ProductCard({ product, onAddToCart, index = 0 }) {
-  const navigate = useNavigate();
-  const [adding, setAdding] = useState(false);
-  const trackRef = useRef(null);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [failed, setFailed] = useState(() => new Set());
+/* =========================================================
+   CONTENU DES TROIS BANNIÈRES
+========================================================= */
 
-  const s = useMemo(() => sanitizeProductForDisplay(product) || product, [product]);
-  const name = s.name || s.title || 'Produit';
-  const price = Number(s.price || s.unitPrice || 0);
-  const productId = s._id || s.id;
-  const moq = Number(getMoqRules(s).moq || 1);
+const BANNER_CONTENT = [
+  {
+    id: 'orange',
+    theme: 'orange',
+    eyebrow: 'BIENVENUE SUR DANGO IMPORT',
+    title: (
+      <>
+        Achetez malin,
+        <br />
+        <span>livrez vite.</span>
+      </>
+    ),
+    description:
+      'Découvrez des produits sélectionnés pour vous, à des prix accessibles.',
+    image: BANNER_IMAGES.shopping,
+    alt: 'Shopping et achats en ligne'
+  },
+  {
+    id: 'blue',
+    theme: 'blue',
+    eyebrow: 'PAIEMENT FACILE ET SÉCURISÉ',
+    title: (
+      <>
+        Payez simplement
+        <br />
+        avec le
+        <br />
+        <span>Mobile Money.</span>
+      </>
+    ),
+    description:
+      'Réglez vos commandes directement depuis votre téléphone, sans avoir besoin d’une carte bancaire.',
+    image: BANNER_IMAGES.mobileMoney,
+    alt: 'Paiement mobile depuis un smartphone'
+  },
+  {
+    id: 'green',
+    theme: 'green',
+    eyebrow: 'TOGO ET BÉNIN',
+    title: (
+      <>
+        Vos achats,
+        <br />
+        livrés en toute
+        <br />
+        <span>simplicité.</span>
+      </>
+    ),
+    description:
+      'Commandez facilement et recevez vos produits au Togo et au Bénin.',
+    image: BANNER_IMAGES.delivery,
+    alt: 'Livraison de colis'
+  }
+];
 
-  const gallery = useMemo(() => {
-    let list = [];
-    try { list = getProductImages(s, 6) || []; } catch (e) { list = []; }
-    if (!list.length && Array.isArray(s?.images)) {
-      list = s.images.map((x) => (typeof x === 'string' ? x : x?.url)).filter(Boolean);
-    }
-    const first = getProductImage(s) || s?.image || '';
-    return Array.from(new Set([first, ...list].filter(Boolean))).slice(0, 6);
-  }, [s]);
+/* =========================================================
+   SLIDER
+========================================================= */
 
-  const slides = gallery.filter((src) => !failed.has(src));
-  const count = slides.length;
+function BannerSlider() {
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const goTo = (i) => {
-    const el = trackRef.current;
-    if (!el || count < 1) return;
-    const next = ((i % count) + count) % count;
-    el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
-    setActiveSlide(next);
-  };
+  const goToSlide = useCallback((index) => {
+    setActiveIndex(index);
+  }, []);
 
-  const onScroll = () => {
-    const el = trackRef.current;
-    if (!el || !el.clientWidth) return;
-    setActiveSlide(Math.round(el.scrollLeft / el.clientWidth));
-  };
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (
+        current + 1
+      ) % BANNER_CONTENT.length);
+    }, 5000);
 
-  const handleAdd = (e) => {
-    e.stopPropagation();
-    setAdding(true);
-    if (onAddToCart) onAddToCart(s, 1);
-    setTimeout(() => setAdding(false), 900);
-  };
-
-  const stop = (e) => { e.stopPropagation(); e.preventDefault(); };
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
-    <article className="pc" style={{ animationDelay: `${Math.min(index, 14) * 40}ms` }} onClick={() => navigate(`/product/${productId}`)}>
-      <div className="pc__frame">
-        <button type="button" className={`pc__cart${adding ? ' pc__cart--done' : ''}`} onClick={handleAdd} aria-label="Ajouter au panier">
-          {adding ? <Check size={18} strokeWidth={2.2} /> : <ShoppingCart size={18} strokeWidth={2} />}
+    <section className="hn-banner-section">
+      <div className="hn-wrap">
+        <div
+          className="hn-slider"
+          aria-label="Bannières Dango import"
+          aria-live="off"
+        >
+          {BANNER_CONTENT.map((banner, index) => (
+            <article
+              key={banner.id}
+              className={
+                `hn-slide hn-slide--${banner.theme}` +
+                (activeIndex === index ? ' is-active' : '')
+              }
+              aria-hidden={activeIndex !== index}
+            >
+              <div className="hn-slide__content">
+                <h1 className="hn-slide__title">
+                  {banner.title}
+                </h1>
+              </div>
+
+              <div className="hn-slide__visual">
+                <img
+                  className="hn-slide__image"
+                  src={banner.image}
+                  alt={banner.alt}
+                  draggable="false"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <nav
+          className="hn-slider__navigation"
+          aria-label="Navigation des bannières"
+        >
+          <div className="hn-slider__dots">
+            {BANNER_CONTENT.map((banner, index) => (
+              <button
+                key={banner.id}
+                type="button"
+                className={
+                  'hn-slider__dot' +
+                  (activeIndex === index ? ' is-active' : '')
+                }
+                onClick={() => goToSlide(index)}
+                aria-label={`Afficher la bannière ${index + 1}`}
+                aria-current={activeIndex === index ? 'true' : undefined}
+              />
+            ))}
+          </div>
+        </nav>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================
+   CARTE PRODUIT
+========================================================= */
+
+function ProductCard({ product, onAddToCart }) {
+  const navigate = useNavigate();
+
+  const [adding, setAdding] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [failedImages, setFailedImages] = useState(() => new Set());
+
+  const galleryRef = useRef(null);
+
+  const item = useMemo(
+    () => sanitizeProductForDisplay(product) || product,
+    [product]
+  );
+
+  const name = item.name || item.title || 'Produit';
+  const price = Number(item.price || item.unitPrice || 0);
+  const productId = item._id || item.id;
+  const moq = Number(getMoqRules(item).moq || 1);
+
+  const images = useMemo(() => {
+    let list = [];
+
+    try {
+      list = getProductImages(item, 6) || [];
+    } catch {
+      list = [];
+    }
+
+    if (!list.length && Array.isArray(item?.images)) {
+      list = item.images
+        .map((image) =>
+          typeof image === 'string' ? image : image?.url
+        )
+        .filter(Boolean);
+    }
+
+    return Array.from(
+      new Set([
+        getProductImage(item),
+        item?.image,
+        ...list
+      ].filter(Boolean))
+    ).slice(0, 6);
+  }, [item]);
+
+  const visibleImages = images.filter(
+    (src) => !failedImages.has(src)
+  );
+
+  const goToImage = (index) => {
+    const element = galleryRef.current;
+
+    if (!element || !visibleImages.length) return;
+
+    const next =
+      (index + visibleImages.length) % visibleImages.length;
+
+    element.scrollTo({
+      left: next * element.clientWidth,
+      behavior: 'smooth'
+    });
+
+    setActiveImage(next);
+  };
+
+  const handleGalleryScroll = () => {
+    const element = galleryRef.current;
+
+    if (!element || !element.clientWidth) return;
+
+    setActiveImage(
+      Math.round(element.scrollLeft / element.clientWidth)
+    );
+  };
+
+  const handleAdd = (event) => {
+    event.stopPropagation();
+
+    if (adding) return;
+
+    setAdding(true);
+    onAddToCart?.(item, 1);
+
+    window.setTimeout(() => {
+      setAdding(false);
+    }, 900);
+  };
+
+  const stopNavigation = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
+  return (
+    <article
+      className="hn-product"
+      onClick={() => {
+        if (productId) {
+          navigate(`/product/${productId}`);
+        }
+      }}
+    >
+      <div className="hn-product__visual">
+        <button
+          type="button"
+          className={
+            `hn-product__add${adding ? ' is-done' : ''}`
+          }
+          onClick={handleAdd}
+          aria-label="Ajouter au panier"
+        >
+          {adding
+            ? <Check size={18} />
+            : <ShoppingCart size={18} />
+          }
         </button>
 
-        {count === 0 ? (
-          <div className="pc__track"><div className="pc__slide pc__ph"><Package size={36} strokeWidth={1.4} /></div></div>
-        ) : (
-          <div ref={trackRef} className="pc__track" onScroll={onScroll}>
-            {slides.map((src, i) => (
-              <div className="pc__slide" key={src}>
+        {visibleImages.length ? (
+          <div
+            ref={galleryRef}
+            className="hn-product__gallery"
+            onScroll={handleGalleryScroll}
+          >
+            {visibleImages.map((src, index) => (
+              <div
+                className="hn-product__image-wrap"
+                key={`${src}-${index}`}
+              >
                 <img
                   src={src}
-                  alt={i === 0 ? name : `${name} (${i + 1})`}
-                  className="pc__img"
-                  loading={i === 0 ? 'eager' : 'lazy'}
+                  alt={name}
+                  className="hn-product__image"
+                  loading="lazy"
                   referrerPolicy="no-referrer"
-                  draggable={false}
-                  onError={() => setFailed((prev) => new Set(prev).add(src))}
+                  draggable="false"
+                  onError={() => {
+                    setFailedImages((previous) => {
+                      const next = new Set(previous);
+                      next.add(src);
+                      return next;
+                    });
+                  }}
                 />
               </div>
             ))}
           </div>
+        ) : (
+          <div className="hn-product__placeholder">
+            <Package size={36} strokeWidth={1.4} />
+          </div>
         )}
 
-        {count > 1 && (
+        {visibleImages.length > 1 && (
           <>
-            <button type="button" className="pc__nav pc__nav--prev" aria-label="Image précédente" onClick={(e) => { stop(e); goTo(activeSlide - 1); }}>
-              <ChevronLeft size={16} />
+            <button
+              type="button"
+              className="hn-product__arrow hn-product__arrow--left"
+              aria-label="Image précédente"
+              onClick={(event) => {
+                stopNavigation(event);
+                goToImage(activeImage - 1);
+              }}
+            >
+              <ChevronLeft size={17} />
             </button>
-            <button type="button" className="pc__nav pc__nav--next" aria-label="Image suivante" onClick={(e) => { stop(e); goTo(activeSlide + 1); }}>
-              <ChevronRight size={16} />
+
+            <button
+              type="button"
+              className="hn-product__arrow hn-product__arrow--right"
+              aria-label="Image suivante"
+              onClick={(event) => {
+                stopNavigation(event);
+                goToImage(activeImage + 1);
+              }}
+            >
+              <ChevronRight size={17} />
             </button>
           </>
         )}
       </div>
 
-      {count > 1 && (
-        <div className="pc__dots">
-          {slides.map((src, i) => (
+      {visibleImages.length > 1 && (
+        <div className="hn-product__dots">
+          {visibleImages.map((src, index) => (
             <button
-              key={src}
               type="button"
-              aria-label={`Image ${i + 1}`}
-              className={`pc__dot${i === activeSlide ? ' pc__dot--on' : ''}`}
-              onClick={(e) => { stop(e); goTo(i); }}
+              key={`${src}-${index}`}
+              aria-label={`Afficher l'image ${index + 1}`}
+              className={
+                `hn-product__dot${activeImage === index ? ' is-active' : ''}`
+              }
+              onClick={(event) => {
+                stopNavigation(event);
+                goToImage(index);
+              }}
             />
           ))}
         </div>
       )}
 
-      <h3 className="pc__title" title={name}>{name}</h3>
-      {amountOf(price) && <p className="pc__price">{amountOf(price)} FCFA</p>}
-      {moq > 1 && <p className="pc__moq">MOQ : {moq} pièces</p>}
+      <h3 className="hn-product__name" title={name}>
+        {name}
+      </h3>
+
+      {formatPrice(price) && (
+        <p className="hn-product__price">
+          {formatPrice(price)} FCFA
+        </p>
+      )}
+
+      {moq > 1 && (
+        <p className="hn-product__moq">
+          Minimum : {moq} pièces
+        </p>
+      )}
     </article>
   );
 }
 
-/* ─── Rangée horizontale ────────────────────────────────────────────── */
-function ProductRow({ title, items, onAddToCart, onAction, actionLabel }) {
-  const rowRef = useRef(null);
-  const scrollBy = (dir) => {
-    const el = rowRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * (el.clientWidth * 0.8), behavior: 'smooth' });
-  };
-  return (
-    <div>
-      <div className="hm-head">
-        <h2 className="hm-head__title">{title}</h2>
-        <div className="hm-head__nav">
-          {onAction && <button type="button" className="hm-link" onClick={onAction}>{actionLabel} →</button>}
-          <button type="button" className="hm-arrow" aria-label="Précédent" onClick={() => scrollBy(-1)}><ChevronLeft size={18} /></button>
-          <button type="button" className="hm-arrow" aria-label="Suivant" onClick={() => scrollBy(1)}><ChevronRight size={18} /></button>
-        </div>
-      </div>
-      <div ref={rowRef} className="hm-row">
-        {items.map((p, i) => (
-          <ProductCard key={p._id || p.id} product={p} onAddToCart={onAddToCart} index={i} />
-        ))}
-      </div>
-    </div>
-  );
-}
+/* =========================================================
+   SQUELETTES
+========================================================= */
 
-/* ─── Chargement ────────────────────────────────────────────────────── */
-function Skeleton({ count = 10 }) {
+function ProductSkeleton({ count = 10 }) {
   return (
     <div className="hn-grid" aria-busy="true">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i}>
-          <div className="hn-sk" style={{ aspectRatio: '1 / 1' }} />
-          <div className="hn-sk" style={{ height: 14, width: '80%', marginTop: 12 }} />
-          <div className="hn-sk" style={{ height: 12, width: '40%', marginTop: 8 }} />
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index}>
+          <div
+            className="hn-skeleton"
+            style={{ aspectRatio: '1 / 1' }}
+          />
+
+          <div
+            className="hn-skeleton"
+            style={{
+              height: 14,
+              width: '80%',
+              marginTop: 12
+            }}
+          />
+
+          <div
+            className="hn-skeleton"
+            style={{
+              height: 12,
+              width: '45%',
+              marginTop: 8
+            }}
+          />
         </div>
       ))}
     </div>
   );
 }
 
-/* ─── Hero : texte + image, adapté à chaque écran ───────────────────── */
-function Hero({ onShop }) {
-  return (
-    <section className="hm-hero">
-      <div className="hm-wrap">
-        <div className="hm-hero__grid">
-          <div className="hm-hero__copy">
-            <h1 className="hm-hero__title">
-              Acheter malin<br />
-              livrez vite avec<br />
-              <span className="hm-hero__accent">Dango import</span>
-            </h1>
-            <p className="hm-hero__lead">
-              Des produits de qualité, à prix imbattables, livrés partout au Togo et au Bénin.
-            </p>
-            <button type="button" onClick={onShop} className="hm-pill hm-pill--primary">
-              Découvrir maintenant <ArrowRight size={16} />
-            </button>
-          </div>
+/* =========================================================
+   FILTRES
+========================================================= */
 
-          <div className="hm-hero__media">
-            <img src={homeBgImg} alt="Dango import" className="hm-hero__img" draggable={false} />
-          </div>
-        </div>
-
-        <div className="hm-features">
-          {[
-            ['Livraison rapide', 'Partout au Togo & Bénin'],
-            ['Paiement sécurisé', 'En toute confiance'],
-            ['Support réactif', 'Nous sommes là pour vous'],
-            ['Meilleurs prix', 'Achetez plus, économisez plus'],
-          ].map(([title, desc]) => (
-            <div key={title} className="hm-feature">
-              <strong>{title}</strong>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Composant principal ───────────────────────────────────────────── */
 const DEFAULT_FILTERS = {
-  minPrice: '', maxPrice: '', rating: '',
-  inStock: false, newOnly: false, brand: '',
-  sort: 'newest', categorySlug: '',
+  minPrice: '',
+  maxPrice: '',
+  rating: '',
+  inStock: false,
+  newOnly: false,
+  brand: '',
+  sort: 'newest',
+  categorySlug: ''
 };
+
+/* =========================================================
+   PAGE HOME
+========================================================= */
 
 function HomeNew() {
   const location = useLocation();
+
   const { addToCart } = useCart();
   const toast = useToast();
+
   const gridRef = useRef(null);
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [inlineSearch] = useState('');
 
-  const scrollToGrid = useCallback(() => {
-    setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  const urlParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+
+  const urlSearch = urlParams.get('q')?.trim() || '';
+  const urlCategory = urlParams.get('category')?.trim() || '';
+
+  const scrollToProducts = useCallback(() => {
+    window.setTimeout(() => {
+      gridRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 80);
   }, []);
 
-  const urlSearch = new URLSearchParams(location.search).get('q')?.trim() || '';
-  const urlCategory = new URLSearchParams(location.search).get('category')?.trim() || '';
-
   useEffect(() => {
-    if (urlCategory) {
-      setFilters((f) => ({ ...f, categorySlug: urlCategory }));
-      scrollToGrid();
-    }
-  }, [urlCategory, scrollToGrid]);
+    setFilters((previous) => ({
+      ...previous,
+      categorySlug: urlCategory
+    }));
+  }, [urlCategory]);
 
-  const { data: productsRaw = [], isLoading: loading } = useQuery({
-    queryKey: ['homeProducts', urlSearch, filters.categorySlug, filters.sort],
+  /* Récupération des produits */
+
+  const {
+    data: productsRaw = [],
+    isLoading: loading
+  } = useQuery({
+    queryKey: [
+      'homeProducts',
+      urlSearch,
+      filters.categorySlug,
+      filters.sort
+    ],
+
     queryFn: async () => {
       const params = {
-        page: 1, limit: 200,
+        page: 1,
+        limit: 200,
         search: urlSearch || undefined,
         category: filters.categorySlug || undefined,
-        sort: filters.sort !== 'newest' ? filters.sort : undefined,
+        sort: filters.sort !== 'newest'
+          ? filters.sort
+          : undefined
       };
-      const res = await client.get('/products', { params });
-      if (Array.isArray(res?.data?.data)) return res.data.data;
-      if (Array.isArray(res?.data?.products)) return res.data.products;
-      if (Array.isArray(res?.data?.data?.products)) return res.data.data.products;
-      if (Array.isArray(res?.data)) return res.data;
+
+      const response = await client.get('/products', { params });
+
+      if (Array.isArray(response?.data?.data)) {
+        return response.data.data;
+      }
+
+      if (Array.isArray(response?.data?.products)) {
+        return response.data.products;
+      }
+
+      if (Array.isArray(response?.data?.data?.products)) {
+        return response.data.data.products;
+      }
+
+      if (Array.isArray(response?.data)) {
+        return response.data;
+      }
+
       return [];
     },
+
     staleTime: 60_000,
-    retry: 1,
+    retry: 1
   });
+
+  /* Récupération des catégories */
 
   const { data: categoriesRaw = [] } = useQuery({
     queryKey: ['homeCategories'],
+
     queryFn: async () => {
-      const res = await client.get('/categories');
-      if (Array.isArray(res?.data?.data)) return res.data.data;
-      if (Array.isArray(res?.data?.categories)) return res.data.categories;
-      if (Array.isArray(res?.data)) return res.data;
+      const response = await client.get('/categories');
+
+      if (Array.isArray(response?.data?.data)) {
+        return response.data.data;
+      }
+
+      if (Array.isArray(response?.data?.categories)) {
+        return response.data.categories;
+      }
+
+      if (Array.isArray(response?.data)) {
+        return response.data;
+      }
+
       return [];
     },
-    staleTime: 300_000,
+
+    staleTime: 300_000
   });
 
+  /* Normalisation */
+
   const products = useMemo(() => {
-    return (productsRaw || []).map((p) => {
-      const s = sanitizeProductForDisplay(p) || p;
-      const price = Number(s.price || 0);
+    return (productsRaw || []).map((product) => {
+      const item =
+        sanitizeProductForDisplay(product) || product;
+
       return {
-        ...s,
-        id: s._id || s.id,
-        price,
-        image: getProductImage(s) || s?.images?.[0]?.url || s?.images?.[0] || s?.image,
-        stock: getProductSellableStock(s),
-        isNew: s.isNew || s.isNewArrival,
+        ...item,
+        id: item._id || item.id,
+        price: Number(item.price || item.unitPrice || 0),
+        image: imageOf(item),
+        stock: getProductSellableStock(item),
+        isNew: Boolean(item.isNew || item.isNewArrival)
       };
     });
   }, [productsRaw]);
 
-  const filtered = useMemo(() => {
-    let r = [...products];
-    const q = (urlSearch || inlineSearch || '').toLowerCase().trim();
-    if (q) r = r.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
-    if (filters.minPrice) r = r.filter((p) => (p.price || 0) >= Number(filters.minPrice));
-    if (filters.maxPrice) r = r.filter((p) => (p.price || 0) <= Number(filters.maxPrice));
-    if (filters.rating) r = r.filter((p) => (p.rating || p.averageRating || 0) >= Number(filters.rating));
-    if (filters.inStock) r = r.filter((p) => p.stock > 0);
-    if (filters.newOnly) r = r.filter((p) => p.isNew);
-    if (filters.brand) r = r.filter((p) => (p.brand || '').toLowerCase().includes(filters.brand.toLowerCase()));
+  /* Filtrage des produits */
 
-    if (filters.sort === 'price-asc') r.sort((a, b) => (a.price || 0) - (b.price || 0));
-    else if (filters.sort === 'price-desc') r.sort((a, b) => (b.price || 0) - (a.price || 0));
-    else if (filters.sort === 'popular') r.sort((a, b) => Number(b.isBoosted || b.isBestSeller || 0) - Number(a.isBoosted || a.isBestSeller || 0));
-    else r.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    return r;
-  }, [products, filters, urlSearch, inlineSearch]);
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
 
-  const newItems = useMemo(() => products.filter((p) => p.isNew && imgOf(p)).slice(0, 12), [products]);
-  const featured = useMemo(() => products.filter((p) => imgOf(p)).slice(0, 5), [products]);
+    if (urlSearch) {
+      const query = urlSearch.toLowerCase();
 
-  const handleReset = useCallback(() => setFilters(DEFAULT_FILTERS), []);
+      result = result.filter((product) => {
+        const name = (product.name || product.title || '')
+          .toLowerCase();
 
-  const handleAddToCart = useCallback((p, qty) => {
-    addToCart(p, qty || 1);
-    toast?.success?.('Ajouté au panier ✓');
-  }, [addToCart, toast]);
+        const description = (product.description || '')
+          .toLowerCase();
 
-  const showNew = useCallback(() => {
-    setFilters((f) => ({ ...f, newOnly: true }));
-    scrollToGrid();
-  }, [scrollToGrid]);
+        return (
+          name.includes(query) ||
+          description.includes(query)
+        );
+      });
+    }
 
-  const isHome = !urlSearch && !inlineSearch && !filters.categorySlug && !filters.newOnly;
+    if (filters.minPrice) {
+      result = result.filter(
+        (product) =>
+          product.price >= Number(filters.minPrice)
+      );
+    }
 
-  const activeCat = categoriesRaw.find((c) => c.slug && c.slug === filters.categorySlug);
-  const gridTitle = urlSearch
+    if (filters.maxPrice) {
+      result = result.filter(
+        (product) =>
+          product.price <= Number(filters.maxPrice)
+      );
+    }
+
+    if (filters.rating) {
+      result = result.filter(
+        (product) =>
+          Number(product.rating || product.averageRating || 0) >=
+          Number(filters.rating)
+      );
+    }
+
+    if (filters.inStock) {
+      result = result.filter(
+        (product) => product.stock > 0
+      );
+    }
+
+    if (filters.newOnly) {
+      result = result.filter(
+        (product) => product.isNew
+      );
+    }
+
+    if (filters.brand) {
+      result = result.filter((product) =>
+        (product.brand || '')
+          .toLowerCase()
+          .includes(filters.brand.toLowerCase())
+      );
+    }
+
+    if (filters.sort === 'price-asc') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (filters.sort === 'price-desc') {
+      result.sort((a, b) => b.price - a.price);
+    } else if (filters.sort === 'popular') {
+      result.sort(
+        (a, b) =>
+          Number(b.isBoosted || b.isBestSeller || 0) -
+          Number(a.isBoosted || a.isBestSeller || 0)
+      );
+    } else {
+      result.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0) -
+          new Date(a.createdAt || 0)
+      );
+    }
+
+    return result;
+  }, [products, filters, urlSearch]);
+
+  /* Catégorie active */
+
+  const activeCategory = categoriesRaw.find(
+    (category) =>
+      category.slug &&
+      category.slug === filters.categorySlug
+  );
+
+  const pageTitle = urlSearch
     ? `Résultats pour « ${urlSearch} »`
-    : filters.newOnly ? 'Nouveautés'
-      : activeCat ? activeCat.name
-        : 'Tous les produits';
+    : filters.newOnly
+      ? 'Nouveautés'
+      : activeCategory
+        ? activeCategory.name
+        : 'Nos produits';
+
+  /* Ajout au panier */
+
+  const handleAddToCart = useCallback(
+    (product, quantity = 1) => {
+      addToCart(product, quantity);
+      toast?.success?.('Produit ajouté au panier');
+    },
+    [addToCart, toast]
+  );
+
+  /* Réinitialisation */
+
+  const resetFilters = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+  }, []);
+
+  const isHome =
+    !urlSearch &&
+    !filters.categorySlug &&
+    !filters.newOnly;
 
   return (
     <div className="hn-page">
       <Header />
 
-      {isHome && <Hero onShop={scrollToGrid} />}
+      {isHome && <BannerSlider />}
 
-      {isHome && !loading && featured.length > 0 && (
-        <section className="hm-section">
-          <div className="hm-wrap">
-            <div className="hm-head">
-              <h2 className="hm-head__title">Nos produits phares</h2>
-              <Link to="/shopping" className="hm-link">Voir tout →</Link>
+      <section
+        ref={gridRef}
+        className="hn-section"
+        id="produits"
+      >
+        <div className="hn-wrap">
+          {loading && (
+            <div
+              className="hn-progress"
+              role="progressbar"
+              aria-label="Chargement des produits"
+            >
+              <span />
             </div>
-            <div className="hn-grid">
-              {featured.map((p, i) => (
-                <ProductCard key={p._id || p.id} product={p} onAddToCart={handleAddToCart} index={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          )}
 
-      {isHome && !loading && newItems.length > 0 && (
-        <section className="hm-section" style={{ paddingTop: 0 }}>
-          <div className="hm-wrap">
-            <ProductRow title="Nouveautés" items={newItems} onAddToCart={handleAddToCart} actionLabel="Tout voir" onAction={showNew} />
-          </div>
-        </section>
-      )}
+          <div className="hn-section__header">
+            <h2 className="hn-section__title">
+              {pageTitle}
+            </h2>
 
-      <section ref={gridRef} className="hm-section" id="produits" style={{ paddingTop: isHome ? 0 : 28 }}>
-        <div className="hm-wrap">
-          {loading && <div className="hn-loadbar" role="progressbar" aria-label="Chargement des produits"><span /></div>}
-
-          <div className="hm-head">
-            <h2 className="hm-head__title">{gridTitle}</h2>
+            {!loading && (
+              <span className="hn-section__count">
+                {filteredProducts.length} produit(s)
+              </span>
+            )}
           </div>
 
           {loading ? (
-            <Skeleton count={10} />
-          ) : filtered.length === 0 ? (
-            <div className="hm-empty">
-              <Search size={44} strokeWidth={1.5} style={{ margin: '0 auto', color: '#cfcfcf' }} />
+            <ProductSkeleton count={10} />
+          ) : filteredProducts.length === 0 ? (
+            <div className="hn-empty">
+              <Package
+                size={42}
+                strokeWidth={1.4}
+                style={{ color: '#ccc' }}
+              />
+
               <strong>Aucun produit trouvé</strong>
-              <p>Essayez de modifier vos filtres ou votre recherche.</p>
-              <button type="button" className="hm-pill hm-pill--primary" style={{ marginTop: 16 }} onClick={handleReset}>
-                Réinitialiser les filtres
+
+              <p>
+                Essayez une autre recherche ou réinitialisez vos filtres.
+              </p>
+
+              <button
+                type="button"
+                className="hn-reset"
+                onClick={resetFilters}
+              >
+                Réinitialiser
               </button>
             </div>
           ) : (
             <div className="hn-grid">
-              {filtered.map((p, i) => (
-                <ProductCard key={p._id || p.id} product={p} onAddToCart={handleAddToCart} index={i} />
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product._id || product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
               ))}
             </div>
           )}
         </div>
       </section>
-
-      {isHome && (
-        <section className="hm-section" style={{ paddingTop: 0 }}>
-          <div className="hm-wrap">
-            <div className="hm-banner">
-              <div>
-                <h3>Vous ne trouvez pas ce que vous cherchez ?</h3>
-                <p>Un article spécifique, une création sur mesure ? Notre équipe peut sourcer des produits et les personnaliser pour votre marque.</p>
-                <div style={{ marginTop: 22 }}>
-                  <Link to="/contact" className="hm-pill hm-pill--dark">Nous contacter <ArrowRight size={14} /></Link>
-                </div>
-              </div>
-              {newItems[0] && <img src={imgOf(newItems[0])} alt="" className="hm-banner__img" loading="lazy" referrerPolicy="no-referrer" />}
-            </div>
-          </div>
-        </section>
-      )}
 
       <Footer />
     </div>

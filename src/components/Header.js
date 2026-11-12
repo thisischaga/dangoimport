@@ -1,36 +1,50 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, Menu, ShoppingCart, LogOut, ShoppingBag, Home, User, X } from 'lucide-react';
+
+import {
+  Search,
+  Menu,
+  ShoppingCart,
+  X,
+  ChevronRight,
+  ChevronDown,
+  Home,
+  UserRound,
+  Package,
+  LogOut,
+} from 'lucide-react';
+
 import client from '../apiClient';
 import { useCart } from '../context/CartContext';
 import { getProductImage } from '../utils/imageUrl';
 import PhoneUpdateBanner from './PhoneUpdateBanner';
 
-// Exports de compatibilité pour les autres pages
+// Compatibilité avec les anciens imports
 export const CATEGORY_LINKS = [];
 export const QUICK_LINKS = [];
 
 export function buildCategoryHref(name, slug = '') {
   const safe = (name || slug || '').trim();
+
   if (!safe) return '/shopping';
+
   return `/shopping?category=${encodeURIComponent(safe)}`;
 }
 
-const SEARCH_FALLBACK_TERMS = ['Chaussures', 'Smartphone', 'Montre', 'Écouteurs', 'Sac à dos', 'T-shirt'];
-
-function buildSearchSuggestions(items, query) {
-  const q = String(query || '').toLowerCase().trim();
-  const unique = new Set();
-  for (const item of items) {
-    const name = typeof item?.name === 'string' ? item.name.trim() : '';
-    if (!name) continue;
-    const n = name.toLowerCase();
-    if (n !== q && n.includes(q)) unique.add(name);
-  }
-  return Array.from(unique).slice(0, 6);
-}
+// --------------------------------------------------
+// LOGO TYPOGRAPHIQUE
+// --------------------------------------------------
 
 function BrandLogo({ onClick }) {
   return (
@@ -38,101 +52,300 @@ function BrandLogo({ onClick }) {
       type="button"
       onClick={onClick}
       aria-label="Accueil Dango import"
-      className="flex shrink-0 items-center gap-1.5"
+      className="flex shrink-0 items-baseline whitespace-nowrap tracking-[-1.4px]"
     >
-      <span className="text-[22px] font-black tracking-tight text-slate-900 md:text-[24px] lg:text-[26px]">Dango</span>
-      <span className="rounded-lg bg-[#FF6B00] px-2 py-0.5 text-[15px] font-black leading-none text-white md:text-[16px] lg:px-2.5 lg:py-1 lg:text-[18px]">
+      <span className="text-[25px] font-black leading-none text-[#171717] md:text-[28px]">
+        Dango
+      </span>
+
+      <span className="text-[25px] font-bold leading-none text-[#F68B1E] md:text-[28px]">
         import
       </span>
     </button>
   );
 }
 
+// --------------------------------------------------
+// RECHERCHE
+// Aucun contour épais, aucun double encadrement
+// --------------------------------------------------
+
+function SearchBox({
+  wrapperRef,
+  inputRef,
+  value,
+  onChange,
+  onFocus,
+  onSubmit,
+  onClear,
+  placeholder,
+  compact = false,
+  children,
+}) {
+  return (
+    <div
+      ref={wrapperRef}
+      className="relative min-w-0 flex-1"
+    >
+      <form
+        onSubmit={onSubmit}
+        role="search"
+        className={`group flex w-full items-center overflow-hidden rounded-xl bg-[#F5F5F5] transition-colors duration-200 focus-within:bg-[#F0F0F0] ${
+          compact ? 'h-11' : 'h-[50px]'
+        }`}
+      >
+        <Search
+          size={19}
+          strokeWidth={1.8}
+          className="ml-4 shrink-0 text-slate-500"
+        />
+
+        <input
+          ref={inputRef}
+          type="search"
+          value={value}
+          onChange={onChange}
+          onFocus={onFocus}
+          placeholder={placeholder}
+          autoComplete="off"
+          enterKeyHint="search"
+          aria-label="Rechercher un produit"
+          className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-slate-800 outline-none ring-0 shadow-none placeholder:text-slate-400 focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          style={{
+            border: 'none',
+            outline: 'none',
+            boxShadow: 'none',
+          }}
+        />
+
+        {value && (
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label="Effacer la recherche"
+            className="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+          >
+            <X size={16} />
+          </button>
+        )}
+
+        <button
+          type="submit"
+          aria-label="Rechercher"
+          className={`flex h-full shrink-0 items-center justify-center bg-[#F68B1E] font-semibold text-white transition-colors hover:bg-[#E77B10] ${
+            compact ? 'w-12' : 'min-w-[125px] px-6 text-sm'
+          }`}
+        >
+          {compact ? (
+            <Search size={19} />
+          ) : (
+            'Rechercher'
+          )}
+        </button>
+      </form>
+
+      {children}
+    </div>
+  );
+}
+
+// --------------------------------------------------
+// HEADER PRINCIPAL
+// --------------------------------------------------
+
 const Header = () => {
-  const headerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
   const { cartCount } = useCart();
 
-  const [user, setUser] = useState(null);
-  const [accountOpen, setAccountOpen] = useState(false);
+  const headerRef = useRef(null);
   const accountRef = useRef(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestionLoading, setSuggestionLoading] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const searchRef = useRef(null);
+  const mobileSearchRef = useRef(null);
+
   const searchInputRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
 
-  const [catOpen, setCatOpen] = useState(false);
-  const [activeCatKey, setActiveCatKey] = useState(null);
   const catTriggerRef = useRef(null);
   const catPanelRef = useRef(null);
+  const mobileCatPanelRef = useRef(null);
+  const mobileCatButtonRef = useRef(null);
+
   const catCloseTimer = useRef(null);
 
-  // Hauteur réelle du header : sert d'espaceur et suit les changements de taille
+  const [scrolled, setScrolled] = useState(false);
+
+  // Utilisateur
+  const [user, setUser] = useState(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  // Recherche
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  // Catégories
+  const [catOpen, setCatOpen] = useState(false);
+  const [activeCatKey, setActiveCatKey] = useState(null);
+
+  // --------------------------------------------------
+  // HAUTEUR DU HEADER FIXE
+  // --------------------------------------------------
+
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return undefined;
-    const update = () => {
-      document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`);
+    const element = headerRef.current;
+
+    if (!element) return undefined;
+
+    const updateHeight = () => {
+      document.documentElement.style.setProperty(
+        '--header-h',
+        `${element.offsetHeight}px`
+      );
     };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener('resize', update);
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(element);
+
+    window.addEventListener('resize', updateHeight);
+
     return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', update);
+      observer.disconnect();
+      window.removeEventListener('resize', updateHeight);
+      document.documentElement.style.removeProperty('--header-h');
     };
   }, []);
+
+  // --------------------------------------------------
+  // OMBRE AU SCROLL
+  // --------------------------------------------------
 
   useEffect(() => {
-    const load = () => {
-      const stored = localStorage.getItem('dangoUser');
-      try { setUser(stored ? JSON.parse(stored) : null); } catch { setUser(null); }
+    const onScroll = () => {
+      setScrolled(window.scrollY > 5);
     };
-    load();
-    window.addEventListener('authChange', load);
-    return () => window.removeEventListener('authChange', load);
+
+    onScroll();
+
+    window.addEventListener('scroll', onScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
-  const { data: categories = [], isLoading: catLoading, isError: catError } = useQuery({
+  // --------------------------------------------------
+  // UTILISATEUR CONNECTÉ
+  // --------------------------------------------------
+
+  useEffect(() => {
+    const loadUser = () => {
+      const stored = localStorage.getItem('dangoUser');
+
+      try {
+        setUser(stored ? JSON.parse(stored) : null);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    loadUser();
+
+    window.addEventListener('authChange', loadUser);
+
+    return () => {
+      window.removeEventListener('authChange', loadUser);
+    };
+  }, []);
+
+  // --------------------------------------------------
+  // CATÉGORIES DEPUIS L'API
+  // --------------------------------------------------
+
+  const {
+    data: categories = [],
+    isLoading: catLoading,
+    isError: catError,
+  } = useQuery({
     queryKey: ['headerCategories'],
+
     queryFn: async () => {
       const res = await client.get('/categories');
-      const raw = res?.data?.data || res?.data?.categories || res?.data;
+
+      const raw =
+        res?.data?.data ||
+        res?.data?.categories ||
+        res?.data;
+
       return Array.isArray(raw) ? raw : [];
     },
-    staleTime: 300_000,
+
+    staleTime: 300000,
   });
 
-  const activeCategory = useMemo(
-    () => categories.find((c) => (c.slug || c.name) === activeCatKey) || categories[0] || null,
-    [categories, activeCatKey],
-  );
+  const activeCategory = useMemo(() => {
+    return (
+      categories.find(
+        (category) =>
+          (category.slug || category.name) === activeCatKey
+      ) ||
+      categories[0] ||
+      null
+    );
+  }, [categories, activeCatKey]);
+
   const activeName = activeCategory?.name;
 
-  const { data: categoryProducts = [], isLoading: productsLoading } = useQuery({
+  // --------------------------------------------------
+  // PRODUITS DE LA CATÉGORIE ACTIVE
+  // --------------------------------------------------
+
+  const {
+    data: categoryProducts = [],
+    isLoading: productsLoading,
+  } = useQuery({
     queryKey: ['headerCatProducts', activeName],
-    enabled: Boolean(activeName),
+
+    enabled: Boolean(activeName) && catOpen,
+
     queryFn: async () => {
-      const res = await client.get(`/products?category=${encodeURIComponent(activeName)}&limit=8`);
-      const d = res?.data;
-      if (Array.isArray(d?.data)) return d.data;
-      if (Array.isArray(d?.products)) return d.products;
-      if (Array.isArray(d)) return d;
+      const res = await client.get(
+        `/products?category=${encodeURIComponent(activeName)}&limit=8`
+      );
+
+      const data = res?.data;
+
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.products)) return data.products;
+      if (Array.isArray(data)) return data;
+
       return [];
     },
-    staleTime: 120_000,
+
+    staleTime: 120000,
   });
 
+  // --------------------------------------------------
+  // SYNCHRONISATION RECHERCHE / URL
+  // --------------------------------------------------
+
   useEffect(() => {
-    setSearchQuery(new URLSearchParams(location.search).get('q') || '');
+    setSearchQuery(
+      new URLSearchParams(location.search).get('q') || ''
+    );
   }, [location.search]);
+
+  // --------------------------------------------------
+  // FERMETURE DES MENUS À LA NAVIGATION
+  // --------------------------------------------------
 
   useEffect(() => {
     setCatOpen(false);
@@ -141,297 +354,574 @@ const Header = () => {
     setMobileSearchOpen(false);
   }, [location.pathname, location.search]);
 
-  useEffect(() => {
-    if (mobileSearchOpen) mobileSearchInputRef.current?.focus();
-  }, [mobileSearchOpen]);
+  // --------------------------------------------------
+  // SUGGESTIONS DE PRODUITS
+  // --------------------------------------------------
 
   useEffect(() => {
     const trimmed = searchQuery.trim();
+
     if (trimmed.length < 2) {
       setSuggestions([]);
       setSuggestionLoading(false);
       return undefined;
     }
+
+    let cancelled = false;
+
     setSuggestionLoading(true);
+
     const timer = setTimeout(async () => {
       try {
-        const res = await client.get(`/products?limit=8&search=${encodeURIComponent(trimmed)}`);
-        const items = Array.isArray(res?.data?.data) ? res.data.data : [];
-        const terms = buildSearchSuggestions(items, trimmed);
-        setSuggestions(terms.length > 0 ? terms : SEARCH_FALLBACK_TERMS.slice(0, 5));
+        const res = await client.get(
+          `/products?limit=5&search=${encodeURIComponent(trimmed)}`
+        );
+
+        const items = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data?.products)
+            ? res.data.products
+            : [];
+
+        if (!cancelled) {
+          setSuggestions(items.slice(0, 5));
+        }
       } catch {
-        setSuggestions(SEARCH_FALLBACK_TERMS.slice(0, 5));
+        if (!cancelled) {
+          setSuggestions([]);
+        }
       } finally {
-        setSuggestionLoading(false);
+        if (!cancelled) {
+          setSuggestionLoading(false);
+        }
       }
     }, 250);
-    return () => clearTimeout(timer);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
+  // --------------------------------------------------
+  // FERMETURE AU CLIC EXTÉRIEUR
+  // --------------------------------------------------
+
   useEffect(() => {
-    const onPointerDown = (e) => {
-      if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false);
-      if (searchRef.current && !searchRef.current.contains(e.target)) setShowSuggestions(false);
-      const inCat = catTriggerRef.current?.contains(e.target) || catPanelRef.current?.contains(e.target);
-      if (!inCat) setCatOpen(false);
+    const handlePointerDown = (event) => {
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(event.target)
+      ) {
+        setAccountOpen(false);
+      }
+
+      const insideSearch =
+        searchRef.current?.contains(event.target) ||
+        mobileSearchRef.current?.contains(event.target);
+
+      if (!insideSearch) {
+        setShowSuggestions(false);
+      }
+
+      const insideCategories =
+        catTriggerRef.current?.contains(event.target) ||
+        catPanelRef.current?.contains(event.target) ||
+        mobileCatPanelRef.current?.contains(event.target) ||
+        mobileCatButtonRef.current?.contains(event.target);
+
+      if (!insideCategories) {
+        setCatOpen(false);
+      }
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setCatOpen(false);
+        setAccountOpen(false);
+        setShowSuggestions(false);
+        setMobileSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
+  // --------------------------------------------------
+  // MENU CATÉGORIES
+  // --------------------------------------------------
+
   const openCats = useCallback(() => {
-    if (catCloseTimer.current) clearTimeout(catCloseTimer.current);
+    if (catCloseTimer.current) {
+      clearTimeout(catCloseTimer.current);
+    }
+
     setCatOpen(true);
   }, []);
+
   const closeCatsLater = useCallback(() => {
-    catCloseTimer.current = setTimeout(() => setCatOpen(false), 180);
+    if (catCloseTimer.current) {
+      clearTimeout(catCloseTimer.current);
+    }
+
+    catCloseTimer.current = setTimeout(() => {
+      setCatOpen(false);
+    }, 180);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (catCloseTimer.current) {
+        clearTimeout(catCloseTimer.current);
+      }
+    };
+  }, []);
+
+  // --------------------------------------------------
+  // DÉCONNEXION
+  // --------------------------------------------------
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('dangoToken');
     localStorage.removeItem('dangoUser');
+
     setUser(null);
-    window.dispatchEvent(new Event('authChange'));
     setAccountOpen(false);
+
+    window.dispatchEvent(new Event('authChange'));
+
     navigate('/');
   }, [navigate]);
 
-  const handleSearchSubmit = (e) => {
-    if (e) e.preventDefault();
-    const q = searchQuery.trim();
+  // --------------------------------------------------
+  // RECHERCHE
+  // --------------------------------------------------
+
+  const handleSearchSubmit = useCallback((event) => {
+    if (event) event.preventDefault();
+
+    const query = searchQuery.trim();
+
     setShowSuggestions(false);
     setMobileSearchOpen(false);
+
     searchInputRef.current?.blur();
     mobileSearchInputRef.current?.blur();
-    navigate(q ? `/shopping?q=${encodeURIComponent(q)}` : '/shopping');
-  };
 
-  const handleSelectSuggestion = (term) => {
-    setSearchQuery(term);
+    navigate(
+      query
+        ? `/shopping?q=${encodeURIComponent(query)}`
+        : '/shopping'
+    );
+  }, [navigate, searchQuery]);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSuggestions([]);
+
+    const visible =
+      window.innerWidth >= 1024
+        ? searchInputRef.current
+        : mobileSearchInputRef.current;
+
+    visible?.focus();
+  }, []);
+
+  const openMobileSearch = () => {
+    setMobileSearchOpen(true);
     setShowSuggestions(false);
-    setMobileSearchOpen(false);
-    navigate(`/shopping?q=${encodeURIComponent(term)}`);
+
+    requestAnimationFrame(() => {
+      mobileSearchInputRef.current?.focus();
+    });
   };
 
-  const userName = useMemo(
-    () => user?.userFirstname || user?.firstname || user?.name || user?.userName || '',
-    [user],
-  );
+  // --------------------------------------------------
+  // INFORMATIONS UTILISATEUR
+  // --------------------------------------------------
+
+  const userName = useMemo(() => {
+    return (
+      user?.userFirstname ||
+      user?.firstname ||
+      user?.name ||
+      user?.userName ||
+      ''
+    );
+  }, [user]);
+
+  const userInitial = (userName || 'M').charAt(0).toUpperCase();
 
   const onHome = location.pathname === '/';
   const onCart = location.pathname.startsWith('/cart');
-  const onAccount = location.pathname.startsWith('/mes-commandes') || location.pathname.startsWith('/login');
+
+  const onAccount =
+    location.pathname.startsWith('/mes-commandes') ||
+    location.pathname.startsWith('/login');
+
+  // --------------------------------------------------
+  // SUGGESTIONS
+  // --------------------------------------------------
+
+  const trimmedQuery = searchQuery.trim();
 
   const suggestionsPanel = (
     <AnimatePresence>
-      {showSuggestions && (searchQuery.trim().length >= 2 || suggestions.length > 0) && (
+      {showSuggestions && trimmedQuery.length >= 2 && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}
           transition={{ duration: 0.15 }}
-          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl"
+          className="absolute left-0 right-0 top-full z-[80] mt-2 overflow-hidden rounded-xl bg-white shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
         >
-          <div className="border-b border-slate-100 bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            {suggestionLoading ? 'Recherche en cours...' : 'Suggestions'}
-          </div>
-          <ul className="py-1">
-            {suggestions.map((term) => (
-              <li key={term}>
-                <button
-                  type="button"
-                  onClick={() => handleSelectSuggestion(term)}
-                  className="flex w-full items-center px-4 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-orange-50 hover:text-[#FF6B00]"
-                >
-                  {term}
-                </button>
-              </li>
-            ))}
-          </ul>
+          {suggestionLoading && suggestions.length === 0 && (
+            <p className="px-4 py-4 text-sm text-slate-400">
+              Recherche en cours...
+            </p>
+          )}
+
+          {suggestions.length > 0 && (
+            <ul className="py-1">
+              {suggestions.map((product) => {
+                const id = product._id || product.id;
+                const name = product.name || product.title || 'Produit';
+                const image = getProductImage(product);
+
+                return (
+                  <li key={id}>
+                    <Link
+                      to={`/product/${id}`}
+                      onClick={() => setShowSuggestions(false)}
+                      className="flex items-center gap-3 px-3 py-3 transition hover:bg-[#FFF7F0]"
+                    >
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt=""
+                            referrerPolicy="no-referrer"
+                            loading="lazy"
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <Package
+                            size={18}
+                            className="text-slate-300"
+                          />
+                        )}
+                      </span>
+
+                      <span className="line-clamp-2 min-w-0 flex-1 text-sm font-semibold text-slate-800">
+                        {name}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {!suggestionLoading && suggestions.length === 0 && (
+            <p className="px-4 py-4 text-sm text-slate-500">
+              Aucun produit ne correspond à cette recherche.
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSearchSubmit}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-[#F68B1E] transition hover:bg-[#FFF7F0]"
+          >
+            <Search size={16} />
+
+            <span className="truncate">
+              Voir tous les résultats pour « {trimmedQuery} »
+            </span>
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
   );
 
+  // --------------------------------------------------
+  // RENDU
+  // --------------------------------------------------
+
   return (
     <>
       <header
         ref={headerRef}
-        className="fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        className={`fixed left-0 right-0 top-0 z-40 bg-white transition-shadow duration-200 ${
+          scrolled
+            ? 'shadow-[0_2px_12px_rgba(0,0,0,0.06)]'
+            : ''
+        }`}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+        }}
       >
-        {user && <PhoneUpdateBanner user={user} onUpdated={setUser} />}
+        {user && (
+          <PhoneUpdateBanner
+            user={user}
+            onUpdated={setUser}
+          />
+        )}
 
-        <div className="mx-auto flex h-[60px] max-w-[1280px] items-center gap-3 px-4 md:h-[68px] md:gap-4 md:px-6 lg:h-[76px] lg:gap-6 lg:px-8">
+        {/* ==========================================
+            MOBILE ET TABLETTE
+            LOGO + RECHERCHE
+        ========================================== */}
 
-          {/* MOBILE : recherche ouverte, remplace le logo sur la ligne */}
-          {mobileSearchOpen && (
-            <form
-              onSubmit={handleSearchSubmit}
-              className="flex h-11 min-w-0 flex-1 items-stretch overflow-hidden rounded-md border border-[#FF6B00] bg-white md:hidden"
-            >
-              <input
-                ref={mobileSearchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher un produit..."
-                className="min-w-0 flex-1 bg-transparent px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400"
-              />
-              <button type="submit" aria-label="Rechercher" className="flex w-11 shrink-0 items-center justify-center bg-[#FF6B00] text-white">
-                <Search size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileSearchOpen(false)}
-                aria-label="Fermer la recherche"
-                className="flex w-11 shrink-0 items-center justify-center text-slate-600"
-              >
-                <X size={20} />
-              </button>
-            </form>
-          )}
-
-          {/* MOBILE : logo + loupe */}
-          {!mobileSearchOpen && (
-            <>
-              <BrandLogo onClick={() => navigate('/')} />
-              <button
-                type="button"
-                onClick={() => setMobileSearchOpen(true)}
-                aria-label="Ouvrir la recherche"
-                className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-slate-800 transition hover:bg-slate-100 md:hidden"
-              >
-                <Search size={22} />
-              </button>
-            </>
-          )}
-
-          {/* TABLETTE + DESKTOP : logo */}
-          <div className="hidden md:flex">
+        <div className="lg:hidden">
+          <div className="flex h-[62px] items-center justify-between px-4 sm:px-6">
             <BrandLogo onClick={() => navigate('/')} />
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={openMobileSearch}
+                aria-label="Ouvrir la recherche"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 active:scale-95"
+              >
+                <Search size={23} strokeWidth={1.9} />
+              </button>
+
+              {user ? (
+                <Link
+                  to="/mes-commandes"
+                  aria-label="Mon compte"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF1E5] text-sm font-black text-[#F68B1E]"
+                >
+                  {userInitial}
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-slate-700 transition hover:text-[#F68B1E]"
+                >
+                  Connexion
+                </Link>
+              )}
+            </div>
           </div>
 
-          {/* DESKTOP : bouton catégories avec libellé (lg et plus) */}
+          <AnimatePresence>
+            {mobileSearchOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-visible px-3 pb-3"
+              >
+                <div className="flex items-center gap-2">
+                  <SearchBox
+                    wrapperRef={mobileSearchRef}
+                    inputRef={mobileSearchInputRef}
+                    value={searchQuery}
+                    onChange={(event) => {
+                      setSearchQuery(event.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onSubmit={handleSearchSubmit}
+                    onClear={handleClearSearch}
+                    placeholder="Rechercher un produit..."
+                    compact
+                  >
+                    {suggestionsPanel}
+                  </SearchBox>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileSearchOpen(false);
+                      setShowSuggestions(false);
+                    }}
+                    aria-label="Fermer la recherche"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ==========================================
+            DESKTOP
+        ========================================== */}
+
+        <div className="mx-auto hidden h-[76px] max-w-[1440px] items-center gap-5 px-6 lg:flex xl:gap-7 xl:px-10">
+          <BrandLogo onClick={() => navigate('/')} />
+
+          {/* CATÉGORIES */}
           <div
             ref={catTriggerRef}
-            className="relative hidden lg:block"
+            className="relative shrink-0"
             onMouseEnter={openCats}
             onMouseLeave={closeCatsLater}
           >
             <button
               type="button"
-              onClick={() => setCatOpen((v) => !v)}
+              onClick={() => setCatOpen((value) => !value)}
               aria-expanded={catOpen}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] font-bold text-slate-900 transition hover:text-[#FF6B00]"
+              className={`flex h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                catOpen
+                  ? 'bg-[#FFF5ED] text-[#F68B1E]'
+                  : 'text-slate-800 hover:bg-slate-50'
+              }`}
             >
-              <Menu size={22} />
-              <span>Catégories</span>
+              <Menu size={19} strokeWidth={1.9} />
+
+              <span>Toutes les catégories</span>
+
+              <ChevronDown
+                size={15}
+                className={`transition-transform ${
+                  catOpen ? 'rotate-180' : ''
+                }`}
+              />
             </button>
           </div>
 
-          {/* TABLETTE + DESKTOP : recherche */}
-          <div ref={searchRef} className="relative hidden min-w-0 flex-1 md:block">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="flex h-11 items-stretch overflow-hidden rounded-md border border-slate-300 bg-white transition focus-within:border-[#FF6B00] lg:h-12"
-            >
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowSuggestions(true)}
-                placeholder="Rechercher un produit..."
-                className="min-w-0 flex-1 bg-transparent px-4 text-[15px] text-slate-800 outline-none placeholder:text-slate-400"
-              />
-              <button
-                type="submit"
-                aria-label="Rechercher"
-                className="flex w-12 shrink-0 items-center justify-center bg-[#FF6B00] text-white transition hover:bg-[#E85F00] lg:w-14"
-              >
-                <Search size={20} />
-              </button>
-            </form>
+          {/* À PROPOS */}
+          <Link
+            to="/about"
+            className="shrink-0 whitespace-nowrap text-sm font-medium text-slate-700 transition hover:text-[#F68B1E]"
+          >
+            À propos de Dango import
+          </Link>
+
+          {/* RECHERCHE DESKTOP */}
+          <SearchBox
+            wrapperRef={searchRef}
+            inputRef={searchInputRef}
+            value={searchQuery}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onSubmit={handleSearchSubmit}
+            onClear={handleClearSearch}
+            placeholder="Rechercher un produit, une marque..."
+          >
             {suggestionsPanel}
-          </div>
+          </SearchBox>
 
-          {/* TABLETTE + DESKTOP : panier et compte */}
-          {!mobileSearchOpen && (
-            <div className="ml-auto hidden shrink-0 items-center gap-2 md:flex lg:gap-3">
-              <Link
-                to="/cart"
-                aria-label={`Panier (${cartCount} articles)`}
-                className="relative flex h-10 items-center gap-2 rounded-md px-2 text-slate-800 transition hover:text-[#FF6B00]"
-              >
-                <span className="relative">
-                  <ShoppingCart size={24} />
-                  {cartCount > 0 && (
-                    <span className="absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[11px] font-bold text-white">
-                      {cartCount > 99 ? '99+' : cartCount}
-                    </span>
-                  )}
+          {/* PANIER */}
+          <Link
+            to="/cart"
+            aria-label={`Panier (${cartCount} articles)`}
+            className={`group relative flex h-11 shrink-0 items-center gap-2 rounded-lg px-3 transition hover:bg-[#FFF5ED] hover:text-[#F68B1E] ${
+              onCart ? 'text-[#F68B1E]' : 'text-slate-800'
+            }`}
+          >
+            <span className="relative">
+              <ShoppingCart size={22} strokeWidth={1.8} />
+
+              {cartCount > 0 && (
+                <span className="absolute -right-2.5 -top-2.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[10px] font-bold text-white">
+                  {cartCount > 99 ? '99+' : cartCount}
                 </span>
-                <span className="hidden text-sm font-bold lg:inline">Panier</span>
-              </Link>
+              )}
+            </span>
 
-              <div className="relative" ref={accountRef}>
-                {user ? (
+            <span className="text-sm font-semibold">Panier</span>
+          </Link>
+
+          {/* COMPTE */}
+          <div
+            className="relative shrink-0"
+            ref={accountRef}
+          >
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setAccountOpen((value) => !value)}
+                aria-expanded={accountOpen}
+                className="flex h-11 max-w-[190px] items-center gap-2.5 rounded-lg px-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF1E5] text-sm font-black text-[#F68B1E]">
+                  {userInitial}
+                </span>
+
+                <span className="truncate">
+                  {userName || 'Mon compte'}
+                </span>
+
+                <ChevronDown
+                  size={14}
+                  className={`shrink-0 text-slate-400 transition-transform ${
+                    accountOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex h-11 items-center justify-center rounded-lg bg-[#F68B1E] px-5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
+              >
+                Se connecter
+              </Link>
+            )}
+
+            <AnimatePresence>
+              {accountOpen && user && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full z-[80] mt-3 w-64 overflow-hidden rounded-xl bg-white p-2 shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
+                >
+                  <div className="px-3 py-3">
+                    <p className="truncate text-sm font-bold text-slate-900">
+                      {userName}
+                    </p>
+
+                    <p className="truncate text-xs text-slate-500">
+                      {user.userEmail || user.email}
+                    </p>
+                  </div>
+
+                  <div className="my-1 h-px bg-slate-100" />
+
+                  <Link
+                    to="/mes-commandes"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#FFF5ED] hover:text-[#F68B1E]"
+                  >
+                    <Package size={17} />
+                    Mes commandes
+                  </Link>
+
                   <button
                     type="button"
-                    onClick={() => setAccountOpen((v) => !v)}
-                    aria-expanded={accountOpen}
-                    className="flex h-10 items-center gap-2 rounded-md border border-[#FF6B00] px-3 text-sm font-bold text-[#FF6B00] transition hover:bg-orange-50"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
                   >
-                    <span className="max-w-[90px] truncate lg:max-w-[110px]">{userName || 'Compte'}</span>
+                    <LogOut size={17} />
+                    Déconnexion
                   </button>
-                ) : (
-                  <Link
-                    to="/login"
-                    className="flex h-10 items-center rounded-md border border-[#FF6B00] px-3 text-sm font-bold text-[#FF6B00] transition hover:bg-orange-50 lg:px-4"
-                  >
-                    Se connecter
-                  </Link>
-                )}
-
-                <AnimatePresence>
-                  {accountOpen && user && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full z-50 mt-2 w-64 rounded-md border border-slate-200 bg-white p-2 shadow-xl"
-                    >
-                      <div className="border-b border-slate-100 px-3 py-2">
-                        <p className="text-sm font-bold text-slate-900">{userName}</p>
-                        <p className="truncate text-xs text-slate-500">{user.userEmail || user.email}</p>
-                      </div>
-                      <Link
-                        to="/mes-commandes"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2.5 rounded px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#FF6B00]"
-                      >
-                        <ShoppingBag size={16} className="text-slate-400" />
-                        <span>Mes commandes</span>
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-2.5 rounded px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"
-                      >
-                        <LogOut size={16} />
-                        <span>Déconnexion</span>
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Panneau catégories (desktop) */}
+        {/* ==========================================
+            MEGA MENU CATÉGORIES DESKTOP
+        ========================================== */}
+
         <AnimatePresence>
           {catOpen && (
             <motion.div
@@ -439,99 +929,141 @@ const Header = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.16 }}
+              transition={{ duration: 0.18 }}
               onMouseEnter={openCats}
               onMouseLeave={closeCatsLater}
-              className="absolute left-0 right-0 top-full z-50 hidden flex-col border-t border-slate-200 bg-white shadow-2xl lg:flex lg:h-[60vh] lg:flex-row"
+              className="absolute left-0 right-0 top-full z-50 hidden h-[min(620px,75vh)] bg-white shadow-[0_15px_35px_rgba(0,0,0,0.12)] lg:flex"
             >
-              <div className="w-full overflow-y-auto bg-slate-50 py-4 lg:w-[300px] lg:shrink-0 lg:border-r lg:border-slate-200">
-                <p className="px-5 pb-2 text-[12px] font-black uppercase tracking-wider text-slate-500">Catégories</p>
+              {/* LISTE DES CATÉGORIES */}
+              <div className="w-[290px] shrink-0 overflow-y-auto bg-[#FAFAFA] py-5">
+                <h3 className="px-5 pb-3 text-sm font-bold text-slate-900">
+                  Toutes les catégories
+                </h3>
 
-                {catLoading && <p className="px-5 py-6 text-sm font-bold text-slate-400">Chargement...</p>}
-                {catError && <p className="px-5 py-6 text-sm font-bold text-slate-500">Impossible de charger les catégories</p>}
+                {catLoading && (
+                  <p className="px-5 py-6 text-sm text-slate-400">
+                    Chargement...
+                  </p>
+                )}
+
+                {catError && (
+                  <p className="px-5 py-6 text-sm text-red-500">
+                    Impossible de charger les catégories.
+                  </p>
+                )}
+
                 {!catLoading && !catError && categories.length === 0 && (
-                  <p className="px-5 py-6 text-sm font-bold text-slate-500">Aucune catégorie trouvée</p>
+                  <p className="px-5 py-6 text-sm text-slate-500">
+                    Aucune catégorie disponible.
+                  </p>
                 )}
 
                 {categories.map((cat) => {
                   const key = cat.slug || cat.name;
-                  const selected = activeCategory && (activeCategory.slug || activeCategory.name) === key;
+
+                  const selected =
+                    activeCategory &&
+                    (activeCategory.slug || activeCategory.name) === key;
+
                   return (
                     <button
-                      key={key}
+                      key={cat._id || key}
                       type="button"
                       onMouseEnter={() => setActiveCatKey(key)}
+                      onFocus={() => setActiveCatKey(key)}
                       onClick={() => {
                         setCatOpen(false);
                         navigate(buildCategoryHref(cat.name, cat.slug));
                       }}
-                      className={`flex w-full items-center justify-between px-5 py-3.5 text-left text-[15px] font-bold transition ${
-                        selected ? 'bg-white text-[#FF6B00]' : 'text-slate-800 hover:bg-white'
+                      className={`flex w-full items-center justify-between px-5 py-3 text-left text-sm font-semibold transition ${
+                        selected
+                          ? 'bg-white text-[#F68B1E]'
+                          : 'text-slate-700 hover:bg-white hover:text-[#F68B1E]'
                       }`}
                     >
                       <span className="truncate">{cat.name}</span>
-                      {cat.productCount != null && (
-                        <span className="ml-3 text-xs font-bold text-slate-400">{cat.productCount}</span>
-                      )}
+
+                      <ChevronRight
+                        size={16}
+                        className="shrink-0 text-slate-400"
+                      />
                     </button>
                   );
                 })}
               </div>
 
-              <div className="flex flex-1 flex-col overflow-hidden p-6">
+              {/* APERÇU PRODUITS */}
+              <div className="flex min-w-0 flex-1 flex-col overflow-hidden p-7">
                 {activeCategory ? (
                   <>
-                    <div className="flex items-end justify-between border-b border-slate-100 pb-4">
+                    <div className="flex items-end justify-between pb-5">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-[#FF6B00]">{activeCategory.name}</p>
-                        <h3 className="text-2xl font-black text-slate-900">Produits populaires</h3>
+                        <h3 className="text-2xl font-bold text-slate-900">
+                          {activeCategory.name}
+                        </h3>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          Découvrez les produits de cette catégorie.
+                        </p>
                       </div>
+
                       <Link
-                        to={buildCategoryHref(activeCategory.name, activeCategory.slug)}
+                        to={buildCategoryHref(
+                          activeCategory.name,
+                          activeCategory.slug
+                        )}
                         onClick={() => setCatOpen(false)}
-                        className="text-sm font-black text-[#FF6B00] hover:underline"
+                        className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-2 text-sm font-bold text-[#F68B1E] transition hover:bg-[#FFF5ED]"
                       >
-                        Tout voir{activeCategory.productCount != null ? ` (${activeCategory.productCount})` : ''}
+                        Tout voir
+                        <ChevronRight size={16} />
                       </Link>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto pt-5">
+                    <div className="min-h-0 flex-1 overflow-y-auto pt-3">
                       {productsLoading ? (
-                        <div className="grid grid-cols-4 gap-4 xl:grid-cols-6">
-                          {[...Array(8)].map((_, i) => (
-                            <div key={i} className="animate-pulse">
-                              <div className="aspect-square w-full rounded-lg bg-slate-100" />
-                              <div className="mt-2 h-3 w-3/4 rounded bg-slate-100" />
+                        <div className="grid grid-cols-4 gap-5 xl:grid-cols-5">
+                          {Array.from({ length: 8 }).map((_, index) => (
+                            <div key={index} className="animate-pulse">
+                              <div className="aspect-square rounded-lg bg-slate-100" />
+                              <div className="mt-3 h-3 w-3/4 rounded bg-slate-100" />
                             </div>
                           ))}
                         </div>
                       ) : categoryProducts.length > 0 ? (
-                        <div className="grid grid-cols-4 gap-4 xl:grid-cols-6">
-                          {categoryProducts.slice(0, 8).map((product) => {
-                            const imgUrl = getProductImage(product);
-                            const prodName = product.name || product.title || 'Produit';
-                            const prodId = product._id || product.id;
+                        <div className="grid grid-cols-4 gap-5 xl:grid-cols-5">
+                          {categoryProducts.slice(0, 10).map((product) => {
+                            const image = getProductImage(product);
+                            const productName =
+                              product.name || product.title || 'Produit';
+                            const productId = product._id || product.id;
+
                             return (
                               <Link
-                                key={prodId}
-                                to={`/product/${prodId}`}
+                                key={productId}
+                                to={`/product/${productId}`}
                                 onClick={() => setCatOpen(false)}
-                                title={prodName}
-                                className="group flex flex-col"
+                                title={productName}
+                                className="group flex min-w-0 flex-col"
                               >
-                                <div className="aspect-square w-full overflow-hidden rounded-lg bg-slate-50">
-                                  {imgUrl && (
+                                <div className="aspect-square overflow-hidden rounded-lg bg-[#F6F6F6]">
+                                  {image ? (
                                     <img
-                                      src={imgUrl}
-                                      alt={prodName}
+                                      src={image}
+                                      alt={productName}
                                       referrerPolicy="no-referrer"
                                       loading="lazy"
-                                      className="h-full w-full object-contain transition duration-200 group-hover:scale-105"
+                                      className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
                                     />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center text-xs text-slate-400">
+                                      Image indisponible
+                                    </div>
                                   )}
                                 </div>
-                                <span className="mt-2 line-clamp-2 text-sm font-black leading-snug text-slate-900 group-hover:text-[#FF6B00]">
-                                  {prodName}
+
+                                <span className="mt-3 line-clamp-2 text-sm font-semibold leading-snug text-slate-800 transition group-hover:text-[#F68B1E]">
+                                  {productName}
                                 </span>
                               </Link>
                             );
@@ -539,21 +1071,27 @@ const Header = () => {
                         </div>
                       ) : (
                         <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-                          <p className="text-sm font-bold text-slate-500">Aucun aperçu disponible pour cette catégorie</p>
+                          <p className="text-sm text-slate-500">
+                            Aucun aperçu disponible pour cette catégorie.
+                          </p>
+
                           <Link
-                            to={buildCategoryHref(activeCategory.name, activeCategory.slug)}
+                            to={buildCategoryHref(
+                              activeCategory.name,
+                              activeCategory.slug
+                            )}
                             onClick={() => setCatOpen(false)}
-                            className="rounded-md bg-[#FF6B00] px-4 py-2 text-sm font-black text-white hover:bg-[#E85F00]"
+                            className="rounded-lg bg-[#F68B1E] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
                           >
-                            Explorer le catalogue
+                            Explorer la catégorie
                           </Link>
                         </div>
                       )}
                     </div>
                   </>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">
-                    Survolez une catégorie pour voir les produits
+                  <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                    Sélectionnez une catégorie.
                   </div>
                 )}
               </div>
@@ -562,58 +1100,209 @@ const Header = () => {
         </AnimatePresence>
       </header>
 
-      {/* Espaceur : réserve la place du header fixe */}
-      <div aria-hidden="true" style={{ height: 'var(--header-h, 120px)' }} />
+      {/* ==========================================
+          PANNEAU CATÉGORIES MOBILE ET TABLETTE
+      ========================================== */}
 
-      {/* Barre de navigation mobile */}
+      <AnimatePresence>
+        {catOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-x-0 z-50 bg-black/35 lg:hidden"
+            style={{
+              top: 'var(--header-h, 70px)',
+              bottom: 'calc(64px + env(safe-area-inset-bottom))',
+            }}
+            onClick={() => setCatOpen(false)}
+          >
+            <motion.div
+              ref={mobileCatPanelRef}
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.22 }}
+              onClick={(event) => event.stopPropagation()}
+              className="flex h-full w-[85%] max-w-[380px] flex-col overflow-hidden bg-white shadow-2xl"
+            >
+              <div className="flex shrink-0 items-center justify-between px-5 py-4">
+                <h3 className="text-lg font-bold text-slate-900">
+                  Toutes les catégories
+                </h3>
+
+                <button
+                  type="button"
+                  onClick={() => setCatOpen(false)}
+                  aria-label="Fermer les catégories"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto overscroll-contain">
+                {catLoading && (
+                  <p className="px-5 py-6 text-sm text-slate-400">
+                    Chargement des catégories...
+                  </p>
+                )}
+
+                {catError && (
+                  <p className="px-5 py-6 text-sm text-red-500">
+                    Impossible de charger les catégories.
+                  </p>
+                )}
+
+                {!catLoading && !catError && categories.length === 0 && (
+                  <p className="px-5 py-6 text-sm text-slate-500">
+                    Aucune catégorie disponible.
+                  </p>
+                )}
+
+                {categories.map((cat) => (
+                  <button
+                    key={cat._id || cat.slug || cat.name}
+                    type="button"
+                    onClick={() => {
+                      setCatOpen(false);
+                      navigate(buildCategoryHref(cat.name, cat.slug));
+                    }}
+                    className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-semibold text-slate-800 transition hover:bg-[#FFF7F0] hover:text-[#F68B1E]"
+                  >
+                    <span>{cat.name}</span>
+
+                    <ChevronRight
+                      size={17}
+                      className="shrink-0 text-slate-400"
+                    />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ESPACEUR DU HEADER FIXE */}
+
+      <div
+        aria-hidden="true"
+        style={{
+          height: 'var(--header-h, 70px)',
+        }}
+      />
+
+      {/* ==========================================
+          NAVIGATION MOBILE
+      ========================================== */}
+
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-slate-200 bg-white md:hidden"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="fixed bottom-0 left-0 right-0 z-[60] bg-white shadow-[0_-3px_12px_rgba(0,0,0,0.05)] lg:hidden"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
         aria-label="Navigation principale"
       >
-        <Link
-          to="/"
-          className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${onHome ? 'text-[#FF6B00]' : 'text-slate-500'}`}
-        >
-          <Home size={22} />
-          <span>Accueil</span>
-        </Link>
+        <div className="mx-auto grid h-16 max-w-[600px] grid-cols-4">
+          {/* ACCUEIL */}
 
-        <button
-          type="button"
-          onClick={() => setCatOpen((v) => !v)}
-          aria-expanded={catOpen}
-          className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${catOpen ? 'text-[#FF6B00]' : 'text-slate-500'}`}
-        >
-          <Menu size={22} />
-          <span>Catégories</span>
-        </button>
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center gap-1 transition ${
+              onHome
+                ? 'text-[#F68B1E]'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Home
+              size={22}
+              strokeWidth={onHome ? 2.3 : 1.8}
+            />
 
-        <Link
-          to="/cart"
-          className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${onCart ? 'text-[#FF6B00]' : 'text-slate-500'}`}
-        >
-          <span className="relative">
-            <ShoppingCart size={22} />
-            {cartCount > 0 && (
-              <span className="absolute -right-2.5 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[10px] font-bold text-white">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </span>
-          <span>Panier</span>
-        </Link>
+            <span className="text-[10px] font-semibold">
+              Accueil
+            </span>
+          </Link>
 
-        <Link
-          to={user ? '/mes-commandes' : '/login'}
-          className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${onAccount ? 'text-[#FF6B00]' : 'text-slate-500'}`}
-        >
-          <User size={22} />
-          <span>{user ? 'Compte' : 'Connexion'}</span>
-        </Link>
+          {/* CATÉGORIES */}
+
+          <button
+            ref={mobileCatButtonRef}
+            type="button"
+            onClick={() => {
+              setCatOpen((value) => !value);
+              setShowSuggestions(false);
+              setMobileSearchOpen(false);
+            }}
+            aria-expanded={catOpen}
+            className={`flex flex-col items-center justify-center gap-1 transition ${
+              catOpen
+                ? 'text-[#F68B1E]'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Menu
+              size={23}
+              strokeWidth={catOpen ? 2.3 : 1.8}
+            />
+
+            <span className="text-[10px] font-semibold">
+              Catégories
+            </span>
+          </button>
+
+          {/* PANIER */}
+
+          <Link
+            to="/cart"
+            className={`flex flex-col items-center justify-center gap-1 transition ${
+              onCart
+                ? 'text-[#F68B1E]'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <span className="relative">
+              <ShoppingCart
+                size={22}
+                strokeWidth={onCart ? 2.3 : 1.8}
+              />
+
+              {cartCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[9px] font-bold text-white">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </span>
+
+            <span className="text-[10px] font-semibold">
+              Panier
+            </span>
+          </Link>
+
+          {/* COMPTE */}
+
+          <Link
+            to={user ? '/mes-commandes' : '/login'}
+            className={`flex flex-col items-center justify-center gap-1 transition ${
+              onAccount
+                ? 'text-[#F68B1E]'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <UserRound
+              size={22}
+              strokeWidth={onAccount ? 2.3 : 1.8}
+            />
+
+            <span className="text-[10px] font-semibold">
+              Compte
+            </span>
+          </Link>
+        </div>
       </nav>
     </>
   );
 };
 
-export default React.memo(Header);
+export default memo(Header);
