@@ -191,6 +191,7 @@ const Header = () => {
   // Catégories
   const [catOpen, setCatOpen] = useState(false);
   const [activeCatKey, setActiveCatKey] = useState(null);
+  const [headerHeight, setHeaderHeight] = useState(76);
 
   // --------------------------------------------------
   // HAUTEUR DU HEADER FIXE
@@ -202,9 +203,11 @@ const Header = () => {
     if (!element) return undefined;
 
     const updateHeight = () => {
+      const h = element.offsetHeight || 76;
+      setHeaderHeight(h);
       document.documentElement.style.setProperty(
         '--header-h',
-        `${element.offsetHeight}px`
+        `${h}px`
       );
     };
 
@@ -926,16 +929,17 @@ const Header = () => {
           {catOpen && (
             <motion.div
               ref={catPanelRef}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.18 }}
+              initial={{ opacity: 0, y: 8, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.99 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
               onMouseEnter={openCats}
               onMouseLeave={closeCatsLater}
-              className="absolute left-0 right-0 top-full z-50 hidden h-[min(620px,75vh)] bg-white shadow-[0_15px_35px_rgba(0,0,0,0.12)] lg:flex"
+              className="absolute left-6 right-6 top-[calc(100%+6px)] z-50 mx-auto hidden max-w-[1360px] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.14)] lg:flex"
+              style={{ height: 'min(520px, 72vh)' }}
             >
               {/* LISTE DES CATÉGORIES */}
-              <div className="w-[290px] shrink-0 overflow-y-auto bg-[#FAFAFA] py-5">
+              <div className="w-[280px] shrink-0 overflow-y-auto border-r border-slate-100 bg-[#FAFAFA] py-4">
                 <h3 className="px-5 pb-3 text-sm font-bold text-slate-900">
                   Toutes les catégories
                 </h3>
@@ -975,35 +979,37 @@ const Header = () => {
                         setCatOpen(false);
                         navigate(buildCategoryHref(cat.name, cat.slug));
                       }}
-                      className={`flex w-full items-center justify-between px-5 py-3 text-left text-sm font-semibold transition ${
+                      className={`flex w-full items-center justify-between px-5 py-2.5 text-left text-sm font-semibold transition ${
                         selected
-                          ? 'bg-white text-[#F68B1E]'
+                          ? 'bg-white text-[#F68B1E] shadow-sm'
                           : 'text-slate-700 hover:bg-white hover:text-[#F68B1E]'
                       }`}
                     >
                       <span className="truncate">{cat.name}</span>
 
                       <ChevronRight
-                        size={16}
-                        className="shrink-0 text-slate-400"
+                        size={15}
+                        className={`shrink-0 ${
+                          selected ? 'text-[#F68B1E]' : 'text-slate-400'
+                        }`}
                       />
                     </button>
                   );
                 })}
               </div>
 
-              {/* APERÇU PRODUITS */}
-              <div className="flex min-w-0 flex-1 flex-col overflow-hidden p-7">
+              {/* APERÇU PRODUITS STYLE ALIBABA */}
+              <div className="flex min-w-0 flex-1 flex-col overflow-hidden p-6">
                 {activeCategory ? (
                   <>
-                    <div className="flex items-end justify-between pb-5">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                       <div>
-                        <h3 className="text-2xl font-bold text-slate-900">
+                        <h3 className="text-xl font-bold text-slate-900">
                           {activeCategory.name}
                         </h3>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                          Découvrez les produits de cette catégorie.
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          Sélection de produits populaires dans cette catégorie
                         </p>
                       </div>
 
@@ -1013,26 +1019,26 @@ const Header = () => {
                           activeCategory.slug
                         )}
                         onClick={() => setCatOpen(false)}
-                        className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-2 text-sm font-bold text-[#F68B1E] transition hover:bg-[#FFF5ED]"
+                        className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-[#F68B1E] transition hover:bg-[#FFF5ED]"
                       >
                         Tout voir
-                        <ChevronRight size={16} />
+                        <ChevronRight size={14} />
                       </Link>
                     </div>
 
-                    <div className="min-h-0 flex-1 overflow-y-auto pt-3">
+                    <div className="min-h-0 flex-1 overflow-y-auto pt-4">
                       {productsLoading ? (
-                        <div className="grid grid-cols-4 gap-5 xl:grid-cols-5">
-                          {Array.from({ length: 8 }).map((_, index) => (
-                            <div key={index} className="animate-pulse">
-                              <div className="aspect-square rounded-lg bg-slate-100" />
-                              <div className="mt-3 h-3 w-3/4 rounded bg-slate-100" />
+                        <div className="grid grid-cols-4 gap-6 sm:grid-cols-5 xl:grid-cols-6">
+                          {Array.from({ length: 12 }).map((_, index) => (
+                            <div key={index} className="flex flex-col items-center animate-pulse">
+                              <div className="h-20 w-20 rounded-full bg-slate-100" />
+                              <div className="mt-2.5 h-3 w-16 rounded bg-slate-100" />
                             </div>
                           ))}
                         </div>
                       ) : categoryProducts.length > 0 ? (
-                        <div className="grid grid-cols-4 gap-5 xl:grid-cols-5">
-                          {categoryProducts.slice(0, 10).map((product) => {
+                        <div className="grid grid-cols-4 gap-6 sm:grid-cols-5 xl:grid-cols-6">
+                          {categoryProducts.slice(0, 12).map((product, idx) => {
                             const image = getProductImage(product);
                             const productName =
                               product.name || product.title || 'Produit';
@@ -1044,25 +1050,35 @@ const Header = () => {
                                 to={`/product/${productId}`}
                                 onClick={() => setCatOpen(false)}
                                 title={productName}
-                                className="group flex min-w-0 flex-col"
+                                className="group flex flex-col items-center text-center"
                               >
-                                <div className="aspect-square overflow-hidden rounded-lg bg-[#F6F6F6]">
+                                <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F7] p-2 transition duration-200 group-hover:scale-105 group-hover:bg-[#FFF5ED] group-hover:shadow-md">
                                   {image ? (
                                     <img
                                       src={image}
                                       alt={productName}
                                       referrerPolicy="no-referrer"
                                       loading="lazy"
-                                      className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+                                      className="h-full w-full rounded-full object-cover"
                                     />
                                   ) : (
-                                    <div className="flex h-full items-center justify-center text-xs text-slate-400">
-                                      Image indisponible
-                                    </div>
+                                    <span className="text-[10px] text-slate-400">
+                                      Produit
+                                    </span>
+                                  )}
+
+                                  {idx % 2 === 0 ? (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#0ea5e9] text-[9px] font-bold text-white shadow-sm">
+                                      ↗
+                                    </span>
+                                  ) : (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F68B1E] text-[9px] font-bold text-white shadow-sm">
+                                      🔥
+                                    </span>
                                   )}
                                 </div>
 
-                                <span className="mt-3 line-clamp-2 text-sm font-semibold leading-snug text-slate-800 transition group-hover:text-[#F68B1E]">
+                                <span className="mt-2 line-clamp-2 max-w-[110px] text-xs font-semibold leading-tight text-slate-800 transition group-hover:text-[#F68B1E]">
                                   {productName}
                                 </span>
                               </Link>
@@ -1189,7 +1205,7 @@ const Header = () => {
       <div
         aria-hidden="true"
         style={{
-          height: 'var(--header-h, 70px)',
+          height: `${headerHeight}px`,
         }}
       />
 

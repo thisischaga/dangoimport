@@ -39,7 +39,10 @@ const emptyForm = {
 };
 
 function getItemPrice(item) {
-  return getUnitPrice(item);
+  const p = getUnitPrice(item);
+  if (Number.isFinite(p) && p > 0) return p;
+  const rawPrice = Number(item?.price || item?.unitPrice || item?.salePrice || item?.promoPrice || 0);
+  return Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 0;
 }
 
 function formatPhoneFull(countryCode, localDigits) {
@@ -66,7 +69,7 @@ const DropshippingCheckout = () => {
   const [paymentNetwork, setPaymentNetwork] = useState('');
 
   const dropItems = useMemo(
-    () => cart.filter((item) => isDropshippingProduct(item)),
+    () => (Array.isArray(cart) ? cart : []),
     [cart],
   );
 

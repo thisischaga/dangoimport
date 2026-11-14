@@ -136,7 +136,12 @@ const INTERNAL_FIELDS = [
 ];
 
 export function isDropshippingProduct(product) {
-  return product?.sourceType === 'DROPSHIPPING';
+  if (!product) return false;
+  if (product?.sourceType === 'DROPSHIPPING') return true;
+  if (product?.isAlibaba || product?.source === 'ALIBABA') return true;
+  if (product?.supplier?.platform === 'alibaba' || product?.supplier?.platform === 'cj') return true;
+  if (product?.importSourceType || product?.fulfillmentPlatform) return true;
+  return true;
 }
 
 export function isCjCatalogProduct(product) {
