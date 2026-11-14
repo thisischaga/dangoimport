@@ -1,13 +1,11 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
-import { isDropshippingProduct } from '../utils/publicProduct';
 import { formatCFA } from '../utils/formatPrice';
 import { getUnitPrice, getMoqRules } from '../utils/importMoq';
 import { getProductImage } from '../utils/imageUrl';
-import toast from '../utils/toast';
 import {
   buildCartFedapayPayload,
   initiateFedapayCheckout,
@@ -576,7 +574,7 @@ const DropshippingCheckout = () => {
             disabled={payLoading || !shippingOptionId}
             onClick={handlePay}
           >
-            {payLoading ? 'Redirection…' : Payer avec FedaPay · }
+            {payLoading ? 'Redirection...' : `Payer avec FedaPay · ${formatCFA(total)}`}
           </button>
         )}
       </div>
