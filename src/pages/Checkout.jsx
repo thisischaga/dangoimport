@@ -1248,7 +1248,7 @@ function StepPayment({
 
         <Lock className="h-3 w-3" />
 
-        Paiement sécurisé via FedaPay
+        Paiement sécurisé en ligne (Mobile Money & Carte)
 
       </p>
 

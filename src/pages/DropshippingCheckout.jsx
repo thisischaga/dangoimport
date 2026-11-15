@@ -317,7 +317,7 @@ const DropshippingCheckout = () => {
         <span>{formatCFA(total)}</span>
       </div>
       <p className="ds-trust">
-        Paiement sécurisé via FedaPay. Dango Import traite votre commande ; vous ne serez jamais redirigé vers un site fournisseur.
+        Paiement sécurisé par Mobile Money et Carte Bancaire. Dango Import traite votre commande en toute sécurité.
       </p>
     </aside>
   );
@@ -467,7 +467,7 @@ const DropshippingCheckout = () => {
 
                 <button
                   type="button"
-                  className="ds-btn-primary hidden md:block"
+                  className="ds-btn-primary mt-6"
                   disabled={quoteLoading}
                   onClick={loadQuote}
                 >
@@ -530,19 +530,19 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Paiement</h2>
                   <p className="text-sm text-gray-700 m-0 mb-4 leading-relaxed">
-                    Vous serez redirigé vers <strong>FedaPay</strong> pour finaliser votre paiement de <strong>{formatCFA(total)}</strong>.
+                    Réglez <strong>{formatCFA(total)}</strong> en toute sécurité par Mobile Money (T-Money, Moov, MTN, Celtiis) ou Carte Bancaire.
                   </p>
                   <button
                     type="button"
-                    className="ds-btn-primary mt-4 hidden md:block"
+                    className="ds-btn-primary mt-4"
                     disabled={payLoading || !shippingOptionId}
                     onClick={handlePay}
                   >
-                    {payLoading ? 'Redirection…' : 'Payer avec FedaPay'}
+                    {payLoading ? 'Redirection en cours…' : `Procéder au paiement (${formatCFA(total)})`}
                   </button>
                   <button
                     type="button"
-                    className="ds-btn-secondary hidden md:block"
+                    className="ds-btn-secondary"
                     onClick={() => setStep(1)}
                   >
                     Modifier mes informations
@@ -552,7 +552,7 @@ const DropshippingCheckout = () => {
             )}
           </div>
 
-          <div className="hidden md:block">{summaryBlock}</div>
+          <div>{summaryBlock}</div>
         </div>
       </main>
 
@@ -564,7 +564,7 @@ const DropshippingCheckout = () => {
             disabled={quoteLoading}
             onClick={loadQuote}
           >
-            {quoteLoading ? 'Calcul…' : `Continuer · ${formatCFA(subtotal)}`}
+            {quoteLoading ? 'Calcul…' : `Continuer vers le paiement · ${formatCFA(subtotal)}`}
           </button>
         )}
         {step === 2 && (
@@ -574,7 +574,7 @@ const DropshippingCheckout = () => {
             disabled={payLoading || !shippingOptionId}
             onClick={handlePay}
           >
-            {payLoading ? 'Redirection...' : `Payer avec FedaPay · ${formatCFA(total)}`}
+            {payLoading ? 'Redirection en cours...' : `Procéder au paiement · ${formatCFA(total)}`}
           </button>
         )}
       </div>
