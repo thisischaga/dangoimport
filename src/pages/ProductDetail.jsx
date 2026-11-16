@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useProduct, useProductReviews, useSimilarProducts } from '../hooks/useProducts';
 import ProductCard from '../components/product/ProductCard';
+import ProductRating from '../components/product/ProductRating';
 import { getVendorDeliveryZonesByVendor } from '../api';
 import { resolveImageUrl } from '../utils/imageUrl';
 import { formatCFA, calcDiscountPercent } from '../utils/formatPrice';
@@ -669,7 +670,6 @@ export default function ProductDetail() {
   const hasShippingInfo = Boolean(detailData?.shippingInfo?.trim());
   const hasWarranty = Boolean(detailData?.warranty?.trim());
   const originLabel = extras.origin || '';
-  const originCountry = product?.shippingOrigin?.countryName || product?.supplier?.shipFromCountryName || '';
   const isFragile = String(product?.shippingCategory || '').toLowerCase() === 'fragile';
   const hasDescription = Boolean(String(detailData?.description || '').trim() || detailData?.safeHtml);
 
@@ -744,7 +744,7 @@ export default function ProductDetail() {
   const tiers = useMemo(() => detailData?.publicPriceTiers || [], [detailData?.publicPriceTiers]);
   const isImport = isDropship || isAlibaba;
   const importInfo = isImport && Boolean(originLabel || importDaysLabel || extras.port);
-  const shippingText = !isImport && hasShippingInfo ? detailData.shippingZones : '';
+  const shippingText = !isImport && hasShippingInfo ? detailData.shippingInfo : '';
   const zoneRows = deliveryZones
     .map((zone) => {
       const isFree = zone.freeShipping || Number(zone.price) === 0;
@@ -803,7 +803,7 @@ export default function ProductDetail() {
     return (
       <div className="pd-page">
         <Header />
-        <div className="pd-wrap pd-wrap--top">
+        <div className="pd-wrap">
           <div className="pd-skeleton">
             <div className="pd-skeleton__media" />
             <div className="pd-skeleton__info">
