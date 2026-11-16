@@ -329,7 +329,7 @@ const PaymentResult = () => {
             <button
               type="button"
               onClick={() => navigate('/shopping')}
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-[#F68B1E] px-6 py-3 text-white font-black shadow-sm hover:bg-[#E67A0C] transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-6 py-3 text-white font-black shadow-sm hover:bg-[#E55E00] transition"
             >
               Continuer mes achats
             </button>
@@ -342,7 +342,7 @@ const PaymentResult = () => {
             {cartRestored && (
               <Link
                 to="/cart"
-                className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-[#F68B1E] px-6 py-3 text-[#F68B1E] font-black hover:bg-[#FFF4E6] transition"
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-[#FF6B00] px-6 py-3 text-[#FF6B00] font-black hover:bg-[#FFF4E6] transition"
               >
                 Voir mon panier restauré
               </Link>

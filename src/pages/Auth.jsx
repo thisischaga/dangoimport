@@ -9,7 +9,7 @@ const TextInput = ({ label, type = 'text', value, onChange, placeholder }) => (
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="mt-2 w-full rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#F68B1E]"
+      className="mt-2 w-full rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
     />
   </label>
 );
@@ -60,7 +60,7 @@ export default function Auth() {
             <div className="flex items-center justify-between">
               <div className="text-xl font-extrabold text-[#111827] flex items-center gap-2">
                 <span>Dango Import</span>
-                <span className="w-2 h-2 rounded-full bg-[#F68B1E] inline-block" />
+                <span className="w-2 h-2 rounded-full bg-[#FF6B00] inline-block" />
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export default function Auth() {
               </div>
               <div className="mt-1 h-0.5 bg-transparent">
                 <div className={`transition-all duration-200 ${tab === 'login' ? 'w-1/2 translate-x-0' : 'w-1/2 translate-x-full'}`} style={{ height: 3 }}>
-                  <div className="bg-[#F68B1E] h-3 rounded-full" />
+                  <div className="bg-[#FF6B00] h-3 rounded-full" />
                 </div>
               </div>
             </div>
@@ -97,7 +97,7 @@ export default function Auth() {
                   <button type="button" className="text-[#6b7280] hover:text-[#111827]">Mot de passe oublié ?</button>
                 </div>
 
-                <button type="submit" className="w-full mt-2 bg-[#F68B1E] text-white font-bold py-3 rounded-2xl">SE CONNECTER</button>
+                <button type="submit" className="w-full mt-2 bg-[#FF6B00] text-white font-bold py-3 rounded-2xl">SE CONNECTER</button>
 
                 <div className="mt-3 flex items-center gap-3">
                   <hr className="flex-1 border-t border-gray-200" />
@@ -115,7 +115,7 @@ export default function Auth() {
                 </div>
 
                 <div className="text-center text-sm text-[#6b7280] mt-4">
-                  Nouveau ? <button type="button" onClick={() => setTab('register')} className="text-[#F68B1E] font-semibold">Créer un compte</button>
+                  Nouveau ? <button type="button" onClick={() => setTab('register')} className="text-[#FF6B00] font-semibold">Créer un compte</button>
                 </div>
               </form>
             ) : (
@@ -128,13 +128,13 @@ export default function Auth() {
 
                 <label className="flex items-start gap-3 text-sm">
                   <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-1" />
-                  <span>J'accepte les <button type="button" className="text-[#F68B1E]">CGU</button> et la politique de confidentialité.</span>
+                  <span>J'accepte les <button type="button" className="text-[#FF6B00]">CGU</button> et la politique de confidentialité.</span>
                 </label>
 
-                <button type="submit" className="w-full mt-2 bg-[#F68B1E] text-white font-bold py-3 rounded-2xl">CRÉER MON COMPTE</button>
+                <button type="submit" className="w-full mt-2 bg-[#FF6B00] text-white font-bold py-3 rounded-2xl">CRÉER MON COMPTE</button>
 
                 <div className="text-center text-sm text-[#6b7280] mt-2">
-                  Déjà un compte ? <button type="button" onClick={() => setTab('login')} className="text-[#F68B1E] font-semibold">Se connecter</button>
+                  Déjà un compte ? <button type="button" onClick={() => setTab('login')} className="text-[#FF6B00] font-semibold">Se connecter</button>
                 </div>
               </form>
             )}

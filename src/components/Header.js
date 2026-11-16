@@ -58,7 +58,7 @@ function BrandLogo({ onClick }) {
         Dango
       </span>
 
-      <span className="text-[25px] font-bold leading-none text-[#F68B1E] md:text-[28px]">
+      <span className="text-[25px] font-bold leading-none text-[#FF6B00] md:text-[28px]">
         import
       </span>
     </button>
@@ -132,7 +132,7 @@ function SearchBox({
         <button
           type="submit"
           aria-label="Rechercher"
-          className={`flex h-full shrink-0 items-center justify-center bg-[#F68B1E] font-semibold text-white transition-colors hover:bg-[#E77B10] ${
+          className={`flex h-full shrink-0 items-center justify-center bg-[#FF6B00] font-semibold text-white transition-colors hover:bg-[#E77B10] ${
             compact ? 'w-12' : 'min-w-[125px] px-6 text-sm'
           }`}
         >
@@ -640,7 +640,7 @@ const Header = () => {
           <button
             type="button"
             onClick={handleSearchSubmit}
-            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-[#F68B1E] transition hover:bg-[#FFF7F0]"
+            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-[#FF6B00] transition hover:bg-[#FFF7F0]"
           >
             <Search size={16} />
 
@@ -700,14 +700,14 @@ const Header = () => {
                 <Link
                   to="/mes-commandes"
                   aria-label="Mon compte"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF1E5] text-sm font-black text-[#F68B1E]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF3EB] text-sm font-black text-[#FF6B00]"
                 >
                   {userInitial}
                 </Link>
               ) : (
                 <Link
                   to="/login"
-                  className="text-sm font-semibold text-slate-700 transition hover:text-[#F68B1E]"
+                  className="text-sm font-semibold text-slate-700 transition hover:text-[#FF6B00]"
                 >
                   Connexion
                 </Link>
@@ -778,7 +778,7 @@ const Header = () => {
               aria-expanded={catOpen}
               className={`flex h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                 catOpen
-                  ? 'bg-[#FFF5ED] text-[#F68B1E]'
+                  ? 'bg-[#FFF3EB] text-[#FF6B00]'
                   : 'text-slate-800 hover:bg-slate-50'
               }`}
             >
@@ -797,8 +797,8 @@ const Header = () => {
 
           {/* À PROPOS */}
           <Link
-            to="/about"
-            className="shrink-0 whitespace-nowrap text-sm font-medium text-slate-700 transition hover:text-[#F68B1E]"
+            to="/a-propos"
+            className="shrink-0 whitespace-nowrap text-sm font-medium text-slate-700 transition hover:text-[#FF6B00]"
           >
             À propos de Dango import
           </Link>
@@ -824,15 +824,15 @@ const Header = () => {
           <Link
             to="/cart"
             aria-label={`Panier (${cartCount} articles)`}
-            className={`group relative flex h-11 shrink-0 items-center gap-2 rounded-lg px-3 transition hover:bg-[#FFF5ED] hover:text-[#F68B1E] ${
-              onCart ? 'text-[#F68B1E]' : 'text-slate-800'
+            className={`group relative flex h-11 shrink-0 items-center gap-2 rounded-lg px-3 transition hover:bg-[#FFF3EB] hover:text-[#FF6B00] ${
+              onCart ? 'text-[#FF6B00]' : 'text-slate-800'
             }`}
           >
             <span className="relative">
               <ShoppingCart size={22} strokeWidth={1.8} />
 
               {cartCount > 0 && (
-                <span className="absolute -right-2.5 -top-2.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-2.5 -top-2.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[10px] font-bold text-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -853,7 +853,7 @@ const Header = () => {
                 aria-expanded={accountOpen}
                 className="flex h-11 max-w-[190px] items-center gap-2.5 rounded-lg px-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF1E5] text-sm font-black text-[#F68B1E]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EB] text-sm font-black text-[#FF6B00]">
                   {userInitial}
                 </span>
 
@@ -871,7 +871,7 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="flex h-11 items-center justify-center rounded-lg bg-[#F68B1E] px-5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
+                className="flex h-11 items-center justify-center rounded-lg bg-[#FF6B00] px-5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
               >
                 Se connecter
               </Link>
@@ -901,7 +901,7 @@ const Header = () => {
                   <Link
                     to="/mes-commandes"
                     onClick={() => setAccountOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#FFF5ED] hover:text-[#F68B1E]"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#FFF3EB] hover:text-[#FF6B00]"
                   >
                     <Package size={17} />
                     Mes commandes
@@ -981,8 +981,8 @@ const Header = () => {
                       }}
                       className={`flex w-full items-center justify-between px-5 py-2.5 text-left text-sm font-semibold transition ${
                         selected
-                          ? 'bg-white text-[#F68B1E] shadow-sm'
-                          : 'text-slate-700 hover:bg-white hover:text-[#F68B1E]'
+                          ? 'bg-white text-[#FF6B00] shadow-sm'
+                          : 'text-slate-700 hover:bg-white hover:text-[#FF6B00]'
                       }`}
                     >
                       <span className="truncate">{cat.name}</span>
@@ -990,7 +990,7 @@ const Header = () => {
                       <ChevronRight
                         size={15}
                         className={`shrink-0 ${
-                          selected ? 'text-[#F68B1E]' : 'text-slate-400'
+                          selected ? 'text-[#FF6B00]' : 'text-slate-400'
                         }`}
                       />
                     </button>
@@ -1019,7 +1019,7 @@ const Header = () => {
                           activeCategory.slug
                         )}
                         onClick={() => setCatOpen(false)}
-                        className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-[#F68B1E] transition hover:bg-[#FFF5ED]"
+                        className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-[#FF6B00] transition hover:bg-[#FFF3EB]"
                       >
                         Tout voir
                         <ChevronRight size={14} />
@@ -1052,7 +1052,7 @@ const Header = () => {
                                 title={productName}
                                 className="group flex flex-col items-center text-center"
                               >
-                                <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F7] p-2 transition duration-200 group-hover:scale-105 group-hover:bg-[#FFF5ED] group-hover:shadow-md">
+                                <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F7] p-2 transition duration-200 group-hover:scale-105 group-hover:bg-[#FFF3EB] group-hover:shadow-md">
                                   {image ? (
                                     <img
                                       src={image}
@@ -1072,13 +1072,13 @@ const Header = () => {
                                       ↗
                                     </span>
                                   ) : (
-                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F68B1E] text-[9px] font-bold text-white shadow-sm">
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF6B00] text-[9px] font-bold text-white shadow-sm">
                                       🔥
                                     </span>
                                   )}
                                 </div>
 
-                                <span className="mt-2 line-clamp-2 max-w-[110px] text-xs font-semibold leading-tight text-slate-800 transition group-hover:text-[#F68B1E]">
+                                <span className="mt-2 line-clamp-2 max-w-[110px] text-xs font-semibold leading-tight text-slate-800 transition group-hover:text-[#FF6B00]">
                                   {productName}
                                 </span>
                               </Link>
@@ -1097,7 +1097,7 @@ const Header = () => {
                               activeCategory.slug
                             )}
                             onClick={() => setCatOpen(false)}
-                            className="rounded-lg bg-[#F68B1E] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
+                            className="rounded-lg bg-[#FF6B00] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E77B10]"
                           >
                             Explorer la catégorie
                           </Link>
@@ -1184,7 +1184,7 @@ const Header = () => {
                       setCatOpen(false);
                       navigate(buildCategoryHref(cat.name, cat.slug));
                     }}
-                    className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-semibold text-slate-800 transition hover:bg-[#FFF7F0] hover:text-[#F68B1E]"
+                    className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-semibold text-slate-800 transition hover:bg-[#FFF7F0] hover:text-[#FF6B00]"
                   >
                     <span>{cat.name}</span>
 
@@ -1227,7 +1227,7 @@ const Header = () => {
             to="/"
             className={`flex flex-col items-center justify-center gap-1 transition ${
               onHome
-                ? 'text-[#F68B1E]'
+                ? 'text-[#FF6B00]'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -1254,7 +1254,7 @@ const Header = () => {
             aria-expanded={catOpen}
             className={`flex flex-col items-center justify-center gap-1 transition ${
               catOpen
-                ? 'text-[#F68B1E]'
+                ? 'text-[#FF6B00]'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -1274,7 +1274,7 @@ const Header = () => {
             to="/cart"
             className={`flex flex-col items-center justify-center gap-1 transition ${
               onCart
-                ? 'text-[#F68B1E]'
+                ? 'text-[#FF6B00]'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -1285,7 +1285,7 @@ const Header = () => {
               />
 
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-2 -top-2 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[9px] font-bold text-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -1302,7 +1302,7 @@ const Header = () => {
             to={user ? '/mes-commandes' : '/login'}
             className={`flex flex-col items-center justify-center gap-1 transition ${
               onAccount
-                ? 'text-[#F68B1E]'
+                ? 'text-[#FF6B00]'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >

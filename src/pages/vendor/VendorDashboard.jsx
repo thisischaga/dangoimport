@@ -7,7 +7,7 @@ import { Package, ShoppingBag, Wallet } from 'lucide-react';
 
 const StatCard = ({ icon: Icon, label, value }) => (
   <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF3EA] text-[#F68B1E]">
+    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF3EA] text-[#FF6B00]">
       <Icon size={18} />
     </div>
     <p className="text-sm text-slate-500">{label}</p>

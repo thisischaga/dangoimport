@@ -204,7 +204,7 @@ const SourcingForm = () => {
         <Header />
         <main className="mx-auto max-w-xl px-4 py-16">
           <div className="rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-50 text-[#F68B1E]">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-50 text-[#FF6B00]">
               ✓
             </div>
             <h1 className="text-2xl font-black">Demande reçue</h1>
@@ -239,7 +239,7 @@ const SourcingForm = () => {
 
       <main className="mx-auto max-w-xl px-4 py-10 sm:py-14">
         <div className="mb-6">
-          <Link to="/sourcing" className="text-sm font-medium text-slate-500 hover:text-[#F68B1E]">
+          <Link to="/sourcing" className="text-sm font-medium text-slate-500 hover:text-[#FF6B00]">
             ← Retour
           </Link>
         </div>
@@ -267,7 +267,7 @@ const SourcingForm = () => {
                 onChange={handleChange}
                 readOnly={lockedIdentity && Boolean(form.fullName)}
                 required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E] read-only:bg-slate-100 read-only:text-slate-600"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00] read-only:bg-slate-100 read-only:text-slate-600"
               />
             </label>
 
@@ -280,7 +280,7 @@ const SourcingForm = () => {
                 onChange={handleChange}
                 readOnly={lockedIdentity && Boolean(form.email)}
                 required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E] read-only:bg-slate-100 read-only:text-slate-600"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00] read-only:bg-slate-100 read-only:text-slate-600"
               />
             </label>
 
@@ -292,7 +292,7 @@ const SourcingForm = () => {
                 onChange={handleChange}
                 required
                 placeholder="Ex: 90 00 00 00"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
               />
             </label>
 
@@ -303,7 +303,7 @@ const SourcingForm = () => {
                 value={form.country}
                 onChange={handleChange}
                 required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
               >
                 <option value="Togo">Togo</option>
                 <option value="Bénin">Bénin</option>
@@ -321,7 +321,7 @@ const SourcingForm = () => {
                 required
                 rows={4}
                 placeholder="Ex: 200 chaises plastique pour restaurant, couleur blanche…"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
               />
             </label>
 
@@ -333,7 +333,7 @@ const SourcingForm = () => {
                   value={form.quantity}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
                 />
               </label>
               <label className="block">
@@ -345,7 +345,7 @@ const SourcingForm = () => {
                   onChange={handleChange}
                   required
                   min="1"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
                 />
               </label>
             </div>
@@ -371,7 +371,7 @@ const SourcingForm = () => {
                 onChange={handleChange}
                 required
                 placeholder="https://..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#F68B1E]"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-[#FF6B00]"
               />
               <span className="mt-1 block text-xs text-slate-500">Obligatoire — lien AliExpress, 1688, site fournisseur…</span>
             </label>
@@ -382,7 +382,7 @@ const SourcingForm = () => {
                 name="acceptFee"
                 checked={form.acceptFee}
                 onChange={handleChange}
-                className="mt-1 h-4 w-4 accent-[#F68B1E]"
+                className="mt-1 h-4 w-4 accent-[#FF6B00]"
               />
               <span>
                 Je comprends que les frais d&apos;étude de 5000F sont à payer maintenant
@@ -392,7 +392,7 @@ const SourcingForm = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-[#F68B1E] py-4 px-6 min-h-[52px] text-base font-black text-white transition-all hover:bg-[#e07b12] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-3 shadow-md shadow-[#F68B1E]/25 cursor-pointer mt-2"
+              className="w-full rounded-xl bg-[#FF6B00] py-4 px-6 min-h-[52px] text-base font-black text-white transition-all hover:bg-[#e07b12] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-3 shadow-md shadow-[#FF6B00]/25 cursor-pointer mt-2"
             >
               {submitting ? (
                 <>

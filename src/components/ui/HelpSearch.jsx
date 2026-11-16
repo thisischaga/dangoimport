@@ -10,7 +10,7 @@ export default function HelpSearch({ value, onChange, onSubmit, placeholder = 'R
           <Search size={16} className="text-slate-400" />
           <input aria-label="Recherche aide" value={value} onChange={onChange} placeholder={placeholder} className="ml-3 w-full outline-none text-sm" />
         </div>
-        <button type="submit" className="bg-[#F68B1E] text-white px-4 py-2 rounded-lg">Rechercher</button>
+        <button type="submit" className="bg-[#FF6B00] text-white px-4 py-2 rounded-lg">Rechercher</button>
       </div>
     </form>
   );

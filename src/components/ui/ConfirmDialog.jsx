@@ -115,7 +115,7 @@ function ConfirmDialog({ title, message, confirmText, cancelText, danger, onConf
                   <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f68b1e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
               )}
@@ -156,13 +156,13 @@ function ConfirmDialog({ title, message, confirmText, cancelText, danger, onConf
               style={{
                 flex: 1, padding: '12px 16px',
                 border: 'none', borderRadius: 4,
-                background: danger ? '#ef4444' : '#f68b1e',
+                background: danger ? '#ef4444' : '#FF6B00',
                 color: '#fff',
                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 transition: 'background 0.15s',
               }}
               onMouseOver={(e) => e.currentTarget.style.background = danger ? '#dc2626' : '#e07a15'}
-              onMouseOut={(e) => e.currentTarget.style.background = danger ? '#ef4444' : '#f68b1e'}
+              onMouseOut={(e) => e.currentTarget.style.background = danger ? '#ef4444' : '#FF6B00'}
             >
               {confirmText}
             </button>

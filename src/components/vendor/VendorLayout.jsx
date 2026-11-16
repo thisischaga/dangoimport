@@ -28,11 +28,11 @@ const VendorLayout = ({ children, title, subtitle }) => {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
           <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2 text-left">
-            <div className="rounded-xl bg-[#F68B1E] p-2 text-white">
+            <div className="rounded-xl bg-[#FF6B00] p-2 text-white">
               <Store size={18} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#F68B1E]">Espace Vendeur</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF6B00]">Espace Vendeur</p>
               <p className="text-sm font-black text-[#0F172A]">Dango Import</p>
             </div>
           </button>
@@ -41,7 +41,7 @@ const VendorLayout = ({ children, title, subtitle }) => {
             <button
               type="button"
               onClick={() => navigate('/shopping')}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:border-[#F68B1E] hover:text-[#F68B1E]"
+              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:border-[#FF6B00] hover:text-[#FF6B00]"
             >
               Voir la boutique
             </button>
@@ -62,7 +62,7 @@ const VendorLayout = ({ children, title, subtitle }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                     isActive
-                      ? 'bg-[#FFF3EA] text-[#F68B1E]'
+                      ? 'bg-[#FFF3EA] text-[#FF6B00]'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-[#0F172A]'
                   }`
                 }

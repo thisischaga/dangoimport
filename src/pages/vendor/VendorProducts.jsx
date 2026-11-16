@@ -61,7 +61,7 @@ const VendorProducts = () => {
         <div className="mb-4 flex justify-end">
           <Link
             to="/vendeur/produits/nouveau"
-            className="rounded-xl bg-[#F68B1E] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#e07b12]"
+            className="rounded-xl bg-[#FF6B00] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#e07b12]"
           >
             + Ajouter un produit
           </Link>
@@ -106,10 +106,10 @@ const VendorProducts = () => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <button type="button" onClick={() => navigate(`/product/${p._id}`)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:border-[#F68B1E] hover:text-[#F68B1E]" title="Voir">
+                            <button type="button" onClick={() => navigate(`/product/${p._id}`)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:border-[#FF6B00] hover:text-[#FF6B00]" title="Voir">
                               <ExternalLink size={14} />
                             </button>
-                            <button type="button" onClick={() => navigate(`/vendeur/produits/nouveau?edit=${p._id}`)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:border-[#F68B1E] hover:text-[#F68B1E]" title="Modifier">
+                            <button type="button" onClick={() => navigate(`/vendeur/produits/nouveau?edit=${p._id}`)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:border-[#FF6B00] hover:text-[#FF6B00]" title="Modifier">
                               <Pencil size={14} />
                             </button>
                             <button type="button" onClick={() => handleDelete(p._id, p.name)} className="rounded-lg border border-slate-200 p-2 text-red-500 hover:bg-red-50" title="Supprimer">

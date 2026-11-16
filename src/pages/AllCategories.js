@@ -103,7 +103,7 @@ function StarRow({ tier, active, count, onClick }) {
       onClick={onClick}
       disabled={count === 0}
       className={`flex w-full items-center justify-between rounded-md px-1.5 py-1 text-xs font-semibold transition ${
-        active ? 'bg-[#FFF1E5] text-[#FF6B00]' : 'text-slate-600 hover:bg-slate-50'
+        active ? 'bg-[#FFF3EB] text-[#FF6B00]' : 'text-slate-600 hover:bg-slate-50'
       } ${count === 0 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span className="flex items-center gap-0.5">
@@ -252,7 +252,7 @@ function ActiveFilterChips({ filters, setFilters, onClearAll }) {
           key={chip.key}
           type="button"
           onClick={chip.clear}
-          className="flex items-center gap-1 rounded-full bg-[#FFF1E5] px-3 py-1 text-xs font-semibold text-[#FF6B00] hover:bg-[#FFE4CC]"
+          className="flex items-center gap-1 rounded-full bg-[#FFF3EB] px-3 py-1 text-xs font-semibold text-[#FF6B00] hover:bg-[#FFE4CC]"
         >
           {chip.label} <X size={12} />
         </button>

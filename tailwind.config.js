@@ -15,6 +15,11 @@ module.exports = {
           orange: '#f3a847',
         },
         primary: '#d4af37', // Or Dango
+        brand: {
+          orange: '#FF6B00',
+          hover: '#E55E00',
+          tint: '#FFF3EB',
+        },
         secondary: '#232f3e',
         bg: '#eaeded', // Gris clair Amazon
       },

@@ -63,7 +63,7 @@ const LegalPageLayout = ({
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
-              <Link to="/" className="hover:text-[#F68B1E]">
+              <Link to="/" className="hover:text-[#FF6B00]">
                 Accueil
               </Link>
             </li>
@@ -71,7 +71,7 @@ const LegalPageLayout = ({
               <li key={item.label} className="flex items-center gap-2">
                 <ChevronRight size={14} className="text-slate-400" />
                 {item.to ? (
-                  <Link to={item.to} className="hover:text-[#F68B1E]">
+                  <Link to={item.to} className="hover:text-[#FF6B00]">
                     {item.label}
                   </Link>
                 ) : (
@@ -169,7 +169,7 @@ const LegalPageLayout = ({
                     if (trimmed.startsWith('•')) {
                       return (
                         <p key={idx} className="mt-3 flex gap-3 text-slate-700">
-                          <span className="mt-1 text-lg text-[#F68B1E]">•</span>
+                          <span className="mt-1 text-lg text-[#FF6B00]">•</span>
                           <span>{trimmed.slice(1).trim()}</span>
                         </p>
                       );

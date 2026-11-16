@@ -49,8 +49,8 @@
 }
 
 .ds-checkout__step.is-active {
-  border-color: #f68b1e;
-  background: #f68b1e;
+  border-color: #FF6B00;
+  background: #FF6B00;
   color: #fff;
 }
 
@@ -70,9 +70,9 @@
 }
 
 .ds-shipping-option:has(input:checked) {
-  border-color: #f68b1e;
+  border-color: #FF6B00;
   background: #fff;
-  box-shadow: inset 4px 0 0 #f68b1e;
+  box-shadow: inset 4px 0 0 #FF6B00;
 }
 
 .ds-summary__line--muted {
@@ -230,7 +230,7 @@
   width: 100%;
   margin-top: 1rem;
   padding: 0.85rem 1rem;
-  background: #f68b1e;
+  background: #FF6B00;
   color: #fff;
   border: none;
   font-weight: 700;
@@ -319,7 +319,7 @@
 }
 
 .ds-mm__mode.is-active {
-  border-color: #f68b1e;
+  border-color: #FF6B00;
   background: #fff7ed;
 }
 
@@ -344,7 +344,7 @@
 }
 
 .ds-mm__op.is-active {
-  border-color: #f68b1e;
+  border-color: #FF6B00;
   box-shadow: 0 0 0 2px rgba(246, 139, 30, 0.2);
 }
 

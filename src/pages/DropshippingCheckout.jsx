@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -328,7 +328,7 @@ const DropshippingCheckout = () => {
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <h1 className="text-lg sm:text-xl font-bold m-0">Checkout livraison internationale</h1>
-          <Link to="/cart" className="text-sm font-semibold text-[#f68b1e] whitespace-nowrap">
+          <Link to="/cart" className="text-sm font-semibold text-[#FF6B00] whitespace-nowrap">
             Retour au panier
           </Link>
         </div>

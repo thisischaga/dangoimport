@@ -25,7 +25,7 @@ export default function Livraison() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-[#111827]">En cas de problème</h2>
-            <p className="mt-3 text-sm text-[#475569] leading-7">Si votre livraison est retardée ou si le produit n'arrive pas, contactez notre support via <a href="mailto:contact@dangoimport.com" className="text-[#F68B1E] underline">contact@dangoimport.com</a> ou par WhatsApp au <a href="tel:+2290158266342" className="text-[#F68B1E] underline">+229 0158266342</a>.</p>
+            <p className="mt-3 text-sm text-[#475569] leading-7">Si votre livraison est retardée ou si le produit n'arrive pas, contactez notre support via <a href="mailto:contact@dangoimport.com" className="text-[#FF6B00] underline">contact@dangoimport.com</a> ou par WhatsApp au <a href="tel:+2290158266342" className="text-[#FF6B00] underline">+229 0158266342</a>.</p>
           </div>
         </section>
       </main>

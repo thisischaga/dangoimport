@@ -56,7 +56,7 @@ const VendorLanding = () => {
 
       <section className="border-b border-slate-100 bg-[#0F172A] text-white">
         <div className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#F68B1E]">Programme vendeur</p>
+          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#FF6B00]">Programme vendeur</p>
           <h1 className="text-4xl font-black leading-tight sm:text-5xl">
             Vendez vos produits sur Dango Import
           </h1>
@@ -67,7 +67,7 @@ const VendorLanding = () => {
             <button
               type="button"
               onClick={handleBecomeVendor}
-              className="rounded-xl bg-[#F68B1E] px-8 py-4 text-base font-bold text-white transition hover:bg-[#e07b12]"
+              className="rounded-xl bg-[#FF6B00] px-8 py-4 text-base font-bold text-white transition hover:bg-[#e07b12]"
             >
               {loggedIn && !isVendor() ? 'Devenir vendeur maintenant' : 'Créer un compte vendeur'}
             </button>
@@ -87,7 +87,7 @@ const VendorLanding = () => {
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {WHY.map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF3EA] text-[#F68B1E]">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF3EA] text-[#FF6B00]">
                   <Icon size={22} />
                 </div>
                 <h3 className="font-bold">{title}</h3>
@@ -119,7 +119,7 @@ const VendorLanding = () => {
 
       <section className="bg-[#FFF3EA] py-16">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <Store className="mx-auto mb-4 text-[#F68B1E]" size={36} />
+          <Store className="mx-auto mb-4 text-[#FF6B00]" size={36} />
           <h2 className="text-2xl font-black sm:text-3xl">Frais 0F de commission</h2>
           <p className="mt-3 text-slate-600">
             Aucune commission prélevée sur vos ventes. Vous fixez vos prix, vous gardez vos revenus.
@@ -127,7 +127,7 @@ const VendorLanding = () => {
           <button
             type="button"
             onClick={handleBecomeVendor}
-            className="mt-8 rounded-xl bg-[#F68B1E] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#e07b12]"
+            className="mt-8 rounded-xl bg-[#FF6B00] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#e07b12]"
           >
             Lancer ma boutique
           </button>

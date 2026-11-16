@@ -422,7 +422,7 @@ const Login = () => {
 
                     <Link
                         to="/register"
-                        className="font-bold text-gray-900 hover:text-[#F68B1E] break-words"
+                        className="font-bold text-gray-900 hover:text-[#FF6B00] break-words"
                     >
                         S'inscrire
                     </Link>
@@ -587,7 +587,7 @@ const Login = () => {
                                 <button
                                     disabled={loading}
                                     type="submit"
-                                    className="w-full bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white font-black py-4 px-6 rounded-xl min-h-[52px] text-base flex items-center justify-center gap-3 mt-4 transition-all shadow-md shadow-[#F68B1E]/25 cursor-pointer"
+                                    className="w-full bg-[#FF6B00] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white font-black py-4 px-6 rounded-xl min-h-[52px] text-base flex items-center justify-center gap-3 mt-4 transition-all shadow-md shadow-[#FF6B00]/25 cursor-pointer"
                                 >
 
                                     {loading ? (

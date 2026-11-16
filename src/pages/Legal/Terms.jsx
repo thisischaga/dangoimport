@@ -12,7 +12,7 @@ export default function Terms(){
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <aside className="hidden lg:block">
             <nav className="sticky top-24 space-y-2">
-              {toc.map((t,i)=> <a key={t} href={`#sec${i}`} className="block text-sm text-[#6b7280] hover:text-[#F68B1E]">{t}</a>)}
+              {toc.map((t,i)=> <a key={t} href={`#sec${i}`} className="block text-sm text-[#6b7280] hover:text-[#FF6B00]">{t}</a>)}
             </nav>
           </aside>
           <div className="lg:col-span-3 space-y-6">
@@ -22,7 +22,7 @@ export default function Terms(){
                 <p className="text-sm text-[#6b7280]">Contenu détaillé pour la section {t}. Ce texte explique les conditions et obligations applicables aux utilisateurs.</p>
               </section>
             ))}
-            <div className="flex justify-end"><a href="#top" className="text-sm text-[#F68B1E]">Retour en haut</a></div>
+            <div className="flex justify-end"><a href="#top" className="text-sm text-[#FF6B00]">Retour en haut</a></div>
           </div>
         </div>
       </main>

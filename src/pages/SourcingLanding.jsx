@@ -24,7 +24,7 @@ const STEPS = [
 const CtaButton = ({ className = '' }) => (
   <Link
     to="/sourcing/form"
-    className={`inline-flex items-center justify-center rounded-xl bg-[#F68B1E] px-8 py-4 text-base font-bold text-white transition hover:bg-[#e07b12] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F68B1E] focus-visible:ring-offset-2 ${className}`}
+    className={`inline-flex items-center justify-center rounded-xl bg-[#FF6B00] px-8 py-4 text-base font-bold text-white transition hover:bg-[#e07b12] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00] focus-visible:ring-offset-2 ${className}`}
   >
     Faire une demande de sourcing
   </Link>
@@ -41,11 +41,11 @@ const SourcingLanding = () => (
           className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
-              'radial-gradient(circle at 20% 20%, #F68B1E 0, transparent 40%), radial-gradient(circle at 80% 0%, #0F172A 0, transparent 35%)',
+              'radial-gradient(circle at 20% 20%, #FF6B00 0, transparent 40%), radial-gradient(circle at 80% 0%, #0F172A 0, transparent 35%)',
           }}
         />
         <div className="relative mx-auto flex min-h-[78vh] max-w-4xl flex-col items-start justify-center px-6 py-20 sm:px-8 lg:py-28">
-          <p className="mb-6 text-sm font-semibold tracking-wide text-[#F68B1E]">
+          <p className="mb-6 text-sm font-semibold tracking-wide text-[#FF6B00]">
             Frais d&apos;étude: 5000F — Réponse en 48h
           </p>
           <h1 className="max-w-3xl text-4xl font-black leading-[1.1] tracking-tight text-[#0F172A] sm:text-5xl lg:text-6xl">
@@ -69,7 +69,7 @@ const SourcingLanding = () => (
           <div className="mt-14 grid gap-8 sm:grid-cols-3">
             {STEPS.map((step) => (
               <div key={step.n} className="text-center sm:text-left">
-                <div className="text-sm font-bold tracking-widest text-[#F68B1E]">{step.n}</div>
+                <div className="text-sm font-bold tracking-widest text-[#FF6B00]">{step.n}</div>
                 <h3 className="mt-3 text-xl font-bold text-[#0F172A]">{step.title}</h3>
                 <p className="mt-2 text-slate-600 leading-relaxed">{step.text}</p>
               </div>

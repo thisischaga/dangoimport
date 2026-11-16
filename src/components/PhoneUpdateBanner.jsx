@@ -51,13 +51,13 @@ export default function PhoneUpdateBanner({ user, onUpdated }) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Ex. 90123456"
-            className="rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F68B1E]"
+            className="rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#FF6B00]"
           />
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-lg bg-[#F68B1E] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-lg bg-[#FF6B00] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>

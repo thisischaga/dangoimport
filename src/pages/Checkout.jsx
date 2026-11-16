@@ -91,7 +91,7 @@ function StepperBar({ currentStep }) {
             duration: 0.5,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="absolute left-0 top-5 mx-9 h-[3px] rounded-full bg-gradient-to-r from-[#F68B1E] to-[#FFA94D] sm:mx-10"
+          className="absolute left-0 top-5 mx-9 h-[3px] rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FFA94D] sm:mx-10"
           style={{
             maxWidth: 'calc(100% - 2.25rem)',
           }}
@@ -119,10 +119,10 @@ function StepperBar({ currentStep }) {
                   'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-black transition-all duration-300',
 
                   isCompleted
-                    ? 'border-[#F68B1E] bg-[#F68B1E] text-white shadow-md shadow-orange-200'
+                    ? 'border-[#FF6B00] bg-[#FF6B00] text-white shadow-md shadow-orange-200'
 
                     : isActive
-                    ? 'border-[#F68B1E] bg-white text-[#F68B1E] shadow-md shadow-orange-100 ring-4 ring-orange-50'
+                    ? 'border-[#FF6B00] bg-white text-[#FF6B00] shadow-md shadow-orange-100 ring-4 ring-orange-50'
 
                     : 'border-gray-200 bg-white text-gray-300',
                 ].join(' ')}
@@ -145,7 +145,7 @@ function StepperBar({ currentStep }) {
                   'text-[11px] font-bold tracking-wide transition-colors duration-300',
 
                   isActive
-                    ? 'text-[#F68B1E]'
+                    ? 'text-[#FF6B00]'
                     : isCompleted
                     ? 'text-[#282828]'
                     : 'text-gray-300',
@@ -297,7 +297,7 @@ function PaymentResultModal({
                 'mt-6 w-full rounded-xl py-3.5 text-sm font-black text-white transition',
 
                 success
-                  ? 'bg-[#F68B1E] hover:bg-[#E67A0C]'
+                  ? 'bg-[#FF6B00] hover:bg-[#E55E00]'
                   : 'bg-gray-900 hover:bg-gray-800',
               ].join(' ')}
             >
@@ -359,7 +359,7 @@ function OrderSummaryPanel({
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-base font-black text-[#F68B1E]">
+            <span className="text-base font-black text-[#FF6B00]">
               {previewLoading
                 ? '...'
                 : `${total.toLocaleString('fr-FR')} XOF`}
@@ -426,7 +426,7 @@ function OrderSummaryPanel({
                     className="h-12 w-12 rounded-xl border border-gray-100 bg-gray-50 object-cover"
                   />
 
-                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F68B1E] px-1 text-[9px] font-black text-white ring-2 ring-white">
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FF6B00] px-1 text-[9px] font-black text-white ring-2 ring-white">
                     {item.quantity}
                   </span>
 
@@ -513,7 +513,7 @@ function OrderSummaryPanel({
               Total
             </span>
 
-            <span className="text-lg font-black text-[#F68B1E]">
+            <span className="text-lg font-black text-[#FF6B00]">
               {previewLoading
                 ? '...'
                 : `${total.toLocaleString('fr-FR')} XOF`}
@@ -568,7 +568,7 @@ function IconField({
         {label}
 
         {required && (
-          <span className="ml-0.5 text-[#F68B1E]">
+          <span className="ml-0.5 text-[#FF6B00]">
             *
           </span>
         )}
@@ -918,7 +918,7 @@ function StepShipping({
 
                         isSeller
                           ? 'bg-blue-100 text-blue-600'
-                          : 'bg-orange-100 text-[#F68B1E]',
+                          : 'bg-orange-100 text-[#FF6B00]',
                       ].join(' ')}
                     >
                       <Truck className="h-4 w-4" />
@@ -966,7 +966,7 @@ function StepShipping({
 
                         isSeller
                           ? 'text-blue-500'
-                          : 'text-[#F68B1E]',
+                          : 'text-[#FF6B00]',
                       ].join(' ')}
                     />
 
@@ -994,7 +994,7 @@ function StepShipping({
 
                   overallProvider === 'SELLER'
                     ? 'bg-blue-100 text-blue-600'
-                    : 'bg-orange-100 text-[#F68B1E]',
+                    : 'bg-orange-100 text-[#FF6B00]',
                 ].join(' ')}
               >
                 <Truck className="h-4 w-4" />
@@ -1023,7 +1023,7 @@ function StepShipping({
 
                   overallProvider === 'SELLER'
                     ? 'text-blue-500'
-                    : 'text-[#F68B1E]',
+                    : 'text-[#FF6B00]',
                 ].join(' ')}
               />
 
@@ -1090,7 +1090,7 @@ function StepPayment({
 
           <div className="flex items-start gap-3">
 
-            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]">
+            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#FF6B00]">
               <MapPin className="h-3.5 w-3.5" />
             </div>
 
@@ -1116,7 +1116,7 @@ function StepPayment({
 
           <div className="flex items-start gap-3">
 
-            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#F68B1E]">
+            <div className="mt-0.5 rounded-lg bg-orange-50 p-1.5 text-[#FF6B00]">
               <Truck className="h-3.5 w-3.5" />
             </div>
 
@@ -1180,7 +1180,7 @@ function StepPayment({
           onChange={(e) =>
             setAcceptCGV(e.target.checked)
           }
-          className="mt-1 h-5 w-5 rounded accent-[#F68B1E]"
+          className="mt-1 h-5 w-5 rounded accent-[#FF6B00]"
         />
 
         <span className="text-sm leading-relaxed text-gray-600">
@@ -1205,7 +1205,7 @@ function StepPayment({
           submitting || !acceptCGV || isCalculating
           || (paymentMode === 'mobile_money' && !paymentNetwork)
             ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-            : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E67A0C]',
+            : 'bg-[#FF6B00] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E55E00]',
         ].join(' ')}
       >
 
@@ -3058,7 +3058,7 @@ export default function Checkout() {
               onClick={() =>
                 navigate('/shopping')
               }
-              className="rounded-xl bg-[#F68B1E] px-8 py-3.5 font-black text-white transition-all hover:-translate-y-0.5 hover:bg-[#E67A0C]"
+              className="rounded-xl bg-[#FF6B00] px-8 py-3.5 font-black text-white transition-all hover:-translate-y-0.5 hover:bg-[#E55E00]"
             >
               Continuer le shopping
             </button>
@@ -3218,7 +3218,7 @@ export default function Checkout() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F68B1E] text-sm font-black text-white">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B00] text-sm font-black text-white">
                     {currentStep}
                   </div>
 
@@ -3382,7 +3382,7 @@ export default function Checkout() {
                     'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
                     previewLoading
                       ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                      : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:-translate-y-0.5 hover:bg-[#E67A0C]',
+                      : 'bg-[#FF6B00] text-white shadow-lg shadow-orange-200/40 hover:-translate-y-0.5 hover:bg-[#E55E00]',
                   ].join(' ')}
                 >
                   {previewLoading ? 'Calcul...' : 'Continuer'}
@@ -3437,7 +3437,7 @@ export default function Checkout() {
               Total
             </p>
 
-            <p className="text-base font-black text-[#F68B1E]">
+            <p className="text-base font-black text-[#FF6B00]">
 
               {previewLoading
                 ? '...'
@@ -3462,7 +3462,7 @@ export default function Checkout() {
                 'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black transition-all',
                 previewLoading
                   ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                  : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E67A0C]',
+                  : 'bg-[#FF6B00] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E55E00]',
               ].join(' ')}
             >
               {previewLoading ? 'Calcul...' : 'Continuer'}
@@ -3487,7 +3487,7 @@ export default function Checkout() {
                 !acceptCGV ||
                 previewLoading
                   ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                  : 'bg-[#F68B1E] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E67A0C]',
+                  : 'bg-[#FF6B00] text-white shadow-lg shadow-orange-200/40 hover:bg-[#E55E00]',
               ].join(' ')}
             >
 

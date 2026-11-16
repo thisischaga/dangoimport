@@ -53,7 +53,7 @@ const BANNER_IMAGES = {
 
 const CSS = `
 :root {
-  --hn-orange: #ff6a00;
+  --hn-orange: #ff6b00;
   --hn-dark: #171717;
   --hn-muted: #777;
 }

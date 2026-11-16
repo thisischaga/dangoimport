@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Livraison from './pages/Livraison';
 
 import './App.css';
+import APropos from './pages/APropos';
 import Cgu from './pages/Cgu';
 import PolitiqueRetour from './pages/PolitiqueRetour';
 import MentionsLegales from './pages/MentionsLegales';
@@ -197,14 +198,14 @@ function App() {
                 <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  {/*<Route path="/about" element={<About />} />*/}
+                  <Route path="/about" element={<APropos />} />
+                  <Route path="/a-propos" element={<APropos />} />
                   <Route path='/services' element={<Navigate to='/' replace />} />
                   <Route path='/checkout-sourcing' element={<Navigate to='/' replace />} />
                   <Route path='/cgu' element={<Cgu/>}/>
                   <Route path='/politique-confidentialite' element={<Politique />}/>
                   <Route path='/politique-retour' element={<PolitiqueRetour/>}/>
                   <Route path='/mentions-legales' element={<MentionsLegales />} />
-                  {/**<Route path='/a-propos' element={<APropos />} /> */}
                   {/* Marketplace routes */}
                   <Route path='/shopping' element={<Home/>}/>
                   <Route path='/mes-commandes' element={<Orders/>}/>

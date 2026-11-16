@@ -12,7 +12,7 @@ export default function CartSummary({ onCheckout }) {
       <div className="flex justify-between mb-2"><span className="text-sm text-gray-600">Réduction</span><span className="text-sm text-gray-600">-{fmt(savings)} XOF</span></div>
       <div className="flex justify-between mb-4"><span className="text-sm text-gray-600">Livraison (est.)</span><span className="font-black">{fmt(shipping)} XOF</span></div>
       <div className="border-t pt-4 flex justify-between items-center mb-4"><span className="text-sm text-gray-600">Total</span><span className="text-xl font-black">{fmt(total)} XOF</span></div>
-      <button onClick={onCheckout} className="w-full bg-[#F68B1E] text-white font-black py-3 rounded-full">Passer la commande</button>
+      <button onClick={onCheckout} className="w-full bg-[#FF6B00] text-white font-black py-3 rounded-full">Passer la commande</button>
     </div>
   );
 }

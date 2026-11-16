@@ -25,7 +25,7 @@ export default function Cookies() {
           <p>Dans cet espace, vous pouvez gérer vos préférences de cookies en fonction de votre niveau de confidentialité.</p>
         </div>
         <div className="mt-6 flex justify-start">
-          <button className="inline-flex items-center justify-center rounded-2xl bg-[#F68B1E] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#dd7f0b]">
+          <button className="inline-flex items-center justify-center rounded-2xl bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#dd7f0b]">
             Gérer mes préférences
           </button>
         </div>

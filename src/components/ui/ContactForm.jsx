@@ -32,7 +32,7 @@ export default function ContactForm() {
       </div>
       <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Votre message" rows={5} className="w-full px-3 py-2 border rounded" required />
       <div className="flex justify-end">
-        <button type="submit" disabled={loading} className="bg-[#F68B1E] text-white px-4 py-2 rounded">{loading ? '...' : 'Envoyer'}</button>
+        <button type="submit" disabled={loading} className="bg-[#FF6B00] text-white px-4 py-2 rounded">{loading ? '...' : 'Envoyer'}</button>
       </div>
     </form>
   );

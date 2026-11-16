@@ -38,7 +38,7 @@ const SECTIONS = [
     id: 'droits',
     title: 'ARTICLE 7 : VOS DROITS (RGPD & APDP BÉNIN)',
     html: true,
-    content: `Conformément à la réglementation applicable (RGPD et Livre V du Code du Numérique), vous disposez des droits suivants sur vos données :\n\n• Droit d'accès ;\n• Droit de rectification ;\n• Droit à l'effacement ;\n• Droit à la limitation du traitement ;\n• Droit à la portabilité ;\n• Droit d'opposition ;\n• Droit de retirer votre consentement.\n\nPour exercer vos droits : envoyez votre demande accompagnée d'une copie d'une pièce d'identité à l'adresse : <a href="mailto:privacy@dangoimport.com" class="text-[#F68B1E] underline">privacy@dangoimport.com</a>. Une réponse vous sera apportée sous un délai maximum d'un (01) mois. Si vous estimez que vos droits ne sont pas respectés, vous pouvez porter réclamation auprès de l’APDP.`,
+    content: `Conformément à la réglementation applicable (RGPD et Livre V du Code du Numérique), vous disposez des droits suivants sur vos données :\n\n• Droit d'accès ;\n• Droit de rectification ;\n• Droit à l'effacement ;\n• Droit à la limitation du traitement ;\n• Droit à la portabilité ;\n• Droit d'opposition ;\n• Droit de retirer votre consentement.\n\nPour exercer vos droits : envoyez votre demande accompagnée d'une copie d'une pièce d'identité à l'adresse : <a href="mailto:privacy@dangoimport.com" class="text-[#FF6B00] underline">privacy@dangoimport.com</a>. Une réponse vous sera apportée sous un délai maximum d'un (01) mois. Si vous estimez que vos droits ne sont pas respectés, vous pouvez porter réclamation auprès de l’APDP.`,
   },
   {
     id: 'securite',

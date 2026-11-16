@@ -51,7 +51,7 @@ const OAuthSuccess = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F1F1F1]">
       <div className="bg-white p-8 rounded-xl shadow-lg text-center">
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#F68B1E] rounded-full animate-spin mx-auto mb-4" />
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#FF6B00] rounded-full animate-spin mx-auto mb-4" />
         <h2 className="font-black text-xl">Connexion en cours</h2>
         <p className="text-sm text-gray-500 mt-2">Préparation de votre compte Dango Import...</p>
       </div>

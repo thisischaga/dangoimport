@@ -168,7 +168,7 @@ const Register = () => {
         </div>
         <div className="text-[11px] sm:text-sm text-gray-500 leading-tight text-left sm:text-right">
           J'ai déjà un compte ?{' '}
-          <Link to="/login" className="font-bold text-gray-900 hover:text-[#F68B1E] break-words">Se connecter</Link>
+          <Link to="/login" className="font-bold text-gray-900 hover:text-[#FF6B00] break-words">Se connecter</Link>
         </div>
       </div>
 
@@ -241,7 +241,7 @@ const Register = () => {
                 </div>
               </div>
 
-              <button disabled={loading} type="submit" className="w-full py-4 px-6 text-base font-black rounded-xl bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] flex items-center justify-center gap-2 shadow-md shadow-[#F68B1E]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>ENVOI DU CODE...</span></>) : 'CONTINUER'}</button>
+              <button disabled={loading} type="submit" className="w-full py-4 px-6 text-base font-black rounded-xl bg-[#FF6B00] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] flex items-center justify-center gap-2 shadow-md shadow-[#FF6B00]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>ENVOI DU CODE...</span></>) : 'CONTINUER'}</button>
             </form>
           ) : (
             <form className="mt-8 space-y-6" onSubmit={handleVerifyAndSignup}>
@@ -251,9 +251,9 @@ const Register = () => {
                   <FaShieldAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input required type="text" maxLength={6} placeholder="000000" className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-2xl font-black tracking-[0.5em]" value={formData.otp} onChange={(e) => setFormData({ ...formData, otp: e.target.value })} />
                 </div>
-                <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-bold text-[#F68B1E] uppercase tracking-widest">Modifier l'email</button>
+                <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-bold text-[#FF6B00] uppercase tracking-widest">Modifier l'email</button>
               </div>
-              <button disabled={loading} type="submit" className="w-full flex justify-center items-center gap-2 py-4 px-6 text-base font-black rounded-xl bg-[#F68B1E] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] shadow-md shadow-[#F68B1E]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>VÉRIFICATION...</span></>) : "VÉRIFIER ET S'INSCRIRE"}</button>
+              <button disabled={loading} type="submit" className="w-full flex justify-center items-center gap-2 py-4 px-6 text-base font-black rounded-xl bg-[#FF6B00] hover:bg-[#e07b12] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all min-h-[52px] shadow-md shadow-[#FF6B00]/25 cursor-pointer">{loading ? (<><div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" /><span>VÉRIFICATION...</span></>) : "VÉRIFIER ET S'INSCRIRE"}</button>
             </form>
           )}
           <div className="bg-gray-50 p-4 border-t border-gray-100 text-center">
