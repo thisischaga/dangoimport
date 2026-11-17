@@ -325,7 +325,7 @@ const Footer = () => {
               <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900">
                 Moyens de paiement acceptés
               </h4>
-              <PaymentsGrid />
+              <h1>TOUS LES PAIEMENTS MOBILES DISPONIBLES AU BENIN ET AU TOGO</h1>
             </div>
           </div>
 

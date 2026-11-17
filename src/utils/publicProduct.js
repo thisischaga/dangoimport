@@ -466,6 +466,30 @@ export function sanitizeProductForDisplay(product) {
     }
   }
 
+  // Récupérer le MOQ réel d'usine si présent dans les paliers Alibaba
+  if (isAlibaba || isDropshippingProduct(product)) {
+    const rawMoqCandidates = [
+      product.minimumOrderQuantity,
+      product.moq,
+      sanitized.sourcePriceTiers?.[0]?.minQty,
+      sanitized.sourcePriceTiers?.[0]?.min_quantity,
+      sanitized.publicPriceTiers?.[0]?.minQuantity,
+      sanitized.alibabaSKUs?.[0]?.ladder_price?.[0]?.min_quantity,
+      rawAlibaba.result_data?.skus?.[0]?.ladder_price?.[0]?.min_quantity,
+      product.pricing?.tiers?.[0]?.minQuantity,
+      product.wholesale?.minOrderQuantity,
+      product.wholesaleTrade?.minOrderQuantity,
+    ];
+    for (const cand of rawMoqCandidates) {
+      const n = Math.round(Number(cand));
+      if (Number.isFinite(n) && n > 1) {
+        sanitized.minimumOrderQuantity = n;
+        sanitized.moq = n;
+        break;
+      }
+    }
+  }
+
   // Récupérer le poids pour l'affichage et les calculs de transport
   if (!sanitized.weight) {
     const rawWeight = (

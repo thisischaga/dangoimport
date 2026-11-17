@@ -12,6 +12,7 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../components/ui/ToastProvider';
 import { sanitizeProductForDisplay, getProductSellableStock } from '../utils/publicProduct';
 import { getProductImage } from '../utils/imageUrl';
+import { getMoqRules } from '../utils/importMoq';
 import './CategoryPage.css';
 
 /* ─── API ──────────────────────────────────────────────────────────────── */
@@ -174,6 +175,12 @@ function ProductMiniCard({ product, onAddToCart }) {
             <span className="cat-card__old-price">{formatXOF(originalPrice)}</span>
           )}
         </div>
+
+        {getMoqRules(sanitized).moq > 1 && (
+          <p className="text-[11px] font-bold text-[#FF6B00] mt-0.5">
+            Min. {getMoqRules(sanitized).moq} {getMoqRules(sanitized).soldAsLot ? 'unités (lot)' : 'unités'}
+          </p>
+        )}
 
         <div className="cat-card__rating">
           <span className="stars">{starString(rating)}</span>

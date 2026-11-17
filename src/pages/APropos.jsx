@@ -29,9 +29,6 @@ const APropos = () => {
           <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-[#FF6B00]/5 blur-2xl pointer-events-none" />
 
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF6B00]/10 text-[#FF6B00] text-xs font-bold uppercase tracking-wider mb-6">
-              <Sparkles size={14} /> La passerelle Chine – Afrique de l'Ouest
-            </span>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
               Du fabricant jusqu’à votre porte,{' '}
@@ -42,21 +39,7 @@ const APropos = () => {
               Dango Import simplifie l’importation de produits depuis la Chine vers le Togo et le Bénin. Nous connectons les particuliers, commerçants et entreprises directement aux meilleures usines certifiées.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                to="/shopping"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#FF6B00] text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:bg-[#E55E00] hover:shadow-orange-500/35 transition-all transform hover:-translate-y-0.5"
-              >
-                Explorer le catalogue
-                <ArrowRight size={16} />
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-sm shadow-sm hover:border-[#FF6B00] hover:text-[#FF6B00] transition-all"
-              >
-                Contacter notre équipe
-              </Link>
-            </div>
+            
           </div>
         </section>
 
@@ -66,20 +49,20 @@ const APropos = () => {
         <section className="py-12 bg-white border-b border-slate-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
-              <div className="p-4 rounded-2xl bg-[#FFF9F5] border border-orange-100/80">
-                <p className="text-3xl sm:text-4xl font-black text-[#FF6B00]">100%</p>
+              <div className="p-4 rounded-2xl ">
+                <p className="text-3xl sm:text-4xl font-black text-[#000]">100%</p>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">Direct usine certifiée</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#FFF9F5] border border-orange-100/80">
-                <p className="text-3xl sm:text-4xl font-black text-[#FF6B00]">20–30 j</p>
+              <div className="p-4 rounded-2xl ">
+                <p className="text-3xl sm:text-4xl font-black text-[#000]">20–30 j</p>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">Délai estimé moyen</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#FFF9F5] border border-orange-100/80">
-                <p className="text-3xl sm:text-4xl font-black text-[#FF6B00]">0 CFA</p>
+              <div className="p-4 rounded-2xl ">
+                <p className="text-3xl sm:text-4xl font-black text-[#000]">0 CFA</p>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">Frais cachés</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#FFF9F5] border border-orange-100/80">
-                <p className="text-3xl sm:text-4xl font-black text-[#FF6B00]">2 Pays</p>
+              <div className="p-4 rounded-2xl ">
+                <p className="text-3xl sm:text-4xl font-black text-[#000]">2 Pays</p>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">Togo & Bénin couverts</p>
               </div>
             </div>
@@ -108,14 +91,12 @@ const APropos = () => {
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-[#FF6B00] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">Transparence des coûts</h4>
                       <p className="text-xs text-slate-500 mt-0.5">Prix produit en FCFA + fret au kilo clair.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-[#FF6B00] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">Paiement Mobile Money</h4>
                       <p className="text-xs text-slate-500 mt-0.5">T-Money, Moov, MTN, Celtiis & Carte.</p>
@@ -133,15 +114,12 @@ const APropos = () => {
 
                 <div className="border-t border-slate-700/80 pt-6 space-y-4">
                   <div className="flex items-center gap-3">
-                    <Building2 className="text-[#FF6B00] shrink-0" size={20} />
                     <span className="text-sm font-medium text-slate-200">Siège opérationnel à Lomé (Togo) et Cotonou (Bénin)</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Users2 className="text-[#FF6B00] shrink-0" size={20} />
                     <span className="text-sm font-medium text-slate-200">Équipe d'agents bilingues en Chine pour le contrôle d'usine</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Truck className="text-[#FF6B00] shrink-0" size={20} />
                     <span className="text-sm font-medium text-slate-200">Réseau de distribution local rapide et sécurisé</span>
                   </div>
                 </div>
@@ -168,9 +146,7 @@ const APropos = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Pilier 1 */}
               <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-[#FF6B00]/40 hover:shadow-md transition-all">
-                <div className="h-12 w-12 rounded-xl bg-[#FFF3EB] text-[#FF6B00] flex items-center justify-center mb-5">
-                  <Factory size={24} />
-                </div>
+                
                 <h3 className="text-base font-bold text-slate-900 mb-2">Direct Fabricant</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Accédez aux prix de gros réels directement sortis d'usine, sans marges de revendeurs superflues.
@@ -179,9 +155,7 @@ const APropos = () => {
 
               {/* Pilier 2 */}
               <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-[#FF6B00]/40 hover:shadow-md transition-all">
-                <div className="h-12 w-12 rounded-xl bg-[#FFF3EB] text-[#FF6B00] flex items-center justify-center mb-5">
-                  <ShieldCheck size={24} />
-                </div>
+                
                 <h3 className="text-base font-bold text-slate-900 mb-2">Contrôle Qualité</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Chaque article est inspecté dans nos entrepôts de transit avant son embarquement pour l'Afrique.
@@ -190,9 +164,7 @@ const APropos = () => {
 
               {/* Pilier 3 */}
               <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-[#FF6B00]/40 hover:shadow-md transition-all">
-                <div className="h-12 w-12 rounded-xl bg-[#FFF3EB] text-[#FF6B00] flex items-center justify-center mb-5">
-                  <PlaneTakeoff size={24} />
-                </div>
+                
                 <h3 className="text-base font-bold text-slate-900 mb-2">Fret & Dédouanement</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Tarifs clairs au kilo, gestion douanière intégrée et suivi de votre colis jusqu'à son arrivée locale.
@@ -201,9 +173,7 @@ const APropos = () => {
 
               {/* Pilier 4 */}
               <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-[#FF6B00]/40 hover:shadow-md transition-all">
-                <div className="h-12 w-12 rounded-xl bg-[#FFF3EB] text-[#FF6B00] flex items-center justify-center mb-5">
-                  <Wallet size={24} />
-                </div>
+                
                 <h3 className="text-base font-bold text-slate-900 mb-2">Paiement Local Sécurisé</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Payez simplement en FCFA par Mobile Money (T-Money, Moov, MTN, Celtiis) sans compte en devises étrangères.

@@ -697,43 +697,46 @@ export default function ProductDetail() {
   const alibabaInfo = useMemo(() => (isAlibaba ? extractAlibabaDisplayInfo(product) : {}), [product, isAlibaba]);
 
   /* Specs : top 6 en colonne + reste dans la fiche technique */
-  const { topSpecs, restGroups } = useMemo(() => {
+  const { topSpecs, restSpecs } = useMemo(() => {
     const norm = (k) => String(k).toLowerCase().replace(/[^a-zà-ÿ0-9]/g, '');
+    const isUselessVal = (v) => {
+      if (v == null) return true;
+      const s = String(v).trim().toLowerCase();
+      return !s || /^(none|no|n\/a|na|null|undefined|-|--|aucun|aucune|sans|\/)$/i.test(s);
+    };
     const seenKeys = new Set();
     const seenVals = [];
-    const groups = [];
-    const push = (title, rows) => {
-      const kept = rows.filter((r) => {
-        const k = norm(r.key);
-        const v = norm(r.value);
-        if (!k || !v || seenKeys.has(k)) return false;
-        if (seenVals.some((o) => o.v === v && (o.k.includes(k) || k.includes(o.k)))) return false;
-        seenKeys.add(k);
-        seenVals.push({ k, v });
-        return true;
-      });
-      if (kept.length) groups.push({ title, rows: kept });
+    const allRows = [];
+
+    const addRow = (key, value) => {
+      if (!key || isUselessVal(value)) return;
+      const k = norm(key);
+      const v = norm(value);
+      if (!k || !v || seenKeys.has(k)) return;
+      if (seenVals.some((o) => o.v === v && (o.k.includes(k) || k.includes(o.k)))) return;
+      seenKeys.add(k);
+      seenVals.push({ k, v });
+      allRows.push({ key: String(key).trim(), value: String(value).trim() });
     };
-    push('Général', (detailData?.specifications || [])
+
+    (detailData?.specifications || [])
       .filter((x) => x?.key && x?.value && !/^marque$/i.test(x.key))
-      .map((x) => ({ key: String(x.key), value: String(x.value) })));
-    extras.groups.forEach((g) => push(g.title, g.rows));
+      .forEach((x) => addRow(x.key, x.value));
+
+    (extras?.groups || []).forEach((g) => {
+      (g.rows || []).forEach((r) => addRow(r.key, r.value));
+    });
 
     const priority = /capacit|mat[ée]riau|dimension|poids|r[ée]f|origine|fabrication|couleur|type/i;
-    const flat = groups.flatMap((g) => g.rows.map((r) => ({ ...r, group: g.title })));
-    const ranked = [...flat.filter((r) => priority.test(r.key)), ...flat.filter((r) => !priority.test(r.key))];
+    const ranked = [...allRows.filter((r) => priority.test(r.key)), ...allRows.filter((r) => !priority.test(r.key))];
     const top = ranked.slice(0, 6);
-    const topIds = new Set(top.map((r) => `${r.group}|${r.key}`));
-    const rest = groups
-      .map((g) => ({ title: g.title, rows: g.rows.filter((r) => !topIds.has(`${g.title}|${r.key}`)) }))
-      .filter((g) => g.rows.length);
-    return { topSpecs: top, restGroups: rest };
-  }, [detailData?.specifications, extras.groups]);
+    const topKeys = new Set(top.map((r) => norm(r.key)));
+    const rest = allRows.filter((r) => !topKeys.has(norm(r.key)));
+    return { topSpecs: top, restSpecs: rest };
+  }, [detailData?.specifications, extras?.groups]);
 
-  const restCount = restGroups.reduce((n, g) => n + g.rows.length, 0);
   const hasSkuOptions = Boolean(isAlibaba && alibabaInfo?.hasSkus);
-  const specCardCount = restGroups.length + (hasSkuOptions ? 1 : 0);
-  const showSpecsBand = restCount > 0 || hasSkuOptions;
+  const showSpecsBand = restSpecs.length > 0 || hasSkuOptions;
 
   /* Conditionnement */
   const wh = detailData?.wholesale;
@@ -1120,13 +1123,13 @@ export default function ProductDetail() {
             <section ref={specsRef} className="pd-band pd-band--alt" id="specs">
               <div className="pd-inner">
                 <SectionHead eyebrow="Données techniques" title="Fiche technique" lead="Informations détaillées fournies par le fabricant." />
-                <div className={`pd-specgrid${specCardCount === 1 ? ' pd-specgrid--single' : ''}`}>
-                  {restGroups.map((g) => (
-                    <div key={g.title} className="pd-card">
-                      <h3 className="pd-card__title">{g.title}</h3>
-                      <Rows rows={g.rows} />
+                <div className={`pd-specgrid${!hasSkuOptions ? ' pd-specgrid--single' : ''}`}>
+                  {restSpecs.length > 0 && (
+                    <div className="pd-card">
+                      <h3 className="pd-card__title">Caractéristiques techniques</h3>
+                      <Rows rows={restSpecs} />
                     </div>
-                  ))}
+                  )}
                   {hasSkuOptions && (
                     <div className="pd-card">
                       <h3 className="pd-card__title">Options disponibles</h3>

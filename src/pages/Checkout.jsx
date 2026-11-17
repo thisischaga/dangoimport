@@ -31,7 +31,6 @@ import {
   initiateFedapayCheckout,
   buildCartFedapayPayload,
 } from '../services/fedapayCheckout';
-import MobileMoneyPicker from '../components/MobileMoneyPicker';
 
 import { calculateDeliveryOptions } from '../api';
 import { io as socketIOClient } from 'socket.io-client';
@@ -1142,14 +1141,20 @@ function StepPayment({
       </div>
 
 
-      <MobileMoneyPicker
-        countryCode={form.country}
-        phone={form.phone}
-        network={paymentNetwork}
-        onNetworkChange={setPaymentNetwork}
-        paymentMode={paymentMode}
-        onPaymentModeChange={setPaymentMode}
-      />
+      {/* Mode de paiement */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-[#FF6B00]">
+            <Lock className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-gray-900 m-0">Paiement sécurisé en ligne</h4>
+            <p className="text-xs text-gray-600 m-0 mt-0.5">
+              Réglez en toute sécurité par <strong>Mobile Money</strong> (T-Money, Moov, MTN, Celtiis) ou <strong>Carte Bancaire</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Secure payment */}
       <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3 text-gray-400">
@@ -1165,7 +1170,7 @@ function StepPayment({
 
         <div className="flex items-center gap-1.5 text-[11px] font-bold">
           <Smartphone className="h-4 w-4 text-gray-400" />
-          Mobile Money
+          Mobile Money & Carte
         </div>
 
       </div>
@@ -1197,13 +1202,11 @@ function StepPayment({
         onClick={handlePlaceOrder}
         disabled={
           submitting || !acceptCGV || isCalculating
-          || (paymentMode === 'mobile_money' && !paymentNetwork)
         }
         className={[
           'group relative w-full overflow-hidden rounded-xl py-4 text-sm font-black tracking-wide transition-all duration-200',
 
           submitting || !acceptCGV || isCalculating
-          || (paymentMode === 'mobile_money' && !paymentNetwork)
             ? 'cursor-not-allowed bg-gray-200 text-gray-400'
             : 'bg-[#FF6B00] text-white shadow-lg shadow-orange-200/50 hover:-translate-y-0.5 hover:bg-[#E55E00]',
         ].join(' ')}
@@ -1224,12 +1227,11 @@ function StepPayment({
           ) : (
             <>
               <Lock className="h-4 w-4" />
-              Confirmer et payer{' '}
-              {previewLoading
+              Procéder au paiement ({previewLoading
                 ? '...'
                 : `${computedTotal.toLocaleString(
                     'fr-FR'
-                  )} XOF`}
+                  )} XOF`})
             </>
           )}
 
@@ -1313,7 +1315,7 @@ export default function Checkout() {
     useState(false);
 
   const [paymentMode, setPaymentMode] =
-    useState('mobile_money');
+    useState('redirect');
 
   const [paymentNetwork, setPaymentNetwork] =
     useState('');

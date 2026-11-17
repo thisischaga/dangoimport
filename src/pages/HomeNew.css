@@ -657,6 +657,14 @@
 }
 .hn-drawer__apply:hover { background: var(--hn-orange-h); }
 
+.hn-product__moq {
+  margin: 3px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--hn-orange);
+  line-height: 1.25;
+}
+
 /* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
 @media (max-width: 1200px) {
   .hn-grid { grid-template-columns: repeat(4, 1fr); }

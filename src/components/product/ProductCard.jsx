@@ -223,6 +223,11 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
             <span className="pc3__price"><span className="pc3__amount pc3__amount--text">{formatSoftS(displayPrice)}</span></span>
           )}
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
+          {moq > 1 && (
+            <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap mt-0.5">
+              ≥ {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
+            </span>
+          )}
         </div>
       </div>
     </article>

@@ -16,11 +16,79 @@ export function parseWeightKg(product = {}) {
   return n > 30 ? Math.round((n / 1000) * 1000) / 1000 : Math.round(n * 1000) / 1000;
 }
 
+export function extractRealProductMoq(product = {}) {
+  if (!product || typeof product !== 'object') return 1;
+
+  // 1. Direct explicit MOQ
+  const candidates = [
+    product.minimumOrderQuantity,
+    product.moq,
+    product.minOrderQuantity,
+    product.minQuantity,
+    product.wholesale?.minOrderQuantity,
+    product.wholesaleTrade?.minOrderQuantity,
+    product.supplier?.wholesaleTrade?.minOrderQuantity,
+  ];
+
+  // 2. Extraire depuis publicPriceTiers (paliers de prix calculés)
+  if (Array.isArray(product.publicPriceTiers) && product.publicPriceTiers.length > 0) {
+    const firstTier = product.publicPriceTiers[0];
+    const tierMin = firstTier?.minQuantity || firstTier?.minQty || firstTier?.min;
+    if (tierMin) candidates.push(tierMin);
+  }
+
+  // 3. Extraire depuis sourcePriceTiers (USD ou direct)
+  if (Array.isArray(product.sourcePriceTiers) && product.sourcePriceTiers.length > 0) {
+    const firstTier = product.sourcePriceTiers[0];
+    const tierMin = firstTier?.minQty || firstTier?.min_quantity || firstTier?.minQuantity || firstTier?.min;
+    if (tierMin) candidates.push(tierMin);
+  }
+
+  // 4. Extraire depuis pricing.tiers ou pricing.sourcePriceTiers
+  if (Array.isArray(product.pricing?.tiers) && product.pricing.tiers.length > 0) {
+    const firstTier = product.pricing.tiers[0];
+    const tierMin = firstTier?.minQuantity || firstTier?.minQty || firstTier?.min;
+    if (tierMin) candidates.push(tierMin);
+  }
+
+  // 5. Extraire depuis alibabaSKUs / ladder_price
+  const ladder = product.alibabaSKUs?.[0]?.ladder_price
+    || product.supplier?.ladderPrices
+    || product.variants?.[0]?.ladderPrices
+    || product.rawPayload?.result_data?.skus?.[0]?.ladder_price
+    || product.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price;
+  if (Array.isArray(ladder) && ladder.length > 0) {
+    const firstLadder = ladder[0];
+    const ladderMin = firstLadder?.min_quantity || firstLadder?.minQuantity || firstLadder?.minQty || firstLadder?.min;
+    if (ladderMin) candidates.push(ladderMin);
+  }
+
+  // Trouver la première valeur numérique valide > 1
+  for (const c of candidates) {
+    const n = Math.round(Number(c));
+    if (Number.isFinite(n) && n > 1) {
+      return n;
+    }
+  }
+
+  // Si explicitement défini comme 1
+  const directExplicit = Number(product.minimumOrderQuantity || product.moq);
+  if (Number.isFinite(directExplicit) && directExplicit >= 1) {
+    return Math.round(directExplicit);
+  }
+
+  return 1;
+}
+
 export function getMoqRules(product = {}) {
   const isImport = product?.sourceType === 'DROPSHIPPING'
     || product?.importFeesAtCheckout
     || product?.fulfillmentType === 'DANGO_IMPORT'
+    || product?.source === 'ALIBABA'
+    || product?.isAlibaba
     || String(product?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+
+  const realFactoryMoq = extractRealProductMoq(product);
 
   const unit = Number(product.unitPrice ?? product.price ?? 0);
   const weight = parseWeightKg(product);
@@ -38,7 +106,7 @@ export function getMoqRules(product = {}) {
     dynamicMoq = Math.min(MAX_MOQ_CAP, Math.max(1, rawMoq));
   }
 
-  const explicitMoq = Math.max(dynamicMoq, Math.round(Number(product.minimumOrderQuantity) || dynamicMoq));
+  const explicitMoq = Math.max(realFactoryMoq, dynamicMoq);
   const moq = explicitMoq;
 
   const hasIncrement = product.quantityIncrement != null && product.quantityIncrement !== '';
