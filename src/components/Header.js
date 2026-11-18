@@ -1,16 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-
 import {
   Search,
   Menu,
@@ -39,24 +30,15 @@ export function buildCategoryHref(name, slug = '') {
   return `/shopping?category=${encodeURIComponent(safe)}`;
 }
 
-const PANEL_ITEMS = [
-  {
-    title: 'Direct usine',
-    text: 'Sourcing auprès de fabricants certifiés, sans intermédiaire ni surcoût.',
-  },
-  {
-    title: 'Contrôle qualité',
-    text: "Inspection physique rigoureuse avant l'embarquement.",
-  },
-  {
-    title: 'Transit & livraison',
-    text: 'Fret calculé au kilo réel (10 000 F/kg), avec livraison locale.',
-  },
-  {
-    title: 'Paiement local sécurisé',
-    text: 'T-Money, Moov, MTN, Celtiis et carte bancaire.',
-  },
+const ABOUT_POINTS = [
+  { title: 'Direct usine', text: 'Sourcing auprès de fabricants certifiés, sans intermédiaire ni surcoût.' },
+  { title: 'Contrôle qualité', text: "Inspection physique rigoureuse avant l'embarquement." },
+  { title: 'Transit & livraison', text: 'Fret calculé au kilo réel (10 000 F/kg), avec livraison locale.' },
+  { title: 'Paiement local sécurisé', text: 'T-Money, Moov, Flooz et carte bancaire.' },
 ];
+
+const ABOUT_IMAGE =
+  'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80';
 
 // --------------------------------------------------
 // LOGO
@@ -70,7 +52,7 @@ function BrandLogo({ onClick }) {
       aria-label="Accueil Dango import"
       className="flex shrink-0 items-baseline whitespace-nowrap tracking-[-1.2px]"
     >
-      <span className="text-[22px] font-black leading-none text-white sm:text-[25px] lg:text-[28px]">
+      <span className="text-[22px] font-black leading-none text-[#FF6B00] sm:text-[25px] lg:text-[28px]">
         Dango
       </span>
       <span className="ml-0.5 text-[22px] font-black leading-none text-slate-900 sm:text-[25px] lg:text-[28px]">
@@ -81,7 +63,7 @@ function BrandLogo({ onClick }) {
 }
 
 // --------------------------------------------------
-// RECHERCHE
+// BARRE DE RECHERCHE (bordure orange, bouton orange intégré)
 // --------------------------------------------------
 
 function SearchBox({
@@ -101,15 +83,9 @@ function SearchBox({
       <form
         onSubmit={onSubmit}
         role="search"
-        className={`flex w-full items-center overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 focus-within:shadow-md ${
-          compact ? 'h-11' : 'h-[50px]'
-        }`}
+        className="flex h-11 w-full items-center overflow-hidden rounded-full border-2 border-[#FF6B00] bg-white transition-shadow duration-200 focus-within:shadow-[0_0_0_3px_rgba(255,107,0,0.15)]"
       >
-        <Search
-          size={18}
-          strokeWidth={1.8}
-          className="ml-3.5 shrink-0 text-slate-400"
-        />
+        <Search size={18} strokeWidth={1.8} className="ml-4 shrink-0 text-slate-400" />
 
         <input
           ref={inputRef}
@@ -129,7 +105,7 @@ function SearchBox({
             type="button"
             onClick={onClear}
             aria-label="Effacer la recherche"
-            className="mr-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
           >
             <X size={16} />
           </button>
@@ -142,7 +118,7 @@ function SearchBox({
             compact ? 'w-12' : 'px-7 text-sm'
           }`}
         >
-          {compact ? <Search size={18} /> : 'Rechercher'}
+          {compact ? <Search size={18} /> : <span>Rechercher</span>}
         </button>
       </form>
 
@@ -208,7 +184,6 @@ const Header = () => {
     };
 
     updateHeight();
-
     const observer = new ResizeObserver(updateHeight);
     observer.observe(element);
 
@@ -268,11 +243,7 @@ const Header = () => {
 
   const activeCategory = useMemo(
     () =>
-      categories.find(
-        (category) => (category.slug || category.name) === activeCatKey
-      ) ||
-      categories[0] ||
-      null,
+      categories.find((c) => (c.slug || c.name) === activeCatKey) || categories[0] || null,
     [categories, activeCatKey]
   );
 
@@ -327,9 +298,7 @@ const Header = () => {
 
     const timer = setTimeout(async () => {
       try {
-        const res = await client.get(
-          `/products?limit=5&search=${encodeURIComponent(trimmed)}`
-        );
+        const res = await client.get(`/products?limit=5&search=${encodeURIComponent(trimmed)}`);
         const items = Array.isArray(res?.data?.data)
           ? res.data.data
           : Array.isArray(res?.data?.products)
@@ -395,7 +364,7 @@ const Header = () => {
   }, []);
 
   // --------------------------------------------------
-  // HOVER : CATÉGORIES & À PROPOS
+  // SURVOL : CATÉGORIES & À PROPOS
   // --------------------------------------------------
 
   const openCats = useCallback(() => {
@@ -449,12 +418,10 @@ const Header = () => {
   const handleSearchSubmit = useCallback(
     (event) => {
       if (event) event.preventDefault();
-
       const query = searchQuery.trim();
       setShowSuggestions(false);
       searchInputRef.current?.blur();
       mobileSearchInputRef.current?.blur();
-
       navigate(query ? `/shopping?q=${encodeURIComponent(query)}` : '/shopping');
     },
     [navigate, searchQuery]
@@ -469,31 +436,24 @@ const Header = () => {
   }, []);
 
   // --------------------------------------------------
-  // INFOS UTILISATEUR
+  // INFOS UTILISATEUR & ÉTATS DE NAVIGATION
   // --------------------------------------------------
 
   const userName = useMemo(
-    () =>
-      user?.userFirstname ||
-      user?.firstname ||
-      user?.name ||
-      user?.userName ||
-      '',
+    () => user?.userFirstname || user?.firstname || user?.name || user?.userName || '',
     [user]
   );
 
-  const userInitial = (userName || 'M').charAt(0).toUpperCase();
   const onHome = location.pathname === '/';
   const onCart = location.pathname.startsWith('/cart');
   const onAccount =
-    location.pathname.startsWith('/mes-commandes') ||
-    location.pathname.startsWith('/login');
+    location.pathname.startsWith('/mes-commandes') || location.pathname.startsWith('/login');
 
   const trimmedQuery = searchQuery.trim();
   const cartLabel = cartCount > 99 ? '99+' : cartCount;
 
   // --------------------------------------------------
-  // PANEL SUGGESTIONS
+  // PANNEAU SUGGESTIONS
   // --------------------------------------------------
 
   const suggestionsPanel = (
@@ -504,7 +464,7 @@ const Header = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}
           transition={{ duration: 0.15 }}
-          className="absolute left-0 right-0 top-full z-[80] mt-2 overflow-hidden rounded-xl bg-white shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
+          className="absolute left-0 right-0 top-full z-[80] mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
         >
           {suggestionLoading && suggestions.length === 0 && (
             <p className="px-4 py-4 text-sm text-slate-400">Recherche en cours...</p>
@@ -574,8 +534,8 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className={`fixed left-0 right-0 top-0 z-40 bg-[#FF6B00] transition-shadow duration-200 ${
-          scrolled ? 'shadow-[0_4px_20px_rgba(0,0,0,0.18)]' : ''
+        className={`fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white transition-shadow duration-200 ${
+          scrolled ? 'shadow-[0_4px_18px_rgba(0,0,0,0.08)]' : ''
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
@@ -583,37 +543,11 @@ const Header = () => {
 
         {/* ========== MOBILE & TABLETTE ========== */}
         <div className="lg:hidden">
-          <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-6">
+          <div className="flex h-14 items-center justify-center px-4 sm:px-6">
             <BrandLogo onClick={() => navigate('/')} />
-
-            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-              <Link
-                to="/a-propos"
-                className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white transition hover:bg-white/15 sm:text-sm"
-              >
-                À propos
-              </Link>
-
-              {user ? (
-                <Link
-                  to="/mes-commandes"
-                  aria-label="Mon compte"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-[#FF6B00] shadow-sm"
-                >
-                  {userInitial}
-                </Link>
-              ) : (
-                <Link
-                  to="/login"
-                  className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#FF6B00] shadow-sm transition hover:bg-orange-50 sm:text-sm"
-                >
-                  Connexion
-                </Link>
-              )}
-            </div>
           </div>
 
-          <div className="px-3 pb-3 sm:px-6">
+          <div className="px-4 pb-3 sm:px-6">
             <SearchBox
               wrapperRef={mobileSearchRef}
               inputRef={mobileSearchInputRef}
@@ -633,60 +567,10 @@ const Header = () => {
           </div>
         </div>
 
-        {/* ========== DESKTOP ========== */}
-        <div className="mx-auto hidden h-[76px] max-w-[1440px] items-center gap-4 px-6 lg:flex xl:gap-6 xl:px-10">
+        {/* ========== DESKTOP : LIGNE 1 ========== */}
+        <div className="mx-auto hidden max-w-[1440px] items-center gap-6 px-6 pb-3 pt-3 lg:flex xl:px-10">
           <BrandLogo onClick={() => navigate('/')} />
 
-          {/* CATÉGORIES */}
-          <div
-            ref={catTriggerRef}
-            className="relative shrink-0"
-            onMouseEnter={openCats}
-            onMouseLeave={closeCatsLater}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setAboutOpen(false);
-                setCatOpen((value) => !value);
-              }}
-              aria-expanded={catOpen}
-              className={`flex h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition ${
-                catOpen ? 'bg-white text-[#FF6B00] shadow-sm' : 'text-white hover:bg-white/15'
-              }`}
-            >
-              <Menu size={19} strokeWidth={2} />
-              <span>Toutes les catégories</span>
-              <ChevronDown
-                size={15}
-                className={`transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-          </div>
-
-          {/* À PROPOS */}
-          <div
-            ref={aboutTriggerRef}
-            className="relative shrink-0"
-            onMouseEnter={openAbout}
-            onMouseLeave={closeAboutLater}
-          >
-            <Link
-              to="/a-propos"
-              onClick={() => setAboutOpen(false)}
-              className={`flex h-11 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition ${
-                aboutOpen ? 'bg-white text-[#FF6B00] shadow-sm' : 'text-white hover:bg-white/15'
-              }`}
-            >
-              <span>À propos</span>
-              <ChevronDown
-                size={15}
-                className={`transition-transform duration-200 ${aboutOpen ? 'rotate-180' : ''}`}
-              />
-            </Link>
-          </div>
-
-          {/* RECHERCHE */}
           <SearchBox
             wrapperRef={searchRef}
             inputRef={searchInputRef}
@@ -703,88 +587,164 @@ const Header = () => {
             {suggestionsPanel}
           </SearchBox>
 
-          {/* PANIER */}
-          <Link
-            to="/cart"
-            aria-label={`Panier (${cartCount} articles)`}
-            className={`flex h-11 shrink-0 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold text-white transition hover:bg-white/15 ${
-              onCart ? 'bg-white/20' : ''
-            }`}
+          <div className="flex shrink-0 items-center gap-5 text-sm text-slate-600">
+            <div className="leading-tight">
+              <p className="text-[11px] text-slate-400">Livraison à</p>
+              <p className="font-semibold text-slate-800">Togo, Bénin</p>
+            </div>
+
+            <Link
+              to="/cart"
+              aria-label={`Panier (${cartCount} articles)`}
+              className={`flex items-center gap-2 font-semibold transition hover:text-[#FF6B00] ${
+                onCart ? 'text-[#FF6B00]' : 'text-slate-800'
+              }`}
+            >
+              <ShoppingCart size={20} strokeWidth={2} />
+              <span>
+                Panier
+                {cartCount > 0 && <span className="ml-1 text-[#FF6B00]">({cartLabel})</span>}
+              </span>
+            </Link>
+
+            <div className="relative" ref={accountRef}>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((value) => !value)}
+                  aria-expanded={accountOpen}
+                  className="flex items-center gap-2 font-semibold text-slate-800 transition hover:text-[#FF6B00]"
+                >
+                  <UserRound size={20} strokeWidth={2} />
+                  <span className="max-w-[140px] truncate">{userName || 'Mon compte'}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-200 ${accountOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex h-10 items-center justify-center rounded-full bg-[#FF6B00] px-6 text-sm font-bold text-white transition hover:bg-[#E55E00]"
+                >
+                  Se connecter
+                </Link>
+              )}
+
+              <AnimatePresence>
+                {accountOpen && user && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full z-[80] mt-3 w-60 overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
+                  >
+                    <div className="px-3 py-3">
+                      <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                      <p className="truncate text-xs text-slate-500">{user.userEmail || user.email}</p>
+                    </div>
+
+                    <div className="my-1 h-px bg-slate-100" />
+
+                    <Link
+                      to="/mes-commandes"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#FFF3EB] hover:text-[#FF6B00]"
+                    >
+                      <Package size={17} />
+                      Mes commandes
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                    >
+                      <LogOut size={17} />
+                      Déconnexion
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        {/* ========== DESKTOP : LIGNE 2 (navigation) ========== */}
+        <div className="mx-auto hidden h-11 max-w-[1440px] items-center gap-2 border-t border-slate-100 px-6 lg:flex xl:px-10">
+          <div
+            ref={catTriggerRef}
+            className="relative shrink-0"
+            onMouseEnter={openCats}
+            onMouseLeave={closeCatsLater}
           >
-            <ShoppingCart size={21} strokeWidth={2} />
-            <span>
-              Panier
-              {cartCount > 0 && <span className="ml-1 font-black">({cartLabel})</span>}
-            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setAboutOpen(false);
+                setCatOpen((value) => !value);
+              }}
+              aria-expanded={catOpen}
+              className={`flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                catOpen ? 'bg-[#FFF3EB] text-[#FF6B00]' : 'text-slate-800 hover:bg-slate-100'
+              }`}
+            >
+              <Menu size={18} strokeWidth={2} />
+              <span>Toutes les catégories</span>
+              <ChevronDown
+                size={15}
+                className={`transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+          </div>
+
+          <Link
+            to="/shopping"
+            className="flex h-9 items-center rounded-lg px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-[#FF6B00]"
+          >
+            Boutique
           </Link>
 
-          {/* COMPTE */}
-          <div className="relative shrink-0" ref={accountRef}>
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setAccountOpen((value) => !value)}
-                aria-expanded={accountOpen}
-                className="flex h-11 max-w-[200px] items-center gap-2.5 rounded-xl px-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
-              >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-[#FF6B00]">
-                  {userInitial}
-                </span>
-                <span className="truncate">{userName || 'Mon compte'}</span>
-                <ChevronDown
-                  size={14}
-                  className={`shrink-0 text-white/80 transition-transform duration-200 ${
-                    accountOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-            ) : (
+          <Link
+            to="/shopping?category=Nouveautés"
+            className="flex h-9 items-center rounded-lg px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-[#FF6B00]"
+          >
+            Nouveautés
+          </Link>
+
+          <div className="ml-auto flex items-center gap-2">
+            <div
+              ref={aboutTriggerRef}
+              className="relative shrink-0"
+              onMouseEnter={openAbout}
+              onMouseLeave={closeAboutLater}
+            >
               <Link
-                to="/login"
-                className="flex h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-bold text-[#FF6B00] shadow-sm transition hover:bg-orange-50"
+                to="/a-propos"
+                onClick={() => setAboutOpen(false)}
+                className={`flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition ${
+                  aboutOpen
+                    ? 'bg-[#FFF3EB] text-[#FF6B00]'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-[#FF6B00]'
+                }`}
               >
-                Se connecter
+                <span>À propos</span>
+                <ChevronDown
+                  size={15}
+                  className={`transition-transform duration-200 ${aboutOpen ? 'rotate-180' : ''}`}
+                />
+              </Link>
+            </div>
+
+            {user && (
+              <Link
+                to="/mes-commandes"
+                className="flex h-9 items-center rounded-lg px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-[#FF6B00]"
+              >
+                Mes commandes
               </Link>
             )}
-
-            <AnimatePresence>
-              {accountOpen && user && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full z-[80] mt-3 w-64 overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-[0_10px_35px_rgba(0,0,0,0.12)]"
-                >
-                  <div className="px-3 py-3">
-                    <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
-                    <p className="truncate text-xs text-slate-500">
-                      {user.userEmail || user.email}
-                    </p>
-                  </div>
-
-                  <div className="my-1 h-px bg-slate-100" />
-
-                  <Link
-                    to="/mes-commandes"
-                    onClick={() => setAccountOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#FFF3EB] hover:text-[#FF6B00]"
-                  >
-                    <Package size={17} />
-                    Mes commandes
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                  >
-                    <LogOut size={17} />
-                    Déconnexion
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
 
@@ -793,32 +753,26 @@ const Header = () => {
           {catOpen && (
             <motion.div
               ref={catPanelRef}
-              initial={{ opacity: 0, y: 8, scale: 0.99 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.99 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
               onMouseEnter={openCats}
               onMouseLeave={closeCatsLater}
-              className="absolute left-6 right-6 top-[calc(100%+6px)] z-50 mx-auto hidden max-w-[1360px] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.14)] lg:flex xl:left-10 xl:right-10"
+              className="absolute left-6 right-6 top-[calc(100%+6px)] z-50 mx-auto hidden max-w-[1360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.14)] lg:flex xl:left-10 xl:right-10"
               style={{ height: 'min(540px, 72vh)' }}
             >
-              <div className="w-[280px] shrink-0 overflow-y-auto border-r border-slate-100 bg-[#FAFAFA] py-4">
-                <h3 className="px-5 pb-3 text-sm font-bold text-slate-900">
-                  Toutes les catégories
-                </h3>
+              <div className="w-[260px] shrink-0 overflow-y-auto border-r border-slate-100 bg-[#FAFAFA] py-4">
+                <h3 className="px-5 pb-3 text-sm font-bold text-slate-900">Catégories</h3>
 
-                {catLoading && (
-                  <p className="px-5 py-6 text-sm text-slate-400">Chargement...</p>
-                )}
+                {catLoading && <p className="px-5 py-6 text-sm text-slate-400">Chargement...</p>}
                 {catError && (
                   <p className="px-5 py-6 text-sm text-red-500">
                     Impossible de charger les catégories.
                   </p>
                 )}
                 {!catLoading && !catError && categories.length === 0 && (
-                  <p className="px-5 py-6 text-sm text-slate-500">
-                    Aucune catégorie disponible.
-                  </p>
+                  <p className="px-5 py-6 text-sm text-slate-500">Aucune catégorie disponible.</p>
                 )}
 
                 {categories.map((cat) => {
@@ -838,7 +792,7 @@ const Header = () => {
                       }}
                       className={`flex w-full items-center justify-between px-5 py-2.5 text-left text-sm font-semibold transition ${
                         selected
-                          ? 'bg-white text-[#FF6B00] shadow-sm'
+                          ? 'bg-white text-[#FF6B00]'
                           : 'text-slate-700 hover:bg-white hover:text-[#FF6B00]'
                       }`}
                     >
@@ -857,12 +811,8 @@ const Header = () => {
                   <>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                       <div>
-                        <h3 className="text-xl font-bold text-slate-900">
-                          {activeCategory.name}
-                        </h3>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          Sélection de produits populaires dans cette catégorie
-                        </p>
+                        <h3 className="text-xl font-bold text-slate-900">{activeCategory.name}</h3>
+                        <p className="mt-0.5 text-xs text-slate-500">Produits de cette catégorie</p>
                       </div>
 
                       <Link
@@ -877,7 +827,7 @@ const Header = () => {
 
                     <div className="min-h-0 flex-1 overflow-y-auto pt-5">
                       {productsLoading ? (
-                        <div className="grid grid-cols-4 gap-6 sm:grid-cols-5 xl:grid-cols-6">
+                        <div className="grid grid-cols-4 gap-6 xl:grid-cols-6">
                           {Array.from({ length: 12 }).map((_, index) => (
                             <div key={index} className="flex animate-pulse flex-col items-center">
                               <div className="h-20 w-20 rounded-full bg-slate-100" />
@@ -886,7 +836,7 @@ const Header = () => {
                           ))}
                         </div>
                       ) : categoryProducts.length > 0 ? (
-                        <div className="grid grid-cols-4 gap-6 sm:grid-cols-5 xl:grid-cols-6">
+                        <div className="grid grid-cols-4 gap-6 xl:grid-cols-6">
                           {categoryProducts.slice(0, 12).map((product) => {
                             const image = getProductImage(product);
                             const productName = product.name || product.title || 'Produit';
@@ -900,14 +850,14 @@ const Header = () => {
                                 title={productName}
                                 className="group flex flex-col items-center text-center"
                               >
-                                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F7] p-2 transition duration-200 group-hover:scale-105 group-hover:bg-[#FFF3EB] group-hover:shadow-md">
+                                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[#F5F5F7] transition duration-200 group-hover:scale-105">
                                   {image ? (
                                     <img
                                       src={image}
                                       alt={productName}
                                       referrerPolicy="no-referrer"
                                       loading="lazy"
-                                      className="h-full w-full rounded-full object-cover"
+                                      className="h-full w-full object-cover"
                                     />
                                   ) : (
                                     <span className="text-[10px] text-slate-400">Produit</span>
@@ -952,21 +902,21 @@ const Header = () => {
           {aboutOpen && (
             <motion.div
               ref={aboutPanelRef}
-              initial={{ opacity: 0, y: 8, scale: 0.99 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.99 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
               onMouseEnter={openAbout}
               onMouseLeave={closeAboutLater}
-              className="absolute left-6 right-6 top-[calc(100%+6px)] z-50 mx-auto hidden max-w-[1360px] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.16)] lg:flex xl:left-10 xl:right-10"
+              className="absolute left-6 right-6 top-full z-50 mx-auto hidden max-w-[1360px] overflow-hidden rounded-b-2xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.16)] lg:flex xl:left-10 xl:right-10"
             >
-              <div className="flex min-w-0 flex-1 flex-col justify-between p-8 xl:p-10">
+              <div className="flex min-w-0 flex-1 flex-col justify-between p-7 xl:p-8">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#FF6B00]">
                     Qui sommes-nous
                   </p>
 
-                  <h3 className="mt-3 text-2xl font-black leading-tight tracking-tight text-slate-900 xl:text-[30px]">
+                  <h3 className="mt-3 max-w-2xl text-2xl font-black leading-tight tracking-tight text-slate-900 xl:text-[32px]">
                     Dango Import, la passerelle directe avec les usines chinoises.
                   </h3>
 
@@ -976,19 +926,17 @@ const Header = () => {
                     transparence et sécurité.
                   </p>
 
-                  <ul className="mt-7 grid grid-cols-2 gap-x-10 gap-y-6">
-                    {PANEL_ITEMS.map((item) => (
-                      <li key={item.title} className="border-l-2 border-[#FF6B00] pl-4">
+                  <ul className="mt-6 grid grid-cols-2 gap-x-12 gap-y-5">
+                    {ABOUT_POINTS.map((item) => (
+                      <li key={item.title}>
                         <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                        <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
-                          {item.text}
-                        </p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{item.text}</p>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="mt-8 flex items-center justify-between gap-6 border-t border-slate-100 pt-5">
+                <div className="mt-6 flex items-center justify-between gap-6">
                   <span className="text-sm text-slate-500">
                     Une question ? Notre équipe à Lomé et Cotonou est à votre écoute.
                   </span>
@@ -1002,29 +950,26 @@ const Header = () => {
                 </div>
               </div>
 
-              <div className="relative w-[400px] shrink-0 overflow-hidden bg-slate-900 xl:w-[460px]">
+              <div className="relative w-[420px] shrink-0 overflow-hidden xl:w-[480px]">
                 <img
-                  src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80"
-                  alt="Logistique Dango Import Chine Afrique"
+                  src={ABOUT_IMAGE}
+                  alt="Logistique Dango Import, Chine vers Afrique"
                   loading="lazy"
-                  className="h-full w-full object-cover opacity-85 transition duration-700 hover:scale-105"
+                  className="h-full w-full object-cover transition duration-700 hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                <div className="absolute inset-x-0 bottom-0 p-7 text-white">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#FFA94D]">
-                    Fret Chine → Afrique
-                  </p>
-                  <h4 className="mt-2 text-xl font-bold leading-snug text-white">
+                <div className="absolute inset-x-0 bottom-0 p-8 text-white">
+                  <h4 className="text-xl font-bold leading-snug text-white">
                     Du fabricant jusqu'à votre porte, sans stress.
                   </h4>
-                  <p className="mt-1.5 text-sm leading-relaxed text-white/80">
+                  <p className="mt-2 text-sm leading-relaxed text-white/85">
                     Plateforme de référence pour vos achats en gros et demi-gros au Togo et au Bénin.
                   </p>
                   <Link
                     to="/a-propos"
                     onClick={() => setAboutOpen(false)}
-                    className="mt-4 inline-block text-sm font-bold text-[#FFA94D] transition hover:text-white"
+                    className="mt-4 inline-block text-sm font-bold text-white underline underline-offset-4 transition hover:text-[#FFB06B]"
                   >
                     Explorer la page À propos
                   </Link>
@@ -1059,7 +1004,7 @@ const Header = () => {
               className="flex h-full w-[88%] max-w-[420px] flex-col overflow-hidden bg-white shadow-2xl"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
-                <h3 className="text-lg font-bold text-slate-900">Toutes les catégories</h3>
+                <h3 className="text-lg font-bold text-slate-900">Catégories</h3>
                 <button
                   type="button"
                   onClick={() => setCatOpen(false)}
@@ -1089,9 +1034,7 @@ const Header = () => {
                   </p>
                 )}
                 {!catLoading && !catError && categories.length === 0 && (
-                  <p className="px-5 py-6 text-sm text-slate-500">
-                    Aucune catégorie disponible.
-                  </p>
+                  <p className="px-5 py-6 text-sm text-slate-500">Aucune catégorie disponible.</p>
                 )}
 
                 {categories.map((cat) => (
