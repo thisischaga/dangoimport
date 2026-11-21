@@ -137,8 +137,7 @@ const DropshippingCheckout = () => {
     if (phoneDigits.length < 8) {
       return 'Numéro de téléphone valide requis (8 chiffres minimum).';
     }
-    if (!form.city.trim()) return 'Ville requise.';
-    if (!form.district.trim()) return 'Quartier requis.';
+    if (!form.city.trim() && !form.district.trim()) return 'Ville ou quartier requis.';
     if (!form.fullAddress.trim()) return 'Adresse détaillée requise.';
     return '';
   };
@@ -409,9 +408,10 @@ const DropshippingCheckout = () => {
 
                 <section className="ds-section">
                   <h2>Adresse de livraison</h2>
+                  <p className="text-sm text-gray-600">Indiquez au moins la ville ou le quartier.</p>
                   <div className="ds-row-2">
                     <div className="ds-field">
-                      <label htmlFor="ds-city">Ville *</label>
+                      <label htmlFor="ds-city">Ville</label>
                       <input
                         id="ds-city"
                         value={form.city}
@@ -420,7 +420,7 @@ const DropshippingCheckout = () => {
                       />
                     </div>
                     <div className="ds-field">
-                      <label htmlFor="ds-district">Quartier *</label>
+                      <label htmlFor="ds-district">Quartier</label>
                       <input
                         id="ds-district"
                         value={form.district}
