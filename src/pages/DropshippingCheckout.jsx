@@ -81,6 +81,7 @@ const DropshippingCheckout = () => {
   const shippingFee = Number(quote?.shippingCost ?? selectedShipping?.cost ?? 0);
   const productTotal = Number(quote?.subtotal ?? subtotal);
   const total = Number(quote?.total ?? Math.round(productTotal + shippingFee));
+  const estimatedDelivery = selectedShipping?.estimatedDelivery || quote?.estimatedDeliveryLabel || null;
   const breakdown = quote?.importBreakdown || null;
   const internationalShippingFee = Number(
     breakdown?.internationalShippingCost ?? breakdown?.shippingBaseCost ?? 0,
