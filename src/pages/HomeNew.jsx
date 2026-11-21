@@ -831,6 +831,34 @@ const imageOf = (product) =>
   product?.images?.[0] ||
   '';
 
+const normalizeFilterText = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+const filterProductsByCategory = (products, categorySlug) => {
+  if (!Array.isArray(products) || !categorySlug) return [];
+
+  const target = normalizeFilterText(categorySlug);
+  const words = normalizeFilterText(categorySlug.replace(/-/g, ' '))
+    .split(/\s+/)
+    .filter(Boolean);
+
+  return products.filter((product) => {
+    const category = normalizeFilterText(product.category);
+    const subCategory = normalizeFilterText(product.subCategory);
+    const name = normalizeFilterText(product.name || product.title);
+
+    if (category.includes(target) || target.includes(category)) return true;
+    if (subCategory.includes(target) || target.includes(subCategory)) return true;
+    return words.some((word) =>
+      category.includes(word) || subCategory.includes(word) || name.includes(word)
+    );
+  });
+};
+
 /* =========================================================
    CONTENU DES TROIS BANNIÈRES
 ========================================================= */
@@ -1254,6 +1282,7 @@ const DEFAULT_FILTERS = {
 
 function HomeNew() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const { addToCart } = useCart();
   const toast = useToast();
@@ -1304,28 +1333,56 @@ function HomeNew() {
         page: 1,
         limit: 200,
         search: urlSearch || undefined,
-        category: filters.categorySlug || undefined,
         sort: filters.sort !== 'newest'
           ? filters.sort
           : undefined
       };
 
+      if (filters.categorySlug) {
+        try {
+          const categoryResponse = await client.get(
+            `/categories/${encodeURIComponent(filters.categorySlug)}/products`,
+            { params: { limit: 200 } }
+          );
+          const categoryData = Array.isArray(categoryResponse?.data)
+            ? categoryResponse.data
+            : (categoryResponse?.data?.data || categoryResponse?.data?.products);
+          if (Array.isArray(categoryData) && categoryData.length > 0) {
+            return categoryData;
+          }
+        } catch (error) {
+          console.warn('Chargement direct de la catégorie impossible, utilisation du catalogue complet.', error);
+        }
+      }
+
       const response = await client.get('/products', { params });
 
       if (Array.isArray(response?.data?.data)) {
-        return response.data.data;
+        const data = response.data.data;
+        return filters.categorySlug
+          ? filterProductsByCategory(data, filters.categorySlug)
+          : data;
       }
 
       if (Array.isArray(response?.data?.products)) {
-        return response.data.products;
+        const data = response.data.products;
+        return filters.categorySlug
+          ? filterProductsByCategory(data, filters.categorySlug)
+          : data;
       }
 
       if (Array.isArray(response?.data?.data?.products)) {
-        return response.data.data.products;
+        const data = response.data.data.products;
+        return filters.categorySlug
+          ? filterProductsByCategory(data, filters.categorySlug)
+          : data;
       }
 
       if (Array.isArray(response?.data)) {
-        return response.data;
+        const data = response.data;
+        return filters.categorySlug
+          ? filterProductsByCategory(data, filters.categorySlug)
+          : data;
       }
 
       return [];
@@ -1494,7 +1551,11 @@ function HomeNew() {
 
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
-  }, []);
+    navigate(
+      { pathname: location.pathname, search: '' },
+      { replace: true }
+    );
+  }, [location.pathname, navigate]);
 
   const isHome =
     !urlSearch &&

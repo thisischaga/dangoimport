@@ -83,6 +83,9 @@ const DropshippingCheckout = () => {
   const total = Number(quote?.total ?? Math.round(productTotal + shippingFee));
   const estimatedDelivery = selectedShipping?.estimatedDelivery || quote?.estimatedDeliveryLabel || null;
   const breakdown = quote?.importBreakdown || null;
+  const isSeaFreight = breakdown?.transport?.transportMode === 'sea';
+  const hasEstimatedSeaVolume = (breakdown?.transport?.items || [])
+    .some((item) => item.volumeEstimated);
 
   const checkoutLines = useMemo(
     () => dropItems.map(mapCartItemToCheckoutLine),
@@ -289,11 +292,18 @@ const DropshippingCheckout = () => {
       {breakdown ? (
         <div className="ds-summary__import">
           <p className="ds-summary__import-title">Détail importation</p>
+          {isSeaFreight ? (
+            <div className="ds-summary__line ds-summary__line--muted">
+              <span>Volume maritime</span>
+              <span>{breakdown.transport.totalVolumeM3} m³</span>
+            </div>
+          ) : (
           <div className="ds-summary__line ds-summary__line--muted">
             <span>Poids facturé</span>
             <span>{breakdown.billedWeight} kg</span>
           </div>
-          {(breakdown.items || []).length > 1 && breakdown.items.map((row, index) => (
+          )}
+          {!isSeaFreight && (breakdown.items || []).length > 1 && breakdown.items.map((row, index) => (
             <div key={`w-${index}`} className="ds-summary__line ds-summary__line--muted">
               <span>Produit {index + 1} × {row.quantity}</span>
               <span>{row.billedWeight} kg</span>
@@ -303,6 +313,11 @@ const DropshippingCheckout = () => {
             <span>Frais d&apos;importation</span>
             <span>{formatCFA(breakdown.shippingCost)}</span>
           </div>
+          {hasEstimatedSeaVolume && (
+            <p className="text-xs text-amber-700 mt-2 mb-0">
+              Le volume d&apos;au moins un article est estimé faute de dimensions colis.
+            </p>
+          )}
         </div>
       ) : null}
       <div className="ds-summary__line">
@@ -481,20 +496,34 @@ const DropshippingCheckout = () => {
                 <section className="ds-section">
                   <h2>Importation / livraison</h2>
                   <p className="text-sm text-gray-600 m-0 mb-3">
-                    Les frais d&apos;importation sont calculés sur le poids total de la commande.
+                    {isSeaFreight
+                      ? 'Les frais maritimes sont calculés selon le volume des articles.'
+                      : 'Les frais d’importation sont calculés sur le poids total de la commande.'}
                   </p>
+                  {hasEstimatedSeaVolume && (
+                    <p className="text-sm text-amber-700 m-0 mb-3" role="status">
+                      Les dimensions colis de certains articles sont inconnues. Leur volume est estimé pour calculer le fret.
+                    </p>
+                  )}
                   {breakdown && (
                     <div className="ds-import-details">
                       <div className="ds-summary__line">
-                        <span>Poids total</span>
-                        <span>{breakdown.billedWeight} kg</span>
+                        <span>{isSeaFreight ? 'Volume maritime' : 'Poids total'}</span>
+                        <span>{isSeaFreight ? `${breakdown.transport.totalVolumeM3} m³` : `${breakdown.billedWeight} kg`}</span>
                       </div>
-                      {(breakdown.items || []).map((row, index) => (
+                      {isSeaFreight
+                        ? (breakdown.transport.items || []).map((row, index) => (
+                          <div key={`item-v-${index}`} className="ds-summary__line ds-summary__line--muted">
+                            <span>{row.name || `Produit ${index + 1}`} (×{row.quantity}){row.volumeEstimated ? ' · estimé' : ''}</span>
+                            <span>{row.billableVolumeM3} m³</span>
+                          </div>
+                        ))
+                        : (breakdown.items || []).map((row, index) => (
                         <div key={`item-w-${index}`} className="ds-summary__line ds-summary__line--muted">
                           <span>Poids produit {index + 1} (×{row.quantity})</span>
                           <span>{row.billedWeight} kg</span>
                         </div>
-                      ))}
+                        ))}
                       <div className="ds-summary__line">
                         <span>Frais d&apos;importation</span>
                         <span>{formatCFA(breakdown.shippingCost)}</span>
