@@ -81,11 +81,11 @@ const DropshippingCheckout = () => {
   const shippingFee = Number(quote?.shippingCost ?? selectedShipping?.cost ?? 0);
   const productTotal = Number(quote?.subtotal ?? subtotal);
   const total = Number(quote?.total ?? Math.round(productTotal + shippingFee));
-  const estimatedDelivery = selectedShipping?.estimatedDelivery || quote?.estimatedDeliveryLabel || null;
   const breakdown = quote?.importBreakdown || null;
-  const isSeaFreight = breakdown?.transport?.transportMode === 'sea';
-  const hasEstimatedSeaVolume = (breakdown?.transport?.items || [])
-    .some((item) => item.volumeEstimated);
+  const internationalShippingFee = Number(
+    breakdown?.internationalShippingCost ?? breakdown?.shippingBaseCost ?? 0,
+  );
+  const localDeliveryFee = Number(breakdown?.localDeliveryFee ?? 0);
 
   const checkoutLines = useMemo(
     () => dropItems.map(mapCartItemToCheckoutLine),
@@ -256,7 +256,7 @@ const DropshippingCheckout = () => {
 
   const summaryBlock = (
     <aside className="ds-summary">
-      <h2 className="text-base font-bold m-0 mb-3">Votre commande</h2>
+      <h2 className="ds-summary__title">Résumé de la commande</h2>
       {dropItems.map((item) => {
         const img = getProductImage(item) || item.image;
         const variant = getVariantLabel(item);
@@ -270,65 +270,37 @@ const DropshippingCheckout = () => {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold m-0 leading-snug">{item.name}</p>
               {variant && <p className="text-xs text-gray-600 m-0 mt-0.5">{variant}</p>}
-              <p className="text-xs text-gray-500 m-0 mt-1">
+              <p className="ds-summary__quantity">
                 {getMoqRules(item).soldAsLot
-                  ? `Lot de ${getMoqRules(item).packSize} · Qté ${item.quantity || 1}`
-                  : `Qté ${item.quantity || 1}`}
+                  ? `Lot de ${getMoqRules(item).packSize} · Quantité ${item.quantity || 1}`
+                  : `Quantité ${item.quantity || 1}`}
+                {Number(item.quantity) > 1
+                  ? ` · ${formatCFA(getItemPrice(item))} / unité`
+                  : ''}
               </p>
-              {Number(item.quantity) > 1 && (
-                <p className="text-xs text-gray-500 m-0">Soit {formatCFA(getItemPrice(item))} / unité</p>
-              )}
-              <p className="text-sm font-bold m-0 mt-1">
+              <p className="ds-summary__item-price">
                 {formatCFA(getItemPrice(item) * (item.quantity || 1))}
               </p>
             </div>
           </div>
         );
       })}
-      <div className="ds-summary__line">
-        <span>Produit</span>
-        <span>{formatCFA(productTotal)}</span>
-      </div>
-      {breakdown ? (
-        <div className="ds-summary__import">
-          <p className="ds-summary__import-title">Détail importation</p>
-          {isSeaFreight ? (
-            <div className="ds-summary__line ds-summary__line--muted">
-              <span>Volume maritime</span>
-              <span>{breakdown.transport.totalVolumeM3} m³</span>
-            </div>
-          ) : (
-          <div className="ds-summary__line ds-summary__line--muted">
-            <span>Poids facturé</span>
-            <span>{breakdown.billedWeight} kg</span>
-          </div>
-          )}
-          {!isSeaFreight && (breakdown.items || []).length > 1 && breakdown.items.map((row, index) => (
-            <div key={`w-${index}`} className="ds-summary__line ds-summary__line--muted">
-              <span>Produit {index + 1} × {row.quantity}</span>
-              <span>{row.billedWeight} kg</span>
-            </div>
-          ))}
-          <div className="ds-summary__line ds-summary__line--muted">
-            <span>Frais d&apos;importation</span>
-            <span>{formatCFA(breakdown.shippingCost)}</span>
-          </div>
-          {hasEstimatedSeaVolume && (
-            <p className="text-xs text-amber-700 mt-2 mb-0">
-              Le volume d&apos;au moins un article est estimé faute de dimensions colis.
-            </p>
-          )}
+      <div className="ds-summary__fees">
+        <div className="ds-summary__line">
+          <span>Prix des produits</span>
+          <span>{formatCFA(productTotal)}</span>
         </div>
-      ) : null}
-      <div className="ds-summary__line">
-        <span>Importation / livraison</span>
-        <span>{quote ? formatCFA(shippingFee) : '—'}</span>
+        <div className="ds-summary__line">
+          <span>Transport international (transitaire)</span>
+          <span>{quote ? formatCFA(internationalShippingFee) : 'Calculé après adresse'}</span>
+        </div>
+        <div className="ds-summary__line">
+          <span>Livraison locale</span>
+          <span>{quote ? formatCFA(localDeliveryFee) : 'Calculée après adresse'}</span>
+        </div>
       </div>
-      {estimatedDelivery && (
-        <p className="text-xs text-gray-600 mt-2 mb-0">Délai estimé : {estimatedDelivery}</p>
-      )}
       <div className="ds-summary__total">
-        <span>TOTAL</span>
+        <span>Total à payer</span>
         <span>{formatCFA(total)}</span>
       </div>
       <p className="ds-trust">
@@ -486,7 +458,7 @@ const DropshippingCheckout = () => {
                   disabled={quoteLoading}
                   onClick={loadQuote}
                 >
-                  {quoteLoading ? 'Calcul des frais d’importation…' : 'Continuer vers le paiement'}
+                  {quoteLoading ? 'Calcul des frais…' : 'Continuer'}
                 </button>
               </>
             )}
@@ -494,72 +466,9 @@ const DropshippingCheckout = () => {
             {step === 2 && (
               <>
                 <section className="ds-section">
-                  <h2>Importation / livraison</h2>
-                  <p className="text-sm text-gray-600 m-0 mb-3">
-                    {isSeaFreight
-                      ? 'Les frais maritimes sont calculés selon le volume des articles.'
-                      : 'Les frais d’importation sont calculés sur le poids total de la commande.'}
-                  </p>
-                  {hasEstimatedSeaVolume && (
-                    <p className="text-sm text-amber-700 m-0 mb-3" role="status">
-                      Les dimensions colis de certains articles sont inconnues. Leur volume est estimé pour calculer le fret.
-                    </p>
-                  )}
-                  {breakdown && (
-                    <div className="ds-import-details">
-                      <div className="ds-summary__line">
-                        <span>{isSeaFreight ? 'Volume maritime' : 'Poids total'}</span>
-                        <span>{isSeaFreight ? `${breakdown.transport.totalVolumeM3} m³` : `${breakdown.billedWeight} kg`}</span>
-                      </div>
-                      {isSeaFreight
-                        ? (breakdown.transport.items || []).map((row, index) => (
-                          <div key={`item-v-${index}`} className="ds-summary__line ds-summary__line--muted">
-                            <span>{row.name || `Produit ${index + 1}`} (×{row.quantity}){row.volumeEstimated ? ' · estimé' : ''}</span>
-                            <span>{row.billableVolumeM3} m³</span>
-                          </div>
-                        ))
-                        : (breakdown.items || []).map((row, index) => (
-                        <div key={`item-w-${index}`} className="ds-summary__line ds-summary__line--muted">
-                          <span>Poids produit {index + 1} (×{row.quantity})</span>
-                          <span>{row.billedWeight} kg</span>
-                        </div>
-                        ))}
-                      <div className="ds-summary__line">
-                        <span>Frais d&apos;importation</span>
-                        <span>{formatCFA(breakdown.shippingCost)}</span>
-                      </div>
-                      {breakdown.estimatedDeliveryLabel && (
-                        <p className="text-xs text-gray-600 mt-2 mb-0">
-                          Délai estimé : {breakdown.estimatedDeliveryLabel}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {(quote?.options || []).map((opt) => (
-                    <label key={opt.id} className="ds-shipping-option">
-                      <input
-                        type="radio"
-                        name="shipping"
-                        checked={shippingOptionId === opt.id}
-                        readOnly
-                      />
-                      <span className="ds-shipping-option__title">{opt.label || 'Importation / livraison'}</span>
-                      {opt.estimatedDelivery && (
-                        <div className="ds-shipping-option__meta">
-                          Délai estimé : {opt.estimatedDelivery}
-                        </div>
-                      )}
-                      <div className="ds-shipping-option__meta font-semibold text-gray-800">
-                        {formatCFA(opt.cost)}
-                      </div>
-                    </label>
-                  ))}
-                </section>
-
-                <section className="ds-section">
                   <h2>Paiement</h2>
-                  <p className="text-sm text-gray-700 m-0 mb-4 leading-relaxed">
-                    Réglez <strong>{formatCFA(total)}</strong> en toute sécurité par Mobile Money (T-Money, Moov, MTN, Celtiis) ou Carte Bancaire.
+                  <p className="ds-payment__intro">
+                    Votre commande est prête. Vous allez régler <strong>{formatCFA(total)}</strong> en toute sécurité.
                   </p>
                   <button
                     type="button"
@@ -567,7 +476,7 @@ const DropshippingCheckout = () => {
                     disabled={payLoading || !shippingOptionId}
                     onClick={handlePay}
                   >
-                    {payLoading ? 'Redirection en cours…' : `Procéder au paiement (${formatCFA(total)})`}
+                    {payLoading ? 'Redirection en cours…' : 'Payer ma commande'}
                   </button>
                   <button
                     type="button"
