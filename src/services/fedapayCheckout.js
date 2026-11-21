@@ -437,6 +437,7 @@ export function buildCartFedapayPayload({
   estimatedDeliveryLabel,
   shippingCost,
   shippingOptionId,
+  importQuoteId,
   callbackUrl,
   paymentMode,
 }) {
@@ -638,6 +639,9 @@ export function buildCartFedapayPayload({
 
     shippingOptionId:
       shippingOptionId || null,
+
+    importQuoteId:
+      importQuoteId || null,
 
     shippingFee:
       Number(shippingFee) || 0,

@@ -11,12 +11,14 @@ export async function fetchDropshippingShippingOptions({ items, destination }) {
   return data.data;
 }
 
-export async function validateDropshippingCheckout({ items, destination, shippingOptionId, shippingAddress }) {
+export async function validateDropshippingCheckout({ items, destination, shippingOptionId, shippingAddress, quoteId, shippingCost }) {
   const { data } = await apiClient.post('/checkout/dropshipping/validate', {
     items,
     destination,
     shippingOptionId,
     shippingAddress,
+    quoteId,
+    shippingCost,
   });
   if (!data?.success) {
     throw new Error(data?.message || 'Validation impossible.');

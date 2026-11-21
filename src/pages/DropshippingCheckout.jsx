@@ -122,6 +122,8 @@ const DropshippingCheckout = () => {
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setQuote(null);
+    setShippingOptionId('');
   };
 
   const validateStep1 = () => {
@@ -155,6 +157,7 @@ const DropshippingCheckout = () => {
         destination: {
           country: form.countryCode,
           city: form.city.trim(),
+          district: form.district.trim(),
         },
       });
       setQuote(data);
@@ -175,6 +178,10 @@ const DropshippingCheckout = () => {
   const handlePay = async () => {
     if (!shippingOptionId || !selectedShipping) {
       setError('Choisissez un mode de livraison.');
+      return;
+    }
+    if (!quote?.quoteId) {
+      setError('Le devis de livraison a expiré. Recalculez les frais avant le paiement.');
       return;
     }
     setPayLoading(true);
@@ -215,6 +222,7 @@ const DropshippingCheckout = () => {
         checkoutMode: 'dropshipping',
         estimatedDeliveryLabel: estimatedDelivery,
         shippingCost: shippingFee,
+        importQuoteId: quote.quoteId,
         callbackUrl: `${window.location.origin}/checkout/result?checkoutMode=dropshipping`,
         countryCode: form.countryCode,
         paymentMode: 'redirect',
@@ -238,9 +246,6 @@ const DropshippingCheckout = () => {
           estimatedDelivery,
           phone: phoneFull,
           productTotal,
-          billedWeight: breakdown?.billedWeight,
-          ratePerKg: breakdown?.ratePerKg,
-          shippingBaseCost: breakdown?.shippingBaseCost,
           shippingCost: shippingFee,
         }),
       );
