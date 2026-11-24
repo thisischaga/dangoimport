@@ -153,6 +153,7 @@ const DropshippingCheckout = () => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setQuote(null);
     setShippingOptionId('');
+    setError('');
   };
 
   const validateStep1 = () => {
@@ -455,6 +456,7 @@ const DropshippingCheckout = () => {
                             setTransportMode(option.id);
                             setQuote(null);
                             setShippingOptionId('');
+                            setError('');
                           }}
                         />
                         <span className="ds-shipping-option__title">{option.label}</span>
@@ -468,7 +470,7 @@ const DropshippingCheckout = () => {
                   <p className="text-sm text-gray-600">Indiquez au moins la ville ou le quartier.</p>
                   <div className="ds-row-2">
                     <div className="ds-field">
-                      <label htmlFor="ds-city">Ville</label>
+                      <label htmlFor="ds-city">Ville *</label>
                       <input
                         id="ds-city"
                         value={form.city}
@@ -477,7 +479,7 @@ const DropshippingCheckout = () => {
                       />
                     </div>
                     <div className="ds-field">
-                      <label htmlFor="ds-district">Quartier</label>
+                      <label htmlFor="ds-district">Quartier *</label>
                       <input
                         id="ds-district"
                         value={form.district}
