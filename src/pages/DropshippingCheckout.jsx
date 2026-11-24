@@ -11,6 +11,7 @@ import {
   initiateFedapayCheckout,
 } from '../services/fedapayCheckout';
 import {
+  fetchDropshippingTransportOptions,
   fetchDropshippingShippingOptions,
   getVariantLabel,
   mapCartItemToCheckoutLine,
@@ -59,6 +60,9 @@ const DropshippingCheckout = () => {
   const [form, setForm] = useState(emptyForm);
   const [quote, setQuote] = useState(null);
   const [shippingOptionId, setShippingOptionId] = useState('');
+  const [transportOptions, setTransportOptions] = useState([]);
+  const [transportMode, setTransportMode] = useState('');
+  const [transportLoading, setTransportLoading] = useState(false);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
   const [error, setError] = useState('');
@@ -92,6 +96,31 @@ const DropshippingCheckout = () => {
     () => dropItems.map(mapCartItemToCheckoutLine),
     [dropItems],
   );
+
+  useEffect(() => {
+    let active = true;
+    setTransportOptions([]);
+    setTransportMode('');
+    setQuote(null);
+    setShippingOptionId('');
+    if (!checkoutLines.length) return undefined;
+
+    setTransportLoading(true);
+    fetchDropshippingTransportOptions({
+      items: checkoutLines,
+      countryCode: form.countryCode,
+    }).then((data) => {
+      if (active) setTransportOptions(data.options || []);
+    }).catch((err) => {
+      if (active) {
+        setError(err.response?.data?.message || err.message || 'Impossible de charger les modes de transport.');
+      }
+    }).finally(() => {
+      if (active) setTransportLoading(false);
+    });
+
+    return () => { active = false; };
+  }, [checkoutLines, form.countryCode]);
 
   const prefillFromUser = useCallback(() => {
     try {
@@ -137,8 +166,10 @@ const DropshippingCheckout = () => {
     if (phoneDigits.length < 8) {
       return 'Numéro de téléphone valide requis (8 chiffres minimum).';
     }
-    if (!form.city.trim() && !form.district.trim()) return 'Ville ou quartier requis.';
+    if (!form.city.trim()) return 'Ville requise.';
+    if (!form.district.trim()) return 'Quartier requis.';
     if (!form.fullAddress.trim()) return 'Adresse détaillée requise.';
+    if (transportOptions.length && !transportMode) return 'Choisissez un mode de transport.';
     return '';
   };
 
@@ -153,6 +184,7 @@ const DropshippingCheckout = () => {
     try {
       const data = await fetchDropshippingShippingOptions({
         items: checkoutLines,
+        transportMode: transportMode || undefined,
         destination: {
           country: form.countryCode,
           city: form.city.trim(),
@@ -406,6 +438,31 @@ const DropshippingCheckout = () => {
                   </div>
                 </section>
 
+                {transportOptions.length > 0 && (
+                  <section className="ds-section">
+                    <h2>Mode de transit *</h2>
+                    <p className="text-sm text-gray-600">
+                      Choisissez le mode disponible pour le pays de livraison avant le calcul des frais.
+                    </p>
+                    {transportOptions.map((option) => (
+                      <label key={option.id} className="ds-shipping-option">
+                        <input
+                          type="radio"
+                          name="transportMode"
+                          value={option.id}
+                          checked={transportMode === option.id}
+                          onChange={() => {
+                            setTransportMode(option.id);
+                            setQuote(null);
+                            setShippingOptionId('');
+                          }}
+                        />
+                        <span className="ds-shipping-option__title">{option.label}</span>
+                      </label>
+                    ))}
+                  </section>
+                )}
+
                 <section className="ds-section">
                   <h2>Adresse de livraison</h2>
                   <p className="text-sm text-gray-600">Indiquez au moins la ville ou le quartier.</p>
@@ -461,10 +518,10 @@ const DropshippingCheckout = () => {
                 <button
                   type="button"
                   className="ds-btn-primary mt-6"
-                  disabled={quoteLoading}
+                  disabled={quoteLoading || transportLoading}
                   onClick={loadQuote}
                 >
-                  {quoteLoading ? 'Calcul des frais…' : 'Continuer'}
+                  {transportLoading ? 'Chargement des modes…' : quoteLoading ? 'Calcul des frais…' : 'Continuer'}
                 </button>
               </>
             )}
@@ -505,10 +562,10 @@ const DropshippingCheckout = () => {
           <button
             type="button"
             className="ds-btn-primary m-0"
-            disabled={quoteLoading}
+            disabled={quoteLoading || transportLoading}
             onClick={loadQuote}
           >
-            {quoteLoading ? 'Calcul…' : `Continuer vers le paiement · ${formatCFA(subtotal)}`}
+            {transportLoading ? 'Chargement…' : quoteLoading ? 'Calcul…' : `Continuer vers le paiement · ${formatCFA(subtotal)}`}
           </button>
         )}
         {step === 2 && (

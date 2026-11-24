@@ -1,9 +1,21 @@
 import apiClient from '../apiClient';
 
-export async function fetchDropshippingShippingOptions({ items, destination }) {
+export async function fetchDropshippingTransportOptions({ items, countryCode }) {
+  const { data } = await apiClient.post('/checkout/dropshipping/transport-options', {
+    items,
+    countryCode,
+  });
+  if (!data?.success) {
+    throw new Error(data?.message || 'Impossible de charger les modes de transport.');
+  }
+  return data.data;
+}
+
+export async function fetchDropshippingShippingOptions({ items, destination, transportMode }) {
   const { data } = await apiClient.post('/checkout/dropshipping/shipping-options', {
     items,
     destination,
+    transportMode,
   });
   if (!data?.success) {
     throw new Error(data?.message || 'Impossible de calculer la livraison.');
