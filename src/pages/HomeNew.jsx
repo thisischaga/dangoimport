@@ -486,33 +486,46 @@ const CSS = `
 
 .hn-product__name {
   display: -webkit-box;
-  min-height: 39px;
+  min-height: 19px;
   overflow: hidden;
   margin: 10px 2px 0;
   color: #171717;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.45;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
-.hn-product__price {
+.hn-product__price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
   margin: 5px 2px 0;
+  min-width: 0;
+}
+
+.hn-product__price {
+  min-width: 0;
+  margin: 0;
   color: #e85f00;
   font-size: 16px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .hn-product__price--range {
-  font-size: 13px;
+  font-size: clamp(10px, 3.2vw, 13px);
   white-space: nowrap;
 }
 
 .hn-product__moq {
-  margin: 3px 2px 0;
+  flex: 0 0 auto;
+  margin: 0;
   color: #858585;
-  font-size: 11px;
+  font-size: clamp(9px, 2.4vw, 11px);
+  white-space: nowrap;
 }
 
 /* =========================================================
@@ -744,7 +757,7 @@ const CSS = `
   }
 
   .hn-product__name {
-    min-height: 36px;
+    min-height: 18px;
     font-size: 12px;
   }
 
@@ -1216,18 +1229,19 @@ function ProductCard({ product, onAddToCart }) {
         {name}
       </h3>
 
-      {(priceRange || formatPrice(price)) && (
-        <p className={`hn-product__price${priceRange ? ' hn-product__price--range' : ''}`}>
-          {priceRange
-            ? `${formatPrice(priceRange.min)} – ${formatPrice(priceRange.max)} FCFA`
-            : `${formatPrice(price)} FCFA`}
-        </p>
-      )}
-
-      {moq > 1 && (
-        <p className="hn-product__moq">
-          Min. {moq} pièces
-        </p>
+      {(priceRange || formatPrice(price) || moq > 1) && (
+        <div className="hn-product__price-row">
+          {(priceRange || formatPrice(price)) && (
+            <p className={`hn-product__price${priceRange ? ' hn-product__price--range' : ''}`}>
+              {priceRange
+                ? `${formatPrice(priceRange.min)} – ${formatPrice(priceRange.max)} FCFA`
+                : `${formatPrice(price)} FCFA`}
+            </p>
+          )}
+          {moq > 1 && (
+            <p className="hn-product__moq">Min. {moq} pièces</p>
+          )}
+        </div>
       )}
     </article>
   );

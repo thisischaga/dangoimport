@@ -60,7 +60,7 @@ const PC3_CSS = `
 .pc3__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 10px; min-width: 0; }
 .pc3__text { flex: 1 1 0; min-width: 0; }
 .pc3__title-link { color: inherit; text-decoration: none; }
-.pc3__title { margin: 0; font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.pc3__title { margin: 0; font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .pc3__sub { margin: 3px 0 0; font-size: 13px; line-height: 1.3; color: var(--pc-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pc3__meta { display: flex; align-items: center; gap: 8px; margin: 3px 0 0; font-size: 12px; line-height: 1.3; color: var(--pc-mute); }
 .pc3__rating { display: inline-flex; align-items: center; gap: 3px; color: var(--pc-ink); font-weight: 600; }
@@ -72,8 +72,8 @@ const PC3_CSS = `
 .pc3__amount { font-size: 24px; font-size: clamp(18px, 11cqw, 32px); font-weight: 800; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
 .pc3__amount--range { font-size: clamp(14px, 7.5cqw, 21px); letter-spacing: -0.03em; }
 .pc3__amount--text { font-size: 16px; letter-spacing: 0; }
-.pc3__foot--range { flex-direction: column; align-items: stretch; }
-.pc3__foot--range .pc3__pricebox { align-items: flex-start; }
+.pc3__foot--purchase { flex-direction: column; align-items: stretch; gap: 4px; }
+.pc3__foot--purchase .pc3__pricebox { width: 100%; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 6px; }
 /* Devise en petit, écrite à la verticale à droite du prix */
 .pc3__unit { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 400; line-height: 1; letter-spacing: 0.04em; color: var(--pc-mute); }
 .pc3__old { margin-top: 4px; font-size: 12px; color: var(--pc-mute); text-decoration: line-through; white-space: nowrap; }
@@ -162,6 +162,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
   const isOutOfStock = !isAlibaba && stock <= 0;
 
   const displayName = getDisplayProductName(product);
+  const hasPurchaseRow = Boolean(priceRange || moq > 1);
 
   /* ── Pastille (origine du produit) ───────────────────── */
   let tag = null;
@@ -210,7 +211,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
         />
       </Link>
 
-      <div className={`pc3__foot${priceRange ? ' pc3__foot--range' : ''}`}>
+      <div className={`pc3__foot${hasPurchaseRow ? ' pc3__foot--purchase' : ''}`}>
         <div className="pc3__text">
           <Link to={to} className="pc3__title-link">
             <h3 className="pc3__title" title={displayName}>{displayName}</h3>
@@ -235,7 +236,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
           )}
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
           {moq > 1 && (
-            <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap mt-0.5">
+            <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap">
               Min. {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
             </span>
           )}
