@@ -74,7 +74,6 @@ const PC3_CSS = `
 .pc3__amount--text { font-size: 16px; letter-spacing: 0; }
 .pc3__foot--range { flex-direction: column; align-items: stretch; }
 .pc3__foot--range .pc3__pricebox { align-items: flex-start; }
-.pc3__range-note { margin-top: 3px; font-size: 10px; line-height: 1.2; color: var(--pc-mute); }
 /* Devise en petit, écrite à la verticale à droite du prix */
 .pc3__unit { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 400; line-height: 1; letter-spacing: 0.04em; color: var(--pc-mute); }
 .pc3__old { margin-top: 4px; font-size: 12px; color: var(--pc-mute); text-decoration: line-through; white-space: nowrap; }
@@ -235,10 +234,9 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
             <span className="pc3__price"><span className="pc3__amount pc3__amount--text">{formatSoftS(displayPrice)}</span></span>
           )}
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
-          {priceRange && <span className="pc3__range-note">Prix selon quantité</span>}
           {moq > 1 && (
             <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap mt-0.5">
-              ≥ {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
+              Min. {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
             </span>
           )}
         </div>

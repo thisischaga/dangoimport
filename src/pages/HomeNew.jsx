@@ -509,12 +509,6 @@ const CSS = `
   white-space: nowrap;
 }
 
-.hn-product__range-note {
-  margin: 2px 2px 0;
-  color: #858585;
-  font-size: 10px;
-}
-
 .hn-product__moq {
   margin: 3px 2px 0;
   color: #858585;
@@ -1230,13 +1224,9 @@ function ProductCard({ product, onAddToCart }) {
         </p>
       )}
 
-      {priceRange && (
-        <p className="hn-product__range-note">Prix selon quantité</p>
-      )}
-
       {moq > 1 && (
         <p className="hn-product__moq">
-          Minimum : {moq} pièces
+          Min. {moq} pièces
         </p>
       )}
     </article>
