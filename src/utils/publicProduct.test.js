@@ -25,6 +25,16 @@ describe('publicProduct Alibaba utilities', () => {
     expect(getProductSellableStock(aliProductWithStock)).toBe(15);
   });
 
+  it('does not fabricate a client price from supplier pricing when the server sale price is missing', () => {
+    const rawAli = {
+      isAlibaba: true,
+      sourcePriceTiers: [{ minQty: 1, price: 10, currency: 'USD' }],
+    };
+
+    expect(sanitizeProductForDisplay(rawAli).price).toBeUndefined();
+    expect(sanitizeProductForDisplay({ ...rawAli, price: 13500 }).price).toBe(13500);
+  });
+
   it('sanitizes Alibaba product, deriving color and size arrays from variant attributes', () => {
     const rawAli = {
       _id: 'prod123',

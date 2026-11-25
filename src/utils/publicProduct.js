@@ -448,24 +448,6 @@ export function sanitizeProductForDisplay(product) {
     sanitized.mainImage = product.mainImage || imageCandidates[0];
   }
 
-  if ((!sanitized.price || Number(sanitized.price) <= 0) && isAlibaba) {
-    const rawP = Number(
-      product.price ||
-      sanitized.sourcePriceTiers?.[0]?.price ||
-      sanitized.alibabaSKUs?.[0]?.ladder_price?.[0]?.price ||
-      product.pricing?.tiers?.[0]?.price ||
-      product.variants?.[0]?.pricing?.[0]?.price ||
-      product.pricing?.sourcePrice ||
-      rawAlibaba.result_data?.skus?.[0]?.ladder_price?.[0]?.price ||
-      rawAlibaba.result_data?.wholesale_trade?.price ||
-      rawAlibaba.result_data?.price ||
-      0
-    );
-    if (rawP > 0) {
-      sanitized.price = Math.round(rawP * 620 * 1.3);
-    }
-  }
-
   // Récupérer le MOQ réel d'usine si présent dans les paliers Alibaba
   if (isAlibaba || isDropshippingProduct(product)) {
     const rawMoqCandidates = [
