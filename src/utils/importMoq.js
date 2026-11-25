@@ -159,3 +159,15 @@ export function getUnitPrice(item = {}) {
 export function getCardDisplayPrice(product = {}) {
   return getUnitPrice(product);
 }
+
+export function getPublicPriceRange(product = {}) {
+  const prices = (Array.isArray(product.publicPriceTiers) ? product.publicPriceTiers : [])
+    .map((tier) => Number(tier?.unitPrice ?? tier?.price))
+    .filter((price) => Number.isFinite(price) && price > 0);
+
+  if (prices.length < 2) return null;
+
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min < max ? { min, max } : null;
+}

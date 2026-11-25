@@ -25,6 +25,7 @@ import Footer from '../components/Footer';
 
 import {
   getProductSellableStock,
+  isAlibabaProduct,
   sanitizeProductForDisplay
 } from '../utils/publicProduct';
 
@@ -33,7 +34,7 @@ import {
   getProductImages
 } from '../utils/imageUrl';
 
-import { getMoqRules } from '../utils/importMoq';
+import { getMoqRules, getPublicPriceRange } from '../utils/importMoq';
 import { useToast } from '../components/ui/ToastProvider';
 import './HomeNew.css';
 
@@ -501,6 +502,17 @@ const CSS = `
   color: #e85f00;
   font-size: 16px;
   font-weight: 900;
+}
+
+.hn-product__price--range {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.hn-product__range-note {
+  margin: 2px 2px 0;
+  color: #858585;
+  font-size: 10px;
 }
 
 .hn-product__moq {
@@ -1021,6 +1033,7 @@ function ProductCard({ product, onAddToCart }) {
 
   const name = item.name || item.title || 'Produit';
   const price = Number(item.price || item.unitPrice || 0);
+  const priceRange = isAlibabaProduct(item) ? getPublicPriceRange(item) : null;
   const productId = item._id || item.id;
   const moq = Number(getMoqRules(item).moq || 1);
 
@@ -1209,10 +1222,16 @@ function ProductCard({ product, onAddToCart }) {
         {name}
       </h3>
 
-      {formatPrice(price) && (
-        <p className="hn-product__price">
-          {formatPrice(price)} FCFA
+      {(priceRange || formatPrice(price)) && (
+        <p className={`hn-product__price${priceRange ? ' hn-product__price--range' : ''}`}>
+          {priceRange
+            ? `${formatPrice(priceRange.min)} – ${formatPrice(priceRange.max)} FCFA`
+            : `${formatPrice(price)} FCFA`}
         </p>
+      )}
+
+      {priceRange && (
+        <p className="hn-product__range-note">Prix selon quantité</p>
       )}
 
       {moq > 1 && (

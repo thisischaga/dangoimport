@@ -12,7 +12,12 @@ import {
   isMarketplaceProduct,
 } from '../../utils/publicProduct';
 import { getProductImages } from '../../utils/imageUrl';
-import { getCardDisplayPrice, getMoqRules, getUnitPrice } from '../../utils/importMoq';
+import {
+  getCardDisplayPrice,
+  getMoqRules,
+  getPublicPriceRange,
+  getUnitPrice,
+} from '../../utils/importMoq';
 
 /* ── Styles intégrés au composant ─────────────────────────
    Injectés une seule fois dans <head> (id « pc3-styles »), après les autres
@@ -65,7 +70,11 @@ const PC3_CSS = `
 .pc3__price { display: inline-flex; align-items: flex-end; gap: 2px; color: var(--pc-ink); }
 .pc3__price--promo { color: var(--pc-orange); }
 .pc3__amount { font-size: 24px; font-size: clamp(18px, 11cqw, 32px); font-weight: 800; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
+.pc3__amount--range { font-size: clamp(14px, 7.5cqw, 21px); letter-spacing: -0.03em; }
 .pc3__amount--text { font-size: 16px; letter-spacing: 0; }
+.pc3__foot--range { flex-direction: column; align-items: stretch; }
+.pc3__foot--range .pc3__pricebox { align-items: flex-start; }
+.pc3__range-note { margin-top: 3px; font-size: 10px; line-height: 1.2; color: var(--pc-mute); }
 /* Devise en petit, écrite à la verticale à droite du prix */
 .pc3__unit { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 400; line-height: 1; letter-spacing: 0.04em; color: var(--pc-mute); }
 .pc3__old { margin-top: 4px; font-size: 12px; color: var(--pc-mute); text-decoration: line-through; white-space: nowrap; }
@@ -132,12 +141,16 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
   const rawProductPrice = Number(product?.price || product?.promoPrice || product?.unitPrice || 0);
   const price = getUnitPrice(product) || rawProductPrice;
   const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
+  const isAlibaba = isAlibabaProduct(product);
+  const priceRange = isAlibaba ? getPublicPriceRange(product) : null;
   const { moq, soldAsLot, packSize } = getMoqRules(product);
 
   const promoPrice = Number(product?.promoPrice ?? product?.salePrice ?? 0) || 0;
   const hasPromo = !isDropship && promoPrice > 0 && promoPrice < price;
   const displayPrice = isDropship ? (getCardDisplayPrice(product) || rawProductPrice) : (hasPromo ? promoPrice : price);
-  const amount = fmt(displayPrice);
+  const amount = priceRange
+    ? `${fmt(priceRange.min)} – ${fmt(priceRange.max)}`
+    : fmt(displayPrice);
   const oldAmount = hasPromo ? fmt(price) : null;
 
   /* ── Images ──────────────────────────────────────────── */
@@ -147,7 +160,6 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
 
   /* ── Stock ───────────────────────────────────────────── */
   const stock = getProductSellableStock(product);
-  const isAlibaba = isAlibabaProduct(product);
   const isOutOfStock = !isAlibaba && stock <= 0;
 
   const displayName = getDisplayProductName(product);
@@ -199,7 +211,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
         />
       </Link>
 
-      <div className="pc3__foot">
+      <div className={`pc3__foot${priceRange ? ' pc3__foot--range' : ''}`}>
         <div className="pc3__text">
           <Link to={to} className="pc3__title-link">
             <h3 className="pc3__title" title={displayName}>{displayName}</h3>
@@ -216,13 +228,14 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
         <div className="pc3__pricebox">
           {amount ? (
             <span className={`pc3__price${hasPromo ? ' pc3__price--promo' : ''}`}>
-              <span className="pc3__amount">{amount}</span>
+              <span className={`pc3__amount${priceRange ? ' pc3__amount--range' : ''}`}>{amount}</span>
               <span className="pc3__unit">XOF</span>
             </span>
           ) : (
             <span className="pc3__price"><span className="pc3__amount pc3__amount--text">{formatSoftS(displayPrice)}</span></span>
           )}
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
+          {priceRange && <span className="pc3__range-note">Prix selon quantité</span>}
           {moq > 1 && (
             <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap mt-0.5">
               ≥ {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
