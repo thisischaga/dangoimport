@@ -597,15 +597,15 @@ const CSS = `
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  color: #e85f00;
-  font-size: 17px;
+  color: #171717;
+  font-size: 19px;
   font-weight: 900;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .hn-product__price--range {
-  font-size: clamp(10px, 2.8vw, 13px);
+  font-size: clamp(12px, 3vw, 15px);
 }
 
 .hn-product__moq {
