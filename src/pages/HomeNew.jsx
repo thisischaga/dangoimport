@@ -585,27 +585,30 @@ const CSS = `
 
 .hn-product__footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 6px;
+  column-gap: 8px;
+  row-gap: 2px;
   margin-top: auto;
   padding-top: 10px;
   min-width: 0;
 }
 
-.hn-product__price {
-  flex: 1 1 auto;
+.hn-product .hn-product__price {
+  flex: 0 1 auto;
   min-width: 0;
   margin: 0;
-  color: #171717;
-  font-size: 19px;
+  color: #000;
+  font-size: 22px;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.15;
   white-space: nowrap;
 }
 
-.hn-product__price--range {
-  font-size: clamp(12px, 3vw, 15px);
+.hn-product .hn-product__price--range {
+  font-size: 18px;
+  white-space: normal;
 }
 
 .hn-product__moq {
@@ -864,8 +867,12 @@ const CSS = `
     font-size: 12px;
   }
 
-  .hn-product__price {
-    font-size: 15px;
+  .hn-product .hn-product__price {
+    font-size: 17px;
+  }
+
+  .hn-product .hn-product__price--range {
+    font-size: 14px;
   }
 
   .hn-product__moq {
@@ -912,6 +919,14 @@ const CSS = `
 
   .hn-product__name {
     font-size: 11.5px;
+  }
+
+  .hn-product .hn-product__price {
+    font-size: 16px;
+  }
+
+  .hn-product .hn-product__price--range {
+    font-size: 13px;
   }
 }
 
