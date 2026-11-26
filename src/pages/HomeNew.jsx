@@ -1,4 +1,3 @@
-
 import React, {
   useCallback,
   useEffect,
@@ -313,20 +312,28 @@ const CSS = `
 .hn-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 14px;
+  gap: 12px;
+  align-items: stretch;
 }
 
 @media (min-width: 640px) {
   .hn-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px 18px;
+    gap: 16px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
+  .hn-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1200px) {
   .hn-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 26px 20px;
+    gap: 20px;
   }
 }
 
@@ -336,19 +343,39 @@ const CSS = `
 
 .hn-product {
   display: flex;
-  min-width: 0;
   flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
   background: #fff;
   color: #171717;
+  border: 1px solid #efefef;
+  border-radius: 14px;
   cursor: pointer;
+  transition:
+    box-shadow .25s ease,
+    transform .25s ease,
+    border-color .25s ease;
+}
+
+@media (hover: hover) {
+  .hn-product:hover {
+    transform: translateY(-3px);
+    border-color: #e4e4e4;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .08);
+  }
+}
+
+.hn-product:active {
+  transform: scale(.985);
 }
 
 .hn-product__visual {
   position: relative;
+  flex: 0 0 auto;
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  background: #f6f6f6;
+  background: #f7f7f7;
 }
 
 .hn-product__gallery {
@@ -359,6 +386,7 @@ const CSS = `
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hn-product__gallery::-webkit-scrollbar {
@@ -371,7 +399,7 @@ const CSS = `
   height: 100%;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 14px;
   scroll-snap-align: center;
 }
 
@@ -380,12 +408,12 @@ const CSS = `
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transition: transform .3s ease;
+  transition: transform .35s ease;
 }
 
 @media (hover: hover) {
   .hn-product:hover .hn-product__image {
-    transform: scale(1.045);
+    transform: scale(1.05);
   }
 }
 
@@ -398,22 +426,44 @@ const CSS = `
   color: #c7c7c7;
 }
 
+/* Badge */
+
+.hn-product__badge {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 10px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--hn-orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Bouton panier */
+
 .hn-product__add {
   position: absolute;
   z-index: 4;
-  right: 9px;
-  bottom: 9px;
+  right: 10px;
+  bottom: 10px;
   display: flex;
   width: 38px;
   height: 38px;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: none;
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--hn-orange);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, .35);
   cursor: pointer;
-  transition: .2s ease;
+  transition: background .2s ease, transform .15s ease;
 }
 
 .hn-product__add:hover {
@@ -421,12 +471,22 @@ const CSS = `
 }
 
 .hn-product__add:active {
-  transform: scale(.94);
+  transform: scale(.92);
+}
+
+.hn-product__add:focus-visible,
+.hn-product__arrow:focus-visible,
+.hn-product__dot:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
 }
 
 .hn-product__add.is-done {
   background: #171717;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
 }
+
+/* Flèches (appareils avec survol uniquement) */
 
 .hn-product__arrow {
   position: absolute;
@@ -443,13 +503,14 @@ const CSS = `
   border-radius: 50%;
   background: #fff;
   color: #171717;
-  box-shadow: 0 2px 9px rgba(0,0,0,.12);
+  box-shadow: 0 2px 9px rgba(0, 0, 0, .14);
   cursor: pointer;
   opacity: 0;
   transition: opacity .2s ease;
 }
 
-.hn-product:hover .hn-product__arrow {
+.hn-product:hover .hn-product__arrow,
+.hn-product__arrow:focus-visible {
   opacity: 1;
 }
 
@@ -461,12 +522,24 @@ const CSS = `
   right: 8px;
 }
 
+@media (hover: none) {
+  .hn-product__arrow {
+    display: none;
+  }
+}
+
+/* Points sur l'image : ils ne changent plus la hauteur de la carte */
+
 .hn-product__dots {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 14px;
   display: flex;
-  min-height: 6px;
   justify-content: center;
   gap: 5px;
-  margin-top: 8px;
+  pointer-events: none;
 }
 
 .hn-product__dot {
@@ -475,8 +548,10 @@ const CSS = `
   padding: 0;
   border: 0;
   border-radius: 6px;
-  background: #d8d8d8;
+  background: rgba(0, 0, 0, .22);
   cursor: pointer;
+  pointer-events: auto;
+  transition: width .25s ease, background .25s ease;
 }
 
 .hn-product__dot.is-active {
@@ -484,47 +559,55 @@ const CSS = `
   background: var(--hn-orange);
 }
 
-.hn-product__name {
-  display: -webkit-box;
-  min-height: 19px;
-  overflow: hidden;
-  margin: 10px 2px 0;
-  color: #171717;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.45;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+/* Contenu texte : le prix reste toujours collé en bas */
+
+.hn-product__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  padding: 12px 12px 14px;
 }
 
-.hn-product__price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 5px;
-  margin: 5px 2px 0;
+.hn-product__name {
+  display: -webkit-box;
+  min-height: 2.8em;
+  overflow: hidden;
+  margin: 0;
+  color: #171717;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.hn-product__footer {
+  margin-top: auto;
+  padding-top: 10px;
   min-width: 0;
 }
 
 .hn-product__price {
-  min-width: 0;
   margin: 0;
   color: #e85f00;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 900;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
 .hn-product__price--range {
-  font-size: clamp(10px, 3.2vw, 13px);
-  white-space: nowrap;
+  font-size: clamp(12px, 3.3vw, 15px);
 }
 
 .hn-product__moq {
-  flex: 0 0 auto;
-  margin: 0;
+  min-height: 15px;
+  margin: 4px 0 0;
   color: #858585;
-  font-size: clamp(9px, 2.4vw, 11px);
+  font-size: 11px;
+  line-height: 15px;
   white-space: nowrap;
 }
 
@@ -752,28 +835,49 @@ const CSS = `
     font-size: 11px;
   }
 
+  /* Carte produit mobile */
+
   .hn-grid {
-    gap: 18px 10px;
+    gap: 10px;
+  }
+
+  .hn-product {
+    border-radius: 12px;
+  }
+
+  .hn-product__image-wrap {
+    padding: 10px;
+  }
+
+  .hn-product__body {
+    padding: 10px 10px 12px;
   }
 
   .hn-product__name {
-    min-height: 18px;
     font-size: 12px;
   }
 
   .hn-product__price {
-    font-size: 14px;
+    font-size: 15px;
+  }
+
+  .hn-product__moq {
+    font-size: 10px;
+  }
+
+  .hn-product__badge {
+    top: 8px;
+    left: 8px;
+    padding: 3px 7px;
+    font-size: 9px;
   }
 
   .hn-product__add {
-    width: 33px;
-    height: 33px;
-    right: 7px;
-    bottom: 7px;
-  }
-
-  .hn-product__arrow {
-    display: none;
+    width: 34px;
+    height: 34px;
+    right: 8px;
+    bottom: 8px;
+    border-radius: 9px;
   }
 }
 
@@ -794,11 +898,25 @@ const CSS = `
   .hn-slide__image {
     height: 120px;
   }
+
+  .hn-product__body {
+    padding: 9px 8px 11px;
+  }
+
+  .hn-product__name {
+    font-size: 11.5px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hn-slide {
+  .hn-slide,
+  .hn-product,
+  .hn-product__image {
     transition: none;
+  }
+
+  .hn-product:hover {
+    transform: none;
   }
 
   .hn-skeleton::after,
@@ -1032,6 +1150,15 @@ function ProductCard({ product, onAddToCart }) {
   const [failedImages, setFailedImages] = useState(() => new Set());
 
   const galleryRef = useRef(null);
+  const addTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (addTimeoutRef.current) {
+        window.clearTimeout(addTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const item = useMemo(
     () => sanitizeProductForDisplay(product) || product,
@@ -1043,6 +1170,7 @@ function ProductCard({ product, onAddToCart }) {
   const priceRange = isAlibabaProduct(item) ? getPublicPriceRange(item) : null;
   const productId = item._id || item.id;
   const moq = Number(getMoqRules(item).moq || 1);
+  const hasPrice = Boolean(priceRange || formatPrice(price));
 
   const images = useMemo(() => {
     let list = [];
@@ -1108,7 +1236,7 @@ function ProductCard({ product, onAddToCart }) {
     setAdding(true);
     onAddToCart?.(item, 1);
 
-    window.setTimeout(() => {
+    addTimeoutRef.current = window.setTimeout(() => {
       setAdding(false);
     }, 900);
   };
@@ -1128,11 +1256,13 @@ function ProductCard({ product, onAddToCart }) {
       }}
     >
       <div className="hn-product__visual">
+        {item.isNew && (
+          <span className="hn-product__badge">Nouveau</span>
+        )}
+
         <button
           type="button"
-          className={
-            `hn-product__add${adding ? ' is-done' : ''}`
-          }
+          className={`hn-product__add${adding ? ' is-done' : ''}`}
           onClick={handleAdd}
           aria-label="Ajouter au panier"
         >
@@ -1202,47 +1332,50 @@ function ProductCard({ product, onAddToCart }) {
             >
               <ChevronRight size={17} />
             </button>
+
+            <div className="hn-product__dots">
+              {visibleImages.map((src, index) => (
+                <button
+                  type="button"
+                  key={`${src}-${index}`}
+                  aria-label={`Afficher l'image ${index + 1}`}
+                  className={
+                    `hn-product__dot${activeImage === index ? ' is-active' : ''}`
+                  }
+                  onClick={(event) => {
+                    stopNavigation(event);
+                    goToImage(index);
+                  }}
+                />
+              ))}
+            </div>
           </>
         )}
       </div>
 
-      {visibleImages.length > 1 && (
-        <div className="hn-product__dots">
-          {visibleImages.map((src, index) => (
-            <button
-              type="button"
-              key={`${src}-${index}`}
-              aria-label={`Afficher l'image ${index + 1}`}
+      <div className="hn-product__body">
+        <h3 className="hn-product__name" title={name}>
+          {name}
+        </h3>
+
+        <div className="hn-product__footer">
+          {hasPrice && (
+            <p
               className={
-                `hn-product__dot${activeImage === index ? ' is-active' : ''}`
+                `hn-product__price${priceRange ? ' hn-product__price--range' : ''}`
               }
-              onClick={(event) => {
-                stopNavigation(event);
-                goToImage(index);
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      <h3 className="hn-product__name" title={name}>
-        {name}
-      </h3>
-
-      {(priceRange || formatPrice(price) || moq > 1) && (
-        <div className="hn-product__price-row">
-          {(priceRange || formatPrice(price)) && (
-            <p className={`hn-product__price${priceRange ? ' hn-product__price--range' : ''}`}>
+            >
               {priceRange
                 ? `${formatPrice(priceRange.min)} – ${formatPrice(priceRange.max)} FCFA`
                 : `${formatPrice(price)} FCFA`}
             </p>
           )}
-          {moq > 1 && (
-            <p className="hn-product__moq">Min. {moq} pièces</p>
-          )}
+
+          <p className="hn-product__moq">
+            {moq > 1 ? `Min. ${moq} pièces` : '\u00A0'}
+          </p>
         </div>
-      )}
+      </div>
     </article>
   );
 }
@@ -1255,29 +1388,32 @@ function ProductSkeleton({ count = 10 }) {
   return (
     <div className="hn-grid" aria-busy="true">
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index}>
+        <div
+          key={index}
+          className="hn-product"
+          style={{ cursor: 'default' }}
+        >
           <div
             className="hn-skeleton"
-            style={{ aspectRatio: '1 / 1' }}
+            style={{ aspectRatio: '1 / 1', borderRadius: 0 }}
           />
 
-          <div
-            className="hn-skeleton"
-            style={{
-              height: 14,
-              width: '80%',
-              marginTop: 12
-            }}
-          />
+          <div className="hn-product__body">
+            <div
+              className="hn-skeleton"
+              style={{ height: 14, width: '85%' }}
+            />
 
-          <div
-            className="hn-skeleton"
-            style={{
-              height: 12,
-              width: '45%',
-              marginTop: 8
-            }}
-          />
+            <div
+              className="hn-skeleton"
+              style={{ height: 14, width: '55%', marginTop: 6 }}
+            />
+
+            <div
+              className="hn-skeleton"
+              style={{ height: 18, width: '50%', marginTop: 'auto' }}
+            />
+          </div>
         </div>
       ))}
     </div>
