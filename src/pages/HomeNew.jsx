@@ -33,7 +33,7 @@ import {
   getProductImages
 } from '../utils/imageUrl';
 
-import { getMoqRules, getPublicPriceRange } from '../utils/importMoq';
+import { extractRealProductMoq, getPublicPriceRange } from '../utils/importMoq';
 import { useToast } from '../components/ui/ToastProvider';
 import './HomeNew.css';
 
@@ -571,25 +571,31 @@ const CSS = `
 
 .hn-product__name {
   display: -webkit-box;
-  min-height: 2.8em;
+  min-height: 1.4em;
   overflow: hidden;
   margin: 0;
   color: #171717;
   font-size: 13px;
   font-weight: 650;
   line-height: 1.4;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   word-break: break-word;
 }
 
 .hn-product__footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
   margin-top: auto;
   padding-top: 10px;
   min-width: 0;
 }
 
 .hn-product__price {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   color: #e85f00;
   font-size: 17px;
@@ -599,15 +605,16 @@ const CSS = `
 }
 
 .hn-product__price--range {
-  font-size: clamp(12px, 3.3vw, 15px);
+  font-size: clamp(10px, 2.8vw, 13px);
 }
 
 .hn-product__moq {
-  min-height: 15px;
-  margin: 4px 0 0;
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: 0;
   color: #858585;
-  font-size: 11px;
-  line-height: 15px;
+  font-size: clamp(9px, 2.5vw, 11px);
+  line-height: 1.2;
   white-space: nowrap;
 }
 
@@ -1169,7 +1176,7 @@ function ProductCard({ product, onAddToCart }) {
   const price = Number(item.price || item.unitPrice || 0);
   const priceRange = isAlibabaProduct(item) ? getPublicPriceRange(item) : null;
   const productId = item._id || item.id;
-  const moq = Number(getMoqRules(item).moq || 1);
+  const moq = extractRealProductMoq(item);
   const hasPrice = Boolean(priceRange || formatPrice(price));
 
   const images = useMemo(() => {
@@ -1372,7 +1379,7 @@ function ProductCard({ product, onAddToCart }) {
           )}
 
           <p className="hn-product__moq">
-            {moq > 1 ? `Min. ${moq} pièces` : '\u00A0'}
+            {moq > 1 ? `MOQ : ${moq} unités` : '\u00A0'}
           </p>
         </div>
       </div>

@@ -14,7 +14,7 @@ import {
 import { getProductImages } from '../../utils/imageUrl';
 import {
   getCardDisplayPrice,
-  getMoqRules,
+  extractRealProductMoq,
   getPublicPriceRange,
   getUnitPrice,
 } from '../../utils/importMoq';
@@ -142,7 +142,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
   const isDropship = isDropshippingProduct(product) || product?.importFeesAtCheckout;
   const isAlibaba = isAlibabaProduct(product);
   const priceRange = isAlibaba ? getPublicPriceRange(product) : null;
-  const { moq, soldAsLot, packSize } = getMoqRules(product);
+  const moq = extractRealProductMoq(product);
 
   const promoPrice = Number(product?.promoPrice ?? product?.salePrice ?? 0) || 0;
   const hasPromo = !isDropship && promoPrice > 0 && promoPrice < price;
@@ -172,13 +172,8 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
   else if (isMarketplaceProduct(product)) tag = { label: 'Marketplace', tone: 'yellow' };
 
   /* ── Détail sous le nom ──────────────────────────────── */
-  let orderNote = '';
-  if (isAlibaba || isDropship) {
-    if (soldAsLot || packSize > 1) orderNote = `Lot de ${packSize} unités`;
-    else if (moq > 1) orderNote = `Min. ${moq} unités`;
-  }
   const categoryName = typeof product?.category === 'string' ? product.category : product?.category?.name;
-  const subtitle = orderNote || product?.brand || categoryName || '';
+  const subtitle = product?.brand || categoryName || '';
 
   const soldCount = Number(product?.soldCount ?? product?.sales ?? product?.totalSold ?? product?.totalSales ?? 0) || 0;
   const rating = product?.rating != null ? Number(product.rating) : 0;
@@ -237,7 +232,7 @@ function ProductCard({ product, onAddToCart, isForPromoSection }) {
           {oldAmount && <span className="pc3__old">{oldAmount} XOF</span>}
           {moq > 1 && (
             <span className="text-[11px] font-bold text-[#FF6B00] whitespace-nowrap">
-              Min. {moq} {soldAsLot ? 'unités (lot)' : 'unités'}
+              MOQ : {moq} unités
             </span>
           )}
         </div>
