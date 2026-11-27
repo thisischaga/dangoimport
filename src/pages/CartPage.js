@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Store, BadgeCheck, ChevronRight, Ticket, Truck, ShieldCheck, ShoppingCart, Sparkles, X } from 'lucide-react';
+import { Heart, Share2, Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ChevronRight, Ticket, Truck, ShieldCheck, ShoppingCart, Sparkles, X } from 'lucide-react';
 import toast from '../utils/toast';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import Header from '../components/Header';
@@ -45,9 +45,7 @@ const quantitySelectorButton =
   'h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100';
 
 const getStockBadge = (item) => {
-  if (isAlibabaCartItem(item)) {
-    return { label: 'Approvisionnement à la commande', cls: 'bg-orange-50 text-orange-700' };
-  }
+  if (isAlibabaCartItem(item)) return null;
   const n = Number(item.stock);
   if (!Number.isFinite(n) || n <= 0) return { label: 'Rupture de stock', cls: 'bg-rose-50 text-rose-700' };
   if (n <= 5) return { label: `Stock faible · ${n} restant(s)`, cls: 'bg-amber-50 text-amber-700' };
@@ -74,9 +72,8 @@ const CartPage = () => {
     const groups = {};
     for (const item of cart) {
       const vendorName = item.vendorName || item.vendor || 'Dango Import';
-      const vendorLogo = item.vendorLogo || item.logo || '';
       if (!groups[vendorName]) {
-        groups[vendorName] = { vendorName, vendorLogo, items: [] };
+        groups[vendorName] = { vendorName, items: [] };
       }
       groups[vendorName].items.push(item);
     }
@@ -304,36 +301,14 @@ const CartPage = () => {
           </button>
         </div>
 
-        <section className="relative mb-7 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FF6B00] via-[#F97316] to-[#E85F00] px-5 py-6 text-white shadow-xl shadow-orange-200/50 sm:px-8 sm:py-8">
-          <div aria-hidden="true" className="absolute -right-10 -top-20 h-56 w-56 rounded-full border-[28px] border-white/10" />
-          <div aria-hidden="true" className="absolute -bottom-24 right-36 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-100">Votre sélection Dango</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Mon panier</h1>
-              <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-orange-50">
-                {cartCount} article{cartCount > 1 ? 's' : ''} · {groupedByVendor.length} vendeur{groupedByVendor.length > 1 ? 's' : ''}. Vérifiez vos quantités avant de continuer.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 ring-1 ring-white/20">
-                  <Truck className="h-4 w-4" /> Livraison estimée : {estimatedDelivery}
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 ring-1 ring-white/20">
-                  <ShieldCheck className="h-4 w-4" /> Frais confirmés au checkout
-                </span>
-              </div>
-            </div>
-            <div className="flex w-fit items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 ring-1 ring-white/25 backdrop-blur-sm">
-              <div className="rounded-xl bg-white p-2.5 text-[#FF6B00]">
-                <ShoppingBag className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-orange-100">Sous-total actuel</p>
-                <p className="text-xl font-black">{formatMoney(subtotal)}</p>
-              </div>
-            </div>
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 sm:text-4xl">Mon panier</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              {cartCount} article{cartCount > 1 ? 's' : ''} · {groupedByVendor.length} vendeur{groupedByVendor.length > 1 ? 's' : ''}
+            </p>
           </div>
-        </section>
+        </div>
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-5">
@@ -347,30 +322,6 @@ const CartPage = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-200">
-                        {group.vendorLogo ? (
-                          <img src={group.vendorLogo} alt={group.vendorName} className="h-full w-full object-cover" />
-                        ) : (
-                          <Store className="h-5 w-5 text-slate-500" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-base font-black text-slate-900">{group.vendorName}</p>
-                          {group.items.some((i) => i.isVendorCertified || i.isCertified) && (
-                            <span className="inline-flex items-center gap-1 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-extrabold text-white" title="Vendeur Certifié">
-                              <BadgeCheck className="h-3 w-3" /> Certifié
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-400">{group.items.length} article{group.items.length > 1 ? 's' : ''}</p>
-                      </div>
-                    </div>
-                    <div className="rounded-full bg-[#FFF7F1] px-3 py-1 text-xs font-bold text-[#FF6B00]">Groupe vendeur</div>
-                  </div>
-
                   <div className="divide-y divide-slate-100">
                     {group.items.map((item) => {
                       const itemId = item._id || item.id;
@@ -424,7 +375,9 @@ const CartPage = () => {
                               </div>
 
                               <div className="mt-3">
-                                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${stockBadge.cls}`}>{stockBadge.label}</span>
+                                {stockBadge && (
+                                  <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${stockBadge.cls}`}>{stockBadge.label}</span>
+                                )}
                                 {moq.moq > 1 && (
                                   <p className="mt-2 text-xs font-semibold text-slate-600">
                                     MOQ fournisseur : {moq.moq} unités{moq.soldAsLot ? ` · lot de ${moq.packSize}` : ''}
