@@ -37,7 +37,10 @@ export function extractRealProductMoq(product = {}) {
     });
 
   const candidates = [
-    ...rawMoqCandidates,
+    product.minimumOrderQuantity,
+    product.moq,
+    product.minOrderQuantity,
+    product.minQuantity,
     product.sourceMinimumOrderQuantity,
     product.wholesaleTrade?.min_order_quantity,
     product.wholesaleTrade?.minOrderQuantity,
@@ -45,10 +48,7 @@ export function extractRealProductMoq(product = {}) {
     product.wholesale?.minOrderQuantity,
     product.supplier?.wholesaleTrade?.min_order_quantity,
     product.supplier?.wholesaleTrade?.minOrderQuantity,
-    product.minimumOrderQuantity,
-    product.moq,
-    product.minOrderQuantity,
-    product.minQuantity,
+    ...rawMoqCandidates,
   ];
 
   for (const c of candidates) {
@@ -77,12 +77,6 @@ export function extractRealProductMoq(product = {}) {
 }
 
 export function getMoqRules(product = {}) {
-  const isImport = product?.sourceType === 'DROPSHIPPING'
-    || product?.importFeesAtCheckout
-    || product?.fulfillmentType === 'DANGO_IMPORT'
-    || product?.source === 'ALIBABA'
-    || product?.isAlibaba
-    || String(product?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
   const isAlibaba = product?.isAlibaba === true
     || String(product?.source || '').toUpperCase() === 'ALIBABA'
     || product?.importSourceType === 'ALIBABA_API'
@@ -90,26 +84,7 @@ export function getMoqRules(product = {}) {
     || String(product?.supplier?.platform || '').toLowerCase() === 'alibaba'
     || /^alibaba:/i.test(String(product?.externalSourceKey || ''));
 
-  const realFactoryMoq = extractRealProductMoq(product);
-
-  const unit = Number(product.unitPrice ?? product.price ?? 0);
-  const weight = parseWeightKg(product);
-
-  let dynamicMoq = 1;
-  if (isImport && !isAlibaba) {
-    const TARGET_VALUE = 3000; // Objectif ~3000 F par commande de lot
-    const TARGET_WEIGHT = 0.2; // Objectif ~0.2 kg (200g) par commande de lot
-    const MAX_MOQ_CAP = 8;     // Plafond maximum pour avantager le client (jamais plus de 8)
-
-    const moqFromVal = (Number.isFinite(unit) && unit > 0 && unit < TARGET_VALUE) ? Math.ceil(TARGET_VALUE / unit) : 1;
-    const moqFromWgt = (weight > 0 && weight < TARGET_WEIGHT) ? Math.ceil(TARGET_WEIGHT / weight) : 1;
-
-    const rawMoq = Math.max(moqFromVal, moqFromWgt);
-    dynamicMoq = Math.min(MAX_MOQ_CAP, Math.max(1, rawMoq));
-  }
-
-  const explicitMoq = Math.max(realFactoryMoq, dynamicMoq);
-  const moq = explicitMoq;
+  const moq = extractRealProductMoq(product);
 
   const hasIncrement = product.quantityIncrement != null && product.quantityIncrement !== '';
   const explicitIncrement = hasIncrement

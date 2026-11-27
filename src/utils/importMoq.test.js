@@ -53,4 +53,34 @@ describe('getPublicPriceRange', () => {
       rawPayload: { result_data: { wholesale_trade: { min_order_quantity: 9 } } },
     })).toBe(9);
   });
+
+  it('uses the server-calculated import MOQ without raising it a second time on the client', () => {
+    const publicProduct = {
+      sourceType: 'DROPSHIPPING',
+      minimumOrderQuantity: 2,
+      quantityIncrement: 2,
+      price: 1000,
+      weight: 0.5,
+    };
+
+    expect(getMoqRules(publicProduct)).toMatchObject({ moq: 2, increment: 2 });
+    expect(snapQuantity(publicProduct, 1)).toBe(2);
+    expect(snapQuantity(publicProduct, 3)).toBe(4);
+  });
+
+  it('does not replace the public MOQ with a lower raw supplier value', () => {
+    const publicProduct = {
+      sourceType: 'DROPSHIPPING',
+      minimumOrderQuantity: 2,
+      quantityIncrement: 2,
+      sourceMinimumOrderQuantity: 1,
+      rawPayload: {
+        result_data: {
+          wholesale_trade: { min_order_quantity: 1 },
+        },
+      },
+    };
+
+    expect(getMoqRules(publicProduct)).toMatchObject({ moq: 2, increment: 2 });
+  });
 });
