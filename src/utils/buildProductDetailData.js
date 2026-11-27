@@ -133,7 +133,7 @@ export function buildProductDetailData(product = {}) {
   const discountPercent = hasPromo ? calcDiscountPercent(basePrice, promoPrice) : 0;
 
   // 2. Stock et disponibilité
-  const productStock = Number(product.stock ?? 0);
+  const productStock = isAlibaba ? 0 : Number(product.stock ?? 0);
   const rawStockIsSuspect = productStock >= 2147483647;
   const isStockVerified = !rawStockIsSuspect && productStock > 0;
   const inStock = isAlibaba || (!rawStockIsSuspect && productStock > 0);

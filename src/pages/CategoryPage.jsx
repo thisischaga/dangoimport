@@ -9,7 +9,6 @@ import client from '../apiClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
-import { useToast } from '../components/ui/ToastProvider';
 import { sanitizeProductForDisplay, getProductSellableStock } from '../utils/publicProduct';
 import { getProductImage } from '../utils/imageUrl';
 import { getMoqRules } from '../utils/importMoq';
@@ -216,7 +215,6 @@ function FilterContent({ filters, setFilters, onReset }) {
 export default function CategoryPage() {
   const { slug } = useParams();
   const { addToCart } = useCart();
-  const toast = useToast();
 
   const [search, setSearch] = useState('');
   const [view, setView] = useState('grid'); // 'grid' | 'list'
@@ -282,8 +280,7 @@ export default function CategoryPage() {
 
   const handleAddToCart = useCallback((product, qty) => {
     addToCart(product, qty || 1);
-    if (toast) toast.success?.('Ajouté au panier');
-  }, [addToCart, toast]);
+  }, [addToCart]);
 
   const catName = cat?.name || (slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Catégorie');
 

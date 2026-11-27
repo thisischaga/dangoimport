@@ -56,7 +56,7 @@ describe('buildProductDetailData', () => {
     expect(data.wholesale.handlingTimeDays).toBe(5);
   });
 
-  it('keeps Alibaba stock at a real value instead of inventing a 999 fallback', () => {
+  it('treats Alibaba supplier stock as non-sellable inventory', () => {
     const raw = {
       _id: 'ali-102',
       name: 'Sac de voyage étanche',
@@ -73,7 +73,7 @@ describe('buildProductDetailData', () => {
     expect(data.isAlibaba).toBe(true);
     expect(data.inStock).toBe(true);
     expect(data.stockStatusLabel).toBe('Sur commande · Fabrication directe usine');
-    expect(data.stock).toBe(2147483647);
+    expect(data.stock).toBe(0);
   });
 
   it('correctly handles local seller product with confirmed stock', () => {

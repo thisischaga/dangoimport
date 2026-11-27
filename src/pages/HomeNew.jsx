@@ -34,7 +34,6 @@ import {
 } from '../utils/imageUrl';
 
 import { extractRealProductMoq, getPublicPriceRange } from '../utils/importMoq';
-import { useToast } from '../components/ui/ToastProvider';
 import './HomeNew.css';
 
 import buynow from '../images/buy-removebg-preview.png';
@@ -1466,7 +1465,6 @@ function HomeNew() {
   const navigate = useNavigate();
 
   const { addToCart } = useCart();
-  const toast = useToast();
 
   const gridRef = useRef(null);
 
@@ -1723,9 +1721,8 @@ function HomeNew() {
   const handleAddToCart = useCallback(
     (product, quantity = 1) => {
       addToCart(product, quantity);
-      toast?.success?.('Produit ajouté au panier');
     },
-    [addToCart, toast]
+    [addToCart]
   );
 
   /* Réinitialisation */

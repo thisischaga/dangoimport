@@ -6,6 +6,8 @@ function isImportItem(item) {
   return item?.sourceType === 'DROPSHIPPING'
     || item?.importFeesAtCheckout
     || item?.fulfillmentType === 'DANGO_IMPORT'
+    || item?.isAlibaba === true
+    || String(item?.source || '').toUpperCase() === 'ALIBABA'
     || String(item?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
 }
 

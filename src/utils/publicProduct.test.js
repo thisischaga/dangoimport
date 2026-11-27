@@ -17,12 +17,16 @@ describe('publicProduct Alibaba utilities', () => {
     expect(isAlibabaProduct({ vendorName: 'Local Vendor', sourceType: 'LOCAL_SELLER' })).toBe(false);
   });
 
-  it('keeps unknown Alibaba stock as zero instead of fabricating a 999 fallback', () => {
+  it('does not expose Alibaba supplier inventory as storefront stock', () => {
     const aliProduct = { isAlibaba: true, stock: 0 };
     expect(getProductSellableStock(aliProduct)).toBe(0);
 
     const aliProductWithStock = { isAlibaba: true, stock: 15 };
-    expect(getProductSellableStock(aliProductWithStock)).toBe(15);
+    expect(getProductSellableStock(aliProductWithStock)).toBe(0);
+    expect(getProductSellableStock({
+      isAlibaba: true,
+      variants: [{ stock: 7 }, { stock: 11 }],
+    })).toBe(0);
   });
 
   it('does not fabricate a client price from supplier pricing when the server sale price is missing', () => {
@@ -44,7 +48,7 @@ describe('publicProduct Alibaba utilities', () => {
       variants: [
         {
           name: 'Blanc / 42',
-          stock: 0,
+          stock: 17,
           attributes: {
             color: 'Blanc',
             size: '42',
@@ -52,7 +56,7 @@ describe('publicProduct Alibaba utilities', () => {
         },
         {
           name: 'Noir / 43',
-          stock: 0,
+          stock: 9,
           attributes: {
             Couleur: 'Noir',
             Taille: '43',

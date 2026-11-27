@@ -241,21 +241,14 @@ function sanitizeVariantsForDisplay(variants = [], isAlibaba = false) {
       ? raw
       : (fallbacks.map((c) => String(c || '').trim()).find((c) => c && !isInvalidTranslationText(c)) || `Option ${index + 1}`);
     const variantStock = Number(variant?.stock ?? 0);
-    const stock = Number.isFinite(variantStock) ? Math.max(0, variantStock) : 0;
+    const stock = isAlibaba ? 0 : Number.isFinite(variantStock) ? Math.max(0, variantStock) : 0;
     return { ...variant, name, stock };
   });
 }
 
 export function getProductSellableStock(product) {
   if (!product) return 0;
-  if (isAlibabaProduct(product)) {
-    const rawStock = Number(
-      product.stock
-      ?? product.inventory?.raw?.[0]?.inventory_list?.[0]?.inventory_count
-      ?? 0
-    );
-    return Number.isFinite(rawStock) && rawStock >= 0 ? rawStock : 0;
-  }
+  if (isAlibabaProduct(product)) return 0;
 
   let stock = Number(product.stock ?? 0);
   if (!Number.isFinite(stock) || stock < 0) stock = 0;

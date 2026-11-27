@@ -170,9 +170,8 @@ export default function Shop() {
   const handleAddToCart = useCallback(
     (product) => {
       addToCart?.(product);
-      toast?.success?.('Produit ajouté au panier');
     },
-    [addToCart, toast]
+    [addToCart]
   );
 
   const bumpPage = useCallback((fn) => {

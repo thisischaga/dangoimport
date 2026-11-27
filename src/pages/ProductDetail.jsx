@@ -790,7 +790,6 @@ export default function ProductDetail() {
   const handleAddToCart = useCallback(() => {
     if (!normalizedProduct || !inStock) return;
     addToCart(normalizedProduct, qty);
-    toast.success(`${product?.name || 'Produit'} ajouté au panier`);
     setAddedAnim(true);
     setTimeout(() => setAddedAnim(false), 1200);
   }, [normalizedProduct, inStock, addToCart, qty, product?.name]);
