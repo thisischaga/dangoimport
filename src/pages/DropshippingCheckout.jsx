@@ -298,6 +298,7 @@ const DropshippingCheckout = () => {
       {dropItems.map((item) => {
         const img = getProductImage(item) || item.image;
         const variant = getVariantLabel(item);
+        const moqRules = getMoqRules(item);
         return (
           <div key={item._id || item.id} className="ds-summary__item">
             {img ? (
@@ -309,8 +310,9 @@ const DropshippingCheckout = () => {
               <p className="text-sm font-semibold m-0 leading-snug">{item.name}</p>
               {variant && <p className="text-xs text-gray-600 m-0 mt-0.5">{variant}</p>}
               <p className="ds-summary__quantity">
-                {getMoqRules(item).soldAsLot
-                  ? `Lot de ${getMoqRules(item).packSize} · Quantité ${item.quantity || 1}`
+                {moqRules.moq > 1 ? `MOQ ${moqRules.moq} · ` : ''}
+                {moqRules.soldAsLot
+                  ? `Lot de ${moqRules.packSize} · Quantité ${item.quantity || 1}`
                   : `Quantité ${item.quantity || 1}`}
                 {Number(item.quantity) > 1
                   ? ` · ${formatCFA(getItemPrice(item))} / unité`

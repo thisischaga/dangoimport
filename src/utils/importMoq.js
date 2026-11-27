@@ -19,62 +19,58 @@ export function parseWeightKg(product = {}) {
 export function extractRealProductMoq(product = {}) {
   if (!product || typeof product !== 'object') return 1;
 
-  // 1. Direct explicit MOQ
+  const rawMoqCandidates = [product.rawAlibabaData, product.rawPayload]
+    .filter((raw) => raw && typeof raw === 'object')
+    .flatMap((raw) => {
+      const rawResult = raw.result_data || raw;
+      const rawTrade = rawResult.trade_info || raw.trade_info || {};
+      const rawWholesale = rawResult.wholesale_trade || rawResult.wholesaleTrade
+        || raw.wholesale_trade || raw.wholesaleTrade || {};
+      return [
+        rawTrade.min_order_quantity,
+        rawTrade.minOrderQuantity,
+        rawWholesale.min_order_quantity,
+        rawWholesale.minOrderQuantity,
+        rawResult.min_order_quantity,
+        rawResult.minOrderQuantity,
+      ];
+    });
+
   const candidates = [
+    ...rawMoqCandidates,
+    product.sourceMinimumOrderQuantity,
+    product.wholesaleTrade?.min_order_quantity,
+    product.wholesaleTrade?.minOrderQuantity,
+    product.wholesale?.min_order_quantity,
+    product.wholesale?.minOrderQuantity,
+    product.supplier?.wholesaleTrade?.min_order_quantity,
+    product.supplier?.wholesaleTrade?.minOrderQuantity,
     product.minimumOrderQuantity,
     product.moq,
     product.minOrderQuantity,
     product.minQuantity,
-    product.wholesale?.minOrderQuantity,
-    product.wholesaleTrade?.minOrderQuantity,
-    product.supplier?.wholesaleTrade?.minOrderQuantity,
   ];
 
-  // 2. Extraire depuis publicPriceTiers (paliers de prix calculés)
-  if (Array.isArray(product.publicPriceTiers) && product.publicPriceTiers.length > 0) {
-    const firstTier = product.publicPriceTiers[0];
-    const tierMin = firstTier?.minQuantity || firstTier?.minQty || firstTier?.min;
-    if (tierMin) candidates.push(tierMin);
-  }
-
-  // 3. Extraire depuis sourcePriceTiers (USD ou direct)
-  if (Array.isArray(product.sourcePriceTiers) && product.sourcePriceTiers.length > 0) {
-    const firstTier = product.sourcePriceTiers[0];
-    const tierMin = firstTier?.minQty || firstTier?.min_quantity || firstTier?.minQuantity || firstTier?.min;
-    if (tierMin) candidates.push(tierMin);
-  }
-
-  // 4. Extraire depuis pricing.tiers ou pricing.sourcePriceTiers
-  if (Array.isArray(product.pricing?.tiers) && product.pricing.tiers.length > 0) {
-    const firstTier = product.pricing.tiers[0];
-    const tierMin = firstTier?.minQuantity || firstTier?.minQty || firstTier?.min;
-    if (tierMin) candidates.push(tierMin);
-  }
-
-  // 5. Extraire depuis alibabaSKUs / ladder_price
-  const ladder = product.alibabaSKUs?.[0]?.ladder_price
-    || product.supplier?.ladderPrices
-    || product.variants?.[0]?.ladderPrices
-    || product.rawPayload?.result_data?.skus?.[0]?.ladder_price
-    || product.rawAlibabaData?.result_data?.skus?.[0]?.ladder_price;
-  if (Array.isArray(ladder) && ladder.length > 0) {
-    const firstLadder = ladder[0];
-    const ladderMin = firstLadder?.min_quantity || firstLadder?.minQuantity || firstLadder?.minQty || firstLadder?.min;
-    if (ladderMin) candidates.push(ladderMin);
-  }
-
-  // Trouver la première valeur numérique valide > 1
   for (const c of candidates) {
-    const n = Math.round(Number(c));
-    if (Number.isFinite(n) && n > 1) {
-      return n;
-    }
+    const n = Number(c);
+    if (Number.isFinite(n) && n >= 1) return Math.round(n);
   }
 
-  // Si explicitement défini comme 1
-  const directExplicit = Number(product.minimumOrderQuantity || product.moq);
-  if (Number.isFinite(directExplicit) && directExplicit >= 1) {
-    return Math.round(directExplicit);
+  const isAlibaba = product.isAlibaba === true
+    || String(product.source || '').toUpperCase() === 'ALIBABA'
+    || product.importSourceType === 'ALIBABA_API'
+    || String(product.fulfillmentPlatform || product.supplierPlatform || '').toLowerCase() === 'alibaba'
+    || String(product.supplier?.platform || '').toLowerCase() === 'alibaba'
+    || /^alibaba:/i.test(String(product.externalSourceKey || ''));
+  if (!isAlibaba) {
+    const firstTier = product.publicPriceTiers?.[0]
+      || product.sourcePriceTiers?.[0]
+      || product.pricing?.tiers?.[0]
+      || product.alibabaSKUs?.[0]?.ladder_price?.[0]
+      || product.variants?.[0]?.ladderPrices?.[0];
+    const tierMin = Number(firstTier?.minQuantity ?? firstTier?.minQty
+      ?? firstTier?.min_quantity ?? firstTier?.min);
+    if (Number.isFinite(tierMin) && tierMin > 1) return Math.round(tierMin);
   }
 
   return 1;
@@ -87,6 +83,12 @@ export function getMoqRules(product = {}) {
     || product?.source === 'ALIBABA'
     || product?.isAlibaba
     || String(product?.vendorName || '').toUpperCase().includes('DANGO IMPORT');
+  const isAlibaba = product?.isAlibaba === true
+    || String(product?.source || '').toUpperCase() === 'ALIBABA'
+    || product?.importSourceType === 'ALIBABA_API'
+    || String(product?.fulfillmentPlatform || product?.supplierPlatform || '').toLowerCase() === 'alibaba'
+    || String(product?.supplier?.platform || '').toLowerCase() === 'alibaba'
+    || /^alibaba:/i.test(String(product?.externalSourceKey || ''));
 
   const realFactoryMoq = extractRealProductMoq(product);
 
@@ -94,7 +96,7 @@ export function getMoqRules(product = {}) {
   const weight = parseWeightKg(product);
 
   let dynamicMoq = 1;
-  if (isImport) {
+  if (isImport && !isAlibaba) {
     const TARGET_VALUE = 3000; // Objectif ~3000 F par commande de lot
     const TARGET_WEIGHT = 0.2; // Objectif ~0.2 kg (200g) par commande de lot
     const MAX_MOQ_CAP = 8;     // Plafond maximum pour avantager le client (jamais plus de 8)
@@ -113,9 +115,7 @@ export function getMoqRules(product = {}) {
   const explicitIncrement = hasIncrement
     ? Math.max(1, Math.round(Number(product.quantityIncrement) || moq))
     : null;
-  const increment = explicitIncrement && explicitIncrement !== explicitMoq
-    ? explicitIncrement
-    : moq;
+  const increment = explicitIncrement || (isAlibaba ? 1 : moq);
   return {
     moq,
     increment,
@@ -133,8 +133,14 @@ export function snapQuantity(product, quantity) {
   if (remainder !== 0) {
     qty = qty - remainder + increment;
   }
+  const isAlibaba = product?.isAlibaba === true
+    || String(product?.source || '').toUpperCase() === 'ALIBABA'
+    || product?.importSourceType === 'ALIBABA_API'
+    || String(product?.fulfillmentPlatform || product?.supplierPlatform || '').toLowerCase() === 'alibaba'
+    || String(product?.supplier?.platform || '').toLowerCase() === 'alibaba'
+    || /^alibaba:/i.test(String(product?.externalSourceKey || ''));
   const stock = Number(product?.stock);
-  if (Number.isFinite(stock) && stock > 0) {
+  if (!isAlibaba && Number.isFinite(stock) && stock > 0) {
     qty = Math.min(qty, stock);
     if (qty < moq) return moq;
     const extraClamped = qty - moq;

@@ -40,8 +40,8 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = useCallback((product, qty = 1) => {
-    const { moq } = getMoqRules(product);
-    const quantityToAdd = snapQuantity(product, qty || moq);
+    const moqRules = getMoqRules(product);
+    const quantityToAdd = snapQuantity(product, qty || moqRules.moq);
     const productId = product._id || product.id;
     const stock = Number(product.stock ?? 0);
     const hasStockLimit = !isImportItem(product) && Number.isFinite(stock) && stock > 0;

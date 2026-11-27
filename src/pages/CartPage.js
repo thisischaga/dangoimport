@@ -9,14 +9,21 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import API_BASE_URL from '../apiConfig';
 import client from '../apiClient';
-import { isDropshippingProduct } from '../utils/publicProduct';
 import { getMoqRules, getUnitPrice, snapQuantity } from '../utils/importMoq';
 
 const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} F`;
 
 const isImportCartItem = (item) => {
   if (!item) return false;
-  if (isDropshippingProduct(item) || item.importFeesAtCheckout || item.fulfillmentType === 'DANGO_IMPORT') {
+  if (
+    item.sourceType === 'DROPSHIPPING'
+    || item.importFeesAtCheckout
+    || item.fulfillmentType === 'DANGO_IMPORT'
+    || item.isAlibaba === true
+    || String(item.source || '').toUpperCase() === 'ALIBABA'
+    || item.importSourceType
+    || item.fulfillmentPlatform
+  ) {
     return true;
   }
   const vendor = String(item.vendorName || item.vendor || '').toUpperCase();
@@ -27,11 +34,21 @@ const isImportCartItem = (item) => {
   return platform === 'cj' || platform === 'alibaba';
 };
 
+const isAlibabaCartItem = (item) => item?.isAlibaba === true
+  || String(item?.source || '').toUpperCase() === 'ALIBABA'
+  || item?.importSourceType === 'ALIBABA_API'
+  || String(item?.fulfillmentPlatform || item?.supplierPlatform || '').toLowerCase() === 'alibaba'
+  || String(item?.supplier?.platform || '').toLowerCase() === 'alibaba'
+  || /^alibaba:/i.test(String(item?.externalSourceKey || ''));
+
 const quantitySelectorButton =
   'h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100';
 
-const getStockBadge = (stock) => {
-  const n = Number(stock);
+const getStockBadge = (item) => {
+  if (isAlibabaCartItem(item)) {
+    return { label: 'Approvisionnement à la commande', cls: 'bg-orange-50 text-orange-700' };
+  }
+  const n = Number(item.stock);
   if (!Number.isFinite(n) || n <= 0) return { label: 'Rupture de stock', cls: 'bg-rose-50 text-rose-700' };
   if (n <= 5) return { label: `Stock faible · ${n} restant(s)`, cls: 'bg-amber-50 text-amber-700' };
   return { label: 'En stock', cls: 'bg-emerald-50 text-emerald-700' };
@@ -287,25 +304,36 @@ const CartPage = () => {
           </button>
         </div>
 
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 sm:text-4xl">Mon panier</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              {cartCount} article{cartCount > 1 ? 's' : ''} · {groupedByVendor.length} vendeur{groupedByVendor.length > 1 ? 's' : ''}
-            </p>
+        <section className="relative mb-7 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FF6B00] via-[#F97316] to-[#E85F00] px-5 py-6 text-white shadow-xl shadow-orange-200/50 sm:px-8 sm:py-8">
+          <div aria-hidden="true" className="absolute -right-10 -top-20 h-56 w-56 rounded-full border-[28px] border-white/10" />
+          <div aria-hidden="true" className="absolute -bottom-24 right-36 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-100">Votre sélection Dango</p>
+              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Mon panier</h1>
+              <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-orange-50">
+                {cartCount} article{cartCount > 1 ? 's' : ''} · {groupedByVendor.length} vendeur{groupedByVendor.length > 1 ? 's' : ''}. Vérifiez vos quantités avant de continuer.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 ring-1 ring-white/20">
+                  <Truck className="h-4 w-4" /> Livraison estimée : {estimatedDelivery}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 ring-1 ring-white/20">
+                  <ShieldCheck className="h-4 w-4" /> Frais confirmés au checkout
+                </span>
+              </div>
+            </div>
+            <div className="flex w-fit items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 ring-1 ring-white/25 backdrop-blur-sm">
+              <div className="rounded-xl bg-white p-2.5 text-[#FF6B00]">
+                <ShoppingBag className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-orange-100">Sous-total actuel</p>
+                <p className="text-xl font-black">{formatMoney(subtotal)}</p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Information rassurante sur la commande */}
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-xs sm:text-sm font-medium text-slate-600 shadow-sm flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4 text-[#FF6B00] shrink-0" />
-            <span>Livraison et frais d'acheminement calculés directement à l'étape suivante selon votre zone (Togo / Bénin).</span>
-          </div>
-          <span className="hidden sm:inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs">
-            <ShieldCheck className="h-3.5 w-3.5" /> Commande vérifiée
-          </span>
-        </div>
+        </section>
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-5">
@@ -349,8 +377,12 @@ const CartPage = () => {
                       const isFavorite = wishlist.includes(itemId);
                       const quantity = Number(item.quantity || 1);
                       const lineTotal = getItemPrice(item) * quantity;
-                      const stockBadge = getStockBadge(item.stock);
-                      const atMax = Number.isFinite(Number(item.stock)) && quantity >= Number(item.stock);
+                      const stockBadge = getStockBadge(item);
+                      const itemStock = Number(item.stock);
+                      const atMax = !isImportCartItem(item)
+                        && Number.isFinite(itemStock)
+                        && itemStock > 0
+                        && quantity >= itemStock;
                       const moq = getMoqRules(item);
 
                       return (
@@ -393,6 +425,11 @@ const CartPage = () => {
 
                               <div className="mt-3">
                                 <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${stockBadge.cls}`}>{stockBadge.label}</span>
+                                {moq.moq > 1 && (
+                                  <p className="mt-2 text-xs font-semibold text-slate-600">
+                                    MOQ fournisseur : {moq.moq} unités{moq.soldAsLot ? ` · lot de ${moq.packSize}` : ''}
+                                  </p>
+                                )}
                               </div>
 
                               <div className="mt-4 flex flex-wrap items-center gap-2">

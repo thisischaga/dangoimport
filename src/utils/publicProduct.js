@@ -1,3 +1,5 @@
+import { extractRealProductMoq } from './importMoq';
+
 export const PLATFORM_VENDOR_NAME = 'DANGO IMPORT';
 export const CJ_CATALOG_VENDOR_LABEL = 'À importer';
 
@@ -306,6 +308,8 @@ export function sanitizeProductForDisplay(product) {
 
   // ─── Extract critical Alibaba fields BEFORE wiping INTERNAL_FIELDS ───────────
   if (isAlibaba) {
+    sanitized.minimumOrderQuantity = extractRealProductMoq(product);
+
     // result_data may be nested one level deeper
     const rawResult = rawAlibaba.result_data || rawAlibaba;
 
